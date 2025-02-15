@@ -4,5 +4,5 @@ export default function Home() {
       <h1 className="text-2xl font-bold">Home Page</h1>
       <p>Welcome to my personal website!</p>
     </div>
-  );
+  )
 }
