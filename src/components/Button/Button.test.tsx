@@ -1,5 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react'
 import Button from '@components/Button'
+import { render, screen, fireEvent } from '@testing-library/react'
 
 describe('Button Component', () => {
   let mockOnClick = vi.fn()
@@ -12,6 +12,7 @@ describe('Button Component', () => {
     render(<Button onClick={mockOnClick}>Click Me</Button>)
 
     const button = screen.getByRole('button', { name: /click me/i })
+
     expect(button).toBeInTheDocument()
     expect(button).toHaveTextContent('Click Me')
   })
