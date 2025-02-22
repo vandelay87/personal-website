@@ -4,6 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "jsx": "react-jsx",
+    "jsxImportSource": "react",
     "strict": true,
     "baseUrl": "./src",
     "paths": {
@@ -11,7 +12,8 @@
       "@pages/*": ["pages/*"]
     },
     "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.mdx", "src/mdx.d.ts"],
   "exclude": ["node_modules", "dist"]

@@ -10,7 +10,7 @@ describe('ThemeToggle Component', () => {
 
   it('renders the toggle component', () => {
     render(<ThemeToggle />)
-    expect(screen.getByLabelText(/theme/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/dark mode/i)).toBeInTheDocument()
   })
 
   it('toggles theme from light to dark', () => {
