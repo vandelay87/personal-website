@@ -1,13 +1,16 @@
 declare module '*.mdx' {
-  import type { ComponentProps, JSX } from 'react'
+  import type { ComponentType, ReactNode, JSX } from 'react'
 
-  interface MDXProps extends ComponentProps<'div'> {
-    frontMatter?: {
-      title?: string
-      date?: string
-    }
+  export interface MDXComponents {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: ComponentType<any>
   }
 
-  const MDXComponent: (props: MDXProps) => JSX.Element
-  export default MDXComponent
+  interface MDXProps {
+    components?: MDXComponents
+    children?: ReactNode
+  }
+
+  const MdxComponent: (props: MDXProps) => JSX.Element
+  export default MdxComponent
 }
