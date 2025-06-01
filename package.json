@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build:prod": "cp public/robots.prod.txt public/robots.txt && vite build",
+    "build:dev": "cp public/robots.dev.txt public/robots.txt && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier --write . && eslint --fix .",

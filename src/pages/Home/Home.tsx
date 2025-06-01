@@ -1,20 +1,19 @@
-import Button from '@components/Button'
+import FullPageHeader from '@components/FullPageHeader'
+import type { FullPageHeaderProps } from '@components/FullPageHeader'
+import imgUrl from '../../assets/profile.webp'
 
 export default function Home() {
+  const FULL_PAGE_HEADER_PROPS: FullPageHeaderProps = {
+    name: 'Akli Aissat',
+    tagline: 'Full-stack engineer',
+    description:
+      'I build beautiful, responsive web applications with React, TypeScript, and modern web technologies. Passionate about creating accessible and user-friendly experiences.',
+    imageSrc: imgUrl,
+  }
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Home Page</h1>
-      <p>Welcome to my personal website!</p>
-      <Button onClick={() => alert('click')}>Click me!</Button>
-      <Button onClick={() => alert('click')} disabled>
-        Click me!
-      </Button>
-      <Button onClick={() => console.log('click')} variant="secondary">
-        Click me!
-      </Button>
-      <Button onClick={() => console.log('click')} ariaLabel="alert">
-        ⚠️
-      </Button>
-    </div>
+    <>
+      <FullPageHeader {...FULL_PAGE_HEADER_PROPS} />
+    </>
   )
 }

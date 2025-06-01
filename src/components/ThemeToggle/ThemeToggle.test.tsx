@@ -2,7 +2,7 @@ import ThemeToggle from '@components/ThemeToggle'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, beforeEach } from 'vitest'
 
-describe('ThemeToggle Component', () => {
+describe('ThemeToggle', () => {
   beforeEach(() => {
     localStorage.clear()
     document.documentElement.removeAttribute('data-theme')

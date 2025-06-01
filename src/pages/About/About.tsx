@@ -1,10 +1,13 @@
-import MyComponent from '../../components/MyComponent'
-import AboutMdx from './about.mdx'
+import SocialCard from '@components/SocialCard'
 
 export default function About() {
   return (
-    <div className="prose mx-auto p-6">
-      <AboutMdx components={{ MyComponent }} />
-    </div>
+    <section>
+      <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4">
+        About
+      </h1>
+      <p>This website is a work in progress.</p>
+      <SocialCard />
+    </section>
   )
 }

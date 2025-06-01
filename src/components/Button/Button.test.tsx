@@ -1,7 +1,7 @@
 import Button from '@components/Button'
 import { render, screen, fireEvent } from '@testing-library/react'
 
-describe('Button Component', () => {
+describe('Button', () => {
   let mockOnClick = vi.fn()
 
   beforeEach(() => {
