@@ -2,8 +2,8 @@ name: Deploy Website to S3 and CloudFront
 
 on:
   push:
-    branches: [main]  # or your main branch name
-  workflow_dispatch:  # allows manual triggering
+    branches: [main] # or your main branch name
+  workflow_dispatch: # allows manual triggering
 
 jobs:
   deploy:
