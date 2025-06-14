@@ -40,7 +40,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build
-        run: pnpm build
+        run: pnpm build:prod
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
