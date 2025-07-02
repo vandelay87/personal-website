@@ -1,3 +1,4 @@
+import CVDownload from '@components/CVDownload'
 import FullPageHeader from '@components/FullPageHeader'
 import type { FullPageHeaderProps } from '@components/FullPageHeader'
 import imgUrl from '../../assets/profile.webp'
@@ -14,6 +15,7 @@ export default function Home() {
   return (
     <>
       <FullPageHeader {...FULL_PAGE_HEADER_PROPS} />
+      <CVDownload />
     </>
   )
 }

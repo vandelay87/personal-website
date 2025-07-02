@@ -15,10 +15,21 @@ vi.mock('@components/FullPageHeader', () => ({
   ),
 }))
 
+vi.mock('@components/CVDownload', () => {
+  return {
+    default: () => <div data-testid="cv-download-mock">CVDownload Component</div>,
+  }
+})
+
 describe('Home', () => {
   it('renders the FullPageHeader component', () => {
     render(<Home />)
     expect(screen.getByTestId('full-page-header')).toBeInTheDocument()
+  })
+
+  it('renders the CVDownload component', () => {
+    render(<Home />)
+    expect(screen.getByTestId('cv-download-mock')).toBeInTheDocument()
   })
 
   it('displays the correct name', () => {
