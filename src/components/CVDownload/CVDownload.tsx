@@ -1,7 +1,14 @@
 import Button from '@components/Button'
 import FileMeta from '@components/FileMeta'
-import { useEffect, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import fileUrl from '../../assets/Akli-Aissat-CV.pdf'
+
+interface CVDownloadProps {
+  type: string
+  date: string
+  name: string
+  size: string
+}
 
 const formatFileSize = (sizeInBytes: number) => {
   if (sizeInBytes < 1024) return `${sizeInBytes} B`
@@ -9,14 +16,9 @@ const formatFileSize = (sizeInBytes: number) => {
   else return `${(sizeInBytes / (1024 * 1024)).toFixed(2)} MB`
 }
 
-const CVDownload = () => {
+const CVDownload: FC = () => {
   const DEFAULT_FILE_NAME = 'Akli-Aissat-CV'
-  const [fileInfo, setFileInfo] = useState<null | {
-    type: string
-    date: string
-    name: string
-    size: string
-  }>(null)
+  const [fileInfo, setFileInfo] = useState<null | CVDownloadProps>(null)
   const [hasError, setHasError] = useState(false)
 
   useEffect(() => {
@@ -63,7 +65,7 @@ const CVDownload = () => {
           what I can bring to your team.
         </p>
 
-        <Button onClick={handleDownload} aria-label="Download CV as PDF">
+        <Button onClick={handleDownload} ariaLabel="Download CV as PDF">
           Download my CV
         </Button>
         <div className="text-sm text-gray-500 dark:text-gray-400 mt-4 flex items-center justify-center min-h-[1.5rem]">
