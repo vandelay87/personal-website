@@ -13,9 +13,17 @@ export interface FullPageHeaderProps {
 const FullPageHeader: FC<FullPageHeaderProps> = ({ name, tagline, description, imageSrc }) => {
   const [isLoaded, setIsLoaded] = useState(false)
 
+  const imageSizes =
+    '(max-width: 640px) 320px, (max-width: 768px) 384px, (max-width: 1024px) 448px, 512px'
+  const imageSrcSet = [320, 640, 768, 1024, 1280, 1536, 1920]
+    .map((w) => `${imageSrc}?w=${w}&q=75 ${w}w`)
+    .join(', ')
+
   usePreloadImage(imageSrc, {
     fetchPriority: 'high',
     crossOrigin: 'anonymous',
+    sizes: imageSizes,
+    srcSet: imageSrcSet,
   })
 
   const handleSendEmail = () =>
@@ -96,7 +104,7 @@ const FullPageHeader: FC<FullPageHeaderProps> = ({ name, tagline, description, i
               placeholder="blur"
               containerClassName="rounded-2xl border-4 border-white shadow-xl dark:border-gray-700"
               className="rounded-2xl"
-              sizes="(max-width: 640px) 320px, (max-width: 768px) 384px, (max-width: 1024px) 448px, 512px"
+              sizes={imageSizes}
               lazy={false}
             />
           </div>

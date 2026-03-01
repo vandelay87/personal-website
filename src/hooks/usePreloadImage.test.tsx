@@ -14,21 +14,62 @@ describe('usePreloadImage', () => {
 
   it('adds a preload link when src is provided', async () => {
     function Test() {
-      usePreloadImage(SRC)
+      usePreloadImage(SRC, { fetchPriority: 'high' })
       return null
     }
 
     render(<Test />)
 
-    // Check for the link by rel and href, which are more reliable in JSDOM
     const link = await waitFor(() => {
       const l = document.head.querySelector(`link[rel="preload"][href="${SRC}"]`)
       if (!l) throw new Error('no preload link')
       return l
     })
 
-    expect(link).toBeDefined()
     expect(link.getAttribute('as')).toBe('image')
+    expect(link.getAttribute('fetchpriority')).toBe('high')
+  })
+
+  it('applies imagesrcset and imagesizes attributes correctly', async () => {
+    const SRCSET = 'small.jpg 300w, large.jpg 1000w'
+    const SIZES = '100vw'
+
+    function Test() {
+      usePreloadImage(SRC, { srcSet: SRCSET, sizes: SIZES })
+      return null
+    }
+
+    render(<Test />)
+
+    const link = await waitFor(() => {
+      const l = document.head.querySelector(`link[rel="preload"][href="${SRC}"]`)
+      if (!l) throw new Error('no preload link')
+      return l
+    })
+
+    expect(link.getAttribute('imagesrcset')).toBe(SRCSET)
+    expect(link.getAttribute('imagesizes')).toBe(SIZES)
+  })
+
+  // NEW TEST: Verify duplicate prevention
+  it('does not add duplicate links for the same src', async () => {
+    function Test() {
+      usePreloadImage(SRC)
+      return null
+    }
+
+    // Render twice (or two components)
+    render(
+      <>
+        <Test />
+        <Test />
+      </>
+    )
+
+    await waitFor(() => {
+      const links = document.head.querySelectorAll(`link[href="${SRC}"]`)
+      expect(links.length).toBe(1)
+    })
   })
 
   it('removes the preload link on unmount', async () => {
@@ -39,7 +80,6 @@ describe('usePreloadImage', () => {
 
     const { unmount } = render(<Test />)
 
-    // Wait for insertion
     await waitFor(() => {
       if (!document.head.querySelector(`link[href="${SRC}"]`)) {
         throw new Error('expected preload link to be present')
@@ -48,11 +88,9 @@ describe('usePreloadImage', () => {
 
     unmount()
 
-    // Wait for removal
     await waitFor(() => {
-      if (document.head.querySelector(`link[href="${SRC}"]`)) {
-        throw new Error('expected preload link to be removed')
-      }
+      const link = document.head.querySelector(`link[href="${SRC}"]`)
+      if (link) throw new Error('expected preload link to be removed')
     })
 
     expect(document.head.querySelector(`link[href="${SRC}"]`)).toBeNull()
