@@ -48,5 +48,18 @@
     "tailwindcss": "^4.0.6",
     "vite": "^6.1.0",
     "vitest": "^3.0.5"
+  },
+  "pnpm": {
+    "supportedArchitectures": {
+      "os": [
+        "current",
+        "linux"
+      ],
+      "cpu": [
+        "current",
+        "x64",
+        "arm64"
+      ]
+    }
   }
 }
