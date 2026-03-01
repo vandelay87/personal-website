@@ -23,6 +23,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'pnpm' # This replaces the manual actions/cache step
+          cache-dependency-path: '**/pnpm-lock.yaml' # Force a fresh cache download
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
