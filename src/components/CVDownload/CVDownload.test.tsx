@@ -21,6 +21,8 @@ function mockFetchFailure() {
 describe('CVDownload', () => {
   beforeEach(() => {
     vi.resetAllMocks()
+    // suppress expected console warnings from component during tests
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
   })
 
   it('renders file info when fetch succeeds', async () => {
@@ -48,7 +50,7 @@ describe('CVDownload', () => {
     mockFetchSuccess(1500, 'application/pdf')
     render(<CVDownload />)
 
-    await waitFor(() => screen.getByRole('button', { name: /Download my CV/i }))
+    await waitFor(() => screen.getByRole('button', { name: /Download CV as PDF/i }))
 
     // Mock the click on <a> element by spying on document.createElement
     const clickMock = vi.fn()
@@ -66,7 +68,7 @@ describe('CVDownload', () => {
         return document.createElement(tagName)
       })
 
-    const button = screen.getByRole('button', { name: /Download my CV/i })
+    const button = screen.getByRole('button', { name: /Download CV as PDF/i })
     button.click()
 
     expect(clickMock).toHaveBeenCalled()

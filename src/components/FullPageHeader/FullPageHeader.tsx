@@ -1,4 +1,6 @@
 import Button from '@components/Button'
+import Image from '@components/Image'
+import { usePreloadImage } from '@hooks/usePreloadImage'
 import { useState, useEffect, FC } from 'react'
 
 export interface FullPageHeaderProps {
@@ -10,6 +12,11 @@ export interface FullPageHeaderProps {
 
 const FullPageHeader: FC<FullPageHeaderProps> = ({ name, tagline, description, imageSrc }) => {
   const [isLoaded, setIsLoaded] = useState(false)
+
+  usePreloadImage(imageSrc, {
+    fetchPriority: 'high',
+    crossOrigin: 'anonymous',
+  })
 
   const handleSendEmail = () =>
     (window.location.href = 'mailto:akliaissat@outlook.com?subject=Hello')
@@ -74,16 +81,23 @@ const FullPageHeader: FC<FullPageHeaderProps> = ({ name, tagline, description, i
         {/* Image */}
         <div className="w-full md:w-1/2 flex justify-center order-1 md:order-2">
           <div
-            className={`relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg aspect-[3/4] overflow-hidden rounded-2xl border-4 border-white shadow-xl dark:border-gray-700 transition-all duration-1000 ease-out ${
+            className={`relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg aspect-[3/4] overflow-hidden rounded-2xl transition-all duration-1000 ease-out ${
               isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
             }`}
             style={{ transitionDelay: '100ms' }}
           >
-            <img
+            <Image
               src={imageSrc}
               alt={`Portrait of ${name}`}
-              className="w-full h-full object-cover object-[50%_20%]"
-              loading="eager"
+              priority={true}
+              aspectRatio="3/4"
+              objectFit="cover"
+              objectPosition="50% 20%"
+              placeholder="blur"
+              containerClassName="rounded-2xl border-4 border-white shadow-xl dark:border-gray-700"
+              className="rounded-2xl"
+              sizes="(max-width: 640px) 320px, (max-width: 768px) 384px, (max-width: 1024px) 448px, 512px"
+              lazy={false}
             />
           </div>
         </div>
