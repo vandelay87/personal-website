@@ -51,14 +51,12 @@ describe('usePreloadImage', () => {
     expect(link.getAttribute('imagesizes')).toBe(SIZES)
   })
 
-  // NEW TEST: Verify duplicate prevention
   it('does not add duplicate links for the same src', async () => {
     function Test() {
       usePreloadImage(SRC)
       return null
     }
 
-    // Render twice (or two components)
     render(
       <>
         <Test />
