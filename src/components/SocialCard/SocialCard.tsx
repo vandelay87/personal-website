@@ -61,7 +61,7 @@ const SocialCard: FC = () => {
       className="bg-white dark:bg-gray-900 rounded-2xl shadow-md m-8 inset-shadow-2xs p-6 max-w-sm mx-auto"
     >
       <h2 id="social-heading" className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-        Connect with me
+        Get in touch
       </h2>
       <ul className="flex space-x-6" role="list">
         {SOCIAL_CARD_PROPS.map(({ name, url, icon }) => (

@@ -5,7 +5,7 @@ import SocialCard from './SocialCard'
 describe('SocialCard', () => {
   it('renders the card heading', () => {
     render(<SocialCard />)
-    expect(screen.getByRole('heading', { name: /connect with me/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /get in touch/i })).toBeInTheDocument()
   })
 
   it('renders a list of social links', () => {
