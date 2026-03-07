@@ -49,26 +49,28 @@ const FullPageHeader: FC<FullPageHeaderProps> = ({ name, tagline, description, i
       <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
         {/* Text Content */}
         <div className="w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left space-y-4 pb-10 sm:pb-16 md:pb-0 order-2 md:order-1">
-          <h1
-            className={`text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 dark:text-white transform opacity-0 translate-y-8 transition-all duration-700 ease-in-out ${
-              isLoaded ? 'opacity-100 translate-y-0' : ''
-            }`}
-            style={{ transitionDelay: '50ms' }}
-          >
-            {name}
-          </h1>
+          <hgroup className="space-y-4">
+            <h1
+              className={`text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 dark:text-white transform opacity-0 translate-y-8 transition-all duration-700 ease-in-out ${
+                isLoaded ? 'opacity-100 translate-y-0' : ''
+              }`}
+              style={{ transitionDelay: '50ms' }}
+            >
+              {name}
+            </h1>
 
-          <h2
-            className={`text-xl md:text-2xl text-gray-600 dark:text-gray-300 font-medium transform opacity-0 translate-y-8 transition-all duration-700 ease-in-out ${
-              isLoaded ? 'opacity-100 translate-y-0' : ''
-            }`}
-            style={{ transitionDelay: '150ms' }}
-          >
-            {tagline}
-          </h2>
+            <p
+              className={`text-xl md:text-2xl text-gray-600 dark:text-gray-300 font-medium transform opacity-0 translate-y-8 transition-all duration-700 ease-in-out ${
+                isLoaded ? 'opacity-100 translate-y-0' : ''
+              }`}
+              style={{ transitionDelay: '150ms' }}
+            >
+              {tagline}
+            </p>
+          </hgroup>
 
           <p
-            className={`text-lg text-gray-600 dark:text-gray-400 max-w-lg transform opacity-0 translate-y-8 transition-all duration-700 ease-in-out ${
+            className={`text-lg leading-relaxed max-w-lg transform opacity-0 translate-y-8 transition-all duration-700 ease-in-out ${
               isLoaded ? 'opacity-100 translate-y-0' : ''
             }`}
             style={{ transitionDelay: '200ms' }}
