@@ -1,12 +1,12 @@
-import { Link } from 'react-router-dom'
+import Link from "@components/Link";
 
 export default function Navigation() {
   return (
     <nav className="space-x-4">
-      <Link to="/" className="text-blue-500">
+      <Link to="/">
         Home
       </Link>
-      <Link to="/about" className="text-blue-500">
+      <Link to="/about">
         About
       </Link>
     </nav>
