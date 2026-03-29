@@ -15,7 +15,7 @@ const CARDS: CardProps[] = [
       srcSet: imgSrcSet,
       alt: 'Real-time particle physics simulation of falling sand grains on a black canvas',
     },
-    href: 'https://akli.dev/sand-box',
+    href: 'https://akli.dev/apps/sand-box',
   },
 ]
 
