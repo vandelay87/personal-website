@@ -2,7 +2,10 @@ import Loading from '@components/Loading'
 import { usePreloadImage } from '@hooks/usePreloadImage'
 import { useState, useEffect, useRef, FC, ImgHTMLAttributes } from 'react'
 
-interface ImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'alt'> {
+export interface ImageProps extends Omit<
+  ImgHTMLAttributes<HTMLImageElement>,
+  'src' | 'alt'
+> {
   src: string
   alt: string
   priority?: boolean
@@ -104,12 +107,15 @@ const Image: FC<ImageProps> = ({
   // Generate responsive image URLs
   const generateSrcSet = (baseSrc: string) => {
     const widths = [320, 640, 768, 1024, 1280, 1536, 1920]
-    return widths.map((width) => `${baseSrc}?w=${width}&q=${quality} ${width}w`).join(', ')
+    return widths
+      .map((width) => `${baseSrc}?w=${width}&q=${quality} ${width}w`)
+      .join(', ')
   }
 
   // Get the appropriate blur data URL
   const effectiveBlurDataURL =
-    blurDataURL || (placeholder === 'blur' ? generateBlurDataURL(src) : undefined)
+    blurDataURL ||
+    (placeholder === 'blur' ? generateBlurDataURL(src) : undefined)
 
   return (
     <figure
@@ -179,7 +185,9 @@ const Image: FC<ImageProps> = ({
                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
               />
             </svg>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Failed to load image</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Failed to load image
+            </p>
           </div>
         </div>
       )}
@@ -213,7 +221,9 @@ const Image: FC<ImageProps> = ({
           decoding="async"
           crossOrigin="anonymous"
           srcSet={generateSrcSet(src)}
-          sizes={sizes || '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'}
+          sizes={
+            sizes || '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
+          }
           {...props}
         />
       )}

@@ -21,6 +21,10 @@ vi.mock('@components/CVDownload', () => {
   }
 })
 
+vi.mock('@components/AppsCta', () => ({
+  default: () => <div data-testid="apps-cta-mock">AppsCta Component</div>,
+}))
+
 describe('Home', () => {
   it('renders the FullPageHeader component', () => {
     render(<Home />)

@@ -10,7 +10,12 @@ export interface FullPageHeaderProps {
   imageSrc: string
 }
 
-const FullPageHeader: FC<FullPageHeaderProps> = ({ name, tagline, description, imageSrc }) => {
+const FullPageHeader: FC<FullPageHeaderProps> = ({
+  name,
+  tagline,
+  description,
+  imageSrc,
+}) => {
   const [isLoaded, setIsLoaded] = useState(false)
 
   const imageSizes =

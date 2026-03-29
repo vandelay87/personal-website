@@ -27,4 +27,19 @@ describe('Link', () => {
 
     expect(linkElement).toHaveAttribute('href', '/apps')
   })
+
+  it('renders as an external anchor tag when "to" is a URL', () => {
+    const externalUrl = 'https://google.com'
+    render(
+      <MemoryRouter>
+        <Link to={externalUrl}>External Site</Link>
+      </MemoryRouter>
+    )
+
+    const linkElement = screen.getByRole('link', { name: /external site/i })
+
+    expect(linkElement).toHaveAttribute('href', externalUrl)
+    expect(linkElement).toHaveAttribute('target', '_blank')
+    expect(linkElement).toHaveAttribute('rel', 'noreferrer')
+  })
 })
