@@ -44,7 +44,7 @@ const FullPageHeader: FC<FullPageHeaderProps> = ({
 
   return (
     <header
-      className="relative z-0 min-h-screen w-full flex flex-col md:flex-row items-center justify-center p-4 md:p-8 bg-gradient-to-br from-indigo-50 to-blue-100 dark:from-gray-900 dark:to-gray-800"
+      className="relative z-0 min-h-screen w-full flex flex-col md:flex-row items-center justify-center p-4 md:p-8 bg-linear-to-br from-indigo-50 to-blue-100 dark:from-gray-900 dark:to-gray-800"
       style={{
         marginLeft: 'calc(-50vw + 50%)',
         marginRight: 'calc(-50vw + 50%)',
@@ -96,7 +96,7 @@ const FullPageHeader: FC<FullPageHeaderProps> = ({
         {/* Image */}
         <div className="w-full md:w-1/2 flex justify-center order-1 md:order-2">
           <div
-            className={`relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg aspect-[3/4] overflow-hidden rounded-2xl transition-all duration-1000 ease-out ${
+            className={`relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg aspect-3/4 overflow-hidden rounded-2xl transition-all duration-1000 ease-out ${
               isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
             }`}
             style={{ transitionDelay: '100ms' }}

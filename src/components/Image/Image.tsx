@@ -141,7 +141,7 @@ const Image: FC<ImageProps> = ({
               aria-hidden="true"
             />
           ) : placeholder === 'blur' && !effectiveBlurDataURL ? (
-            <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 animate-pulse" />
+            <div className="w-full h-full bg-linear-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 animate-pulse" />
           ) : (
             <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex items-center justify-center">
               <svg

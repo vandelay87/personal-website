@@ -12,7 +12,8 @@ interface CVDownloadProps {
 
 const formatFileSize = (sizeInBytes: number) => {
   if (sizeInBytes < 1024) return `${sizeInBytes} B`
-  else if (sizeInBytes < 1024 * 1024) return `${(sizeInBytes / 1024).toFixed(1)} KB`
+  else if (sizeInBytes < 1024 * 1024)
+    return `${(sizeInBytes / 1024).toFixed(1)} KB`
   else return `${(sizeInBytes / (1024 * 1024)).toFixed(2)} MB`
 }
 
@@ -26,13 +27,18 @@ const CVDownload: FC = () => {
     fetch(fileUrl)
       .then((response) => response.blob())
       .then((blob) => {
-        const file = new File([blob], `${DEFAULT_FILE_NAME}.pdf`, { type: blob.type })
+        const file = new File([blob], `${DEFAULT_FILE_NAME}.pdf`, {
+          type: blob.type,
+        })
         setFileInfo({
           type: file.type.split('/')[1].toUpperCase() || 'PDF',
-          date: new Date(file.lastModified || Date.now()).toLocaleDateString('en-GB', {
-            year: 'numeric',
-            month: 'long',
-          }),
+          date: new Date(file.lastModified || Date.now()).toLocaleDateString(
+            'en-GB',
+            {
+              year: 'numeric',
+              month: 'long',
+            }
+          ),
           name: file.name.split('.')[0] || DEFAULT_FILE_NAME,
           size: formatFileSize(blob.size),
         })
@@ -52,7 +58,7 @@ const CVDownload: FC = () => {
 
   return (
     <section
-      className="py-16 px-4 bg-gradient-to-br from-slate-50 to-gray-100 dark:from-gray-900 dark:to-slate-800 w-screen ml-[calc(50%-50vw)]"
+      className="py-16 px-4 bg-linear-to-br from-slate-50 to-gray-100 dark:from-gray-900 dark:to-slate-800 w-screen ml-[calc(50%-50vw)]"
       aria-labelledby="cv-section-heading"
     >
       <div className="max-w-2xl mx-auto text-center">
@@ -61,14 +67,14 @@ const CVDownload: FC = () => {
         </h2>
 
         <p className="text-lg mb-8 leading-relaxed">
-          Take a look at my experience, skills, and background. Download my CV to learn more about
-          what I can bring to your team.
+          Take a look at my experience, skills, and background. Download my CV
+          to learn more about what I can bring to your team.
         </p>
 
         <Button onClick={handleDownload} ariaLabel="Download CV as PDF">
           Download my CV
         </Button>
-        <div className="text-sm text-gray-500 dark:text-gray-400 mt-4 flex items-center justify-center min-h-[1.5rem]">
+        <div className="text-sm text-gray-500 dark:text-gray-400 mt-4 flex items-center justify-center min-6">
           <FileMeta fileInfo={fileInfo} hasError={hasError} />
         </div>
       </div>
