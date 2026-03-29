@@ -10,12 +10,8 @@ const objectFitClasses: Record<NonNullable<ImageProps['objectFit']>, string> = {
   'scale-down': 'object-scale-down',
 }
 
-const generateBlurDataURL = (baseSrc: string) => `${baseSrc}?w=10&h=10&blur=10&q=1`
-
-const generateSrcSet = (baseSrc: string, quality: number) => {
-  const widths = [320, 640, 768, 1024, 1280, 1536, 1920]
-  return widths.map((width) => `${baseSrc}?w=${width}&q=${quality} ${width}w`).join(', ')
-}
+const generateBlurDataURL = (baseSrc: string) =>
+  `${baseSrc}?w=10&h=10&blur=10&q=1`
 
 export interface ImageProps extends Omit<
   ImgHTMLAttributes<HTMLImageElement>,
@@ -24,7 +20,6 @@ export interface ImageProps extends Omit<
   src: string
   alt: string
   priority?: boolean
-  quality?: number
   sizes?: string
   aspectRatio?: string
   objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down'
@@ -43,7 +38,6 @@ const Image: FC<ImageProps> = ({
   src,
   alt,
   priority = false,
-  quality = 75,
   sizes,
   aspectRatio = 'auto',
   objectFit = 'cover',
@@ -56,7 +50,7 @@ const Image: FC<ImageProps> = ({
   className = '',
   containerClassName = '',
   lazy = true,
-  ...props
+  srcSet,
 }) => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [isError, setIsError] = useState(false)
@@ -201,11 +195,13 @@ const Image: FC<ImageProps> = ({
           fetchPriority={priority ? 'high' : 'auto'}
           decoding="async"
           crossOrigin="anonymous"
-          srcSet={generateSrcSet(src, quality)}
+          srcSet={srcSet}
           sizes={
-            sizes || '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
+            srcSet
+              ? sizes ||
+                '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
+              : sizes
           }
-          {...props}
         />
       )}
 

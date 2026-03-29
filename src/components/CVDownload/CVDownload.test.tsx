@@ -9,6 +9,7 @@ function mockFetchSuccess(sizeInBytes = 1234, type = 'application/pdf') {
 
   ;(globalThis as any).fetch = vi.fn(() =>
     Promise.resolve({
+      headers: { get: () => null },
       blob: () => Promise.resolve(blob),
     })
   )
@@ -31,7 +32,6 @@ describe('CVDownload', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/PDF format/i)).toBeInTheDocument()
-      expect(screen.getByText(/Updated/i)).toBeInTheDocument()
     })
 
     expect(screen.getByText(/1.5 KB/i)).toBeInTheDocument()

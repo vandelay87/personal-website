@@ -2,23 +2,6 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import Image from './Image'
 
-const mockIntersectionObserver = vi
-  .fn()
-  .mockImplementation((callback: IntersectionObserverCallback) => ({
-    observe: vi.fn((element: Element) => {
-      callback(
-        [{ isIntersecting: true, target: element } as IntersectionObserverEntry],
-        {} as IntersectionObserver
-      )
-    }),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
-    root: null,
-    rootMargin: '',
-    thresholds: [],
-  }))
-
-window.IntersectionObserver = mockIntersectionObserver as unknown as typeof IntersectionObserver
 
 describe('Image', () => {
   const defaultProps = {

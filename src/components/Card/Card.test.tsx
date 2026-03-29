@@ -4,14 +4,7 @@ import Card, { CardProps } from './Card'
 
 describe('Card', () => {
   beforeEach(() => {
-    vi.stubGlobal(
-      'IntersectionObserver',
-      vi.fn((callback) => ({
-        observe: vi.fn(() => callback([{ isIntersecting: true }])),
-        unobserve: vi.fn(),
-        disconnect: vi.fn(),
-      }))
-    )
+    vi.resetAllMocks()
   })
 
   const mockProps: CardProps = {

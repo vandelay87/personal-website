@@ -22,7 +22,7 @@ const FileMeta: FC<FileMetaProps> = ({ fileInfo, hasError }) => {
 
     return (
       <ul role="list" className="inline-flex items-center space-x-1">
-        <li>{type} format</li>
+        <li>{`${type} format`}</li>
         <li aria-hidden="true">•</li>
         <li>{size}</li>
         {date && (

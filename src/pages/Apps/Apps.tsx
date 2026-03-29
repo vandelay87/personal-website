@@ -2,7 +2,8 @@ import Card from '@components/Card'
 import type { CardProps } from '@components/Card'
 import Grid from '@components/Grid'
 import type { FC } from 'react'
-import img from '../../assets/sand-box.webp'
+import imgSrc from '../../assets/sand-box.webp'
+import imgSrcSet from '../../assets/sand-box.webp?w=320;640;768;1024;1280;1536;1920&format=webp&as=srcset'
 
 const CARDS: CardProps[] = [
   {
@@ -10,7 +11,8 @@ const CARDS: CardProps[] = [
     description:
       'Real-time particle physics simulation of falling sand grains on a black canvas.',
     image: {
-      src: img,
+      src: imgSrc,
+      srcSet: imgSrcSet,
       alt: 'Real-time particle physics simulation of falling sand grains on a black canvas',
     },
     href: 'https://akli.dev/sand-box',
