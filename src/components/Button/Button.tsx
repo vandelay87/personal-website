@@ -33,7 +33,6 @@ const Button = ({
       className={`${baseStyles} ${variantStyles[variant]}`}
       disabled={disabled}
       aria-label={ariaLabel}
-      aria-disabled={disabled ? 'true' : 'false'}
     >
       {children}
     </button>

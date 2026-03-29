@@ -5,11 +5,6 @@ const AppsCta: FC = () => {
   return (
     <section
       className="py-16 px-4 w-screen bg-linear-to-br from-indigo-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 ml-[calc(50%-50vw)]"
-      style={{
-        marginLeft: 'calc(-50vw + 50%)',
-        marginRight: 'calc(-50vw + 50%)',
-        width: '100vw',
-      }}
       aria-labelledby="apps-section-title"
     >
       <div className="max-w-2xl mx-auto text-center">

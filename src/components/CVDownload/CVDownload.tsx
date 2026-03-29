@@ -3,12 +3,7 @@ import FileMeta from '@components/FileMeta'
 import { FC, useEffect, useState } from 'react'
 import fileUrl from '../../assets/Akli-Aissat-CV.pdf'
 
-interface CVDownloadProps {
-  type: string
-  date: string
-  name: string
-  size: string
-}
+const DEFAULT_FILE_NAME = 'Akli-Aissat-CV'
 
 const formatFileSize = (sizeInBytes: number) => {
   if (sizeInBytes < 1024) return `${sizeInBytes} B`
@@ -18,41 +13,38 @@ const formatFileSize = (sizeInBytes: number) => {
 }
 
 const CVDownload: FC = () => {
-  const DEFAULT_FILE_NAME = 'Akli-Aissat-CV'
-  const [fileInfo, setFileInfo] = useState<null | CVDownloadProps>(null)
+  const [fileInfo, setFileInfo] = useState<{
+    type: string
+    size: string
+    date?: string
+  } | null>(null)
   const [hasError, setHasError] = useState(false)
 
   useEffect(() => {
-    // Create a blob from the imported file to get metadata
-    fetch(fileUrl)
-      .then((response) => response.blob())
-      .then((blob) => {
-        const file = new File([blob], `${DEFAULT_FILE_NAME}.pdf`, {
-          type: blob.type,
-        })
-        setFileInfo({
-          type: file.type.split('/')[1].toUpperCase() || 'PDF',
-          date: new Date(file.lastModified || Date.now()).toLocaleDateString(
-            'en-GB',
-            {
+    const load = async () => {
+      try {
+        const response = await fetch(fileUrl)
+        const lastModified = response.headers.get('Last-Modified')
+        const date = lastModified
+          ? new Date(lastModified).toLocaleDateString('en-GB', {
               year: 'numeric',
               month: 'long',
-            }
-          ),
-          name: file.name.split('.')[0] || DEFAULT_FILE_NAME,
-          size: formatFileSize(blob.size),
-        })
-      })
-      .catch((error) => {
+            })
+          : undefined
+        const blob = await response.blob()
+        setFileInfo({ type: 'PDF', size: formatFileSize(blob.size), date })
+      } catch (error) {
         console.warn('Failed to load CV metadata:', error)
         setHasError(true)
-      })
+      }
+    }
+    load()
   }, [])
 
   const handleDownload = () => {
     const link = document.createElement('a')
     link.href = fileUrl
-    link.download = `${fileInfo?.name || DEFAULT_FILE_NAME}.pdf`
+    link.download = `${DEFAULT_FILE_NAME}.pdf`
     link.click()
   }
 

@@ -2,6 +2,21 @@ import Loading from '@components/Loading'
 import { usePreloadImage } from '@hooks/usePreloadImage'
 import { useState, useEffect, useRef, FC, ImgHTMLAttributes } from 'react'
 
+const objectFitClasses: Record<NonNullable<ImageProps['objectFit']>, string> = {
+  cover: 'object-cover',
+  contain: 'object-contain',
+  fill: 'object-fill',
+  none: 'object-none',
+  'scale-down': 'object-scale-down',
+}
+
+const generateBlurDataURL = (baseSrc: string) => `${baseSrc}?w=10&h=10&blur=10&q=1`
+
+const generateSrcSet = (baseSrc: string, quality: number) => {
+  const widths = [320, 640, 768, 1024, 1280, 1536, 1920]
+  return widths.map((width) => `${baseSrc}?w=${width}&q=${quality} ${width}w`).join(', ')
+}
+
 export interface ImageProps extends Omit<
   ImgHTMLAttributes<HTMLImageElement>,
   'src' | 'alt'
@@ -50,13 +65,11 @@ const Image: FC<ImageProps> = ({
   const imgRef = useRef<HTMLImageElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Preload critical images
   usePreloadImage(priority ? src : undefined, {
     fetchPriority: priority ? 'high' : 'auto',
     crossOrigin: 'anonymous',
   })
 
-  // Intersection Observer for lazy loading
   useEffect(() => {
     if (!lazy || priority || isInView) return
 
@@ -80,14 +93,12 @@ const Image: FC<ImageProps> = ({
     return () => observer.disconnect()
   }, [lazy, priority, isInView])
 
-  // Handle image load
   const handleLoad = () => {
     setIsLoaded(true)
     setIsError(false)
     onLoad?.()
   }
 
-  // Handle image error with fallback
   const handleError = () => {
     if (fallbackSrc && currentSrc !== fallbackSrc) {
       setCurrentSrc(fallbackSrc)
@@ -98,21 +109,6 @@ const Image: FC<ImageProps> = ({
     onError?.()
   }
 
-  // Generate blur data URL automatically
-  const generateBlurDataURL = (baseSrc: string) => {
-    // Create a tiny, heavily blurred version for the placeholder
-    return `${baseSrc}?w=10&h=10&blur=10&q=1`
-  }
-
-  // Generate responsive image URLs
-  const generateSrcSet = (baseSrc: string) => {
-    const widths = [320, 640, 768, 1024, 1280, 1536, 1920]
-    return widths
-      .map((width) => `${baseSrc}?w=${width}&q=${quality} ${width}w`)
-      .join(', ')
-  }
-
-  // Get the appropriate blur data URL
   const effectiveBlurDataURL =
     blurDataURL ||
     (placeholder === 'blur' ? generateBlurDataURL(src) : undefined)
@@ -125,7 +121,6 @@ const Image: FC<ImageProps> = ({
         aspectRatio: aspectRatio !== 'auto' ? aspectRatio : undefined,
       }}
     >
-      {/* Placeholder */}
       {!isLoaded && !isError && (
         <div
           className={`absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-out ${
@@ -163,7 +158,6 @@ const Image: FC<ImageProps> = ({
         </div>
       )}
 
-      {/* Error state */}
       {isError && (
         <div
           className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800"
@@ -192,25 +186,12 @@ const Image: FC<ImageProps> = ({
         </div>
       )}
 
-      {/* Main image */}
       {isInView && (
         <img
           ref={imgRef}
           src={currentSrc}
           alt={alt}
-          className={`w-full h-full transition-all duration-500 ease-out ${
-            objectFit === 'cover'
-              ? 'object-cover'
-              : objectFit === 'contain'
-                ? 'object-contain'
-                : objectFit === 'fill'
-                  ? 'object-fill'
-                  : objectFit === 'none'
-                    ? 'object-none'
-                    : objectFit === 'scale-down'
-                      ? 'object-scale-down'
-                      : ''
-          } ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'} ${className}`}
+          className={`w-full h-full transition-all duration-500 ease-out ${objectFitClasses[objectFit]} ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'} ${className}`}
           style={{
             objectPosition,
           }}
@@ -220,7 +201,7 @@ const Image: FC<ImageProps> = ({
           fetchPriority={priority ? 'high' : 'auto'}
           decoding="async"
           crossOrigin="anonymous"
-          srcSet={generateSrcSet(src)}
+          srcSet={generateSrcSet(src, quality)}
           sizes={
             sizes || '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
           }
@@ -228,7 +209,6 @@ const Image: FC<ImageProps> = ({
         />
       )}
 
-      {/* Loading indicator */}
       {isInView && !isLoaded && !isError && (
         <div
           className="absolute inset-0 flex items-center justify-center text-2xl"

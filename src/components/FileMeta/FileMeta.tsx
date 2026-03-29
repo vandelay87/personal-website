@@ -3,8 +3,8 @@ import { FC } from 'react'
 
 interface FileInfo {
   type: string
-  date: string
   size: string
+  date?: string
 }
 
 interface FileMetaProps {
@@ -25,8 +25,12 @@ const FileMeta: FC<FileMetaProps> = ({ fileInfo, hasError }) => {
         <li>{type} format</li>
         <li aria-hidden="true">•</li>
         <li>{size}</li>
-        <li aria-hidden="true">•</li>
-        <li>Updated {date}</li>
+        {date && (
+          <>
+            <li aria-hidden="true">•</li>
+            <li>Updated {date}</li>
+          </>
+        )}
       </ul>
     )
   }
