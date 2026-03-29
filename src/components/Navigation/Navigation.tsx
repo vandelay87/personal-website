@@ -5,7 +5,6 @@ export default function Navigation() {
     <nav className="space-x-4">
       <Link to="/">Home</Link>
       <Link to="/apps">Apps</Link>
-      <Link to="/about">About</Link>
     </nav>
   )
 }

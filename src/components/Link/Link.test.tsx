@@ -6,14 +6,14 @@ describe('Link', () => {
   it('renders correctly with children', () => {
     render(
       <MemoryRouter>
-        <Link to="/about">About</Link>
+        <Link to="/apps">Apps</Link>
       </MemoryRouter>
     )
 
-    const linkElement = screen.getByRole('link', { name: /about/i })
+    const linkElement = screen.getByRole('link', { name: /apps/i })
 
     expect(linkElement).toBeInTheDocument()
-    expect(linkElement).toHaveTextContent('About')
+    expect(linkElement).toHaveTextContent('Apps')
   })
 
   it('points to the correct destination', () => {

@@ -11,7 +11,7 @@ describe('Navigation', () => {
       </MemoryRouter>
     )
     expect(screen.getByText('Home')).toBeInTheDocument()
-    expect(screen.getByText('About')).toBeInTheDocument()
+    expect(screen.getByText('Apps')).toBeInTheDocument()
   })
 
   it('links have correct href', () => {
@@ -21,6 +21,9 @@ describe('Navigation', () => {
       </MemoryRouter>
     )
     expect(screen.getByText('Home').closest('a')).toHaveAttribute('href', '/')
-    expect(screen.getByText('About').closest('a')).toHaveAttribute('href', '/about')
+    expect(screen.getByText('Apps').closest('a')).toHaveAttribute(
+      'href',
+      '/apps'
+    )
   })
 })

@@ -1,6 +1,5 @@
 import Header from '@components/Header'
 import Layout from '@components/Layout'
-import About from '@pages/About'
 import Apps from '@pages/Apps'
 import Home from '@pages/Home'
 import NotFound from '@pages/NotFound'
@@ -15,7 +14,6 @@ export default function App() {
       <Layout isHomePage={location.pathname === '/'}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
           <Route path="/apps" element={<Apps />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

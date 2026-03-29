@@ -22,7 +22,7 @@ export default defineConfig({
           priority: 1.0,
           changefreq: 'monthly',
         },
-        '/about': {
+        '/apps': {
           priority: 0.8,
           changefreq: 'monthly',
         },
