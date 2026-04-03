@@ -45,7 +45,7 @@ describe('Apps', () => {
   it('renders the correct card href', () => {
     render(<Apps />)
     expect(
-      screen.getByRole('link', { name: 'https://akli.dev/sand-box' })
+      screen.getByRole('link', { name: 'https://akli.dev/apps/sand-box' })
     ).toBeInTheDocument()
   })
 })
