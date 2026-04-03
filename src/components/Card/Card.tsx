@@ -2,6 +2,7 @@ import Image from '@components/Image'
 import type { ImageProps } from '@components/Image/Image'
 import Link from '@components/Link'
 import type { FC } from 'react'
+import styles from './Card.module.css'
 
 export interface CardProps {
   title: string
@@ -12,22 +13,22 @@ export interface CardProps {
 
 const Card: FC<CardProps> = ({ title, description, href, image }) => {
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-gray-700 dark:bg-gray-900">
-      <div className="aspect-video w-full overflow-hidden">
+    <article className={styles.card}>
+      <div className={styles.imageWrapper}>
         <Image
           {...image}
-          className="transition-transform duration-500 group-hover:scale-105"
+          className={styles.imageScaled}
           aspectRatio="16/9"
           objectFit="cover"
         />
       </div>
 
-      <div className="flex flex-1 flex-col p-6">
-        <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">
+      <div className={styles.body}>
+        <h3 className={styles.title}>
           {title}
         </h3>
 
-        <p className="mb-4 line-clamp-2">{description}</p>
+        <p className={styles.description}>{description}</p>
 
         <Link to={href}>{href}</Link>
       </div>

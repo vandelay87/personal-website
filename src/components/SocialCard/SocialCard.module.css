@@ -1,0 +1,50 @@
+/* SocialCard component styles */
+
+.card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-2xl);
+  box-shadow:
+    var(--shadow-md),
+    inset 0 1px 2px 0 rgb(0 0 0 / 0.05); /* inset-shadow-2xs equivalent */
+  margin-block: var(--space-8);
+  margin-inline: auto;
+  padding-block: var(--space-6);
+  padding-inline: var(--space-6);
+  max-width: var(--max-w-sm);
+}
+
+.heading {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-strong);
+  margin-block-end: var(--space-4);
+}
+
+.list {
+  display: flex;
+  gap: var(--space-6);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.link {
+  color: var(--color-text-muted);
+  outline-offset: 4px; /* no token — standard focus ring spacing */
+  transition: color var(--duration-fast) var(--easing-default);
+}
+
+.link:hover {
+  color: var(--color-primary-ring); /* blue-500 */
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--color-primary-ring);
+  border-radius: var(--radius-sm);
+}
+
+/* Size the SVG icons via descendant selector (icons are in static data array) */
+.link svg {
+  width: var(--size-6);
+  height: var(--size-6);
+}
