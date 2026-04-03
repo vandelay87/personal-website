@@ -20,7 +20,8 @@ describe('Image', () => {
     // Find the image by alt text
     const img = screen.getByAltText('Test Image')
     expect(img).toBeInTheDocument()
-    expect(img).toHaveClass('opacity-0')
+    // Before load, the image should not have the loaded class
+    expect(img.className).not.toMatch(/loaded/)
   })
 
   it('removes placeholder and shows image on successful load', () => {
@@ -28,7 +29,8 @@ describe('Image', () => {
     const img = screen.getByAltText('Test Image')
 
     fireEvent.load(img)
-    expect(img).toHaveClass('opacity-100')
+    // After load, the image should have the loaded class
+    expect(img.className).toMatch(/loaded/)
   })
 
   it('handles error state and switches to fallback image', () => {
@@ -67,6 +69,6 @@ describe('Image', () => {
     expect(figure?.style.aspectRatio).toBe('16/9')
 
     const img = screen.getByAltText('Test Image')
-    expect(img).toHaveClass('object-contain')
+    expect(img.style.objectFit).toBe('contain')
   })
 })
