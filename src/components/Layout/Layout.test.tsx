@@ -12,23 +12,21 @@ describe('Layout', () => {
     expect(getByText('Test Child')).toBeInTheDocument()
   })
 
-  it('applies pt-20 class when isHomePage is false', () => {
-    const { container } = render(
+  it('applies withHeader class when isHomePage is false', () => {
+    const { getByRole } = render(
       <Layout>
         <div>Content</div>
       </Layout>
     )
-    const main = container.querySelector('main')
-    expect(main?.className).toContain('pt-20')
+    expect(getByRole('main').className).toMatch(/withHeader/)
   })
 
-  it('does not apply pt-20 class when isHomePage is true', () => {
-    const { container } = render(
+  it('does not apply withHeader class when isHomePage is true', () => {
+    const { getByRole } = render(
       <Layout isHomePage>
         <div>Content</div>
       </Layout>
     )
-    const main = container.querySelector('main')
-    expect(main?.className).not.toContain('pt-20')
+    expect(getByRole('main').className).not.toMatch(/withHeader/)
   })
 })
