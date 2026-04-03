@@ -31,7 +31,7 @@
 
 .primary {
   background-color: var(--color-primary);
-  color: #ffffff;
+  color: #ffffff; /* no token — always white on coloured background */
 }
 
 .primary:hover:not(:disabled) {
@@ -50,7 +50,7 @@
 
 .secondary {
   background-color: var(--color-secondary);
-  color: #ffffff;
+  color: #ffffff; /* no token — always white on coloured background */
 }
 
 .secondary:hover:not(:disabled) {
