@@ -1,6 +1,6 @@
 # personal-website
 
-Personal portfolio site for akli.dev. Built with React 19, TypeScript, Vite, and Tailwind CSS 4.
+Personal portfolio site for akli.dev. Built with React 19, TypeScript, Vite, and CSS Modules.
 
 ## PRDs
 
@@ -13,7 +13,7 @@ To write a new PRD, copy `docs/prds/template.md` and fill it in.
 - React 19 + TypeScript
 - React Router v7 (client-side routing)
 - Vite 6
-- Tailwind CSS 4
+- CSS Modules
 - Vitest + Testing Library
 
 ## Conventions
