@@ -9,7 +9,6 @@
     "eslint.config.js",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "tailwind.config.js",
     "sitemap-plugin.ts"
   ],
   "exclude": ["node_modules", "dist", "coverage"]
