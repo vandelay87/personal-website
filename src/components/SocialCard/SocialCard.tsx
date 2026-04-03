@@ -13,7 +13,7 @@ const SOCIAL_CARD_PROPS: SocialCardProps[] = [
     url: 'https://github.com/vandelay87',
     icon: (
       <svg
-        className="w-6 h-6"
+
         fill="currentColor"
         viewBox="0 0 24 24"
         aria-hidden="true"
@@ -28,7 +28,7 @@ const SOCIAL_CARD_PROPS: SocialCardProps[] = [
     url: 'https://www.linkedin.com/in/akli-aissat-b08119115/',
     icon: (
       <svg
-        className="w-6 h-6"
+
         fill="currentColor"
         viewBox="0 0 24 24"
         aria-hidden="true"
@@ -43,7 +43,7 @@ const SOCIAL_CARD_PROPS: SocialCardProps[] = [
     url: 'mailto:akliaissat@outlook.com?subject=Hello',
     icon: (
       <svg
-        className="w-6 h-6"
+
         fill="currentColor"
         viewBox="0 0 24 24"
         aria-hidden="true"
