@@ -1,4 +1,5 @@
 import { FC, JSX } from 'react'
+import styles from './SocialCard.module.css'
 
 type SocialCardProps = {
   name: string
@@ -58,12 +59,12 @@ const SocialCard: FC = () => {
   return (
     <article
       aria-labelledby="social-heading"
-      className="bg-white dark:bg-gray-900 rounded-2xl shadow-md m-8 inset-shadow-2xs p-6 max-w-sm mx-auto"
+      className={styles.card}
     >
-      <h2 id="social-heading" className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+      <h2 id="social-heading" className={styles.heading}>
         Get in touch
       </h2>
-      <ul className="flex space-x-6" role="list">
+      <ul className={styles.list} role="list">
         {SOCIAL_CARD_PROPS.map(({ name, url, icon }) => (
           <li key={name} role="listitem">
             <a
@@ -72,7 +73,7 @@ const SocialCard: FC = () => {
               rel="noopener noreferrer"
               title={name}
               aria-label={name}
-              className="text-gray-600 dark:text-gray-300 hover:text-blue-500 outline-offset-4 transition-colors"
+              className={styles.link}
             >
               <span className="sr-only">{name}</span>
               {icon}
