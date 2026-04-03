@@ -1,5 +1,6 @@
 import Loading from '@components/Loading'
 import { FC } from 'react'
+import styles from './FileMeta.module.css'
 
 interface FileInfo {
   type: string
@@ -14,14 +15,14 @@ interface FileMetaProps {
 
 const FileMeta: FC<FileMetaProps> = ({ fileInfo, hasError }) => {
   if (hasError) {
-    return <span className="text-red-500 dark:text-red-400">Failed to load CV metadata</span>
+    return <span className={styles.error}>Failed to load CV metadata</span>
   }
 
   if (fileInfo) {
     const { type, size, date } = fileInfo
 
     return (
-      <ul role="list" className="inline-flex items-center space-x-1">
+      <ul role="list" className={styles.list}>
         <li>{`${type} format`}</li>
         <li aria-hidden="true">•</li>
         <li>{size}</li>
