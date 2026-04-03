@@ -1,38 +1,43 @@
 import { useEffect, useState } from 'react'
+import styles from './ThemeToggle.module.css'
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light')
+  const [focused, setFocused] = useState(false)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('theme', theme)
   }, [theme])
 
+  const isDark = theme === 'dark'
+
+  const trackClass = [styles.track, isDark ? styles.checked : '', focused ? styles.focused : '']
+    .filter(Boolean)
+    .join(' ')
+
+  const thumbClass = [styles.thumb, isDark ? styles.checked : ''].filter(Boolean).join(' ')
+
   return (
-    <div className="flex items-center gap-3">
-      <span
-        id="theme-toggle-label"
-        className="text-sm font-medium text-gray-700 dark:text-gray-300"
-      >
+    <div className={styles.wrapper}>
+      <span id="theme-toggle-label" className={styles.label}>
         Dark Mode
       </span>
 
-      <label htmlFor="theme-toggle" className="relative inline-flex items-center cursor-pointer">
+      <label htmlFor="theme-toggle" className={styles.toggleLabel}>
         <input
           id="theme-toggle"
           type="checkbox"
-          checked={theme === 'dark'}
+          className={styles.input}
+          checked={isDark}
           onChange={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
-          className="sr-only peer"
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           aria-labelledby="theme-toggle-label"
-          aria-checked={theme === 'dark'}
+          aria-checked={isDark}
         />
-        <div className="w-10 h-6 bg-gray-300 peer-checked:bg-blue-600 rounded-full transition-colors duration-300 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500 peer-focus-visible:ring-offset-2">
-          <div
-            className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${
-              theme === 'dark' ? 'translate-x-5' : 'translate-x-1'
-            }`}
-          />
+        <div className={trackClass}>
+          <div className={thumbClass} />
         </div>
       </label>
     </div>
