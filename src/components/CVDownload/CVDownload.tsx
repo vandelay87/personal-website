@@ -2,6 +2,7 @@ import Button from '@components/Button'
 import FileMeta from '@components/FileMeta'
 import { FC, useEffect, useState } from 'react'
 import fileUrl from '../../assets/Akli-Aissat-CV.pdf'
+import styles from './CVDownload.module.css'
 
 const DEFAULT_FILE_NAME = 'Akli-Aissat-CV'
 
@@ -50,15 +51,15 @@ const CVDownload: FC = () => {
 
   return (
     <section
-      className="py-16 px-4 bg-linear-to-br from-slate-50 to-gray-100 dark:from-gray-900 dark:to-slate-800 w-screen ml-[calc(50%-50vw)]"
+      className={styles.section}
       aria-labelledby="cv-section-heading"
     >
-      <div className="max-w-2xl mx-auto text-center">
-        <h2 id="cv-section-heading" className="text-3xl font-bold mb-4">
+      <div className={styles.inner}>
+        <h2 id="cv-section-heading" className={styles.heading}>
           Interested in working together?
         </h2>
 
-        <p className="text-lg mb-8 leading-relaxed">
+        <p className={styles.paragraph}>
           Take a look at my experience, skills, and background. Download my CV
           to learn more about what I can bring to your team.
         </p>
@@ -66,7 +67,7 @@ const CVDownload: FC = () => {
         <Button onClick={handleDownload} ariaLabel="Download CV as PDF">
           Download my CV
         </Button>
-        <div className="text-sm text-gray-500 dark:text-gray-400 mt-4 flex items-center justify-center min-6">
+        <div className={styles.metaWrapper}>
           <FileMeta fileInfo={fileInfo} hasError={hasError} />
         </div>
       </div>
