@@ -2,6 +2,7 @@ import Card from '@components/Card'
 import type { CardProps } from '@components/Card'
 import Grid from '@components/Grid'
 import type { FC } from 'react'
+import styles from './Apps.module.css'
 import imgSrc from '../../assets/sand-box.webp'
 import imgSrcSet from '../../assets/sand-box.webp?w=320;640;768;1024;1280;1536;1920&format=webp&as=srcset'
 
@@ -22,7 +23,7 @@ const CARDS: CardProps[] = [
 const Apps: FC = () => {
   return (
     <>
-      <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4">
+      <h1 className={styles.heading}>
         Apps
       </h1>
       <Grid columns={3}>
