@@ -2,7 +2,7 @@
 
 :root {
   /* ── Colour scheme ────────────────────────────────────────── */
-  color-scheme: light dark;
+  color-scheme: light;
 
   /* Backgrounds */
   --color-bg:              #ffffff;
@@ -40,7 +40,6 @@
 
   /* Danger / error */
   --color-error:           #ef4444; /* red-500 */
-  --color-error-dark:      #f87171; /* red-400 — dark mode */
 
   /* Gradient backgrounds */
   --color-grad-from-light: #eef2ff; /* indigo-50 */
@@ -68,6 +67,7 @@
   --space-4:   1rem;     /* 16px */
   --space-5:   1.25rem;  /* 20px */
   --space-6:   1.5rem;   /* 24px */
+  --space-7:   1.75rem;  /* 28px */
   --space-8:   2rem;     /* 32px */
   --space-10:  2.5rem;   /* 40px */
   --space-12:  3rem;     /* 48px */
@@ -86,6 +86,7 @@
   --font-size-5xl:  3rem;      /* 48px */
   --font-size-6xl:  3.75rem;   /* 60px */
 
+  --font-weight-normal:    400;
   --font-weight-medium:    500;
   --font-weight-semibold:  600;
   --font-weight-bold:      700;
@@ -143,7 +144,7 @@
 }
 
 /* ── Dark mode overrides ────────────────────────────────────── */
-[data-theme=dark] {
+[data-theme="dark"] {
   color-scheme: dark;
 
   /* Backgrounds */
@@ -172,6 +173,10 @@
 
   /* Error */
   --color-error:           #f87171; /* red-400 */
+
+  /* Focus rings */
+  --color-primary-ring:    #60a5fa; /* blue-400 — more visible on dark */
+  --color-secondary-ring:  #f87171; /* red-400 */
 
   /* Gradient backgrounds */
   --color-grad-from-light: #111827; /* gray-900 */
