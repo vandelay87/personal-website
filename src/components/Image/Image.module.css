@@ -1,0 +1,106 @@
+.container {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-surface-raised); /* gray-100 / gray-700 via token */
+}
+
+/* ── Placeholder overlay ─────────────────────────────────── */
+.placeholderOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity var(--duration-slow) var(--easing-out);
+  opacity: 1;
+}
+
+.placeholderOverlayBlur {
+  backdrop-filter: blur(4px); /* sm blur */
+}
+
+/* ── Blur placeholder image ──────────────────────────────── */
+.blurImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(4px);
+  transform: scale(1.1);
+}
+
+/* ── Pulse gradient placeholder ──────────────────────────── */
+.pulsePlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom right, var(--color-placeholder-from), var(--color-placeholder-to));
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ── Empty placeholder (circle with icon) ────────────────── */
+.emptyPlaceholder {
+  width: var(--size-12);
+  height: var(--size-12);
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-muted); /* gray-200 / gray-600 via token */
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyPlaceholder svg {
+  width: var(--size-6);
+  height: var(--size-6);
+  color: var(--color-icon-muted);
+}
+
+/* ── Error overlay ───────────────────────────────────────── */
+.errorOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-surface-raised); /* gray-100 / gray-700 via token */
+}
+
+.errorIcon {
+  width: var(--size-12);
+  height: var(--size-12);
+  color: var(--color-icon-muted);
+  margin-inline: auto;
+  margin-block-end: var(--space-2);
+}
+
+.errorContent {
+  text-align: center;
+}
+
+.errorText {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* ── Main image ──────────────────────────────────────────── */
+.image {
+  width: 100%;
+  height: 100%;
+  transition: all var(--duration-slow) var(--easing-out);
+  opacity: 0;
+  transform: scale(1.05);
+}
+
+.loaded {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ── Loading overlay ─────────────────────────────────────── */
+.loadingOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-2xl);
+}

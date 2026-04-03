@@ -1,14 +1,7 @@
 import Loading from '@components/Loading'
 import { usePreloadImage } from '@hooks/usePreloadImage'
 import { useState, useEffect, useRef, FC, ImgHTMLAttributes } from 'react'
-
-const objectFitClasses: Record<NonNullable<ImageProps['objectFit']>, string> = {
-  cover: 'object-cover',
-  contain: 'object-contain',
-  fill: 'object-fill',
-  none: 'object-none',
-  'scale-down': 'object-scale-down',
-}
+import styles from './Image.module.css'
 
 const generateBlurDataURL = (baseSrc: string) =>
   `${baseSrc}?w=10&h=10&blur=10&q=1`
@@ -110,31 +103,28 @@ const Image: FC<ImageProps> = ({
   return (
     <figure
       ref={containerRef}
-      className={`relative overflow-hidden bg-gray-100 dark:bg-gray-800 ${containerClassName}`}
+      className={`${styles.container} ${containerClassName}`}
       style={{
         aspectRatio: aspectRatio !== 'auto' ? aspectRatio : undefined,
       }}
     >
       {!isLoaded && !isError && (
         <div
-          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-out ${
-            isLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'
-          } ${placeholder === 'blur' ? 'backdrop-blur-sm' : ''}`}
+          className={`${styles.placeholderOverlay} ${placeholder === 'blur' ? styles.placeholderOverlayBlur : ''}`}
           aria-hidden="true"
         >
           {placeholder === 'blur' && effectiveBlurDataURL ? (
             <img
               src={effectiveBlurDataURL}
               alt=""
-              className="w-full h-full object-cover filter blur-sm scale-110"
+              className={styles.blurImage}
               aria-hidden="true"
             />
           ) : placeholder === 'blur' && !effectiveBlurDataURL ? (
-            <div className="w-full h-full bg-linear-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 animate-pulse" />
+            <div className={styles.pulsePlaceholder} />
           ) : (
-            <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex items-center justify-center">
+            <div className={styles.emptyPlaceholder}>
               <svg
-                className="w-6 h-6 text-gray-400 dark:text-gray-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -154,13 +144,13 @@ const Image: FC<ImageProps> = ({
 
       {isError && (
         <div
-          className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800"
+          className={styles.errorOverlay}
           role="alert"
           aria-live="polite"
         >
-          <div className="text-center">
+          <div className={styles.errorContent}>
             <svg
-              className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-2"
+              className={styles.errorIcon}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -173,7 +163,7 @@ const Image: FC<ImageProps> = ({
                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
               />
             </svg>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className={styles.errorText}>
               Failed to load image
             </p>
           </div>
@@ -185,8 +175,9 @@ const Image: FC<ImageProps> = ({
           ref={imgRef}
           src={currentSrc}
           alt={alt}
-          className={`w-full h-full transition-all duration-500 ease-out ${objectFitClasses[objectFit]} ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'} ${className}`}
+          className={`${styles.image} ${isLoaded ? styles.loaded : ''} ${className}`}
           style={{
+            objectFit,
             objectPosition,
           }}
           onLoad={handleLoad}
@@ -207,7 +198,7 @@ const Image: FC<ImageProps> = ({
 
       {isInView && !isLoaded && !isError && (
         <div
-          className="absolute inset-0 flex items-center justify-center text-2xl"
+          className={styles.loadingOverlay}
           aria-hidden="true"
         >
           <Loading />
