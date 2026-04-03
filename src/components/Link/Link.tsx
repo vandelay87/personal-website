@@ -1,5 +1,6 @@
 import { FC, ReactNode } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
+import styles from './Link.module.css'
 
 interface LinkProps {
   children: ReactNode
@@ -16,15 +17,14 @@ const Link: FC<LinkProps> = ({
 }) => {
   const isExternal =
     /^https?:\/\//.test(to) || to.startsWith('mailto:') || to.startsWith('tel:')
-  const baseStyles = `text-blue-500 hover:text-blue-600 dark:text-blue-300 dark:hover:text-blue-200 transition-colors duration-200 ${
-    underline ? 'underline underline-offset-4' : 'no-underline hover:underline'
-  }`
+
+  const className = [styles.link, underline ? styles.underline : ''].filter(Boolean).join(' ')
 
   if (isExternal) {
     return (
       <a
         href={to}
-        className={baseStyles}
+        className={className}
         target="_blank"
         rel="noreferrer"
         aria-label={ariaLabel}
@@ -35,7 +35,7 @@ const Link: FC<LinkProps> = ({
   }
 
   return (
-    <RouterLink to={to} className={baseStyles} aria-label={ariaLabel}>
+    <RouterLink to={to} className={className} aria-label={ariaLabel}>
       {children}
     </RouterLink>
   )
