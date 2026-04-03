@@ -8,18 +8,6 @@ describe('Loading', () => {
     const spinner = screen.getByRole('status', { name: /loading content/i })
 
     expect(spinner).toBeInTheDocument()
-    expect(spinner).toHaveClass(
-      'inline-block',
-      'w-[1em]',
-      'h-[1em]',
-      'align-middle',
-      'animate-spin',
-      'rounded-full',
-      'border-[0.15em]',
-      'border-gray-400',
-      'border-t-transparent',
-      'dark:border-gray-500',
-      'dark:border-t-transparent'
-    )
+    expect(spinner.tagName).toBe('SPAN')
   })
 })

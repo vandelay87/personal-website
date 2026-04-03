@@ -1,0 +1,68 @@
+/* Button component styles */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-block: var(--space-3);
+  padding-inline: var(--space-6);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-default),
+              color var(--duration-fast) var(--easing-default);
+}
+
+.button:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--color-ring-offset),
+    0 0 0 4px var(--color-primary-ring);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+}
+
+/* ── Variants ────────────────────────────────────────────────── */
+
+.primary {
+  background-color: var(--color-primary);
+  color: #ffffff; /* no token — always white on coloured background */
+}
+
+.primary:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.primary:disabled {
+  background-color: var(--color-primary-disabled);
+}
+
+.primary:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--color-ring-offset),
+    0 0 0 4px var(--color-primary-ring);
+}
+
+.secondary {
+  background-color: var(--color-secondary);
+  color: #ffffff; /* no token — always white on coloured background */
+}
+
+.secondary:hover:not(:disabled) {
+  background-color: var(--color-secondary-hover);
+}
+
+.secondary:disabled {
+  background-color: var(--color-secondary-disabled);
+}
+
+.secondary:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--color-ring-offset),
+    0 0 0 4px var(--color-secondary-ring);
+}

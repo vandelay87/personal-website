@@ -1,5 +1,4 @@
 import mdx from '@mdx-js/rollup'
-import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { imagetools } from 'vite-imagetools'
 import { defineConfig } from 'vitest/config'
@@ -9,7 +8,6 @@ export default defineConfig({
   plugins: [
     react(),
     mdx(),
-    tailwindcss(),
     imagetools(),
     sitemapPlugin({
       hostname: 'https://akli.dev',

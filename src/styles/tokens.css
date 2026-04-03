@@ -1,0 +1,197 @@
+/* Design tokens — all CSS custom properties for the site */
+
+:root {
+  /* ── Colour scheme ────────────────────────────────────────── */
+  color-scheme: light;
+
+  /* Backgrounds */
+  --color-bg:              #ffffff;
+  --color-bg-subtle:       #f3f4f6; /* gray-100 */
+  --color-bg-muted:        #e5e7eb; /* gray-200 */
+  --color-bg-overlay:      rgb(255 255 255 / 0.8);
+
+  /* Surfaces */
+  --color-surface:         #ffffff;
+  --color-surface-raised:  #f3f4f6; /* gray-100 */
+
+  /* Text */
+  --color-text:            #374151; /* gray-700 */
+  --color-text-strong:     #111827; /* gray-900 */
+  --color-text-muted:      #6b7280; /* gray-500 */
+  --color-text-subtle:     #9ca3af; /* gray-400 */
+
+  /* Border */
+  --color-border:          #e5e7eb; /* gray-200 */
+  --color-border-strong:   #d1d5db; /* gray-300 */
+
+  /* Primary — blue */
+  --color-primary:         #2563eb; /* blue-600 */
+  --color-primary-hover:   #1d4ed8; /* blue-700 */
+  --color-primary-disabled:#93c5fd; /* blue-300 */
+  --color-primary-ring:    #3b82f6; /* blue-500 */
+  --color-link:            #3b82f6; /* blue-500 */
+  --color-link-hover:      #2563eb; /* blue-600 */
+
+  /* Secondary — red */
+  --color-secondary:       #dc2626; /* red-600 */
+  --color-secondary-hover: #b91c1c; /* red-700 */
+  --color-secondary-disabled:#fca5a5; /* red-300 */
+  --color-secondary-ring:  #ef4444; /* red-500 */
+
+  /* Danger / error */
+  --color-error:           #ef4444; /* red-500 */
+
+  /* Gradient backgrounds */
+  --color-grad-from-light: #eef2ff; /* indigo-50 */
+  --color-grad-to-light:   #dbeafe; /* blue-100 */
+  --color-grad-from-cv:    #f8fafc; /* slate-50 */
+  --color-grad-to-cv:      #f3f4f6; /* gray-100 */
+
+  /* Toggle track */
+  --color-toggle-track:    #d1d5db; /* gray-300 */
+  --color-toggle-thumb:    #ffffff;
+
+  /* Focus ring offset */
+  --color-ring-offset:     #ffffff;
+
+  /* Image placeholder */
+  --color-placeholder-from:#f3f4f6; /* gray-100 */
+  --color-placeholder-to:  #e5e7eb; /* gray-200 */
+  --color-icon-muted:      #9ca3af; /* gray-400 */
+
+  /* ── Spacing ──────────────────────────────────────────────── */
+  /* Tailwind default: 1 unit = 0.25rem */
+  --space-1:   0.25rem;  /* 4px  */
+  --space-2:   0.5rem;   /* 8px  */
+  --space-3:   0.75rem;  /* 12px */
+  --space-4:   1rem;     /* 16px */
+  --space-5:   1.25rem;  /* 20px */
+  --space-6:   1.5rem;   /* 24px */
+  --space-7:   1.75rem;  /* 28px */
+  --space-8:   2rem;     /* 32px */
+  --space-10:  2.5rem;   /* 40px */
+  --space-12:  3rem;     /* 48px */
+  --space-16:  4rem;     /* 64px */
+  --space-20:  5rem;     /* 80px */
+
+  /* ── Typography ───────────────────────────────────────────── */
+  --font-size-xs:   0.75rem;   /* 12px */
+  --font-size-sm:   0.875rem;  /* 14px */
+  --font-size-base: 1rem;      /* 16px */
+  --font-size-lg:   1.125rem;  /* 18px */
+  --font-size-xl:   1.25rem;   /* 20px */
+  --font-size-2xl:  1.5rem;    /* 24px */
+  --font-size-3xl:  1.875rem;  /* 30px */
+  --font-size-4xl:  2.25rem;   /* 36px */
+  --font-size-5xl:  3rem;      /* 48px */
+  --font-size-6xl:  3.75rem;   /* 60px */
+
+  --font-weight-normal:    400;
+  --font-weight-medium:    500;
+  --font-weight-semibold:  600;
+  --font-weight-bold:      700;
+
+  --line-height-tight:     1.25;
+  --line-height-normal:    1.5;
+  --line-height-relaxed:   1.625;
+
+  /* ── Border radii ─────────────────────────────────────────── */
+  --radius-sm:    0.25rem;  /* rounded-sm */
+  --radius-md:    0.375rem; /* rounded-md */
+  --radius-lg:    0.5rem;   /* rounded-lg  — Button */
+  --radius-xl:    0.75rem;  /* rounded-xl */
+  --radius-2xl:   1rem;     /* rounded-2xl — Card, Image */
+  --radius-full:  9999px;   /* rounded-full — toggle, spinner */
+
+  /* ── Shadows ──────────────────────────────────────────────── */
+  --shadow-md:  0 4px 6px -1px rgb(0 0 0 / 0.1),
+                0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-xl:  0 20px 25px -5px rgb(0 0 0 / 0.1),
+                0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* ── Sizes — common fixed dimensions ─────────────────────── */
+  --size-4:   1rem;    /* w-4 / h-4  — toggle thumb */
+  --size-6:   1.5rem;  /* w-6 / h-6  — social icons */
+  --size-10:  2.5rem;  /* w-10       — toggle track width */
+  --size-12:  3rem;    /* w-12 / h-12 — image placeholder icon */
+  --size-toggle-height: 1.5rem; /* h-6 */
+
+  /* Max widths */
+  --max-w-xs:   20rem;  /* 320px */
+  --max-w-sm:   24rem;  /* 384px */
+  --max-w-md:   28rem;  /* 448px */
+  --max-w-lg:   32rem;  /* 512px */
+  --max-w-2xl:  42rem;  /* 672px */
+
+  /* ── Z-index ──────────────────────────────────────────────── */
+  --z-header: 10;
+
+  /* ── Transitions ──────────────────────────────────────────── */
+  --duration-fast:   200ms;
+  --duration-base:   300ms;
+  --duration-slow:   500ms;
+  --duration-slower: 700ms;
+  --duration-image:  1000ms;
+  --easing-default:  ease;
+  --easing-in-out:   ease-in-out;
+  --easing-out:      ease-out;
+
+  /* ── Breakpoints (reference — use in @media queries) ─────── */
+  /* sm:  640px  */
+  /* md:  768px  */
+  /* lg:  1024px */
+  /* xl:  1280px */
+}
+
+/* ── Dark mode overrides ────────────────────────────────────── */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Backgrounds */
+  --color-bg:              #1f2937; /* gray-800 */
+  --color-bg-subtle:       #374151; /* gray-700 */
+  --color-bg-muted:        #4b5563; /* gray-600 */
+  --color-bg-overlay:      rgb(31 41 55 / 0.8); /* gray-800/80 */
+
+  /* Surfaces */
+  --color-surface:         #111827; /* gray-900 */
+  --color-surface-raised:  #374151; /* gray-700 */
+
+  /* Text */
+  --color-text:            #d1d5db; /* gray-300 */
+  --color-text-strong:     #ffffff;
+  --color-text-muted:      #9ca3af; /* gray-400 */
+  --color-text-subtle:     #6b7280; /* gray-500 */
+
+  /* Border */
+  --color-border:          #374151; /* gray-700 */
+  --color-border-strong:   #4b5563; /* gray-600 */
+
+  /* Primary links */
+  --color-link:            #93c5fd; /* blue-300 */
+  --color-link-hover:      #dbeafe; /* blue-200 — approximately */
+
+  /* Error */
+  --color-error:           #f87171; /* red-400 */
+
+  /* Focus rings */
+  --color-primary-ring:    #60a5fa; /* blue-400 — more visible on dark */
+  --color-secondary-ring:  #f87171; /* red-400 */
+
+  /* Gradient backgrounds */
+  --color-grad-from-light: #111827; /* gray-900 */
+  --color-grad-to-light:   #1f2937; /* gray-800 */
+  --color-grad-from-cv:    #111827; /* gray-900 */
+  --color-grad-to-cv:      #1e293b; /* slate-800 */
+
+  /* Toggle track (unchanged when checked — blue-600 handles that) */
+  --color-toggle-track:    #374151; /* gray-700 — unchecked state in dark */
+
+  /* Focus ring offset */
+  --color-ring-offset:     #111827; /* gray-900 */
+
+  /* Image placeholder */
+  --color-placeholder-from:#374151; /* gray-700 */
+  --color-placeholder-to:  #1f2937; /* gray-800 */
+  --color-icon-muted:      #6b7280; /* gray-500 */
+}

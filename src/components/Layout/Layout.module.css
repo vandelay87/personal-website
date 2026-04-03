@@ -1,0 +1,14 @@
+/* Layout.module.css */
+
+.main {
+  padding: var(--space-6);
+  padding-block-end: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* Non-home pages need top padding to clear the fixed header */
+.withHeader {
+  padding-block-start: var(--space-20);
+  padding-block-end: var(--space-6);
+}

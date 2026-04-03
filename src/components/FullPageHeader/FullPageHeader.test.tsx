@@ -50,14 +50,13 @@ describe('FullPageHeader', () => {
   it('applies animation classes after timeout', () => {
     render(<FullPageHeader {...DEFAULT_PROPS} />)
     const heading = screen.getByText(name)
-    expect(heading).toHaveClass('opacity-0')
-    expect(heading).not.toHaveClass('opacity-100')
+    expect(heading.className).not.toMatch(/loaded/)
 
     act(() => {
       vi.runAllTimers()
     })
 
-    expect(heading).toHaveClass('opacity-100')
+    expect(heading.className).toMatch(/loaded/)
   })
 
   it('image has correct alt text', () => {
