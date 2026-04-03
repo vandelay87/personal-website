@@ -52,6 +52,6 @@ describe('Button', () => {
 
     const button = screen.getByRole('button', { name: /disabled button/i })
 
-    expect(button).toHaveClass('disabled:cursor-not-allowed')
+    expect(button).toBeDisabled()
   })
 })

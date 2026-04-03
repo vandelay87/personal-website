@@ -1,0 +1,29 @@
+/* Link component styles */
+
+.link {
+  color: var(--color-link);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--easing-default);
+}
+
+.link:hover {
+  color: var(--color-link-hover);
+  text-decoration: underline;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--color-primary-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Underline modifier ──────────────────────────────────────── */
+
+.underline {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.underline:hover {
+  text-decoration: underline;
+}
