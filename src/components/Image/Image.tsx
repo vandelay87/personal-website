@@ -148,7 +148,7 @@ const Image: FC<ImageProps> = ({
           role="alert"
           aria-live="polite"
         >
-          <div className="text-center">
+          <div className={styles.errorContent}>
             <svg
               className={styles.errorIcon}
               fill="none"

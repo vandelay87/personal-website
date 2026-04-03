@@ -72,6 +72,10 @@
   margin-block-end: var(--space-2);
 }
 
+.errorContent {
+  text-align: center;
+}
+
 .errorText {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
