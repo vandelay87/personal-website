@@ -38,9 +38,10 @@
 
 .track {
   position: relative;
-  width: var(--size-10);
-  height: var(--size-toggle-height);
-  background-color: var(--color-toggle-track);
+  width: 2.5rem;
+  height: 1.5rem;
+  background-color: var(--color-bg-subtle);
+  border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-full);
   transition: background-color var(--duration-base) var(--easing-default);
 }
@@ -50,30 +51,29 @@
 }
 
 .input:focus-visible + .track {
-  box-shadow:
-    0 0 0 2px var(--color-ring-offset),
-    0 0 0 4px var(--color-primary-ring);
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* ── Thumb ───────────────────────────────────────────────────── */
 
 .thumb {
   position: absolute;
-  top: var(--space-1);
-  width: var(--size-4);
-  height: var(--size-4);
-  background-color: var(--color-toggle-thumb);
+  top: 50%;
+  width: 1rem;
+  height: 1rem;
+  background-color: var(--color-bg);
+  border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-full);
-  transform: translateX(var(--space-1));
-  transition: transform var(--duration-base) var(--easing-default);
+  transform: translateX(3px) translateY(-50%);
+  transition: transform var(--duration-fast) var(--easing-default);
 }
 
 .thumb.checked {
-  transform: translateX(var(--space-5));
+  transform: translateX(calc(2.5rem - 1rem - 5px)) translateY(-50%);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .track,
   .thumb {
     transition: none;
   }
