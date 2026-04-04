@@ -15,7 +15,6 @@
     min-block-size: calc(100svh - var(--space-16));
     padding: var(--space-6);
   }
-
 }
 
 /* ── Inner container ──────────────────────────────────────────── */
@@ -45,6 +44,7 @@
   align-items: center;
   text-align: center;
   gap: var(--space-4);
+  padding-block-end: var(--space-3);
   order: 2;
 
   @media (min-width: 768px) {
@@ -58,6 +58,7 @@
 .hgroup {
   display: flex;
   flex-direction: column;
+  gap: var(--space-4);
 }
 
 /* ── Text elements ───────────────────────────────────────────── */
@@ -66,7 +67,6 @@
   font-size: var(--font-size-5xl);
   font-weight: var(--font-weight-extrabold);
   color: var(--color-text-strong);
-  margin-block-end: var(--space-4);
 
   @media (min-width: 768px) {
     font-size: clamp(var(--font-size-5xl), 6vw, 4rem);
@@ -89,7 +89,6 @@
 .cta {
   display: flex;
   gap: var(--space-4);
-  padding-block-end: var(--space-3);
 }
 
 /* ── Image column ─────────────────────────────────────────────── */
@@ -108,21 +107,22 @@
 .imageWrapper {
   position: relative;
   inline-size: 100%;
-  max-inline-size: var(--max-w-xs); /* 320px */
+  max-inline-size: var(--max-w-xs);
   overflow: hidden;
+
   @media (min-width: 768px) {
-    max-inline-size: var(--max-w-md); /* 448px */
+    max-inline-size: var(--max-w-md);
   }
 
   @media (min-width: 1024px) {
-    max-inline-size: var(--max-w-lg); /* 512px */
+    max-inline-size: var(--max-w-lg);
   }
 }
 
 /* ── Image component overrides ────────────────────────────────── */
 
 .imageContainer {
-  border-radius: var(--radius-none);
+  border-radius: 0;
   border: var(--border-width-thick) solid var(--color-border);
   box-shadow: var(--shadow-md);
 }
