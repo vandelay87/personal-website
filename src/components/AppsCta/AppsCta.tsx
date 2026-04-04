@@ -14,10 +14,10 @@ const AppsCta: FC = () => {
         </h2>
 
         <p className={styles.body}>
-          A collection of technical demonstrations and tools, ranging from
-          physics-based simulations to functional utilities. Explore the{' '}
+          Side projects and experiments I've built to explore ideas and learn
+          how things work. Take a look at{' '}
           <Link to="/apps" underline={true}>
-            Apps library
+            Apps
           </Link>
           .
         </p>
