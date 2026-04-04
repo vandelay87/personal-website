@@ -10,12 +10,10 @@
 .heading {
   font-size: clamp(var(--font-size-4xl), 8vw, var(--font-size-5xl));
   font-weight: var(--font-weight-extrabold);
-  color: var(--color-text-strong);
   margin-block-end: var(--space-4);
 }
 
 .subtext {
-  font-size: var(--font-size-lg);
   color: var(--color-text-muted);
   margin-block-end: var(--space-8);
 }
