@@ -24,9 +24,9 @@ const Card: FC<CardProps> = ({ title, description, href, image }) => {
       </div>
 
       <div className={styles.body}>
-        <h3 className={styles.title}>
+        <h2 className={styles.title}>
           {title}
-        </h3>
+        </h2>
 
         <p className={styles.description}>{description}</p>
 
