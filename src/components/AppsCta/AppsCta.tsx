@@ -15,7 +15,7 @@ const AppsCta: FC = () => {
         </Typography>
 
         <Typography variant="bodyLarge" className={styles.body}>
-          Side projects and experiments I've built to explore ideas and learn
+          Side projects and experiments I&apos;ve built to explore ideas and learn
           how things work. Take a look at{' '}
           <Link to="/apps" underline={true}>
             Apps
