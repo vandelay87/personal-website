@@ -1,4 +1,4 @@
-/* Shared keyframe animations — mirrors Tailwind's built-in defaults */
+/* Shared keyframe animations — loading spinner only */
 
 @keyframes spin {
   from {
@@ -9,26 +9,11 @@
   }
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
 /* Respect the user's motion preference */
 @media (prefers-reduced-motion: reduce) {
   @keyframes spin {
     from, to {
       transform: none;
-    }
-  }
-
-  @keyframes pulse {
-    0%, 50%, 100% {
-      opacity: 1;
     }
   }
 }
