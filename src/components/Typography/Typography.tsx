@@ -1,5 +1,7 @@
 import type { ElementType, ReactNode } from 'react'
 
+import styles from './Typography.module.css'
+
 type TypographyVariant =
   | 'heading1'
   | 'heading2'
@@ -17,6 +19,29 @@ interface TypographyProps {
   className?: string
 }
 
-export default function Typography(_props: TypographyProps) {
-  return null
+const defaultElements: Record<TypographyVariant, ElementType> = {
+  heading1: 'h1',
+  heading2: 'h2',
+  heading3: 'h3',
+  heading4: 'h4',
+  body: 'p',
+  bodyLarge: 'p',
+  label: 'span',
+  caption: 'span',
 }
+
+const Typography = ({
+  variant,
+  as,
+  children,
+  className,
+}: TypographyProps) => {
+  const Component = as ?? defaultElements[variant]
+  const combinedClassName = [styles[variant], className]
+    .filter(Boolean)
+    .join(' ')
+
+  return <Component className={combinedClassName}>{children}</Component>
+}
+
+export default Typography
