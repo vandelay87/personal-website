@@ -10,4 +10,6 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   list-style: none;
+  padding: 0;
+  margin: 0;
 }
