@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { render, screen, fireEvent, act } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect } from 'vitest'
 import FullPageHeader from './FullPageHeader'
 
 describe('FullPageHeader', () => {
@@ -11,14 +11,6 @@ describe('FullPageHeader', () => {
     imageSrc: '/portrait.jpg',
   }
   const { name, tagline, description, imageSrc } = DEFAULT_PROPS
-
-  beforeEach(() => {
-    vi.useFakeTimers()
-  })
-
-  afterEach(() => {
-    vi.useRealTimers()
-  })
 
   it('renders name, tagline, description, image, and button', () => {
     render(<FullPageHeader {...DEFAULT_PROPS} />)
@@ -45,18 +37,6 @@ describe('FullPageHeader', () => {
 
     // @ts-ignore
     window.location = originalLocation
-  })
-
-  it('applies animation classes after timeout', () => {
-    render(<FullPageHeader {...DEFAULT_PROPS} />)
-    const heading = screen.getByText(name)
-    expect(heading.className).not.toMatch(/loaded/)
-
-    act(() => {
-      vi.runAllTimers()
-    })
-
-    expect(heading.className).toMatch(/loaded/)
   })
 
   it('image has correct alt text', () => {

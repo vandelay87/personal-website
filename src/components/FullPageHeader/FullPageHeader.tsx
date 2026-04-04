@@ -1,7 +1,7 @@
 import Button from '@components/Button'
 import Image from '@components/Image'
 import { usePreloadImage } from '@hooks/usePreloadImage'
-import { useState, useEffect, FC } from 'react'
+import { FC } from 'react'
 import styles from './FullPageHeader.module.css'
 
 export interface FullPageHeaderProps {
@@ -17,8 +17,6 @@ const FullPageHeader: FC<FullPageHeaderProps> = ({
   description,
   imageSrc,
 }) => {
-  const [isLoaded, setIsLoaded] = useState(false)
-
   const imageSizes =
     '(max-width: 640px) 320px, (max-width: 768px) 384px, (max-width: 1024px) 448px, 512px'
   const imageSrcSet = [320, 640, 768, 1024, 1280, 1536, 1920]
@@ -35,51 +33,26 @@ const FullPageHeader: FC<FullPageHeaderProps> = ({
   const handleSendEmail = () =>
     (window.location.href = 'mailto:akliaissat@outlook.com?subject=Hello')
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoaded(true)
-    }, 300)
-
-    return () => clearTimeout(timer)
-  }, [])
-
   return (
     <header className={styles.header}>
       <div className={styles.container}>
         {/* Text Content */}
         <div className={styles.textColumn}>
           <hgroup className={styles.hgroup}>
-            <h1
-              className={`${styles.heading}${isLoaded ? ` ${styles.loaded}` : ''}`}
-            >
-              {name}
-            </h1>
-
-            <p
-              className={`${styles.tagline}${isLoaded ? ` ${styles.loaded}` : ''}`}
-            >
-              {tagline}
-            </p>
+            <h1 className={styles.heading}>{name}</h1>
+            <p className={styles.tagline}>{tagline}</p>
           </hgroup>
 
-          <p
-            className={`${styles.description}${isLoaded ? ` ${styles.loaded}` : ''}`}
-          >
-            {description}
-          </p>
+          <p className={styles.description}>{description}</p>
 
-          <div
-            className={`${styles.cta}${isLoaded ? ` ${styles.loaded}` : ''}`}
-          >
+          <div className={styles.cta}>
             <Button onClick={handleSendEmail}>Get in touch</Button>
           </div>
         </div>
 
         {/* Image */}
         <div className={styles.imageColumn}>
-          <div
-            className={`${styles.imageWrapper}${isLoaded ? ` ${styles.imageWrapperLoaded}` : ''}`}
-          >
+          <div className={styles.imageWrapper}>
             <Image
               src={imageSrc}
               alt={`Portrait of ${name}`}
