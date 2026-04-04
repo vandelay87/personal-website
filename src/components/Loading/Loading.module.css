@@ -5,7 +5,6 @@
   vertical-align: middle;
   animation: spin 1s linear infinite;
   border-radius: var(--radius-full);
-  /* 0.15em border that scales with font size */
-  border: 0.15em solid var(--color-text-subtle); /* gray-400 / gray-500 via token */
-  border-block-start-color: transparent;
+  border: var(--border-width-thick) solid var(--color-border-subtle);
+  border-block-start-color: var(--color-primary);
 }
