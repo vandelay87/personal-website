@@ -1,5 +1,6 @@
 import Button from '@components/Button'
 import Image from '@components/Image'
+import Typography from '@components/Typography'
 import { usePreloadImage } from '@hooks/usePreloadImage'
 import { FC } from 'react'
 import styles from './FullPageHeader.module.css'
@@ -39,11 +40,11 @@ const FullPageHeader: FC<FullPageHeaderProps> = ({
         {/* Text Content */}
         <div className={styles.textColumn}>
           <hgroup className={styles.hgroup}>
-            <h1 className={styles.heading}>{name}</h1>
-            <p className={styles.tagline}>{tagline}</p>
+            <Typography variant="heading1" className={styles.heading}>{name}</Typography>
+            <Typography variant="bodyLarge" className={styles.tagline}>{tagline}</Typography>
           </hgroup>
 
-          <p className={styles.description}>{description}</p>
+          <Typography variant="bodyLarge" className={styles.description}>{description}</Typography>
 
           <div className={styles.cta}>
             <Button onClick={handleSendEmail}>Get in touch</Button>

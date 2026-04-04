@@ -46,9 +46,6 @@
 
 .title {
   margin-block-end: var(--space-2);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-strong);
 }
 
 .description {

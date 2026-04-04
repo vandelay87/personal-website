@@ -1,3 +1,4 @@
+import Typography from '@components/Typography'
 import { FC, JSX } from 'react'
 import styles from './SocialCard.module.css'
 
@@ -61,9 +62,9 @@ const SocialCard: FC = () => {
       aria-labelledby="social-heading"
       className={styles.card}
     >
-      <h2 id="social-heading" className={styles.heading}>
+      <Typography variant="heading3" as="h2" id="social-heading" className={styles.heading}>
         Get in touch
-      </h2>
+      </Typography>
       <ul className={styles.list} role="list">
         {SOCIAL_CARD_PROPS.map(({ name, url, icon }) => (
           <li key={name} role="listitem">
