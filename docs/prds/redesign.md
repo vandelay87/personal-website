@@ -221,7 +221,7 @@ The homepage hero. Simplify dramatically.
 - Solid fill for primary: `background: var(--color-primary)`, white text
 - Border: `var(--border-width) solid var(--color-border)`
 - Shadow: `var(--shadow-sm)`
-- Border-radius: `var(--radius-sm)`
+- Border-radius: `var(--radius-none)` — square corners so the shadow connects flush with the button edge
 - Hover: shift shadow to `0 0 0` and translate `2px 2px` (press-down effect)
 - Focus: `outline: 2px solid var(--color-primary)`, `outline-offset: 2px`
 - Padding: `var(--space-2) var(--space-6)` (vertical horizontal)
@@ -234,7 +234,7 @@ The homepage hero. Simplify dramatically.
 - Background: `var(--color-surface)`
 - Border: `var(--border-width) solid var(--color-border)`
 - Shadow: `var(--shadow-md)`
-- Border-radius: `var(--radius-sm)`
+- Border-radius: `var(--radius-none)` — square corners, consistent with buttons
 - Hover: translate `(-4px, -4px)`, shadow grows to `var(--shadow-lg)`. Transition: `var(--duration-fast)`
 - Image inside card: `object-fit: cover`, no border-radius (flush with card edges)
 - Content padding: `var(--space-6)`
@@ -282,15 +282,16 @@ The homepage hero. Simplify dramatically.
 
 ### SocialCard
 
-- Component exists but is not currently used on any page
-- **No changes needed.** Skip during implementation. If reintroduced later, style it as a simple horizontal list of icon links with hover color change.
+- Used on the Apps page below the card grid
+- Border: `var(--border-width) solid var(--color-border)`, `border-radius: var(--radius-none)`, `box-shadow: var(--shadow-md)` — consistent with Card and Button styling
+- Horizontal list of icon links with hover color change
 
 ### Image
 
 - Border: `var(--border-width) solid var(--color-border)`
 - Border-radius: `var(--radius-sm)` (or `--radius-full` for profile image — set via prop/class)
 - Remove scale-in animation on load — image just appears
-- Remove pulse/placeholder gradient animation — use a flat `var(--color-bg-subtle)` placeholder
+- Replace pulse/placeholder with a shimmer effect — solid `var(--color-bg-subtle)` background with a smooth glimmer sweep animation
 - Error state: flat background, muted text, icon centered
 - Loading spinner: keep `@keyframes spin` (functional)
 
@@ -395,7 +396,7 @@ The current `tokens.css` has ~200 lines of tokens, many inherited from Tailwind'
 - [ ] No gradient tokens remain in `tokens.css`
 - [ ] All shadows use hard offset (no `blur-radius` in any shadow value)
 - [ ] All border-radius values are either `0`, `2px`, or `9999px`
-- [ ] No `@keyframes` declarations exist except `spin` (loading spinner)
+- [ ] No `@keyframes` declarations exist except `spin` (loading spinner) and `shimmer` (image placeholder)
 - [ ] No entrance/stagger/fade animations on any component
 - [ ] Theme toggle thumb slides smoothly between positions
 - [ ] All interactive elements (buttons, links, cards, toggle) have visible `:focus-visible` outlines

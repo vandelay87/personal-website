@@ -1,9 +1,16 @@
 .section {
-  padding-block: var(--space-16);
-  padding-inline: var(--space-4);
-  background: linear-gradient(to bottom right, var(--color-grad-from-cv), var(--color-grad-to-cv));
-  width: 100vw;
-  margin-inline-start: calc(50% - 50vw);
+  position: relative;
+  padding-block: var(--space-12);
+}
+
+.section::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  inline-size: 100vw;
+  transform: translateX(-50%);
+  border-block-start: var(--border-width) solid var(--color-border-subtle);
 }
 
 .inner {

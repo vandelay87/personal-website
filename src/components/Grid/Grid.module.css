@@ -8,11 +8,6 @@
   margin: 0;
 }
 
-@media (min-width: 768px) {
-  .grid {
-    gap: var(--space-8);
-  }
-}
 
 .item {
   list-style: none;

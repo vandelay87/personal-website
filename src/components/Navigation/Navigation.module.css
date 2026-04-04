@@ -2,5 +2,20 @@
 
 .nav {
   display: flex;
-  gap: var(--space-4);
+  gap: var(--space-6);
+}
+
+.nav a {
+  color: var(--color-text);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--easing-default);
+}
+
+.nav a:hover {
+  color: var(--color-primary);
+}
+
+.nav a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
