@@ -99,9 +99,8 @@ describe('Typography', () => {
         </Typography>
       )
 
-      expect(container.querySelector('div > div')).toHaveTextContent(
-        'Body in a div'
-      )
+      const element = screen.getByText('Body in a div')
+      expect(element.tagName).toBe('DIV')
       expect(container.querySelector('p')).not.toBeInTheDocument()
     })
   })
