@@ -5,6 +5,7 @@
   font-weight: inherit;
   text-decoration: underline;
   text-underline-offset: 2px;
+  width: fit-content;
   transition: color var(--duration-fast) var(--easing-default);
 }
 

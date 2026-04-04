@@ -5,20 +5,15 @@
 .header {
   position: relative;
   z-index: 0;
-  min-block-size: 100svh;
-  inline-size: 100vw;
-  margin-inline-start: calc(-50vw + 50%);
-  margin-inline-end: calc(-50vw + 50%);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--space-4);
-  background: var(--color-bg);
+  padding-inline: var(--space-2);
+  padding-block: var(--space-12);
 
   @media (min-width: 768px) {
-    flex-direction: row;
-    padding: var(--space-8);
+    min-block-size: calc(100svh - var(--space-16));
+    padding: var(--space-6);
   }
 }
 
@@ -31,8 +26,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-8);
+  justify-content: center;
+  gap: var(--space-2);
 
   @media (min-width: 768px) {
     flex-direction: row;
@@ -49,18 +44,13 @@
   align-items: center;
   text-align: center;
   gap: var(--space-4);
-  padding-block-end: var(--space-10);
+  padding-block-end: var(--space-3);
   order: 2;
-
-  @media (min-width: 640px) {
-    padding-block-end: var(--space-16);
-  }
 
   @media (min-width: 768px) {
     inline-size: 50%;
     align-items: flex-start;
     text-align: start;
-    padding-block-end: 0;
     order: 1;
   }
 }
@@ -74,15 +64,20 @@
 /* ── Text elements ───────────────────────────────────────────── */
 
 .heading {
-  font-size: clamp(var(--font-size-4xl), 6vw, var(--font-size-5xl));
+  font-size: var(--font-size-5xl);
   font-weight: var(--font-weight-extrabold);
   color: var(--color-text-strong);
+
+  @media (min-width: 768px) {
+    font-size: clamp(var(--font-size-5xl), 6vw, 4rem);
+  }
 }
 
 .tagline {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-normal);
-  color: var(--color-text-muted);
+  color: var(--color-text);
+  margin: 0;
 }
 
 .description {
@@ -99,7 +94,6 @@
 /* ── Image column ─────────────────────────────────────────────── */
 
 .imageColumn {
-  inline-size: 100%;
   display: flex;
   justify-content: center;
   order: 1;
@@ -113,32 +107,26 @@
 .imageWrapper {
   position: relative;
   inline-size: 100%;
-  max-inline-size: var(--max-w-xs); /* 320px */
-  aspect-ratio: 3 / 4;
+  max-inline-size: var(--max-w-xs);
   overflow: hidden;
-  border-radius: var(--radius-sm);
-
-  @media (min-width: 640px) {
-    max-inline-size: var(--max-w-sm); /* 384px */
-  }
 
   @media (min-width: 768px) {
-    max-inline-size: var(--max-w-md); /* 448px */
+    max-inline-size: var(--max-w-md);
   }
 
   @media (min-width: 1024px) {
-    max-inline-size: var(--max-w-lg); /* 512px */
+    max-inline-size: var(--max-w-lg);
   }
 }
 
 /* ── Image component overrides ────────────────────────────────── */
 
 .imageContainer {
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   border: var(--border-width-thick) solid var(--color-border);
   box-shadow: var(--shadow-md);
 }
 
 .imageRounded {
-  border-radius: var(--radius-sm);
+  border-radius: 0;
 }

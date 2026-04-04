@@ -1,8 +1,18 @@
 /* AppsCta component styles */
 
 .section {
-  border-block-start: var(--border-width) solid var(--color-border-subtle);
+  position: relative;
   padding-block: var(--space-12);
+}
+
+.section::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  inline-size: 100vw;
+  transform: translateX(-50%);
+  border-block-start: var(--border-width) solid var(--color-border-subtle);
 }
 
 .inner {

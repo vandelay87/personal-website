@@ -1,19 +1,21 @@
-/* Shared keyframe animations — loading spinner only */
+/* Shared keyframe animations */
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-/* Respect the user's motion preference */
+@keyframes shimmer {
+  0% { transform: translateX(-150%); }
+  100% { transform: translateX(150%); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   @keyframes spin {
-    from, to {
-      transform: none;
-    }
+    from, to { transform: none; }
+  }
+
+  @keyframes shimmer {
+    0%, 100% { transform: none; }
   }
 }
