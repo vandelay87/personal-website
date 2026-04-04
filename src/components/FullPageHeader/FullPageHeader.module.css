@@ -6,20 +6,11 @@
   position: relative;
   z-index: 0;
   min-block-size: 100svh;
-  inline-size: 100vw;
-  margin-inline-start: calc(-50vw + 50%);
-  margin-inline-end: calc(-50vw + 50%);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--space-4);
-  background: var(--color-bg);
+  padding: var(--space-6);
 
-  @media (min-width: 768px) {
-    flex-direction: row;
-    padding: var(--space-8);
-  }
 }
 
 /* ── Inner container ──────────────────────────────────────────── */
