@@ -110,8 +110,6 @@
   inline-size: 100%;
   max-inline-size: var(--max-w-xs); /* 320px */
   overflow: hidden;
-  border-radius: var(--radius-sm);
-
   @media (min-width: 768px) {
     max-inline-size: var(--max-w-md); /* 448px */
   }
@@ -124,7 +122,7 @@
 /* ── Image component overrides ────────────────────────────────── */
 
 .imageContainer {
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-none);
   border: var(--border-width-thick) solid var(--color-border);
   box-shadow: var(--shadow-md);
 }

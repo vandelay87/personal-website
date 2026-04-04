@@ -234,7 +234,7 @@ The homepage hero. Simplify dramatically.
 - Background: `var(--color-surface)`
 - Border: `var(--border-width) solid var(--color-border)`
 - Shadow: `var(--shadow-md)`
-- Border-radius: `var(--radius-sm)`
+- Border-radius: `var(--radius-none)` — square corners, consistent with buttons
 - Hover: translate `(-4px, -4px)`, shadow grows to `var(--shadow-lg)`. Transition: `var(--duration-fast)`
 - Image inside card: `object-fit: cover`, no border-radius (flush with card edges)
 - Content padding: `var(--space-6)`
