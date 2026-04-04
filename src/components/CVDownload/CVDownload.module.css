@@ -20,15 +20,11 @@
 }
 
 .heading {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
   margin-block-end: var(--space-4);
 }
 
 .paragraph {
-  font-size: var(--font-size-lg);
   margin-block-end: var(--space-8);
-  line-height: var(--line-height-relaxed);
 }
 
 .metaWrapper {

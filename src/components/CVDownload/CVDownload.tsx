@@ -1,5 +1,6 @@
 import Button from '@components/Button'
 import FileMeta from '@components/FileMeta'
+import Typography from '@components/Typography'
 import { FC, useEffect, useState } from 'react'
 import fileUrl from '../../assets/Akli-Aissat-CV.pdf'
 import styles from './CVDownload.module.css'
@@ -55,14 +56,14 @@ const CVDownload: FC = () => {
       aria-labelledby="cv-section-heading"
     >
       <div className={styles.inner}>
-        <h2 id="cv-section-heading" className={styles.heading}>
+        <Typography variant="heading2" id="cv-section-heading" className={styles.heading}>
           Interested in working together?
-        </h2>
+        </Typography>
 
-        <p className={styles.paragraph}>
+        <Typography variant="bodyLarge" className={styles.paragraph}>
           Take a look at my experience, skills, and background. Download my CV
           to learn more about what I can bring to your team.
-        </p>
+        </Typography>
 
         <Button onClick={handleDownload} ariaLabel="Download CV as PDF">
           Download my CV
