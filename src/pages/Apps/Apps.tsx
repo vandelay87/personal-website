@@ -26,6 +26,9 @@ const Apps: FC = () => {
       <h1 className={styles.heading}>
         Apps
       </h1>
+      <p className={styles.description}>
+        A collection of interactive experiments and side projects. Most of these started as a way to learn something new or answer a question I had about how things work.
+      </p>
       <Grid columns={3}>
         {CARDS.map((card) => (
           <Card {...card} key={card.href} />
