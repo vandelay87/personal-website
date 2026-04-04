@@ -10,3 +10,7 @@
   color: var(--color-text);
   margin-block-end: var(--space-12);
 }
+
+.social {
+  margin-block-start: var(--space-20);
+}

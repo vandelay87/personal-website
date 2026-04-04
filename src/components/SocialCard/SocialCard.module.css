@@ -2,7 +2,8 @@
 
 .card {
   background-color: var(--color-surface);
-  border-radius: var(--radius-sm);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-none);
   box-shadow: var(--shadow-md);
   margin-block: var(--space-8);
   margin-inline: auto;

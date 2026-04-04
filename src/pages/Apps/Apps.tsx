@@ -1,6 +1,7 @@
 import Card from '@components/Card'
 import type { CardProps } from '@components/Card'
 import Grid from '@components/Grid'
+import SocialCard from '@components/SocialCard'
 import type { FC } from 'react'
 import imgSrc from '../../assets/sand-box.webp'
 import imgSrcSet from '../../assets/sand-box.webp?w=320;640;768;1024;1280;1536;1920&format=webp&as=srcset'
@@ -34,6 +35,9 @@ const Apps: FC = () => {
           <Card {...card} key={card.href} />
         ))}
       </Grid>
+      <div className={styles.social}>
+        <SocialCard />
+      </div>
     </>
   )
 }

@@ -282,8 +282,9 @@ The homepage hero. Simplify dramatically.
 
 ### SocialCard
 
-- Component exists but is not currently used on any page
-- **No changes needed.** Skip during implementation. If reintroduced later, style it as a simple horizontal list of icon links with hover color change.
+- Used on the Apps page below the card grid
+- Border: `var(--border-width) solid var(--color-border)`, `border-radius: var(--radius-none)`, `box-shadow: var(--shadow-md)` — consistent with Card and Button styling
+- Horizontal list of icon links with hover color change
 
 ### Image
 
