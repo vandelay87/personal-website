@@ -15,6 +15,7 @@ To write a new PRD, copy `docs/prds/template.md` and fill it in.
 - Vite 6
 - CSS Modules
 - Vitest + Testing Library
+- Package manager: pnpm (do not use npm or yarn)
 
 ## Conventions
 
@@ -23,6 +24,11 @@ To write a new PRD, copy `docs/prds/template.md` and fill it in.
 - Each component/page has a co-located test file `<Name>.test.tsx`
 - Use path aliases: `@components/`, `@pages/`, `@hooks/`
 - Dark mode via `data-theme` attribute on the document root
+
+## Workflow
+
+- When completing issues that involve CSS, styling, or visual changes, use the `frontend-design` skill for implementation.
+- Always run `/simplify` after completing an issue, before opening the PR.
 
 ## Deployment
 
