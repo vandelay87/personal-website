@@ -19,4 +19,6 @@ export class MockIntersectionObserver {
   }
 }
 
-window.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver
+if (typeof window !== 'undefined') {
+  window.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver
+}
