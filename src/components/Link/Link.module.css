@@ -1,7 +1,7 @@
 /* Link component styles */
 
 .link {
-  color: var(--color-primary);
+  color: var(--color-link);
   font-weight: inherit;
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -10,7 +10,7 @@
 }
 
 .link:hover {
-  color: var(--color-primary-hover);
+  color: var(--color-link-hover);
 }
 
 .link:focus-visible {
