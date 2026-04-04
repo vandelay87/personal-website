@@ -1,4 +1,4 @@
-import type { ElementType, ReactNode } from 'react'
+import type { ElementType, FC, ReactNode } from 'react'
 
 import styles from './Typography.module.css'
 
@@ -30,12 +30,12 @@ const defaultElements: Record<TypographyVariant, ElementType> = {
   caption: 'span',
 }
 
-const Typography = ({
+const Typography: FC<TypographyProps> = ({
   variant,
   as,
   children,
   className,
-}: TypographyProps) => {
+}) => {
   const Component = as ?? defaultElements[variant]
   const combinedClassName = [styles[variant], className]
     .filter(Boolean)
