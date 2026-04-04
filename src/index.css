@@ -1,6 +1,15 @@
 @import './styles/tokens.css';
 @import './styles/animations.css';
 
+/* ── Global base styles ────────────────────────────────────── */
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: var(--line-height-normal);
+}
+
 /* ── Global accessibility utilities ──────────────────────── */
 
 /* Visually hidden but accessible to screen readers */
