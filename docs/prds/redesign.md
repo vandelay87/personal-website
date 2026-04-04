@@ -221,7 +221,7 @@ The homepage hero. Simplify dramatically.
 - Solid fill for primary: `background: var(--color-primary)`, white text
 - Border: `var(--border-width) solid var(--color-border)`
 - Shadow: `var(--shadow-sm)`
-- Border-radius: `var(--radius-sm)`
+- Border-radius: `var(--radius-none)` — square corners so the shadow connects flush with the button edge
 - Hover: shift shadow to `0 0 0` and translate `2px 2px` (press-down effect)
 - Focus: `outline: 2px solid var(--color-primary)`, `outline-offset: 2px`
 - Padding: `var(--space-2) var(--space-6)` (vertical horizontal)
