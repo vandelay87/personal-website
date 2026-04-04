@@ -1,6 +1,7 @@
 import Image from '@components/Image'
 import type { ImageProps } from '@components/Image/Image'
 import Link from '@components/Link'
+import Typography from '@components/Typography'
 import type { FC } from 'react'
 import styles from './Card.module.css'
 
@@ -24,11 +25,11 @@ const Card: FC<CardProps> = ({ title, description, href, image }) => {
       </div>
 
       <div className={styles.body}>
-        <h2 className={styles.title}>
+        <Typography variant="heading3" as="h2" className={styles.title}>
           {title}
-        </h2>
+        </Typography>
 
-        <p className={styles.description}>{description}</p>
+        <Typography variant="body" className={styles.description}>{description}</Typography>
 
         <Link to={href}>{href}</Link>
       </div>
