@@ -11,22 +11,4 @@ describe('Layout', () => {
     )
     expect(getByText('Test Child')).toBeInTheDocument()
   })
-
-  it('applies withHeader class when isHomePage is false', () => {
-    const { getByRole } = render(
-      <Layout>
-        <div>Content</div>
-      </Layout>
-    )
-    expect(getByRole('main').className).toMatch(/withHeader/)
-  })
-
-  it('does not apply withHeader class when isHomePage is true', () => {
-    const { getByRole } = render(
-      <Layout isHomePage>
-        <div>Content</div>
-      </Layout>
-    )
-    expect(getByRole('main').className).not.toMatch(/withHeader/)
-  })
 })

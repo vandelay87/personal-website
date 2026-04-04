@@ -1,15 +1,5 @@
-/* Layout.module.css */
-
 .main {
   min-height: 100vh;
   background-color: var(--color-bg);
   color: var(--color-text);
-}
-
-/* Non-home pages: sticky header is in flow, so no large top padding needed */
-.withHeader {
-  max-width: var(--max-w-site);
-  margin-inline: auto;
-  padding-inline: var(--space-6);
-  padding-block: var(--space-6);
 }
