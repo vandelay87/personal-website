@@ -1,4 +1,4 @@
-import type { ElementType, FC, ReactNode } from 'react'
+import type { ComponentPropsWithoutRef, ElementType, FC, ReactNode } from 'react'
 
 import styles from './Typography.module.css'
 
@@ -12,11 +12,10 @@ type TypographyVariant =
   | 'label'
   | 'caption'
 
-interface TypographyProps {
+interface TypographyProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
   variant: TypographyVariant
   as?: ElementType
   children: ReactNode
-  className?: string
 }
 
 const defaultElements: Record<TypographyVariant, ElementType> = {
@@ -35,13 +34,14 @@ const Typography: FC<TypographyProps> = ({
   as,
   children,
   className,
+  ...rest
 }) => {
   const Component = as ?? defaultElements[variant]
   const combinedClassName = [styles[variant], className]
     .filter(Boolean)
     .join(' ')
 
-  return <Component className={combinedClassName}>{children}</Component>
+  return <Component className={combinedClassName} {...rest}>{children}</Component>
 }
 
 export default Typography
