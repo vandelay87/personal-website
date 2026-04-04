@@ -291,7 +291,7 @@ The homepage hero. Simplify dramatically.
 - Border: `var(--border-width) solid var(--color-border)`
 - Border-radius: `var(--radius-sm)` (or `--radius-full` for profile image — set via prop/class)
 - Remove scale-in animation on load — image just appears
-- Remove pulse/placeholder gradient animation — use a flat `var(--color-bg-subtle)` placeholder
+- Replace pulse/placeholder with a shimmer effect — solid `var(--color-bg-subtle)` background with a smooth glimmer sweep animation
 - Error state: flat background, muted text, icon centered
 - Loading spinner: keep `@keyframes spin` (functional)
 
@@ -396,7 +396,7 @@ The current `tokens.css` has ~200 lines of tokens, many inherited from Tailwind'
 - [ ] No gradient tokens remain in `tokens.css`
 - [ ] All shadows use hard offset (no `blur-radius` in any shadow value)
 - [ ] All border-radius values are either `0`, `2px`, or `9999px`
-- [ ] No `@keyframes` declarations exist except `spin` (loading spinner)
+- [ ] No `@keyframes` declarations exist except `spin` (loading spinner) and `shimmer` (image placeholder)
 - [ ] No entrance/stagger/fade animations on any component
 - [ ] Theme toggle thumb slides smoothly between positions
 - [ ] All interactive elements (buttons, links, cards, toggle) have visible `:focus-visible` outlines

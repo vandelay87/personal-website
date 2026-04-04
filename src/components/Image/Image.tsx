@@ -1,4 +1,3 @@
-import Loading from '@components/Loading'
 import { usePreloadImage } from '@hooks/usePreloadImage'
 import { useState, useEffect, useRef, FC, ImgHTMLAttributes } from 'react'
 import styles from './Image.module.css'
@@ -196,14 +195,6 @@ const Image: FC<ImageProps> = ({
         />
       )}
 
-      {isInView && !isLoaded && !isError && (
-        <div
-          className={styles.loadingOverlay}
-          aria-hidden="true"
-        >
-          <Loading />
-        </div>
-      )}
     </figure>
   )
 }
