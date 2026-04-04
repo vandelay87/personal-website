@@ -1,18 +1,14 @@
 /* Header.module.css */
 
 .header {
-  position: fixed;
+  position: sticky;
   inset-block-start: 0;
-  inset-inline-start: 0;
-  inline-size: 100%;
   z-index: var(--z-header);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: var(--color-bg-overlay);
+  background-color: var(--color-bg);
   color: var(--color-text);
-  backdrop-filter: blur(12px); /* no token for blur radius */
-  -webkit-backdrop-filter: blur(12px);
-  padding-inline: var(--space-6);
-  padding-block: var(--space-4);
+  border-block-end: var(--border-width) solid var(--color-border-subtle);
+  padding: var(--space-4) var(--space-6);
 }
