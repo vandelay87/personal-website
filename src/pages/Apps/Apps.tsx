@@ -2,6 +2,7 @@ import Card from '@components/Card'
 import type { CardProps } from '@components/Card'
 import Grid from '@components/Grid'
 import SocialCard from '@components/SocialCard'
+import Typography from '@components/Typography'
 import type { FC } from 'react'
 import imgSrc from '../../assets/sand-box.webp'
 import imgSrcSet from '../../assets/sand-box.webp?w=320;640;768;1024;1280;1536;1920&format=webp&as=srcset'
@@ -24,12 +25,12 @@ const CARDS: CardProps[] = [
 const Apps: FC = () => {
   return (
     <>
-      <h1 className={styles.heading}>
+      <Typography variant="heading1" className={styles.heading}>
         Apps
-      </h1>
-      <p className={styles.description}>
+      </Typography>
+      <Typography variant="bodyLarge" className={styles.description}>
         A collection of interactive experiments and side projects. Most of these started as a way to learn something new or answer a question I had about how things work.
-      </p>
+      </Typography>
       <Grid columns={3}>
         {CARDS.map((card) => (
           <Card {...card} key={card.href} />
