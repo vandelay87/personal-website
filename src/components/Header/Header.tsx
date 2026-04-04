@@ -5,8 +5,10 @@ import styles from './Header.module.css'
 export default function Header() {
   return (
     <header className={styles.header}>
-      <Navigation />
-      <ThemeToggle />
+      <div className={styles.headerInner}>
+        <Navigation />
+        <ThemeToggle />
+      </div>
     </header>
   )
 }
