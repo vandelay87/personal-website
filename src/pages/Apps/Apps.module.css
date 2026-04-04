@@ -4,15 +4,3 @@
   color: var(--color-text-strong);
   margin-block-end: var(--space-4);
 }
-
-@media (min-width: 768px) {
-  .heading {
-    font-size: var(--font-size-5xl);
-  }
-}
-
-@media (min-width: 1024px) {
-  .heading {
-    font-size: var(--font-size-6xl);
-  }
-}

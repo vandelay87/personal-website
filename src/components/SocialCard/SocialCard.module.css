@@ -2,10 +2,8 @@
 
 .card {
   background-color: var(--color-surface);
-  border-radius: var(--radius-2xl);
-  box-shadow:
-    var(--shadow-md),
-    inset 0 1px 2px 0 rgb(0 0 0 / 0.05); /* inset-shadow-2xs equivalent */
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
   margin-block: var(--space-8);
   margin-inline: auto;
   padding-block: var(--space-6);
@@ -35,16 +33,16 @@
 }
 
 .link:hover {
-  color: var(--color-primary-ring); /* blue-500 */
+  color: var(--color-primary); /* blue-500 */
 }
 
 .link:focus-visible {
-  outline: 2px solid var(--color-primary-ring);
+  outline: 2px solid var(--color-primary);
   border-radius: var(--radius-sm);
 }
 
 /* Size the SVG icons via descendant selector (icons are in static data array) */
 .link svg {
-  width: var(--size-6);
-  height: var(--size-6);
+  width: 1.5rem;
+  height: 1.5rem;
 }

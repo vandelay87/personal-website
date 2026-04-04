@@ -1,18 +1,8 @@
 /* AppsCta component styles */
 
 .section {
-  /* Full-bleed breakout from parent container */
-  width: 100vw;
-  margin-inline-start: calc(50% - 50vw);
-
-  padding-block: var(--space-16);
-  padding-inline: var(--space-4);
-
-  background-image: linear-gradient(
-    to bottom right,
-    var(--color-grad-from-light),
-    var(--color-grad-to-light)
-  );
+  border-block-start: var(--border-width) solid var(--color-border-subtle);
+  padding-block: var(--space-12);
 }
 
 .inner {
