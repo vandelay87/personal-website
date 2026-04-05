@@ -4,32 +4,36 @@ import { imagetools } from 'vite-imagetools'
 import { defineConfig } from 'vitest/config'
 import { sitemapPlugin } from './sitemap-plugin'
 
-export default defineConfig({
+export default defineConfig(({ isSsrBuild }) => ({
   plugins: [
     react(),
     mdx(),
     imagetools(),
-    sitemapPlugin({
-      hostname: 'https://akli.dev',
-      pagesDir: 'src/pages',
-      include: ['**/*.tsx'],
-      exclude: ['**/*.test.*', '**/*.spec.*', '**/NotFound.*', '**/*test*'],
-      routeMapping: {
-        '/home': '/',
-      },
-      routeConfig: {
-        '/': {
-          priority: 1.0,
-          changefreq: 'monthly',
-        },
-        '/apps': {
-          priority: 0.8,
-          changefreq: 'monthly',
-        },
-      },
-      defaultPriority: 0.5,
-      defaultChangefreq: 'monthly',
-    }),
+    ...(!isSsrBuild
+      ? [
+          sitemapPlugin({
+            hostname: 'https://akli.dev',
+            pagesDir: 'src/pages',
+            include: ['**/*.tsx'],
+            exclude: ['**/*.test.*', '**/*.spec.*', '**/NotFound.*', '**/*test*'],
+            routeMapping: {
+              '/home': '/',
+            },
+            routeConfig: {
+              '/': {
+                priority: 1.0,
+                changefreq: 'monthly',
+              },
+              '/apps': {
+                priority: 0.8,
+                changefreq: 'monthly',
+              },
+            },
+            defaultPriority: 0.5,
+            defaultChangefreq: 'monthly',
+          }),
+        ]
+      : []),
   ],
   resolve: {
     alias: {
@@ -37,6 +41,9 @@ export default defineConfig({
       '@pages': '/src/pages',
       '@hooks': '/src/hooks',
     },
+  },
+  ssr: {
+    noExternal: true,
   },
   test: {
     globals: true,
@@ -47,4 +54,4 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
     },
   },
-})
+}))
