@@ -45,6 +45,14 @@ export default defineConfig(({ isSsrBuild }) => ({
   ssr: {
     noExternal: true,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Lambda expects index.handler — output as index.js
+        ...(isSsrBuild && { entryFileNames: 'index.js' }),
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',
