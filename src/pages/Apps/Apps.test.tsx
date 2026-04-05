@@ -48,4 +48,17 @@ describe('Apps', () => {
       screen.getByRole('link', { name: 'https://akli.dev/apps/sand-box' })
     ).toBeInTheDocument()
   })
+
+  it('renders the Pokedex card with correct title, description, and link', () => {
+    render(<Apps />)
+    expect(screen.getByText('Pokedex')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'A searchable encyclopedia of Gen 1 Pokemon, styled after the classic Game Boy Color Pokedex.'
+      )
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: 'https://akli.dev/apps/pokedex' })
+    ).toBeInTheDocument()
+  })
 })
