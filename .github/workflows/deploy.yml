@@ -36,8 +36,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
 
-      - name: Deploy to S3
-        run: aws s3 sync ./dist s3://${{ secrets.S3_BUCKET_NAME }} --delete --exclude "apps/sand-box/*"
+      - name: Deploy client bundle to S3
+        run: aws s3 sync ./dist/client s3://${{ secrets.S3_BUCKET_NAME }} --delete --exclude "apps/sand-box/*"
+
+      - name: Zip server bundle
+        run: cd dist/server && zip -r ../server.zip .
+
+      - name: Deploy server bundle to Lambda
+        run: aws lambda update-function-code --function-name ${{ secrets.SSR_LAMBDA_FUNCTION_NAME }} --zip-file fileb://dist/server.zip
 
       - name: Invalidate CloudFront
         run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
