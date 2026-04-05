@@ -47,38 +47,22 @@ export function escapeHtml(str: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
 }
 
-export function getMetaTags(path: string): MetaTags {
-  const normalised = normalisePath(path)
-  const route = routeMeta[normalised]
-  const canonical = `${BASE_URL}${normalised}`
+export const KNOWN_ROUTES = new Set(Object.keys(routeMeta))
 
-  if (route) {
-    return {
-      title: route.title,
-      description: route.description,
-      canonical,
-      og: {
-        type: 'website',
-        url: canonical,
-        title: route.title,
-        description: route.description,
-      },
-      twitter: {
-        card: 'summary',
-        title: route.title,
-        description: route.description,
-      },
-    }
-  }
-
-  const { title, description } = notFoundMeta
+function buildMetaTags(
+  title: string,
+  description: string,
+  canonical: string,
+  robots?: string,
+): MetaTags {
   return {
     title,
     description,
     canonical,
-    robots: 'noindex',
+    ...(robots && { robots }),
     og: {
       type: 'website',
       url: canonical,
@@ -91,4 +75,16 @@ export function getMetaTags(path: string): MetaTags {
       description,
     },
   }
+}
+
+export function getMetaTags(path: string): MetaTags {
+  const normalised = normalisePath(path)
+  const route = routeMeta[normalised]
+  const canonical = `${BASE_URL}${normalised}`
+
+  if (route) {
+    return buildMetaTags(route.title, route.description, canonical)
+  }
+
+  return buildMetaTags(notFoundMeta.title, notFoundMeta.description, canonical, 'noindex')
 }
