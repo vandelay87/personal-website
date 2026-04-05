@@ -17,11 +17,12 @@ export async function handler(
       statusCode,
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=60',
+        'Cache-Control': statusCode === 200 ? 'public, max-age=60' : 'no-cache',
       },
       body: html,
     }
-  } catch {
+  } catch (err) {
+    console.error('SSR render failed:', err)
     return {
       statusCode: 500,
       headers: {

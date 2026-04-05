@@ -25,8 +25,8 @@ try {
 </html>`
 }
 
-function buildHeadHtml(path: string): string {
-  const meta = getMetaTags(path)
+function buildHeadHtml(routePath: string): string {
+  const meta = getMetaTags(routePath)
   const lines: string[] = []
 
   lines.push(`<title>${escapeHtml(meta.title)}</title>`)
