@@ -9,6 +9,12 @@ interface RouteConfig {
   lastmod?: string
 }
 
+interface AdditionalRoute {
+  route: string
+  priority?: number
+  changefreq?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never'
+}
+
 interface SitemapOptions {
   hostname: string
   pagesDir?: string
@@ -18,6 +24,7 @@ interface SitemapOptions {
   defaultPriority?: number
   routeConfig?: Record<string, RouteConfig>
   routeMapping?: Record<string, string>
+  additionalRoutes?: AdditionalRoute[]
 }
 
 export function sitemapPlugin(options: SitemapOptions): Plugin {
@@ -30,23 +37,40 @@ export function sitemapPlugin(options: SitemapOptions): Plugin {
     defaultPriority = 0.5,
     routeConfig = {},
     routeMapping = {},
+    additionalRoutes = [],
   } = options
 
   return {
     name: 'sitemap-plugin',
     async writeBundle() {
       try {
-        const routes = await discoverRoutes(pagesDir, include, exclude, routeMapping)
+        const discoveredRoutes = await discoverRoutes(pagesDir, include, exclude, routeMapping)
+
+        const allRoutes: Array<{ route: string; filePath?: string }> = [
+          ...discoveredRoutes,
+          ...additionalRoutes.map(({ route, priority, changefreq }) => {
+            // Store priority/changefreq in routeConfig so generateSitemap picks them up
+            if (priority !== undefined || changefreq !== undefined) {
+              routeConfig[route] = {
+                ...routeConfig[route],
+                ...(priority !== undefined && { priority }),
+                ...(changefreq !== undefined && { changefreq }),
+              }
+            }
+            return { route }
+          }),
+        ]
+
         const sitemap = generateSitemap(
           hostname,
-          routes,
+          allRoutes,
           defaultChangefreq,
           defaultPriority,
           routeConfig
         )
         const sitemapPath = resolve('dist', 'sitemap.xml')
         writeFileSync(sitemapPath, sitemap)
-        console.log(`✅ Sitemap generated with ${routes.length} routes`)
+        console.log(`✅ Sitemap generated with ${allRoutes.length} routes`)
       } catch (error) {
         console.error('❌ Failed to generate sitemap:', error)
       }
@@ -142,9 +166,9 @@ function fileToRoute(
   return route
 }
 
-function generateSitemap(
+export function generateSitemap(
   hostname: string,
-  routes: Array<{ route: string; filePath: string }>,
+  routes: Array<{ route: string; filePath?: string }>,
   defaultChangefreq: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never',
   defaultPriority: number,
   routeConfig: Record<string, RouteConfig>
@@ -162,11 +186,16 @@ function generateSitemap(
       // Use file modification time if no explicit lastmod is configured
       let lastmod = config.lastmod
       if (!lastmod) {
-        try {
-          const stats = statSync(filePath)
-          lastmod = stats.mtime.toISOString().split('T')[0]
-        } catch {
-          // Fallback to current date if file stat fails
+        if (filePath) {
+          try {
+            const stats = statSync(filePath)
+            lastmod = stats.mtime.toISOString().split('T')[0]
+          } catch {
+            // Fallback to current date if file stat fails
+            lastmod = new Date().toISOString().split('T')[0]
+          }
+        } else {
+          // No file path (e.g., additional routes) — use current date
           lastmod = new Date().toISOString().split('T')[0]
         }
       }

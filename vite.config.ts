@@ -31,6 +31,9 @@ export default defineConfig(({ isSsrBuild }) => ({
             },
             defaultPriority: 0.5,
             defaultChangefreq: 'monthly',
+            additionalRoutes: [
+              { route: '/apps/pokedex', priority: 0.7, changefreq: 'monthly' },
+            ],
           }),
         ]
       : []),
