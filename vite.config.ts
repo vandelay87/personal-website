@@ -48,8 +48,10 @@ export default defineConfig(({ isSsrBuild }) => ({
   build: {
     rollupOptions: {
       output: {
-        // Lambda expects index.handler — output as index.js
-        ...(isSsrBuild && { entryFileNames: 'index.js' }),
+        ...(isSsrBuild && {
+          entryFileNames: 'index.js',
+          format: 'cjs', // Lambda expects CommonJS
+        }),
       },
     },
   },
