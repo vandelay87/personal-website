@@ -4,11 +4,24 @@ import Grid from '@components/Grid'
 import SocialCard from '@components/SocialCard'
 import Typography from '@components/Typography'
 import type { FC } from 'react'
+import pokedexImgSrc from '../../assets/pokedex.webp'
+import pokedexImgSrcSet from '../../assets/pokedex.webp?w=320;640;768;1024;1280;1536;1920&format=webp&as=srcset'
 import imgSrc from '../../assets/sand-box.webp'
 import imgSrcSet from '../../assets/sand-box.webp?w=320;640;768;1024;1280;1536;1920&format=webp&as=srcset'
 import styles from './Apps.module.css'
 
 const CARDS: CardProps[] = [
+  {
+    title: 'Pokedex',
+    description:
+      'A searchable encyclopedia of Gen 1 Pokemon, styled after the classic Game Boy Color Pokedex.',
+    image: {
+      src: pokedexImgSrc,
+      srcSet: pokedexImgSrcSet,
+      alt: 'A searchable encyclopedia of Gen 1 Pokemon, styled after the classic Game Boy Color Pokedex',
+    },
+    href: 'https://akli.dev/apps/pokedex',
+  },
   {
     title: 'Sand box',
     description:
