@@ -7,7 +7,7 @@
     "dev": "vite",
     "build:client": "vite build --outDir dist/client",
     "build:server": "vite build --ssr src/lambda-handler.ts --outDir dist/server",
-    "build:prod": "cp public/robots.prod.txt public/robots.txt && pnpm build:client && pnpm build:server",
+    "build:prod": "cp public/robots.prod.txt public/robots.txt && pnpm build:client && pnpm build:server && cp dist/client/index.html dist/server/index.html",
     "build:dev": "cp public/robots.dev.txt public/robots.txt && vite build",
     "lint": "eslint .",
     "preview": "vite preview",

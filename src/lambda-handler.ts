@@ -4,7 +4,9 @@ import { KNOWN_ROUTES, normalisePath } from './meta'
 export async function handler(
   event: Record<string, unknown>
 ): Promise<Record<string, unknown>> {
-  const rawPath = (event.rawPath as string) || '/'
+  let rawPath = (event.rawPath as string) || '/'
+  // CloudFront defaultRootObject rewrites / to /index.html
+  if (rawPath === '/index.html') rawPath = '/'
   const path = normalisePath(rawPath)
 
   try {

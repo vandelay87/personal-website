@@ -44,13 +44,14 @@ export default defineConfig(({ isSsrBuild }) => ({
   },
   ssr: {
     noExternal: true,
+    external: ['node:fs', 'node:path'],
   },
   build: {
     rollupOptions: {
       output: {
         ...(isSsrBuild && {
           entryFileNames: 'index.js',
-          format: 'cjs', // Lambda expects CommonJS
+          format: 'cjs',
         }),
       },
     },

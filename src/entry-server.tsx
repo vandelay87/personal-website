@@ -1,9 +1,17 @@
+import * as fs from 'node:fs'
+import * as path from 'node:path'
 import { renderToString } from 'react-dom/server'
 import { StaticRouter } from 'react-router-dom'
 import App from './App'
 import { getMetaTags, escapeHtml } from './meta'
 
-const template = `<!doctype html>
+// Read the client-built index.html (copied into dist/server/ by build:prod).
+// Has hashed CSS/JS asset links. Falls back to minimal template for tests.
+let template: string
+try {
+  template = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf-8')
+} catch {
+  template = `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -15,6 +23,7 @@ const template = `<!doctype html>
     <div id="root"><!--ssr-outlet--></div>
   </body>
 </html>`
+}
 
 function buildHeadHtml(path: string): string {
   const meta = getMetaTags(path)
