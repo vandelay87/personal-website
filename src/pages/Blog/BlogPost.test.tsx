@@ -38,7 +38,7 @@ vi.mock('@pages/NotFound', () => ({
   default: () => <div data-testid="not-found">404</div>,
 }))
 
-function renderWithRoute(slug: string) {
+const renderWithRoute = (slug: string) => {
   return render(
     <MemoryRouter initialEntries={[`/blog/${slug}`]}>
       <Routes>

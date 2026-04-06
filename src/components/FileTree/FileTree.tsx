@@ -13,7 +13,7 @@ interface TreeNode {
   children: TreeNode[]
 }
 
-export function parseTree(text: string): TreeNode[] {
+export const parseTree = (text: string): TreeNode[] => {
   const lines = text.split('\n').filter((line) => line.trim() !== '')
   const root: TreeNode[] = []
   const stack: { indent: number; children: TreeNode[] }[] = [{ indent: -1, children: root }]
@@ -39,7 +39,7 @@ export function parseTree(text: string): TreeNode[] {
   return root
 }
 
-function renderNodes(nodes: TreeNode[], isRoot: boolean): ReactNode {
+const renderNodes = (nodes: TreeNode[], isRoot: boolean): ReactNode => {
   if (nodes.length === 0) return null
 
   return (

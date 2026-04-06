@@ -8,6 +8,8 @@ interface ButtonProps {
   variant?: 'primary' | 'secondary'
   disabled?: boolean
   ariaLabel?: string
+  ariaPressed?: 'true' | 'false'
+  className?: string
 }
 
 const Button = ({
@@ -17,8 +19,10 @@ const Button = ({
   variant = 'primary',
   disabled = false,
   ariaLabel,
+  ariaPressed,
+  className: extraClassName,
 }: ButtonProps): ReactElement => {
-  const className = [styles.button, styles[variant]].join(' ')
+  const className = [styles.button, styles[variant], extraClassName].filter(Boolean).join(' ')
 
   return (
     <button
@@ -27,6 +31,7 @@ const Button = ({
       className={className}
       disabled={disabled}
       aria-label={ariaLabel}
+      aria-pressed={ariaPressed}
     >
       {children}
     </button>

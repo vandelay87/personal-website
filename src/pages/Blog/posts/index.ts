@@ -35,7 +35,7 @@ const contentModules = import.meta.glob('./*.mdx') as Record<
   () => Promise<MDXModule>
 >
 
-function extractSlug(path: string): string {
+const extractSlug = (path: string): string => {
   return path.replace('./', '').replace('.mdx', '')
 }
 
@@ -47,13 +47,13 @@ export const posts: PostMeta[] = Object.entries(eagerModules)
   }))
   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
-export function getPost(slug: string): PostMeta | undefined {
+export const getPost = (slug: string): PostMeta | undefined => {
   return posts.find((post) => post.slug === slug)
 }
 
-export function loadPostContent(
+export const loadPostContent = (
   slug: string
-): (() => Promise<MDXModule>) | undefined {
+): (() => Promise<MDXModule>) | undefined => {
   const path = `./${slug}.mdx`
   return contentModules[path]
 }
@@ -63,11 +63,11 @@ const lazyCache = new Map<
   React.LazyExoticComponent<ComponentType<{ components?: MDXComponents }>>
 >()
 
-export function getLazyPost(
+export const getLazyPost = (
   slug: string
 ):
   | React.LazyExoticComponent<ComponentType<{ components?: MDXComponents }>>
-  | undefined {
+  | undefined => {
   const loader = loadPostContent(slug)
   if (!loader) return undefined
 

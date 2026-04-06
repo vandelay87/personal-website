@@ -3,12 +3,12 @@ import { visit } from 'unist-util-visit'
 
 const WORDS_PER_MINUTE = 200
 
-export function calculateReadingTime(text: string): number {
+export const calculateReadingTime = (text: string): number => {
   const words = text.split(/\s+/).filter(Boolean)
   return Math.ceil(words.length / WORDS_PER_MINUTE)
 }
 
-export default function remarkReadingTime() {
+const remarkReadingTime = () => {
   return (tree: Root) => {
     let textContent = ''
 
@@ -52,3 +52,5 @@ export default function remarkReadingTime() {
     } as unknown as Root['children'][number])
   }
 }
+
+export default remarkReadingTime

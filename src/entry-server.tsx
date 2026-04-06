@@ -26,7 +26,7 @@ try {
 </html>`
 }
 
-function buildHeadHtml(routePath: string): string {
+const buildHeadHtml = (routePath: string): string => {
   const meta = getMetaTags(routePath)
   const lines: string[] = []
 
@@ -63,7 +63,7 @@ function buildHeadHtml(routePath: string): string {
   return lines.join('\n    ')
 }
 
-export function render(url: string): string {
+export const render = (url: string): string => {
   const appHtml = renderToString(
     <StaticRouter location={url}>
       <App />
