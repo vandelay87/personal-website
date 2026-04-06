@@ -26,7 +26,7 @@
 
 .tag:hover {
   background: var(--color-primary);
-  color: var(--color-bg);
+  color: var(--color-on-primary);
 }
 
 .shareSection {
@@ -57,7 +57,7 @@
 
 .shareLink:hover {
   background: var(--color-primary);
-  color: var(--color-bg);
+  color: var(--color-on-primary);
 }
 
 .shareLink svg {

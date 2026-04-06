@@ -95,12 +95,12 @@
 
 .tag:hover {
   background: var(--color-primary);
-  color: var(--color-bg);
+  color: var(--color-on-primary);
 }
 
 .tag[aria-pressed='true'] {
   background: var(--color-primary);
-  color: var(--color-bg);
+  color: var(--color-on-primary);
   font-weight: var(--font-weight-bold);
 }
 

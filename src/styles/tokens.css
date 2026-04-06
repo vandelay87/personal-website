@@ -42,6 +42,7 @@
   /* Text */
   --color-text:          #1A1A1A;
   --color-text-strong:   #000000;
+  --color-on-primary:    #FFFFFF;
   --color-text-muted:    #666666;
 
   /* Borders */
