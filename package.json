@@ -18,13 +18,9 @@
   },
   "dependencies": {
     "@mdx-js/rollup": "^3.1.0",
-    "@shikijs/rehype": "^4.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.1.5",
-    "remark-frontmatter": "^5.0.0",
-    "remark-mdx-frontmatter": "^5.2.0",
-    "unist-util-visit": "^5.1.0"
+    "react-router-dom": "^7.1.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
@@ -52,7 +48,11 @@
     "prettier": "^3.5.1",
     "vite": "^7.3.1",
     "vite-imagetools": "^10.0.0",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.2",
+    "remark-frontmatter": "^5.0.0",
+    "remark-mdx-frontmatter": "^5.2.0",
+    "@shikijs/rehype": "^4.0.2",
+    "unist-util-visit": "^5.1.0"
   },
   "pnpm": {
     "supportedArchitectures": {

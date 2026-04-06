@@ -17,7 +17,7 @@ describe('calculateReadingTime', () => {
     expect(calculateReadingTime(text)).toBe(2)
   })
 
-  it('returns 1 minute for empty text', () => {
+  it('returns 0 for empty text', () => {
     expect(calculateReadingTime('')).toBe(0)
   })
 
@@ -43,7 +43,7 @@ describe('remarkReadingTime', () => {
     const plugin = remarkReadingTime()
     plugin(tree)
 
-    const esmNode = tree.children[0] as unknown as { type: string; value: string }
+    const esmNode = tree.children[tree.children.length - 1] as unknown as { type: string; value: string }
     expect(esmNode.type).toBe('mdxjsEsm')
     expect(esmNode.value).toBe('export const readingTime = 1')
   })
@@ -71,7 +71,7 @@ describe('remarkReadingTime', () => {
     const plugin = remarkReadingTime()
     plugin(tree)
 
-    const esmNode = tree.children[0] as unknown as { type: string; value: string }
+    const esmNode = tree.children[tree.children.length - 1] as unknown as { type: string; value: string }
     expect(esmNode.value).toBe('export const readingTime = 2')
   })
 
@@ -84,7 +84,7 @@ describe('remarkReadingTime', () => {
     const plugin = remarkReadingTime()
     plugin(tree)
 
-    const esmNode = tree.children[0] as unknown as { type: string; value: string }
+    const esmNode = tree.children[tree.children.length - 1] as unknown as { type: string; value: string }
     expect(esmNode.value).toBe('export const readingTime = 0')
   })
 })

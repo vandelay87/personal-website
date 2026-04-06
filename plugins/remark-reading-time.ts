@@ -1,5 +1,5 @@
-import { visit } from 'unist-util-visit'
 import type { Root, Text } from 'mdast'
+import { visit } from 'unist-util-visit'
 
 const WORDS_PER_MINUTE = 200
 
@@ -18,7 +18,7 @@ export default function remarkReadingTime() {
 
     const readingTime = calculateReadingTime(textContent)
 
-    tree.children.unshift({
+    tree.children.push({
       type: 'mdxjsEsm',
       value: `export const readingTime = ${readingTime}`,
       data: {
