@@ -13,7 +13,7 @@ describe('usePreloadImage', () => {
   })
 
   it('adds a preload link when src is provided', async () => {
-    function Test() {
+    const Test = () => {
       usePreloadImage(SRC, { fetchPriority: 'high' })
       return null
     }
@@ -34,7 +34,7 @@ describe('usePreloadImage', () => {
     const SRCSET = 'small.jpg 300w, large.jpg 1000w'
     const SIZES = '100vw'
 
-    function Test() {
+    const Test = () => {
       usePreloadImage(SRC, { srcSet: SRCSET, sizes: SIZES })
       return null
     }
@@ -52,7 +52,7 @@ describe('usePreloadImage', () => {
   })
 
   it('does not add duplicate links for the same src', async () => {
-    function Test() {
+    const Test = () => {
       usePreloadImage(SRC)
       return null
     }
@@ -71,7 +71,7 @@ describe('usePreloadImage', () => {
   })
 
   it('removes the preload link on unmount', async () => {
-    function Test() {
+    const Test = () => {
       usePreloadImage(SRC)
       return null
     }

@@ -13,7 +13,7 @@ vi.mock('react-router-dom', async () => {
   }
 })
 
-function renderWithRouter(initialPath: string) {
+const renderWithRouter = (initialPath: string) => {
   return render(
     <MemoryRouter initialEntries={[initialPath]}>
       <ScrollToTop />

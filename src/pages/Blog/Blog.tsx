@@ -4,7 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import styles from './Blog.module.css'
 import { posts } from './posts'
 
-function formatDate(dateString: string): string {
+const formatDate = (dateString: string): string => {
   const date = new Date(dateString + 'T00:00:00')
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
@@ -13,7 +13,7 @@ function formatDate(dateString: string): string {
   })
 }
 
-export default function Blog() {
+const Blog = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTag = searchParams.get('tag')
 
@@ -21,7 +21,7 @@ export default function Blog() {
     ? posts.filter((post) => post.tags.includes(activeTag))
     : posts
 
-  function handleTagClick(tag: string) {
+  const handleTagClick = (tag: string) => {
     if (activeTag === tag) {
       setSearchParams({})
     } else {
@@ -94,3 +94,5 @@ export default function Blog() {
     </>
   )
 }
+
+export default Blog

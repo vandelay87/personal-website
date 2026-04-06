@@ -36,12 +36,12 @@ const notFoundMeta = {
   description: 'The page you are looking for does not exist.',
 }
 
-export function normalisePath(path: string): string {
+export const normalisePath = (path: string): string => {
   if (path === '/') return '/'
   return path.endsWith('/') ? path.slice(0, -1) : path
 }
 
-export function escapeHtml(str: string): string {
+export const escapeHtml = (str: string): string => {
   return str
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -52,12 +52,12 @@ export function escapeHtml(str: string): string {
 
 export const KNOWN_ROUTES = new Set(Object.keys(routeMeta))
 
-function buildMetaTags(
+const buildMetaTags = (
   title: string,
   description: string,
   canonical: string,
   robots?: string,
-): MetaTags {
+): MetaTags => {
   return {
     title,
     description,
@@ -77,7 +77,7 @@ function buildMetaTags(
   }
 }
 
-export function getMetaTags(path: string): MetaTags {
+export const getMetaTags = (path: string): MetaTags => {
   const normalised = normalisePath(path)
   const route = routeMeta[normalised]
   const canonical = `${BASE_URL}${normalised}`

@@ -40,7 +40,7 @@ vi.mock('./posts', () => ({
   },
 }))
 
-function renderBlog(initialRoute = '/blog') {
+const renderBlog = (initialRoute = '/blog') => {
   return render(
     <MemoryRouter initialEntries={[initialRoute]}>
       <Blog />

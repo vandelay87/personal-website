@@ -25,6 +25,7 @@ To write a new PRD, copy `docs/prds/template.md` and fill it in.
 - Use path aliases: `@components/`, `@pages/`, `@hooks/`
 - Dark mode via `data-theme` attribute on the document root
 - Neo-brutalist design: use `var(--radius-none)` for border-radius — no rounded corners on any component
+- Use const arrow functions, not function declarations — enforced by ESLint (`func-style: expression`)
 - After modifying TSX files, run `pnpm exec eslint --fix` on changed files to auto-fix import order
 
 ## Workflow

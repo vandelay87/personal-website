@@ -1,9 +1,9 @@
 import { render } from './entry-server'
 import { KNOWN_ROUTES, normalisePath } from './meta'
 
-export async function handler(
+export const handler = async (
   event: Record<string, unknown>
-): Promise<Record<string, unknown>> {
+): Promise<Record<string, unknown>> => {
   let rawPath = (event.rawPath as string) || '/'
   // CloudFront defaultRootObject rewrites / to /index.html
   if (rawPath === '/index.html') rawPath = '/'
