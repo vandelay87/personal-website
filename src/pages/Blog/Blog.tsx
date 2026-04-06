@@ -1,3 +1,4 @@
+import Button from '@components/Button'
 import Typography from '@components/Typography'
 import { Link, useSearchParams } from 'react-router-dom'
 import styles from './Blog.module.css'
@@ -42,6 +43,9 @@ export default function Blog() {
       <Typography variant="heading1" className={styles.heading}>
         Blog
       </Typography>
+      <Typography variant="bodyLarge" className={styles.intro}>
+        Thoughts on building things, technical deep-dives, and lessons learned along the way.
+      </Typography>
 
       {filteredPosts.length === 0 ? (
         <div className={styles.empty}>
@@ -72,14 +76,15 @@ export default function Blog() {
               <p className={styles.description}>{post.description}</p>
               <div className={styles.tags}>
                 {post.tags.map((tag) => (
-                  <button
+                  <Button
                     key={tag}
+                    variant="secondary"
                     className={styles.tag}
-                    aria-pressed={activeTag === tag ? 'true' : 'false'}
+                    ariaPressed={activeTag === tag ? 'true' : 'false'}
                     onClick={() => handleTagClick(tag)}
                   >
                     {tag}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </li>

@@ -2,6 +2,10 @@
   margin-block-end: var(--space-2);
 }
 
+.intro {
+  margin-block-end: var(--space-8);
+}
+
 .postList {
   list-style: none;
   padding: 0;
@@ -17,6 +21,24 @@
   padding: var(--space-6);
   background: var(--color-surface);
   box-shadow: var(--shadow-md);
+  transition:
+    transform var(--duration-fast) var(--easing-default),
+    box-shadow var(--duration-fast) var(--easing-default);
+}
+
+.postCard:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: var(--shadow-lg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .postCard {
+    transition: none;
+  }
+
+  .postCard:hover {
+    transform: none;
+  }
 }
 
 .postHeading {
@@ -65,16 +87,10 @@
 }
 
 .tag {
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background: var(--color-bg-subtle);
-  color: var(--color-text);
-  padding: var(--space-1) var(--space-3);
+  padding: var(--space-1) var(--space-2);
   font-size: var(--font-size-sm);
   font-family: var(--font-mono);
-  cursor: pointer;
-  transition: background var(--duration-fast) var(--easing-default),
-    color var(--duration-fast) var(--easing-default);
+  font-weight: var(--font-weight-normal);
 }
 
 .tag:hover {
