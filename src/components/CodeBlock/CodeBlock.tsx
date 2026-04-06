@@ -49,16 +49,18 @@ const CodeBlock = ({
           onClick={handleCopy}
           aria-label={copied ? 'Copied!' : 'Copy code'}
         >
-          {copied ? (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <rect x="8" y="8" width="14" height="14" />
-              <path d="M8 16H2V2H16V8" />
-            </svg>
-          )}
+          <span className={`${styles.copyIcon}${copied ? ` ${styles.copyIconCopied}` : ''}`}>
+            {copied ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <rect x="8" y="8" width="14" height="14" />
+                <path d="M8 16H2V2H16V8" />
+              </svg>
+            )}
+          </span>
         </button>
       </div>
       <pre
