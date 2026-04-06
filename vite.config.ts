@@ -1,13 +1,28 @@
 import mdx from '@mdx-js/rollup'
+import rehypeShiki from '@shikijs/rehype'
 import react from '@vitejs/plugin-react'
+import remarkFrontmatter from 'remark-frontmatter'
+import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import { imagetools } from 'vite-imagetools'
 import { defineConfig } from 'vitest/config'
+import remarkReadingTime from './plugins/remark-reading-time'
 import { sitemapPlugin } from './sitemap-plugin'
 
 export default defineConfig(({ isSsrBuild }) => ({
   plugins: [
     react(),
-    mdx(),
+    mdx({
+      remarkPlugins: [
+        remarkFrontmatter,
+        [remarkMdxFrontmatter, { name: 'frontmatter' }],
+        remarkReadingTime,
+      ],
+      rehypePlugins: [
+        [rehypeShiki, {
+          themes: { light: 'github-light', dark: 'github-dark' },
+        }],
+      ],
+    }),
     imagetools(),
     ...(!isSsrBuild
       ? [
