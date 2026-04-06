@@ -69,4 +69,10 @@ export default [
       'react/react-in-jsx-scope': 'off',
     },
   },
+  {
+    files: ['**/*.test.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_|^mock' }],
+    },
+  },
 ]

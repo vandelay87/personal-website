@@ -1,0 +1,70 @@
+.wrapper {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+  margin: var(--space-6) 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border);
+  background: var(--color-bg-subtle);
+}
+
+.filenameHeader {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  margin-inline-end: auto;
+}
+
+.pre {
+  margin: 0;
+  padding: var(--space-4);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  background: var(--color-bg-subtle);
+  color: var(--color-text);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+/* Line numbers via CSS counters */
+.pre code {
+  counter-reset: line;
+}
+
+.pre code .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 2em;
+  margin-right: var(--space-4);
+  text-align: right;
+  color: var(--color-text-muted);
+  opacity: 0.5;
+  user-select: none;
+}
+
+.copyButton {
+  padding: var(--space-1) var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-default);
+}
+
+.copyButton:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-text);
+}
