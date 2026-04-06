@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import type { Root } from 'mdast'
+import { describe, it, expect } from 'vitest'
 import remarkReadingTime, { calculateReadingTime } from './remark-reading-time'
 
 describe('calculateReadingTime', () => {

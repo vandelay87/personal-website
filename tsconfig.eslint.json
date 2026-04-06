@@ -1,5 +1,8 @@
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowJs": true
+  },
   "include": [
     "vite.config.ts",
     "src/**/*.ts",
@@ -10,7 +13,8 @@
     "tests/**/*.ts",
     "tests/**/*.tsx",
     "sitemap-plugin.ts",
-    "sitemap-plugin.test.ts"
+    "sitemap-plugin.test.ts",
+    "plugins/**/*.ts"
   ],
   "exclude": ["node_modules", "dist", "coverage"]
 }
