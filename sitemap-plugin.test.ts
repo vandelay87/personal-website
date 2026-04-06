@@ -66,6 +66,30 @@ describe('generateSitemap', () => {
     expect(sitemap).toContain(`<lastmod>${today}</lastmod>`)
   })
 
+  it('includes blog post routes in sitemap', () => {
+    const routes = [
+      { route: '/', filePath: 'src/pages/Home/Home.tsx' },
+      { route: '/blog', filePath: 'src/pages/Blog/Blog.tsx' },
+      { route: '/blog/test-post' },
+    ]
+
+    const routeConfig = {
+      '/blog/test-post': { priority: 0.6, changefreq: 'monthly' as const },
+    }
+
+    const sitemap = generateSitemap('https://akli.dev', routes, 'monthly', 0.5, routeConfig)
+
+    expect(sitemap).toContain('<loc>https://akli.dev/blog</loc>')
+    expect(sitemap).toContain('<loc>https://akli.dev/blog/test-post</loc>')
+
+    const blogPostMatch = sitemap.match(/<url>\s*<loc>https:\/\/akli\.dev\/blog\/test-post<\/loc>[\s\S]*?<\/url>/)
+    expect(blogPostMatch).not.toBeNull()
+
+    const blogPostBlock = blogPostMatch![0]
+    expect(blogPostBlock).toContain('<priority>0.6</priority>')
+    expect(blogPostBlock).toContain('<changefreq>monthly</changefreq>')
+  })
+
   it('does not break existing routes with filePath', () => {
     const routes = [
       { route: '/', filePath: 'src/pages/Home/Home.tsx' },

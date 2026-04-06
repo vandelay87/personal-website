@@ -1,3 +1,6 @@
+import { readdirSync } from 'fs'
+import { dirname, join } from 'path'
+import { fileURLToPath } from 'url'
 import mdx from '@mdx-js/rollup'
 import rehypeShiki from '@shikijs/rehype'
 import react from '@vitejs/plugin-react'
@@ -7,6 +10,23 @@ import { imagetools } from 'vite-imagetools'
 import { defineConfig } from 'vitest/config'
 import remarkReadingTime from './plugins/remark-reading-time'
 import { sitemapPlugin } from './sitemap-plugin'
+
+const getBlogRoutes = (): Array<{ route: string; priority: number; changefreq: 'monthly' }> => {
+  const currentDir = dirname(fileURLToPath(import.meta.url))
+  const postsDir = join(currentDir, 'src/pages/Blog/posts')
+  try {
+    const files = readdirSync(postsDir)
+    return files
+      .filter((file) => file.endsWith('.mdx'))
+      .map((file) => ({
+        route: `/blog/${file.replace('.mdx', '')}`,
+        priority: 0.6,
+        changefreq: 'monthly' as const,
+      }))
+  } catch {
+    return []
+  }
+}
 
 export default defineConfig(({ isSsrBuild }) => ({
   plugins: [
@@ -40,7 +60,7 @@ export default defineConfig(({ isSsrBuild }) => ({
             hostname: 'https://akli.dev',
             pagesDir: 'src/pages',
             include: ['**/*.tsx'],
-            exclude: ['**/*.test.*', '**/*.spec.*', '**/NotFound.*', '**/*test*'],
+            exclude: ['**/*.test.*', '**/*.spec.*', '**/NotFound.*', '**/*test*', '**/BlogPost.*'],
             routeMapping: {
               '/home': '/',
             },
@@ -58,6 +78,7 @@ export default defineConfig(({ isSsrBuild }) => ({
             defaultChangefreq: 'monthly',
             additionalRoutes: [
               { route: '/apps/pokedex', priority: 0.7, changefreq: 'monthly' },
+              ...getBlogRoutes(),
             ],
           }),
         ]
