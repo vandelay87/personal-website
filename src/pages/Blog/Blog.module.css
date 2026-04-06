@@ -20,6 +20,8 @@
 }
 
 .postTitle {
+  display: block;
+  margin-block-start: 0;
   color: var(--color-text-strong);
   text-decoration: none;
 }
