@@ -79,7 +79,7 @@ const BlogPost = () => {
             href={twitterHref}
             target="_blank"
             rel="noreferrer"
-            aria-label="Share on Twitter"
+            aria-label="Share on X"
             className={styles.shareLink}
           >
             <svg
