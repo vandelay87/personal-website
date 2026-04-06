@@ -2,16 +2,7 @@ import Button from '@components/Button'
 import Typography from '@components/Typography'
 import { Link, useSearchParams } from 'react-router-dom'
 import styles from './Blog.module.css'
-import { posts } from './posts'
-
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString + 'T00:00:00')
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-}
+import { formatDate, posts } from './posts'
 
 const Blog = () => {
   const [searchParams, setSearchParams] = useSearchParams()

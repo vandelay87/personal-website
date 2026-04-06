@@ -66,6 +66,14 @@ const createLazyPost = (content: string, hasExternalLink = false) =>
 vi.mock('./posts', () => ({
   posts: mockPosts,
   getPost: (slug: string) => mockPosts.find((p: PostMeta) => p.slug === slug),
+  formatDate: (dateString: string): string => {
+    const date = new Date(dateString + 'T00:00:00')
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  },
   getLazyPost: (slug: string) => {
     const post = mockPosts.find((p: PostMeta) => p.slug === slug)
     if (!post) return undefined
@@ -98,7 +106,7 @@ describe('BlogPost', () => {
 
   it('renders post metadata', () => {
     renderWithRoute('test-post')
-    expect(screen.getByText(/2026-04-06/)).toBeInTheDocument()
+    expect(screen.getByText(/April 6, 2026/)).toBeInTheDocument()
     expect(screen.getByText(/3 min read/)).toBeInTheDocument()
   })
 

@@ -7,9 +7,9 @@ import Typography from '@components/Typography'
 import NotFound from '@pages/NotFound'
 import type { AnchorHTMLAttributes } from 'react'
 import { Suspense } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link as RouterLink, useParams } from 'react-router-dom'
 import styles from './BlogPost.module.css'
-import { getLazyPost, getPost, posts } from './posts'
+import { formatDate, getLazyPost, getPost, posts } from './posts'
 import type { PostMeta } from './posts'
 
 const BlogLink = ({ href, children }: AnchorHTMLAttributes<HTMLAnchorElement>) => (
@@ -61,18 +61,18 @@ const BlogPost = () => {
     <article className={styles.article}>
       <Typography variant="heading1">{post.title}</Typography>
       <Typography variant="body">
-        {post.date} - {post.readingTime} min read
+        {formatDate(post.date)} - {post.readingTime} min read
       </Typography>
       <div className={styles.tags}>
         {post.tags.map((tag) => (
-          <span key={tag} className={styles.tag}>{tag}</span>
+          <RouterLink key={tag} to={`/blog?tag=${tag}`} className={styles.tag}>{tag}</RouterLink>
         ))}
       </div>
       <Suspense fallback={<Typography variant="body">Loading...</Typography>}>
         <PostContent components={mdxComponents} />
       </Suspense>
 
-      <div className={styles.shareSection}>
+      <section className={styles.shareSection} aria-label="Share this post">
         <Typography variant="heading3" as="h2">Share this post</Typography>
         <div className={styles.shareLinks}>
           <a
@@ -108,20 +108,18 @@ const BlogPost = () => {
             </svg>
           </a>
         </div>
-      </div>
+      </section>
 
       {showRelated && (
         <section className={styles.relatedSection}>
           <Typography variant="heading3" as="h2">Related Posts</Typography>
           <div className={styles.relatedGrid}>
             {relatedPosts.map((rp) => (
-              <Link key={rp.slug} to={`/blog/${rp.slug}`}>
-                <div className={styles.relatedCard}>
+              <Link key={rp.slug} to={`/blog/${rp.slug}`} className={styles.relatedCard}>
                   <Typography variant="heading4" as="h3">{rp.title}</Typography>
                   <Typography variant="body">
-                    {rp.date} · {rp.readingTime} min read
+                    {formatDate(rp.date)} · {rp.readingTime} min read
                   </Typography>
-                </div>
               </Link>
             ))}
           </div>
