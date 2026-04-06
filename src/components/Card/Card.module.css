@@ -40,19 +40,16 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  padding-block: var(--space-6);
+  padding-block-start: 0;
+  padding-block-end: var(--space-6);
   padding-inline: var(--space-6);
 }
 
 .title {
+  margin-block-start: 0;
   margin-block-end: var(--space-2);
 }
 
 .description {
   margin-block-end: var(--space-4);
-  /* line-clamp-2: no token exists, use standard CSS */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
