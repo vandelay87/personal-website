@@ -59,7 +59,7 @@ export default function Blog() {
         <ul className={styles.postList}>
           {filteredPosts.map((post) => (
             <li key={post.slug} className={styles.postCard}>
-              <Typography variant="heading3">
+              <Typography variant="heading3" className={styles.postHeading}>
                 <Link to={`/blog/${post.slug}`} className={styles.postTitle}>
                   {post.title}
                 </Link>

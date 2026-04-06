@@ -19,9 +19,12 @@
   box-shadow: var(--shadow-md);
 }
 
+.postHeading {
+  margin-block: 0;
+}
+
 .postTitle {
   display: block;
-  margin-block-start: 0;
   color: var(--color-text-strong);
   text-decoration: none;
 }
