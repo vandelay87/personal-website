@@ -3,7 +3,8 @@ import type { FC, ReactNode } from 'react'
 import styles from './FileTree.module.css'
 
 export interface FileTreeProps {
-  children: ReactNode
+  content: string
+  title?: string
 }
 
 interface TreeNode {
@@ -12,7 +13,7 @@ interface TreeNode {
   children: TreeNode[]
 }
 
-function parseTree(text: string): TreeNode[] {
+export function parseTree(text: string): TreeNode[] {
   const lines = text.split('\n').filter((line) => line.trim() !== '')
   const root: TreeNode[] = []
   const stack: { indent: number; children: TreeNode[] }[] = [{ indent: -1, children: root }]
@@ -53,17 +54,16 @@ function renderNodes(nodes: TreeNode[], isRoot: boolean): ReactNode {
   )
 }
 
-const FileTree: FC<FileTreeProps> = ({ children }) => {
-  const text = typeof children === 'string' ? children : ''
-
-  if (!text) {
+const FileTree: FC<FileTreeProps> = ({ content, title }) => {
+  if (!content.trim()) {
     return <div className={styles.tree} />
   }
 
-  const tree = parseTree(text)
+  const tree = parseTree(content)
 
   return (
     <div className={styles.tree} role="tree">
+      {title && <div className={styles.title}>{title}</div>}
       {renderNodes(tree, true)}
     </div>
   )

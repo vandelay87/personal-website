@@ -12,7 +12,7 @@ describe('FileTree', () => {
     useTheme.ts`
 
   it('parses indented text into a tree structure', () => {
-    render(<FileTree>{sampleTree}</FileTree>)
+    render(<FileTree content={sampleTree} />)
 
     expect(screen.getByText(/src/)).toBeInTheDocument()
     expect(screen.getByText(/Button\.tsx/)).toBeInTheDocument()
@@ -20,9 +20,8 @@ describe('FileTree', () => {
   })
 
   it('renders folder names for lines ending with /', () => {
-    render(<FileTree>{sampleTree}</FileTree>)
+    render(<FileTree content={sampleTree} />)
 
-    // Folders (ending with /) should be rendered distinctly
     const srcFolder = screen.getByText(/src/)
     const componentsFolder = screen.getByText(/components/)
     const buttonFolder = screen.getByText(/Button\//)
@@ -33,7 +32,7 @@ describe('FileTree', () => {
   })
 
   it('renders file names for lines not ending with /', () => {
-    render(<FileTree>{sampleTree}</FileTree>)
+    render(<FileTree content={sampleTree} />)
 
     expect(screen.getByText(/Button\.tsx/)).toBeInTheDocument()
     expect(screen.getByText(/index\.ts/)).toBeInTheDocument()
@@ -46,17 +45,15 @@ describe('FileTree', () => {
     level2/
       deepFile.ts`
 
-    const { container } = render(<FileTree>{nestedTree}</FileTree>)
+    const { container } = render(<FileTree content={nestedTree} />)
 
     expect(screen.getByText(/deepFile\.ts/)).toBeInTheDocument()
-    // The tree should contain nested elements reflecting the hierarchy
     expect(container.querySelectorAll('ul, li, [role="treeitem"]').length).toBeGreaterThan(0)
   })
 
   it('renders empty tree gracefully', () => {
-    const { container } = render(<FileTree>{''}</FileTree>)
+    const { container } = render(<FileTree content="" />)
 
-    // Should render an empty container without errors
     expect(container).toBeInTheDocument()
     expect(container.querySelectorAll('li, [role="treeitem"]').length).toBe(0)
   })

@@ -20,6 +20,16 @@ export default defineConfig(({ isSsrBuild }) => ({
       rehypePlugins: [
         [rehypeShiki, {
           themes: { light: 'github-light', dark: 'github-dark' },
+          defaultColor: false,
+          cssVariablePrefix: '--shiki-',
+          transformers: [{
+            name: 'preserve-meta',
+            pre(node) {
+              if (this.options.meta?.__raw) {
+                node.properties['data-meta'] = this.options.meta.__raw
+              }
+            },
+          }],
         }],
       ],
     }),

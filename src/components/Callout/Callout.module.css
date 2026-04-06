@@ -1,13 +1,23 @@
 .callout {
-  padding: var(--space-4);
+  display: flex;
   margin: var(--space-4) 0;
-  border-left: 4px solid var(--color-border-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-none);
   background-color: var(--color-bg-subtle);
-  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
   font-family: var(--font-sans);
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
   color: var(--color-text);
+}
+
+.accentBar {
+  flex-shrink: 0;
+  width: 10px;
+}
+
+.content {
+  padding: var(--space-4);
 }
 
 .indicator {
@@ -15,14 +25,14 @@
   margin-bottom: var(--space-2);
 }
 
-.tip {
-  border-left-color: var(--color-success);
+.tip .accentBar {
+  background-color: var(--color-success);
 }
 
-.warning {
-  border-left-color: var(--color-error);
+.warning .accentBar {
+  background-color: var(--color-error);
 }
 
-.info {
-  border-left-color: var(--color-primary);
+.info .accentBar {
+  background-color: var(--color-primary);
 }
