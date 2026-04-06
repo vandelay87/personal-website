@@ -24,6 +24,11 @@
   text-decoration: none;
 }
 
+.postTitle:focus-visible {
+  outline: var(--border-width) solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .postTitle:hover {
   color: var(--color-link-hover);
 }

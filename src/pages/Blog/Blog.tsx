@@ -3,6 +3,15 @@ import { Link, useSearchParams } from 'react-router-dom'
 import styles from './Blog.module.css'
 import { posts } from './posts'
 
+function formatDate(dateString: string): string {
+  const date = new Date(dateString + 'T00:00:00')
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
 export default function Blog() {
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTag = searchParams.get('tag')
@@ -17,15 +26,6 @@ export default function Blog() {
     } else {
       setSearchParams({ tag })
     }
-  }
-
-  function formatDate(dateString: string): string {
-    const date = new Date(dateString + 'T00:00:00')
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
   }
 
   if (posts.length === 0) {
@@ -48,9 +48,12 @@ export default function Blog() {
           <Typography variant="bodyLarge">
             No posts found for this tag.
           </Typography>
-          <Link to="/blog" className={styles.clearLink}>
+          <button
+            onClick={() => setSearchParams({})}
+            className={styles.clearLink}
+          >
             Clear filter
-          </Link>
+          </button>
         </div>
       ) : (
         <ul className={styles.postList}>
@@ -72,7 +75,7 @@ export default function Blog() {
                   <button
                     key={tag}
                     className={styles.tag}
-                    aria-pressed={activeTag === tag}
+                    aria-pressed={activeTag === tag ? 'true' : 'false'}
                     onClick={() => handleTagClick(tag)}
                   >
                     {tag}

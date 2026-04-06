@@ -277,7 +277,7 @@ describe('Blog', () => {
       expect(screen.getByText(/no posts found/i)).toBeInTheDocument()
 
       // There should be a link to clear the filter
-      const clearLink = screen.getByRole('link', { name: /clear/i })
+      const clearLink = screen.getByRole('button', { name: /clear/i })
       expect(clearLink).toBeInTheDocument()
     })
 
