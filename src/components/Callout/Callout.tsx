@@ -15,7 +15,7 @@ const indicators: Record<CalloutProps['type'], { emoji: string; label: string }>
 
 const Callout: FC<CalloutProps> = ({ type, children }) => {
   return (
-    <div className={`${styles.callout} ${styles[type]}`} role="note">
+    <div className={`${styles.callout} ${styles[type]}`} role="note" aria-label={indicators[type].label}>
       <div className={styles.accentBar} />
       <div className={styles.content}>
         <div className={styles.indicator}><span aria-hidden="true">{indicators[type].emoji}</span> {indicators[type].label}</div>

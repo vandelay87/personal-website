@@ -30,7 +30,7 @@
 }
 
 .warning .accentBar {
-  background-color: var(--color-error);
+  background-color: var(--color-warning);
 }
 
 .info .accentBar {
