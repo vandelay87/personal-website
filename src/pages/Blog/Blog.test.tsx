@@ -38,6 +38,14 @@ vi.mock('./posts', () => ({
   get posts() {
     return mockPosts.value
   },
+  formatDate: (dateString: string): string => {
+    const date = new Date(dateString + 'T00:00:00')
+    return date.toLocaleDateString('en-GB', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  },
 }))
 
 const renderBlog = (initialRoute = '/blog') => {
@@ -114,12 +122,12 @@ describe('Blog', () => {
 
     it('renders the date for each post', () => {
       renderBlog()
-      expect(screen.getByText(/Apr(il)?\s+6,?\s+2026/)).toBeInTheDocument()
+      expect(screen.getByText(/6\s+April\s+2026/)).toBeInTheDocument()
       expect(
-        screen.getByText(/Mar(ch)?\s+15,?\s+2026/)
+        screen.getByText(/15\s+March\s+2026/)
       ).toBeInTheDocument()
       expect(
-        screen.getByText(/Feb(ruary)?\s+1,?\s+2026/)
+        screen.getByText(/1\s+February\s+2026/)
       ).toBeInTheDocument()
     })
 

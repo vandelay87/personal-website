@@ -7,6 +7,7 @@ interface LinkProps {
   to: string
   underline?: boolean
   ariaLabel?: string
+  className?: string
 }
 
 const Link: FC<LinkProps> = ({
@@ -14,11 +15,12 @@ const Link: FC<LinkProps> = ({
   to,
   underline = false,
   ariaLabel,
+  className: externalClassName,
 }) => {
   const isExternal =
     /^https?:\/\//.test(to) || to.startsWith('mailto:') || to.startsWith('tel:')
 
-  const className = [styles.link, underline ? styles.underline : ''].filter(Boolean).join(' ')
+  const className = [styles.link, underline ? styles.underline : '', externalClassName].filter(Boolean).join(' ')
 
   if (isExternal) {
     return (
