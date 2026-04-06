@@ -1,0 +1,26 @@
+.tree {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  background-color: var(--color-bg-subtle);
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  margin: var(--space-4) 0;
+  line-height: var(--line-height-relaxed);
+}
+
+.list {
+  list-style: none;
+  padding-left: var(--space-4);
+  margin: 0;
+}
+
+.rootList {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.item {
+  white-space: nowrap;
+}

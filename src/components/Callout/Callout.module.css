@@ -1,0 +1,28 @@
+.callout {
+  padding: var(--space-4);
+  margin: var(--space-4) 0;
+  border-left: 4px solid var(--color-border-subtle);
+  background-color: var(--color-bg-subtle);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text);
+}
+
+.indicator {
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-2);
+}
+
+.tip {
+  border-left-color: #16a34a;
+}
+
+.warning {
+  border-left-color: var(--color-error);
+}
+
+.info {
+  border-left-color: var(--color-primary);
+}
