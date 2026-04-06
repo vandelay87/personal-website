@@ -6,9 +6,9 @@ import { handler } from './lambda-handler'
  * Helper to build a mock API Gateway v2 event with the given rawPath.
  * Only includes fields the handler is expected to use.
  */
-function createApiGatewayEvent(
+const createApiGatewayEvent = (
   rawPath?: string
-): Record<string, unknown> {
+): Record<string, unknown> => {
   return {
     version: '2.0',
     routeKey: '$default',

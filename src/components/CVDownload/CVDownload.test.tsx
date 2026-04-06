@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import CVDownload from './CVDownload'
 
-function mockFetchSuccess(sizeInBytes = 1234, type = 'application/pdf') {
+const mockFetchSuccess = (sizeInBytes = 1234, type = 'application/pdf') => {
   const data = 'a'.repeat(sizeInBytes)
   const blob = new Blob([data], { type })
 
@@ -15,7 +15,7 @@ function mockFetchSuccess(sizeInBytes = 1234, type = 'application/pdf') {
   )
 }
 
-function mockFetchFailure() {
+const mockFetchFailure = () => {
   ;(globalThis as any).fetch = vi.fn(() => Promise.reject(new Error('Fetch failed')))
 }
 

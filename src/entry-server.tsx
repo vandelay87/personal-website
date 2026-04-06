@@ -1,3 +1,4 @@
+/* global __dirname */
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { renderToString } from 'react-dom/server'
@@ -25,7 +26,7 @@ try {
 </html>`
 }
 
-function buildHeadHtml(routePath: string): string {
+const buildHeadHtml = (routePath: string): string => {
   const meta = getMetaTags(routePath)
   const lines: string[] = []
 
@@ -47,6 +48,12 @@ function buildHeadHtml(routePath: string): string {
     `<meta property="og:description" content="${escapeHtml(meta.og.description)}" />`
   )
 
+  if (meta.og.image) {
+    lines.push(
+      `<meta property="og:image" content="${escapeHtml(meta.og.image)}" />`
+    )
+  }
+
   lines.push(
     `<meta name="twitter:card" content="${escapeHtml(meta.twitter.card)}" />`
   )
@@ -57,12 +64,18 @@ function buildHeadHtml(routePath: string): string {
     `<meta name="twitter:description" content="${escapeHtml(meta.twitter.description)}" />`
   )
 
+  if (meta.twitter.image) {
+    lines.push(
+      `<meta name="twitter:image" content="${escapeHtml(meta.twitter.image)}" />`
+    )
+  }
+
   lines.push(`<link rel="canonical" href="${escapeHtml(meta.canonical)}" />`)
 
   return lines.join('\n    ')
 }
 
-export function render(url: string): string {
+export const render = (url: string): string => {
   const appHtml = renderToString(
     <StaticRouter location={url}>
       <App />

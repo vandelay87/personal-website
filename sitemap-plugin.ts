@@ -27,7 +27,7 @@ interface SitemapOptions {
   additionalRoutes?: AdditionalRoute[]
 }
 
-export function sitemapPlugin(options: SitemapOptions): Plugin {
+export const sitemapPlugin = (options: SitemapOptions): Plugin => {
   const {
     hostname,
     pagesDir = 'src/pages',
@@ -78,12 +78,12 @@ export function sitemapPlugin(options: SitemapOptions): Plugin {
   }
 }
 
-async function discoverRoutes(
+const discoverRoutes = async (
   pagesDir: string,
   include: string[],
   exclude: string[],
   routeMapping: Record<string, string>
-): Promise<Array<{ route: string; filePath: string }>> {
+): Promise<Array<{ route: string; filePath: string }>> => {
   const routes: Array<{ route: string; filePath: string }> = []
 
   try {
@@ -103,11 +103,11 @@ async function discoverRoutes(
   return routes
 }
 
-function fileToRoute(
+const fileToRoute = (
   filePath: string,
   pagesDir: string,
   routeMapping: Record<string, string>
-): string | null {
+): string | null => {
   // Normalize path separators to forward slashes
   const normalizedFilePath = filePath.replace(/\\/g, '/')
   const normalizedPagesDir = pagesDir.replace(/\\/g, '/')
@@ -166,13 +166,13 @@ function fileToRoute(
   return route
 }
 
-export function generateSitemap(
+export const generateSitemap = (
   hostname: string,
   routes: Array<{ route: string; filePath?: string }>,
   defaultChangefreq: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never',
   defaultPriority: number,
   routeConfig: Record<string, RouteConfig>
-): string {
+): string => {
   const urls = routes
     .map(({ route, filePath }) => {
       const config = routeConfig[route] || {}

@@ -8,6 +8,7 @@ Personal portfolio site for [akli.dev](https://akli.dev). Built with React 19, T
 - React Router v7 (client-side SPA)
 - Vite 6
 - CSS Modules with design tokens
+- MDX blog with Shiki syntax highlighting
 - Vitest + Testing Library
 - pnpm
 
@@ -36,7 +37,7 @@ pnpm dev
 ```
 src/
   components/    # Reusable components (<Name>/<Name>.tsx + index.ts)
-  pages/         # Route pages (Home, Apps, NotFound)
+  pages/         # Route pages (Home, Apps, Blog, NotFound)
   hooks/         # Custom hooks
   styles/        # Design tokens and animations
   assets/        # Images and static files
@@ -51,6 +52,9 @@ tests/
 - `/` — Home page with hero, CV download, and apps CTA
 - `/apps` — Showcase of interactive experiments and side projects
 - `/apps/sand-box` — Real-time particle physics simulation (deployed separately)
+- `/apps/pokedex` — Searchable Gen 1 Pokemon encyclopedia (deployed separately)
+- `/blog` — Technical blog with tag filtering
+- `/blog/:slug` — Individual blog posts (MDX with code blocks, callouts, file trees)
 
 ## Design
 
