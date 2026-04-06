@@ -17,7 +17,8 @@ function parseTree(text: string): TreeNode[] {
   const root: TreeNode[] = []
   const stack: { indent: number; children: TreeNode[] }[] = [{ indent: -1, children: root }]
 
-  for (const line of lines) {
+  for (let line of lines) {
+    line = line.replace(/\t/g, '  ')
     const trimmed = line.trimStart()
     const indent = line.length - trimmed.length
     const isFolder = trimmed.endsWith('/')
@@ -41,7 +42,7 @@ function renderNodes(nodes: TreeNode[], isRoot: boolean): ReactNode {
   if (nodes.length === 0) return null
 
   return (
-    <ul className={isRoot ? styles.rootList : styles.list}>
+    <ul className={isRoot ? styles.rootList : styles.list} {...(!isRoot && { role: 'group' })}>
       {nodes.map((node, index) => (
         <li key={`${node.name}-${index}`} className={styles.item} role="treeitem">
           <span>{node.isFolder ? '📁 ' : '📄 '}{node.name}</span>

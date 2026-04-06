@@ -16,7 +16,7 @@
 }
 
 .tip {
-  border-left-color: #16a34a;
+  border-left-color: var(--color-success);
 }
 
 .warning {

@@ -7,16 +7,16 @@ export interface CalloutProps {
   children: ReactNode
 }
 
-const indicators: Record<CalloutProps['type'], string> = {
-  tip: '💡 Tip',
-  warning: '⚠️ Warning',
-  info: 'ℹ️ Info',
+const indicators: Record<CalloutProps['type'], { emoji: string; label: string }> = {
+  tip: { emoji: '💡', label: 'Tip' },
+  warning: { emoji: '⚠️', label: 'Warning' },
+  info: { emoji: 'ℹ️', label: 'Info' },
 }
 
 const Callout: FC<CalloutProps> = ({ type, children }) => {
   return (
     <div className={`${styles.callout} ${styles[type]}`} role="note">
-      <div className={styles.indicator}>{indicators[type]}</div>
+      <div className={styles.indicator}><span aria-hidden="true">{indicators[type].emoji}</span> {indicators[type].label}</div>
       <div>{children}</div>
     </div>
   )

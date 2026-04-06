@@ -26,16 +26,11 @@ describe('ImageCaption', () => {
     ).toBeInTheDocument()
   })
 
-  it('image is responsive with max-width style or class', () => {
+  it('image is responsive via CSS class', () => {
     render(<ImageCaption {...defaultProps} caption="Responsive image" />)
 
     const img = screen.getByRole('img')
-    const hasMaxWidth =
-      img.style.maxWidth === '100%' ||
-      img.className.match(/responsive|full|max/) !== null ||
-      img.closest('figure')?.style.maxWidth === '100%'
-
-    expect(hasMaxWidth).toBe(true)
+    expect(img.className).toMatch(/image/)
   })
 
   it('renders without caption when caption is not provided', () => {

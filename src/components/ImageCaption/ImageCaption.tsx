@@ -11,7 +11,7 @@ export interface ImageCaptionProps {
 const ImageCaption: FC<ImageCaptionProps> = ({ src, alt, caption }) => {
   return (
     <figure className={styles.figure}>
-      <img className={styles.image} src={src} alt={alt} style={{ maxWidth: '100%' }} />
+      <img className={styles.image} src={src} alt={alt} />
       {caption && <figcaption className={styles.caption}>{caption}</figcaption>}
     </figure>
   )
