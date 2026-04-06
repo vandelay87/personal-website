@@ -10,7 +10,7 @@ export type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
 
 const extractTitle = (meta: string | undefined): string | null => {
   if (!meta) return null
-  const match = meta.match(/title="([^"]+)"/)
+  const match = meta.match(/title=["']([^"']+)["']/)
   return match ? match[1] : null
 }
 
@@ -27,25 +27,27 @@ const CodeBlock = ({
   const handleCopy = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       const text = preRef.current?.textContent ?? ''
-      navigator.clipboard.writeText(text)
+      navigator.clipboard.writeText(text).catch(() => {})
     }
   }
 
   return (
     <div className={styles.wrapper}>
-      {title && (
-        <div className={styles.filenameHeader} data-testid="code-block-filename">
-          {title}
-        </div>
-      )}
-      <button
-        type="button"
-        className={styles.copyButton}
-        onClick={handleCopy}
-        aria-label="Copy code"
-      >
-        Copy
-      </button>
+      <div className={styles.toolbar}>
+        {title && (
+          <span className={styles.filenameHeader} data-testid="code-block-filename">
+            {title}
+          </span>
+        )}
+        <button
+          type="button"
+          className={styles.copyButton}
+          onClick={handleCopy}
+          aria-label="Copy code"
+        >
+          Copy
+        </button>
+      </div>
       <pre
         ref={preRef}
         className={`${styles.pre} line-numbers${className ? ` ${className}` : ''}`}
