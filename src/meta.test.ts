@@ -1,5 +1,35 @@
 // @vitest-environment node
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+
+const mockPostData = vi.hoisted(() => ({
+  testPost: {
+    title: 'Test Post Title',
+    date: '2025-01-15',
+    description: 'A test post description for meta tag testing.',
+    tags: ['testing'],
+    slug: 'test-post',
+    readingTime: 3,
+    image: '/images/blog/test-post-cover.jpg',
+  },
+  testPostNoImage: {
+    title: 'No Image Post',
+    date: '2025-02-01',
+    description: 'A post without an image.',
+    tags: ['testing'],
+    slug: 'no-image-post',
+    readingTime: 2,
+  },
+}))
+
+vi.mock('./pages/Blog/posts/index', () => ({
+  posts: [mockPostData.testPost, mockPostData.testPostNoImage],
+  getPost: (slug: string) =>
+    [mockPostData.testPost, mockPostData.testPostNoImage].find((p) => p.slug === slug),
+  getLazyPost: () => undefined,
+  loadPostContent: () => undefined,
+  formatDate: (d: string) => d,
+}))
+
 import { getMetaTags, normalisePath, escapeHtml } from './meta'
 
 describe('normalisePath', () => {
@@ -209,6 +239,120 @@ describe('getMetaTags', () => {
     it('returns correct canonical for /apps/ without trailing slash', () => {
       const meta = getMetaTags('/apps/')
       expect(meta.canonical).toBe('https://akli.dev/apps')
+    })
+  })
+
+  describe('blog index route /blog', () => {
+    it('returns correct title', () => {
+      const meta = getMetaTags('/blog')
+      expect(meta.title).toBe('Blog | Akli Aissat')
+    })
+
+    it('returns a description about the blog', () => {
+      const meta = getMetaTags('/blog')
+      expect(meta.description).toBeTruthy()
+      expect(meta.description.length).toBeGreaterThan(10)
+    })
+
+    it('does not include robots noindex', () => {
+      const meta = getMetaTags('/blog')
+      expect(meta.robots).toBeUndefined()
+    })
+
+    it('returns correct canonical URL', () => {
+      const meta = getMetaTags('/blog')
+      expect(meta.canonical).toBe('https://akli.dev/blog')
+    })
+
+    it('includes og:type as website', () => {
+      const meta = getMetaTags('/blog')
+      expect(meta.og.type).toBe('website')
+    })
+
+    it('includes twitter:card as summary', () => {
+      const meta = getMetaTags('/blog')
+      expect(meta.twitter.card).toBe('summary')
+    })
+  })
+
+  describe('blog post route /blog/<slug>', () => {
+
+    it('returns post title with site suffix', () => {
+      const meta = getMetaTags('/blog/test-post')
+      expect(meta.title).toBe('Test Post Title | Akli Aissat')
+    })
+
+    it('returns post description from frontmatter', () => {
+      const meta = getMetaTags('/blog/test-post')
+      expect(meta.description).toBe(
+        'A test post description for meta tag testing.'
+      )
+    })
+
+    it('is not marked noindex', () => {
+      const meta = getMetaTags('/blog/test-post')
+      expect(meta.robots).toBeUndefined()
+    })
+
+    it('returns correct canonical URL', () => {
+      const meta = getMetaTags('/blog/test-post')
+      expect(meta.canonical).toBe('https://akli.dev/blog/test-post')
+    })
+
+    it('includes og:type as article', () => {
+      const meta = getMetaTags('/blog/test-post')
+      expect(meta.og.type).toBe('article')
+    })
+
+    it('includes og:image when post has image', () => {
+      const meta = getMetaTags('/blog/test-post')
+      expect(meta.og.image).toBe('https://akli.dev/images/blog/test-post-cover.jpg')
+    })
+
+    it('includes twitter:image when post has image', () => {
+      const meta = getMetaTags('/blog/test-post')
+      expect(meta.twitter.image).toBe(
+        'https://akli.dev/images/blog/test-post-cover.jpg'
+      )
+    })
+
+    it('sets twitter:card to summary_large_image when post has image', () => {
+      const meta = getMetaTags('/blog/test-post')
+      expect(meta.twitter.card).toBe('summary_large_image')
+    })
+
+    it('sets twitter:card to summary when post has no image', () => {
+      const meta = getMetaTags('/blog/no-image-post')
+      expect(meta.twitter.card).toBe('summary')
+    })
+
+    it('does not include og:image when post has no image', () => {
+      const meta = getMetaTags('/blog/no-image-post')
+      expect(meta.og.image).toBeUndefined()
+    })
+
+    it('does not include twitter:image when post has no image', () => {
+      const meta = getMetaTags('/blog/no-image-post')
+      expect(meta.twitter.image).toBeUndefined()
+    })
+  })
+
+  describe('blog post 404 /blog/nonexistent-slug', () => {
+    it('returns 404 title for nonexistent post', () => {
+      const meta = getMetaTags('/blog/nonexistent-slug')
+      expect(meta.title).toBe('Page Not Found | Akli Aissat')
+    })
+
+    it('returns 404 description for nonexistent post', () => {
+      const meta = getMetaTags('/blog/nonexistent-slug')
+      expect(meta.description).toBe(
+        'The page you are looking for does not exist.'
+      )
+    })
+
+    it('includes robots noindex for nonexistent post', () => {
+      const meta = getMetaTags('/blog/nonexistent-slug')
+      expect(meta.robots).toBe('noindex')
     })
   })
 })

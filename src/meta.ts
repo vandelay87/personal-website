@@ -8,13 +8,17 @@ export interface MetaTags {
     url: string
     title: string
     description: string
+    image?: string
   }
   twitter: {
     card: string
     title: string
     description: string
+    image?: string
   }
 }
+
+import * as postsModule from './pages/Blog/posts/index'
 
 const BASE_URL = 'https://akli.dev'
 
@@ -28,6 +32,11 @@ const routeMeta: Record<string, { title: string; description: string }> = {
     title: 'Apps & Experiments | Akli Aissat',
     description:
       'Interactive side projects and experiments built to explore ideas and learn how things work.',
+  },
+  '/blog': {
+    title: 'Blog | Akli Aissat',
+    description:
+      'Articles on web development, engineering, and lessons learned building software.',
   },
 }
 
@@ -57,22 +66,27 @@ const buildMetaTags = (
   description: string,
   canonical: string,
   robots?: string,
+  ogType: string = 'website',
+  image?: string,
 ): MetaTags => {
+  const fullImage = image ? `${BASE_URL}${image}` : undefined
   return {
     title,
     description,
     canonical,
     ...(robots && { robots }),
     og: {
-      type: 'website',
+      type: ogType,
       url: canonical,
       title,
       description,
+      ...(fullImage && { image: fullImage }),
     },
     twitter: {
-      card: 'summary',
+      card: fullImage ? 'summary_large_image' : 'summary',
       title,
       description,
+      ...(fullImage && { image: fullImage }),
     },
   }
 }
@@ -84,6 +98,22 @@ export const getMetaTags = (path: string): MetaTags => {
 
   if (route) {
     return buildMetaTags(route.title, route.description, canonical)
+  }
+
+  const blogPostMatch = normalised.match(/^\/blog\/(.+)$/)
+  if (blogPostMatch) {
+    const slug = blogPostMatch[1]
+    const post = postsModule.getPost(slug)
+    if (post) {
+      return buildMetaTags(
+        `${post.title} | Akli Aissat`,
+        post.description,
+        canonical,
+        undefined,
+        'article',
+        post.image,
+      )
+    }
   }
 
   return buildMetaTags(notFoundMeta.title, notFoundMeta.description, canonical, 'noindex')
