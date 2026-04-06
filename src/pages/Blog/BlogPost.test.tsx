@@ -68,7 +68,7 @@ vi.mock('./posts', () => ({
   getPost: (slug: string) => mockPosts.find((p: PostMeta) => p.slug === slug),
   formatDate: (dateString: string): string => {
     const date = new Date(dateString + 'T00:00:00')
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('en-GB', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -106,7 +106,7 @@ describe('BlogPost', () => {
 
   it('renders post metadata', () => {
     renderWithRoute('test-post')
-    expect(screen.getByText(/April 6, 2026/)).toBeInTheDocument()
+    expect(screen.getByText(/6 April 2026/)).toBeInTheDocument()
     expect(screen.getByText(/3 min read/)).toBeInTheDocument()
   })
 

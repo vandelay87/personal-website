@@ -41,7 +41,7 @@ const extractSlug = (path: string): string => {
 
 export const formatDate = (dateString: string): string => {
   const date = new Date(dateString + 'T00:00:00')
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString('en-GB', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
