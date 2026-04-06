@@ -12,6 +12,7 @@ describe('Navigation', () => {
     )
     expect(screen.getByText('Home')).toBeInTheDocument()
     expect(screen.getByText('Apps')).toBeInTheDocument()
+    expect(screen.getByText('Blog')).toBeInTheDocument()
   })
 
   it('links have correct href', () => {
@@ -24,6 +25,10 @@ describe('Navigation', () => {
     expect(screen.getByText('Apps').closest('a')).toHaveAttribute(
       'href',
       '/apps'
+    )
+    expect(screen.getByText('Blog').closest('a')).toHaveAttribute(
+      'href',
+      '/blog'
     )
   })
 })
