@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react'
+import React, { type ComponentType } from 'react'
 import type { MDXComponents } from '*.mdx'
 
 export interface PostMeta {
@@ -21,15 +21,14 @@ interface Frontmatter {
   tags: string[]
 }
 
-const frontmatterModules = import.meta.glob('./*.mdx', {
-  eager: true,
-  import: 'frontmatter',
-}) as Record<string, Frontmatter>
+interface EagerMDXModule {
+  frontmatter: Frontmatter
+  readingTime: number
+}
 
-const readingTimeModules = import.meta.glob('./*.mdx', {
+const eagerModules = import.meta.glob('./*.mdx', {
   eager: true,
-  import: 'readingTime',
-}) as Record<string, number>
+}) as Record<string, EagerMDXModule>
 
 const contentModules = import.meta.glob('./*.mdx') as Record<
   string,
@@ -40,11 +39,11 @@ function extractSlug(path: string): string {
   return path.replace('./', '').replace('.mdx', '')
 }
 
-export const posts: PostMeta[] = Object.entries(frontmatterModules)
-  .map(([path, frontmatter]) => ({
-    ...frontmatter,
+export const posts: PostMeta[] = Object.entries(eagerModules)
+  .map(([path, mod]) => ({
+    ...mod.frontmatter,
     slug: extractSlug(path),
-    readingTime: readingTimeModules[path] ?? 1,
+    readingTime: mod.readingTime ?? 1,
   }))
   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
@@ -57,4 +56,25 @@ export function loadPostContent(
 ): (() => Promise<MDXModule>) | undefined {
   const path = `./${slug}.mdx`
   return contentModules[path]
+}
+
+const lazyCache = new Map<
+  string,
+  React.LazyExoticComponent<ComponentType<{ components?: MDXComponents }>>
+>()
+
+export function getLazyPost(
+  slug: string
+):
+  | React.LazyExoticComponent<ComponentType<{ components?: MDXComponents }>>
+  | undefined {
+  const loader = loadPostContent(slug)
+  if (!loader) return undefined
+
+  let cached = lazyCache.get(slug)
+  if (!cached) {
+    cached = React.lazy(() => loader())
+    lazyCache.set(slug, cached)
+  }
+  return cached
 }

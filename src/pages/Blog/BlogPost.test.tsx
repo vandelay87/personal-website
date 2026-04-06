@@ -1,7 +1,16 @@
 import { render, screen } from '@testing-library/react'
+import { lazy } from 'react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
 import BlogPost from './BlogPost'
+
+const LazyTestPost = lazy(() =>
+  Promise.resolve({
+    default: ({ components: _components }: { components?: Record<string, unknown> }) => (
+      <div>MDX content here</div>
+    ),
+  })
+)
 
 vi.mock('./posts', () => ({
   getPost: (slug: string) => {
@@ -17,14 +26,9 @@ vi.mock('./posts', () => ({
     }
     return undefined
   },
-  loadPostContent: (slug: string) => {
+  getLazyPost: (slug: string) => {
     if (slug === 'test-post') {
-      return () =>
-        Promise.resolve({
-          default: ({ components: _components }: { components?: Record<string, unknown> }) => (
-            <div>MDX content here</div>
-          ),
-        })
+      return LazyTestPost
     }
     return undefined
   },

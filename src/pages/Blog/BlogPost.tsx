@@ -1,17 +1,13 @@
+import Typography from '@components/Typography'
 import NotFound from '@pages/NotFound'
-import { Suspense, lazy, useMemo } from 'react'
+import { Suspense } from 'react'
 import { useParams } from 'react-router-dom'
-import { getPost, loadPostContent } from './posts'
+import { getLazyPost, getPost } from './posts'
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>()
   const post = slug ? getPost(slug) : undefined
-  const loader = slug ? loadPostContent(slug) : undefined
-
-  const PostContent = useMemo(() => {
-    if (!loader) return undefined
-    return lazy(() => loader())
-  }, [loader])
+  const PostContent = slug ? getLazyPost(slug) : undefined
 
   if (!post || !PostContent) {
     return <NotFound />
@@ -19,11 +15,11 @@ export default function BlogPost() {
 
   return (
     <article>
-      <h1>{post.title}</h1>
-      <p>
+      <Typography variant="heading1">{post.title}</Typography>
+      <Typography variant="body">
         {post.date} - {post.readingTime} min read
-      </p>
-      <Suspense fallback={<p>Loading...</p>}>
+      </Typography>
+      <Suspense fallback={<Typography variant="body">Loading...</Typography>}>
         <PostContent components={{}} />
       </Suspense>
     </article>
