@@ -1,5 +1,5 @@
 import { render, screen, within } from '@testing-library/react'
-import { lazy } from 'react'
+import React, { lazy } from 'react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
 import BlogPost from './BlogPost'
