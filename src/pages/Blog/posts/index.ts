@@ -1,4 +1,4 @@
-import React, { type ComponentType } from 'react'
+import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
 import type { MDXComponents } from '*.mdx'
 
 export interface PostMeta {
@@ -70,20 +70,20 @@ export const loadPostContent = (
 
 const lazyCache = new Map<
   string,
-  React.LazyExoticComponent<ComponentType<{ components?: MDXComponents }>>
+  LazyExoticComponent<ComponentType<{ components?: MDXComponents }>>
 >()
 
 export const getLazyPost = (
   slug: string
 ):
-  | React.LazyExoticComponent<ComponentType<{ components?: MDXComponents }>>
+  | LazyExoticComponent<ComponentType<{ components?: MDXComponents }>>
   | undefined => {
   const loader = loadPostContent(slug)
   if (!loader) return undefined
 
   let cached = lazyCache.get(slug)
   if (!cached) {
-    cached = React.lazy(() => loader())
+    cached = lazy(() => loader())
     lazyCache.set(slug, cached)
   }
   return cached

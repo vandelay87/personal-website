@@ -7,7 +7,7 @@ import Home from '@pages/Home'
 import NotFound from '@pages/NotFound'
 import { Routes, Route } from 'react-router-dom'
 
-export default function App() {
+const App = () => {
   return (
     <>
       <Header />
@@ -23,3 +23,5 @@ export default function App() {
     </>
   )
 }
+
+export default App

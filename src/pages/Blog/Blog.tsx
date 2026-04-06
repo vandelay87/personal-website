@@ -44,6 +44,7 @@ const Blog = () => {
             No posts found for this tag.
           </Typography>
           <button
+            type="button"
             onClick={() => setSearchParams({})}
             className={styles.clearLink}
           >
