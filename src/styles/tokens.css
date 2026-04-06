@@ -59,6 +59,12 @@
   /* Error */
   --color-error:         #DC2626;
 
+  /* Success */
+  --color-success:       #16a34a;
+
+  /* Warning */
+  --color-warning:       #D97706;
+
   /* ── Spacing ──────────────────────────────────────────────── */
   --space-1:   0.25rem;  /* 4px  */
   --space-2:   0.5rem;   /* 8px  */
@@ -124,4 +130,6 @@
   --color-link:          #60A5FA;
   --color-link-hover:    #93C5FD;
   --color-error:         #F87171;
+  --color-success:       #22c55e;
+  --color-warning:       #F59E0B;
 }

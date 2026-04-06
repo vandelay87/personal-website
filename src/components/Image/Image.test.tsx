@@ -66,7 +66,8 @@ describe('Image', () => {
 
     const figure = container.querySelector('figure')
     expect(figure).toHaveClass('custom-container')
-    expect(figure?.style.aspectRatio).toBe('16/9')
+    const imageContainer = figure?.querySelector('div')
+    expect(imageContainer?.style.aspectRatio).toBe('16/9')
 
     const img = screen.getByAltText('Test Image')
     expect(img.style.objectFit).toBe('contain')

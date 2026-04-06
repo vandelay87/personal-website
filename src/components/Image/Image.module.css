@@ -3,7 +3,7 @@
   overflow: hidden;
   background-color: var(--color-bg-subtle);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-none);
 }
 
 /* ── Placeholder overlay ─────────────────────────────────── */
@@ -65,7 +65,7 @@
 .emptyPlaceholder {
   width: 3rem;
   height: 3rem;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-none);
   background-color: var(--color-bg-subtle);
   display: flex;
   align-items: center;
@@ -114,5 +114,14 @@
 
 .loaded {
   opacity: 1;
+}
+
+/* ── Caption ────────────────────────────────────────────── */
+.caption {
+  padding: var(--space-3) 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+  font-style: italic;
 }
 

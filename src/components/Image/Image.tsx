@@ -24,6 +24,8 @@ export interface ImageProps extends Omit<
   className?: string
   containerClassName?: string
   lazy?: boolean
+  caption?: string
+  maxWidth?: string
 }
 
 const Image: FC<ImageProps> = ({
@@ -43,6 +45,8 @@ const Image: FC<ImageProps> = ({
   containerClassName = '',
   lazy = true,
   srcSet,
+  caption,
+  maxWidth,
 }) => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [isError, setIsError] = useState(false)
@@ -102,11 +106,18 @@ const Image: FC<ImageProps> = ({
   return (
     <figure
       ref={containerRef}
-      className={`${styles.container} ${containerClassName}`}
+      className={`${containerClassName}`}
       style={{
-        aspectRatio: aspectRatio !== 'auto' ? aspectRatio : undefined,
+        maxWidth: maxWidth ?? undefined,
+        marginInline: maxWidth ? 'auto' : undefined,
       }}
     >
+      <div
+        className={styles.container}
+        style={{
+          aspectRatio: aspectRatio !== 'auto' ? aspectRatio : undefined,
+        }}
+      >
       {!isLoaded && !isError && (
         <div
           className={`${styles.placeholderOverlay} ${placeholder === 'blur' ? styles.placeholderOverlayBlur : ''}`}
@@ -195,6 +206,10 @@ const Image: FC<ImageProps> = ({
         />
       )}
 
+      </div>
+      {caption && (
+        <figcaption className={styles.caption}>{caption}</figcaption>
+      )}
     </figure>
   )
 }

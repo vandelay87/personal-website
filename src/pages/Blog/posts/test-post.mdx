@@ -1,14 +1,82 @@
 ---
 title: Test Post
 date: 2026-04-06
-description: A test post to verify the MDX pipeline.
-tags: [test]
+description: A test post to verify the MDX pipeline and showcase all available components.
+tags: [test, react, aws]
 ---
 
 # Test Post
 
-This is a test post with some code:
+This is a test post demonstrating all available MDX components.
 
-```typescript
-const hello = 'world'
+## Code Blocks
+
+Here's a code block with a filename header:
+
+```typescript title="lambda/handler.ts"
+export const handler = async (event: APIGatewayProxyEventV2) => {
+  const result = await client.send(new ScanCommand({ TableName }))
+  return {
+    statusCode: 200,
+    body: JSON.stringify(result),
+  }
+}
 ```
+
+And one without a filename:
+
+```bash
+pnpm install
+pnpm dev
+```
+
+## Callouts
+
+<Callout type="tip">
+  DynamoDB Scan reads every item — fine for 151 Pokemon, not for millions.
+</Callout>
+
+<Callout type="warning">
+  Never hardcode credentials in your CDK stack code. Use Secrets Manager or environment variables.
+</Callout>
+
+<Callout type="info">
+  The Pokedex API is served from api.akli.dev via a shared CloudFront distribution.
+</Callout>
+
+## Images
+
+<Image src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" alt="Pikachu sprite" caption="Pikachu — the most recognisable Pokemon" maxWidth="400px" />
+
+## File Trees
+
+<FileTree title="pokedex" content={`src/
+  components/
+    PokemonCard/
+      PokemonCard.tsx
+      PokemonCard.module.css
+      index.ts
+    PokemonList/
+      PokemonList.tsx
+      index.ts
+  hooks/
+    usePokemonList.ts
+    usePokemonDetail.ts
+  types/
+    pokemon.ts`} />
+
+## Regular Markdown
+
+Here's some **bold** and *italic* text, plus a [link to the Pokedex](https://akli.dev/apps/pokedex).
+
+> This is a blockquote — useful for highlighting key takeaways.
+
+- Bullet point one
+- Bullet point two
+- Bullet point three
+
+| Feature | Status |
+|---------|--------|
+| Code blocks | Done |
+| Callouts | Done |
+| File trees | Done |

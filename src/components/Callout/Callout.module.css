@@ -1,0 +1,38 @@
+.callout {
+  display: flex;
+  margin: var(--space-4) 0;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-none);
+  background-color: var(--color-bg-subtle);
+  box-shadow: var(--shadow-md);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text);
+}
+
+.accentBar {
+  flex-shrink: 0;
+  width: 10px;
+}
+
+.content {
+  padding: var(--space-4);
+}
+
+.indicator {
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-2);
+}
+
+.tip .accentBar {
+  background-color: var(--color-success);
+}
+
+.warning .accentBar {
+  background-color: var(--color-warning);
+}
+
+.info .accentBar {
+  background-color: var(--color-primary);
+}

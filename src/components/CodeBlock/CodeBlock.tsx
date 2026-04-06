@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState, useCallback } from 'react'
 
 import type { HTMLAttributes } from 'react'
 
@@ -21,15 +21,19 @@ const CodeBlock = ({
   ...rest
 }: CodeBlockProps) => {
   const preRef = useRef<HTMLPreElement>(null)
+  const [copied, setCopied] = useState(false)
 
   const title = extractTitle(dataMeta)
 
-  const handleCopy = () => {
+  const handleCopy = useCallback(() => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       const text = preRef.current?.textContent ?? ''
-      navigator.clipboard.writeText(text).catch(() => {})
+      navigator.clipboard.writeText(text).then(() => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      }).catch(() => {})
     }
-  }
+  }, [])
 
   return (
     <div className={styles.wrapper}>
@@ -43,9 +47,20 @@ const CodeBlock = ({
           type="button"
           className={styles.copyButton}
           onClick={handleCopy}
-          aria-label="Copy code"
+          aria-label={copied ? 'Copied!' : 'Copy code'}
         >
-          Copy
+          <span className={`${styles.copyIcon}${copied ? ` ${styles.copyIconCopied}` : ''}`}>
+            {copied ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <rect x="8" y="8" width="14" height="14" />
+                <path d="M8 16H2V2H16V8" />
+              </svg>
+            )}
+          </span>
         </button>
       </div>
       <pre
