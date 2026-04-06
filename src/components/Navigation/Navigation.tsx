@@ -6,6 +6,7 @@ export default function Navigation() {
     <nav className={styles.nav} aria-label="Main navigation">
       <Link to="/">Home</Link>
       <Link to="/apps">Apps</Link>
+      <Link to="/blog">Blog</Link>
     </nav>
   )
 }
