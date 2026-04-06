@@ -48,6 +48,12 @@ const buildHeadHtml = (routePath: string): string => {
     `<meta property="og:description" content="${escapeHtml(meta.og.description)}" />`
   )
 
+  if (meta.og.image) {
+    lines.push(
+      `<meta property="og:image" content="${escapeHtml(meta.og.image)}" />`
+    )
+  }
+
   lines.push(
     `<meta name="twitter:card" content="${escapeHtml(meta.twitter.card)}" />`
   )
@@ -57,6 +63,12 @@ const buildHeadHtml = (routePath: string): string => {
   lines.push(
     `<meta name="twitter:description" content="${escapeHtml(meta.twitter.description)}" />`
   )
+
+  if (meta.twitter.image) {
+    lines.push(
+      `<meta name="twitter:image" content="${escapeHtml(meta.twitter.image)}" />`
+    )
+  }
 
   lines.push(`<link rel="canonical" href="${escapeHtml(meta.canonical)}" />`)
 

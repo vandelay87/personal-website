@@ -8,6 +8,7 @@ export interface PostMeta {
   tags: string[]
   slug: string
   readingTime: number
+  image?: string
 }
 
 interface MDXModule {

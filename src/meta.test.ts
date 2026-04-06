@@ -1,7 +1,36 @@
 // @vitest-environment node
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+
+const mockPostData = vi.hoisted(() => ({
+  testPost: {
+    title: 'Test Post Title',
+    date: '2025-01-15',
+    description: 'A test post description for meta tag testing.',
+    tags: ['testing'],
+    slug: 'test-post',
+    readingTime: 3,
+    image: '/images/blog/test-post-cover.jpg',
+  },
+  testPostNoImage: {
+    title: 'No Image Post',
+    date: '2025-02-01',
+    description: 'A post without an image.',
+    tags: ['testing'],
+    slug: 'no-image-post',
+    readingTime: 2,
+  },
+}))
+
+vi.mock('./pages/Blog/posts/index', () => ({
+  posts: [mockPostData.testPost, mockPostData.testPostNoImage],
+  getPost: (slug: string) =>
+    [mockPostData.testPost, mockPostData.testPostNoImage].find((p) => p.slug === slug),
+  getLazyPost: () => undefined,
+  loadPostContent: () => undefined,
+  formatDate: (d: string) => d,
+}))
+
 import { getMetaTags, normalisePath, escapeHtml } from './meta'
-import type { MetaTags } from './meta'
 
 describe('normalisePath', () => {
   it('strips trailing slash from /apps/', () => {
@@ -247,32 +276,6 @@ describe('getMetaTags', () => {
   })
 
   describe('blog post route /blog/<slug>', () => {
-    const testPost = {
-      title: 'Test Post Title',
-      date: '2025-01-15',
-      description: 'A test post description for meta tag testing.',
-      tags: ['testing'],
-      slug: 'test-post',
-      readingTime: 3,
-      image: '/images/blog/test-post-cover.jpg',
-    }
-
-    const testPostNoImage = {
-      title: 'No Image Post',
-      date: '2025-02-01',
-      description: 'A post without an image.',
-      tags: ['testing'],
-      slug: 'no-image-post',
-      readingTime: 2,
-    }
-
-    beforeEach(() => {
-      vi.doMock('./pages/Blog/posts/index', () => ({
-        posts: [testPost, testPostNoImage],
-        getPost: (slug: string) =>
-          [testPost, testPostNoImage].find((p) => p.slug === slug),
-      }))
-    })
 
     it('returns post title with site suffix', () => {
       const meta = getMetaTags('/blog/test-post')
