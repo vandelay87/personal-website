@@ -73,6 +73,14 @@ export default [
     },
   },
   {
+    files: ['src/lambda-handler.ts'],
+    languageOptions: {
+      globals: {
+        awslambda: 'readonly',
+      },
+    },
+  },
+  {
     files: ['**/*.test.{ts,tsx}'],
     rules: {
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_|^mock' }],
