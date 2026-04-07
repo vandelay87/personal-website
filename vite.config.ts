@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 import mdx from '@mdx-js/rollup'
 import rehypeShiki from '@shikijs/rehype'
 import react from '@vitejs/plugin-react'
+import rehypeMermaid from 'rehype-mermaid'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import { imagetools } from 'vite-imagetools'
@@ -38,6 +39,12 @@ export default defineConfig(({ isSsrBuild }) => ({
         remarkReadingTime,
       ],
       rehypePlugins: [
+        [rehypeMermaid, {
+          strategy: 'inline-svg',
+          mermaidConfig: {
+            theme: 'neutral',
+          },
+        }],
         [rehypeShiki, {
           themes: { light: 'github-light', dark: 'github-dark' },
           defaultColor: false,
