@@ -12,15 +12,15 @@ I built a full-stack Pokedex as a portfolio project. It runs on AWS, costs almos
 
 You can try it at [akli.dev/apps/pokedex](https://akli.dev/apps/pokedex).
 
-## Three CDK stacks
+## The CDK stacks
 
-The infrastructure lives in a separate repo from the frontend. I split it into three stacks because each has different deployment constraints.
+The infrastructure lives in a separate repo from the frontend. The Pokedex spans three of the four stacks because each has different deployment constraints.
 
 <FileTree title="akli-infrastructure" content={"bin/\n  akli-infrastructure.ts\nlib/\n  certificate-stack.ts\n  pokedex-stack.ts\n  api-stack.ts\nlambda/\n  pokedex-handler.ts\n  seed-pokemon.ts\ndata/\n  pokemon.json"} />
 
 ```mermaid
 graph TD
-    subgraph "CertificateStack (us-east-1)"
+    subgraph "AkliCertificateStack (us-east-1)"
         HZ[Route 53 Hosted Zone]
         SC[ACM Certificate<br/>akli.dev, www.akli.dev]
         AC[ACM Certificate<br/>api.akli.dev]
@@ -63,6 +63,8 @@ const pokedexStack = new PokedexStack(app, 'PokedexStack', {
 })
 
 new ApiStack(app, 'ApiStack', {
+  env: { account, region: 'eu-west-2' },
+  crossRegionReferences: true,
   apiCertificate: certStack.apiCertificate,
   hostedZone: certStack.hostedZone,
   pokedexApiUrl: pokedexStack.httpApi.apiEndpoint,
@@ -92,16 +94,26 @@ export const handler = async (
       ProjectionExpression: 'id, #n, types, sprite',
       ExpressionAttributeNames: { '#n': 'name' },
     }))
-    const items = (result.Items ?? []).map((item) => unmarshall(item))
-    return jsonResponse(200, { pokemon: items })
+    const items = (result.Items || []).map(item => unmarshall(item))
+    return jsonResponse(200, { pokemon: items, count: items.length, nextToken: null })
   }
 
   if (routeKey === ROUTE_DETAIL) {
-    const id = Number(event.pathParameters?.id)
+    const idParam = event.pathParameters?.id
+    const id = Number(idParam)
+    if (!idParam || isNaN(id)) {
+      return jsonResponse(404, { error: 'Pokemon not found' })
+    }
+
     const result = await client.send(new GetItemCommand({
       TableName: TABLE_NAME,
       Key: { id: { N: String(id) } },
     }))
+
+    if (!result.Item) {
+      return jsonResponse(404, { error: 'Pokemon not found' })
+    }
+
     return jsonResponse(200, unmarshall(result.Item))
   }
 }
@@ -202,7 +214,7 @@ The result: HP fills first, then Attack, then Defense, cascading down the list. 
 
 ## What I'd do differently
 
-**Pagination.** The list endpoint does a full table scan. With 151 Pokemon that's fine. With 1000+ it wouldn't be. I'd add cursor-based pagination with DynamoDB's `LastEvaluatedKey`.
+**Pagination.** The list endpoint does a full table scan. With 151 Pokemon that's fine. With 1000+ it wouldn't be. The response already includes a `nextToken` field (always `null` for now), so adding cursor-based pagination with DynamoDB's `LastEvaluatedKey` would be backwards-compatible.
 
 **Shared types.** The frontend and infrastructure repos define the same `Pokemon` interface independently. A shared package or a generated OpenAPI spec would keep them in sync.
 
