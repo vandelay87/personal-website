@@ -106,7 +106,7 @@ const Image: FC<ImageProps> = ({
   return (
     <figure
       ref={containerRef}
-      className={`${containerClassName}`}
+      className={`${styles.figure} ${containerClassName}`}
       style={{
         maxWidth: maxWidth ?? undefined,
         marginInline: maxWidth ? 'auto' : '0',

@@ -24,6 +24,11 @@
   aspect-ratio: 16 / 9;
   width: 100%;
   overflow: hidden;
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.imageWrapper > figure > div {
+  border: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -46,7 +51,6 @@
 }
 
 .title {
-  margin-block-start: 0;
   margin-block-end: var(--space-2);
 }
 
