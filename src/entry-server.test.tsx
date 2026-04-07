@@ -118,19 +118,20 @@ describe('entry-server render', () => {
 
   describe('error handling', () => {
     it('rejects or signals an error when the render crashes', async () => {
-      // Mock a module that will cause the React tree to throw during render
+      vi.resetModules()
+
       vi.doMock('./App', () => ({
         default: () => {
           throw new Error('Simulated render crash')
         },
       }))
 
-      // Re-import to pick up the mock
       const { render: renderWithError } = await import('./entry-server')
 
       await expect(renderWithError('/')).rejects.toThrow()
 
       vi.doUnmock('./App')
+      vi.resetModules()
     })
   })
 })
