@@ -10,7 +10,7 @@ export const handler = async (
   const path = normalisePath(rawPath)
 
   try {
-    const html = render(path)
+    const html = await render(path)
     const statusCode = isKnownRoute(path) ? 200 : 404
 
     return {
