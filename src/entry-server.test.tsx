@@ -67,6 +67,19 @@ describe('entry-server render', () => {
     })
   })
 
+  describe('blog index page /blog', () => {
+    it('returns non-empty HTML', async () => {
+      const html = await render('/blog')
+      expect(html).toBeTruthy()
+      expect(html.length).toBeGreaterThan(0)
+    })
+
+    it('contains the correct <title> tag', async () => {
+      const html = await render('/blog')
+      expect(html).toContain('<title>Blog | Akli Aissat</title>')
+    })
+  })
+
   describe('canonical link', () => {
     it('includes canonical link for /', async () => {
       const html = await render('/')

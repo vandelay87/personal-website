@@ -106,7 +106,15 @@ const resolveSuspenseBoundaries = (html: string): string => {
     let depth = 1
     let pos = contentStart
     while (depth > 0 && pos < result.length) {
-      const nextOpen = result.indexOf('<div', pos)
+      const nextOpen = (() => {
+        let i = result.indexOf('<div', pos)
+        while (i !== -1) {
+          const ch = result[i + 4]
+          if (ch === '>' || ch === ' ' || ch === undefined) return i
+          i = result.indexOf('<div', i + 4)
+        }
+        return -1
+      })()
       const nextClose = result.indexOf('</div>', pos)
       if (nextClose === -1) break
       if (nextOpen !== -1 && nextOpen < nextClose) {
@@ -121,16 +129,10 @@ const resolveSuspenseBoundaries = (html: string): string => {
           const fallbackPattern = new RegExp(
             `<!--\\$\\?--><template id="B:${bId}"></template>[\\s\\S]*?<!--/\\$-->`,
           )
-          result = result.replace(
-            fallbackPattern,
-            `<!--$-->${resolvedContent}<!--/$-->`,
-          )
+          result = result.replace(fallbackPattern, resolvedContent)
 
           // Remove the hidden div
-          result = result.replace(
-            result.slice(hiddenStart, nextClose + 6),
-            '',
-          )
+          result = result.slice(0, hiddenStart) + result.slice(nextClose + 6)
         } else {
           pos = nextClose + 6
         }
@@ -139,7 +141,7 @@ const resolveSuspenseBoundaries = (html: string): string => {
   }
 
   // Remove the React streaming runtime scripts
-  result = result.replace(/<script>\$RB[\s\S]*?<\/script>/g, '')
+  result = result.replace(/<script>\$R[A-Z][\s\S]*?<\/script>/g, '')
 
   return result
 }
