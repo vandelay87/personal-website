@@ -27,17 +27,21 @@ body {
 
 /* ── Mermaid diagram styles ─────────────────────────────── */
 
-pre.mermaid {
+svg[id^="mermaid-"] {
+  display: block;
+  margin-inline: auto;
+  margin-block: var(--space-8);
+  padding: var(--space-4);
+  height: auto;
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-none);
   box-shadow: var(--shadow-md);
-  padding: var(--space-4);
-  background: var(--color-surface);
-  text-align: center;
 }
 
-[data-theme="dark"] .mermaid {
-  filter: invert(0.88) hue-rotate(180deg);
+[data-theme="dark"] svg[id^="mermaid-"] {
+  filter: invert(1) hue-rotate(180deg);
+  border-color: #000000;
+  box-shadow: 4px 4px 0 #000000;
 }
 
 /* ── Global accessibility utilities ──────────────────────── */

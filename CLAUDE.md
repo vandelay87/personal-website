@@ -27,6 +27,8 @@ To write a new PRD, copy `docs/prds/template.md` and fill it in.
 - Neo-brutalist design: use `var(--radius-none)` for border-radius — no rounded corners on any component
 - Use const arrow functions, not function declarations — enforced by ESLint (`func-style: expression`)
 - After modifying TSX files, run `pnpm exec eslint --fix` on changed files to auto-fix import order
+- Site images (cards, hero) live in `src/assets/` — imported via Vite, get hashed filenames and responsive srcSet
+- Blog post images live in `public/images/blog/` — referenced by URL string in MDX, served as-is, no Vite processing. Optimise manually before adding.
 
 ## Workflow
 

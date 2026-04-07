@@ -1,5 +1,6 @@
 .article {
   padding-block-end: var(--space-12);
+  overflow-x: hidden;
 }
 
 .tags {
@@ -7,7 +8,7 @@
   flex-wrap: wrap;
   gap: var(--space-2);
   margin-block-start: var(--space-2);
-  margin-block-end: var(--space-4);
+  margin-block-end: var(--space-12);
 }
 
 .tag {

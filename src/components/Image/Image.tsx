@@ -109,7 +109,7 @@ const Image: FC<ImageProps> = ({
       className={`${containerClassName}`}
       style={{
         maxWidth: maxWidth ?? undefined,
-        marginInline: maxWidth ? 'auto' : undefined,
+        marginInline: maxWidth ? 'auto' : '0',
       }}
     >
       <div
