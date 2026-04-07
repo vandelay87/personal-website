@@ -43,9 +43,9 @@ const renderNodes = (nodes: TreeNode[], isRoot: boolean): ReactNode => {
   if (nodes.length === 0) return null
 
   return (
-    <ul className={isRoot ? styles.rootList : styles.list} {...(!isRoot && { role: 'group' })}>
+    <ul className={isRoot ? styles.rootList : styles.list}>
       {nodes.map((node, index) => (
-        <li key={`${node.name}-${index}`} className={styles.item} role="treeitem" aria-expanded={node.children.length > 0 ? true : undefined}>
+        <li key={`${node.name}-${index}`} className={styles.item}>
           <span><span aria-hidden="true">{node.isFolder ? '📁 ' : '📄 '}</span>{node.name}</span>
           {node.children.length > 0 && renderNodes(node.children, false)}
         </li>
@@ -62,10 +62,10 @@ const FileTree: FC<FileTreeProps> = ({ content, title }) => {
   const tree = parseTree(content)
 
   return (
-    <div className={styles.tree} role="tree" aria-label={title ?? 'File tree'}>
+    <nav className={styles.tree} aria-label={title ?? 'File tree'}>
       {title && <div className={styles.title}>{title}</div>}
       {renderNodes(tree, true)}
-    </div>
+    </nav>
   )
 }
 

@@ -1,5 +1,5 @@
 import { render } from './entry-server'
-import { KNOWN_ROUTES, normalisePath } from './meta'
+import { isKnownRoute, normalisePath } from './meta'
 
 export const handler = async (
   event: Record<string, unknown>
@@ -11,7 +11,7 @@ export const handler = async (
 
   try {
     const html = render(path)
-    const statusCode = KNOWN_ROUTES.has(path) ? 200 : 404
+    const statusCode = isKnownRoute(path) ? 200 : 404
 
     return {
       statusCode,

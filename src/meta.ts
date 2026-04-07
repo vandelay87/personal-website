@@ -61,6 +61,16 @@ export const escapeHtml = (str: string): string => {
 
 export const KNOWN_ROUTES = new Set(Object.keys(routeMeta))
 
+export const isKnownRoute = (path: string): boolean => {
+  if (KNOWN_ROUTES.has(path)) return true
+  const blogPostMatch = path.match(/^\/blog\/(.+)$/)
+  if (blogPostMatch) {
+    const post = postsModule.getPost(blogPostMatch[1])
+    return !!post
+  }
+  return false
+}
+
 const buildMetaTags = (
   title: string,
   description: string,

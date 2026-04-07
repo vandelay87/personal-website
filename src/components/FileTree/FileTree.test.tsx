@@ -48,13 +48,13 @@ describe('FileTree', () => {
     const { container } = render(<FileTree content={nestedTree} />)
 
     expect(screen.getByText(/deepFile\.ts/)).toBeInTheDocument()
-    expect(container.querySelectorAll('ul, li, [role="treeitem"]').length).toBeGreaterThan(0)
+    expect(container.querySelectorAll('ul, li').length).toBeGreaterThan(0)
   })
 
   it('renders empty tree gracefully', () => {
     const { container } = render(<FileTree content="" />)
 
     expect(container).toBeInTheDocument()
-    expect(container.querySelectorAll('li, [role="treeitem"]').length).toBe(0)
+    expect(container.querySelectorAll('li').length).toBe(0)
   })
 })
