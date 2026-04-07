@@ -27,6 +27,8 @@ try {
 </html>`
 }
 
+const [templateBeforeOutlet, templateAfterOutlet] = template.split('<!--ssr-outlet-->')
+
 const buildHeadHtml = (routePath: string): string => {
   const meta = getMetaTags(routePath)
   const lines: string[] = []
@@ -149,8 +151,7 @@ const resolveSuspenseBoundaries = (html: string): string => {
 export const render = (url: string): Promise<string> =>
   new Promise<string>((resolve, reject) => {
     const head = buildHeadHtml(url)
-    const [beforeOutlet, afterOutlet] = template.split('<!--ssr-outlet-->')
-    const beforeHtml = beforeOutlet.replace('<!--ssr-head-->', head)
+    const beforeHtml = templateBeforeOutlet.replace('<!--ssr-head-->', head)
 
     const { pipe } = renderToPipeableStream(
       <StaticRouter location={url}>
@@ -166,7 +167,7 @@ export const render = (url: string): Promise<string> =>
           })
 
           reactStream.on('end', () => {
-            const fullHtml = beforeHtml + reactHtml + afterOutlet
+            const fullHtml = beforeHtml + reactHtml + templateAfterOutlet
             resolve(resolveSuspenseBoundaries(fullHtml))
           })
 
