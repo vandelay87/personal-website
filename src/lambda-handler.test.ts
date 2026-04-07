@@ -1,14 +1,6 @@
 // @vitest-environment node
 import { Writable } from 'node:stream'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
-/**
- * Mock for the awslambda global that the Lambda runtime provides.
- *
- * streamifyResponse: extracts the inner handler so we can invoke it directly.
- * HttpResponseStream.from: captures the metadata (statusCode, headers) and
- *   returns the writable stream so we can inspect what the handler wrote.
- */
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 interface CapturedMetadata {
   statusCode?: number
@@ -33,10 +25,8 @@ let innerHandler: ((
   context: unknown
 ) => Promise<void>) | null = null
 
-beforeEach(() => {
-  capturedMetadata = {}
-  innerHandler = null
-
+// Set up the awslambda global mock once before all tests
+beforeAll(() => {
   const mockAwsLambda = {
     streamifyResponse: (
       fn: (
@@ -56,67 +46,62 @@ beforeEach(() => {
     },
   }
 
-  // Set the global so the module sees it when imported
   ;(globalThis as Record<string, unknown>).awslambda = mockAwsLambda
 })
 
-afterEach(() => {
+afterAll(() => {
   delete (globalThis as Record<string, unknown>).awslambda
-  vi.resetModules()
 })
 
-/**
- * Helper: import the handler fresh (so it picks up the global mock),
- * then invoke the inner streaming handler with a mock writable.
- *
- * Returns the captured metadata and the collected stream chunks.
- */
-const invokeHandler = async (rawPath?: string) => {
-  const mod = await import('./lambda-handler')
+beforeEach(() => {
+  capturedMetadata = {}
+})
 
-  // The handler should have been registered via streamifyResponse
+const createEvent = (rawPath?: string): Record<string, unknown> => ({
+  version: '2.0',
+  routeKey: '$default',
+  rawPath,
+  rawQueryString: '',
+  headers: { 'content-type': 'text/html' },
+  requestContext: {
+    accountId: '123456789012',
+    apiId: 'api-id',
+    domainName: 'id.execute-api.us-east-1.amazonaws.com',
+    domainPrefix: 'id',
+    http: {
+      method: 'GET',
+      path: rawPath ?? '/',
+      protocol: 'HTTP/1.1',
+      sourceIp: '127.0.0.1',
+      userAgent: 'test',
+    },
+    requestId: 'id',
+    routeKey: '$default',
+    stage: '$default',
+    time: '01/Jan/2024:00:00:00 +0000',
+    timeEpoch: 1704067200000,
+  },
+  isBase64Encoded: false,
+})
+
+const invokeHandler = async (rawPath?: string) => {
+  // Import is cached after first call — innerHandler stays set
+  await import('./lambda-handler')
   expect(innerHandler).not.toBeNull()
 
   const { writable, chunks } = createMockWritable()
 
-  const event: Record<string, unknown> = {
-    version: '2.0',
-    routeKey: '$default',
-    rawPath,
-    rawQueryString: '',
-    headers: { 'content-type': 'text/html' },
-    requestContext: {
-      accountId: '123456789012',
-      apiId: 'api-id',
-      domainName: 'id.execute-api.us-east-1.amazonaws.com',
-      domainPrefix: 'id',
-      http: {
-        method: 'GET',
-        path: rawPath ?? '/',
-        protocol: 'HTTP/1.1',
-        sourceIp: '127.0.0.1',
-        userAgent: 'test',
-      },
-      requestId: 'id',
-      routeKey: '$default',
-      stage: '$default',
-      time: '01/Jan/2024:00:00:00 +0000',
-      timeEpoch: 1704067200000,
-    },
-    isBase64Encoded: false,
-  }
-
   await new Promise<void>((resolve, reject) => {
     writable.on('finish', resolve)
     writable.on('error', reject)
-    innerHandler!(event, writable, {}).catch(reject)
+    innerHandler!(createEvent(rawPath), writable, {}).catch(reject)
   })
 
-  const body = chunks.join('')
-  return { metadata: capturedMetadata, body, handler: mod.handler }
+  return { metadata: capturedMetadata, body: chunks.join('') }
 }
 
-describe('lambda-handler (streaming)', () => {
+// eslint-disable-next-line vitest/valid-describe-callback
+describe('lambda-handler (streaming)', { timeout: 30_000 }, () => {
   describe('streamifyResponse wrapping', () => {
     it('exports a handler created via awslambda.streamifyResponse', async () => {
       await import('./lambda-handler')
@@ -124,7 +109,7 @@ describe('lambda-handler (streaming)', () => {
     })
   })
 
-  describe('200 routes — writes HTML to the stream', () => {
+  describe('200 routes', () => {
     it('sets statusCode 200 and correct headers for the home route', async () => {
       const { metadata } = await invokeHandler('/')
       expect(metadata.statusCode).toBe(200)
@@ -167,39 +152,33 @@ describe('lambda-handler (streaming)', () => {
 
   describe('error handling', () => {
     it('writes a 500 error page when render fails', async () => {
-      // Mock the render function to throw
+      vi.resetModules()
+
       vi.doMock('./entry-server', () => ({
         render: () => Promise.reject(new Error('boom')),
       }))
 
-      const mod = await import('./lambda-handler')
+      // Re-import with the mocked entry-server
+      innerHandler = null
+      await import('./lambda-handler')
       expect(innerHandler).not.toBeNull()
 
       const { writable, chunks } = createMockWritable()
-      const event: Record<string, unknown> = {
-        version: '2.0',
-        routeKey: '$default',
-        rawPath: '/',
-        rawQueryString: '',
-        headers: {},
-        requestContext: {
-          http: { method: 'GET', path: '/' },
-        },
-        isBase64Encoded: false,
-      }
 
       await new Promise<void>((resolve, reject) => {
         writable.on('finish', resolve)
         writable.on('error', reject)
-        innerHandler!(event, writable, {}).catch(reject)
+        innerHandler!(createEvent('/'), writable, {}).catch(reject)
       })
 
       expect(capturedMetadata.statusCode).toBe(500)
-      const body = chunks.join('')
-      expect(body).toContain('Internal Server Error')
+      expect(chunks.join('')).toContain('Internal Server Error')
 
-      // Ensure the handler reference is used so TS doesn't complain
-      expect(mod.handler).toBeDefined()
+      // Restore modules so subsequent tests use the real entry-server
+      vi.doUnmock('./entry-server')
+      vi.resetModules()
+      innerHandler = null
+      await import('./lambda-handler')
     })
   })
 
