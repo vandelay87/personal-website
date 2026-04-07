@@ -25,6 +25,21 @@ body {
   background-color: var(--shiki-dark-bg);
 }
 
+/* ── Mermaid diagram styles ─────────────────────────────── */
+
+pre.mermaid {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-none);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+[data-theme="dark"] .mermaid {
+  filter: invert(0.88) hue-rotate(180deg);
+}
+
 /* ── Global accessibility utilities ──────────────────────── */
 
 /* Visually hidden but accessible to screen readers */
