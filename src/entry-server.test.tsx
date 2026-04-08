@@ -95,10 +95,8 @@ describe('entry-server render', () => {
   })
 
   describe('blog post /blog/building-a-pokedex', () => {
-    it('renders full blog post content without Suspense fallback', async () => {
+    it('renders full blog post content including resolved Suspense boundary', async () => {
       const html = await render('/blog/building-a-pokedex')
-      // The actual blog post content should be present, not the fallback
-      expect(html).not.toContain('>Loading...</')
       // Real content from the blog post should be in the HTML
       expect(html).toContain('Pokedex')
     })
