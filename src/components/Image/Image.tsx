@@ -60,6 +60,12 @@ const Image: FC<ImageProps> = ({
   })
 
   useEffect(() => {
+    if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) {
+      setIsLoaded(true)
+    }
+  }, [])
+
+  useEffect(() => {
     if (!lazy || priority || isInView) return
 
     const observer = new IntersectionObserver(
