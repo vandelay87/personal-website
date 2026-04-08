@@ -57,7 +57,6 @@ const Image: FC<ImageProps> = ({
 
   usePreloadImage(priority ? src : undefined, {
     fetchPriority: priority ? 'high' : 'auto',
-    crossOrigin: 'anonymous',
   })
 
   useEffect(() => {
@@ -195,7 +194,6 @@ const Image: FC<ImageProps> = ({
           loading={priority ? 'eager' : 'lazy'}
           fetchPriority={priority ? 'high' : 'auto'}
           decoding="async"
-          crossOrigin="anonymous"
           srcSet={srcSet}
           sizes={
             srcSet
