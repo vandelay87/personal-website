@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fetchRecipes, fetchRecipe, fetchTags } from './recipes'
 import type { RecipeIndex, Recipe, Tag } from '../types/recipe'
+import { fetchRecipes, fetchRecipe, fetchTags } from './recipes'
 
 const mockRecipeIndex: RecipeIndex = {
   id: 'r1',
