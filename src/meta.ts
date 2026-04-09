@@ -38,6 +38,10 @@ const routeMeta: Record<string, { title: string; description: string }> = {
     description:
       'Articles on web development, engineering, and lessons learned building software.',
   },
+  '/recipes': {
+    title: 'Recipes | Akli Aissat',
+    description: 'Browse recipes for delicious home-cooked meals.',
+  },
 }
 
 const notFoundMeta = {
@@ -68,6 +72,8 @@ export const isKnownRoute = (path: string): boolean => {
     const post = postsModule.getPost(blogPostMatch[1])
     return !!post
   }
+  const recipeMatch = path.match(/^\/recipes\/(.+)$/)
+  if (recipeMatch) return true
   return false
 }
 
