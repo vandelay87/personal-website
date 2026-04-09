@@ -30,7 +30,7 @@ vi.mock('./pages/Blog/posts/index', () => ({
   formatDate: (d: string) => d,
 }))
 
-import { getMetaTags, normalisePath, escapeHtml } from './meta'
+import { getMetaTags, normalisePath, escapeHtml, isKnownRoute } from './meta'
 
 describe('normalisePath', () => {
   it('strips trailing slash from /apps/', () => {
@@ -354,5 +354,11 @@ describe('getMetaTags', () => {
       const meta = getMetaTags('/blog/nonexistent-slug')
       expect(meta.robots).toBe('noindex')
     })
+  })
+})
+
+describe('isKnownRoute', () => {
+  it('recognises /recipes/:slug pattern', () => {
+    expect(isKnownRoute('/recipes/some-slug')).toBe(true)
   })
 })
