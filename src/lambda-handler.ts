@@ -1,4 +1,5 @@
 import type { Writable } from 'node:stream'
+import type { RecipeData } from './contexts/RecipeDataContext'
 import { render } from './entry-server'
 import { isKnownRoute, normalisePath } from './meta'
 
@@ -12,10 +13,26 @@ export const handler = awslambda.streamifyResponse(
     // CloudFront defaultRootObject rewrites / to /index.html
     if (rawPath === '/index.html') rawPath = '/'
     const path = normalisePath(rawPath)
-    const statusCode = isKnownRoute(path) ? 200 : 404
+    let statusCode = isKnownRoute(path) ? 200 : 404
+
+    const recipeMatch = path.match(/^\/recipes\/([^/]+)$/)
+    let recipeData: RecipeData | undefined
+
+    if (recipeMatch) {
+      try {
+        const response = await fetch(`https://api.akli.dev/recipes/${recipeMatch[1]}`)
+        if (response.ok) {
+          recipeData = { recipe: await response.json() }
+        } else if (response.status === 404) {
+          statusCode = 404
+        }
+      } catch {
+        // API unavailable — render loading state, client will retry
+      }
+    }
 
     try {
-      const html = await render(path)
+      const html = await render(path, recipeData)
       const httpStream = awslambda.HttpResponseStream.from(responseStream, {
         statusCode,
         headers: {

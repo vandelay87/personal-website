@@ -18,6 +18,7 @@ export interface MetaTags {
   }
 }
 
+import type { RecipeData } from './contexts/RecipeDataContext'
 import * as postsModule from './pages/Blog/posts/index'
 
 const BASE_URL = 'https://akli.dev'
@@ -107,7 +108,7 @@ const buildMetaTags = (
   }
 }
 
-export const getMetaTags = (path: string): MetaTags => {
+export const getMetaTags = (path: string, data?: RecipeData): MetaTags => {
   const normalised = normalisePath(path)
   const route = routeMeta[normalised]
   const canonical = `${BASE_URL}${normalised}`
@@ -130,6 +131,23 @@ export const getMetaTags = (path: string): MetaTags => {
         post.image,
       )
     }
+  }
+
+  const recipeMatch = normalised.match(/^\/recipes\/(.+)$/)
+  if (recipeMatch && data?.recipe) {
+    const recipe = data.recipe
+    const description = recipe.intro.length > 160
+      ? recipe.intro.slice(0, 157) + '...'
+      : recipe.intro
+    const coverMediumPath = `/images/${recipe.coverImage.key}-medium.webp`
+    return buildMetaTags(
+      `${recipe.title} | Akli Aissat`,
+      description,
+      canonical,
+      undefined,
+      'article',
+      coverMediumPath,
+    )
   }
 
   return buildMetaTags(notFoundMeta.title, notFoundMeta.description, canonical, 'noindex')
