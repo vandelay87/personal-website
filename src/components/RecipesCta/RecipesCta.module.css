@@ -38,7 +38,7 @@
 
 .skeleton {
   block-size: 16rem;
-  background: var(--color-surface-raised);
+  background: var(--color-bg-subtle);
   border: var(--border-width) solid var(--color-border-subtle);
   border-radius: var(--radius-none);
   animation: pulse 1.5s ease-in-out infinite;
