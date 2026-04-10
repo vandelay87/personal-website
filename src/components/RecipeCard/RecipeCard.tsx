@@ -1,4 +1,5 @@
 import Image from '@components/Image'
+import Typography from '@components/Typography'
 import type { FC } from 'react'
 import { Link } from 'react-router-dom'
 import type { RecipeIndex } from '../../types/recipe'
@@ -25,11 +26,11 @@ const RecipeCard: FC<RecipeCardProps> = ({ recipe }) => {
       </div>
 
       <div className={styles.body}>
-        <h2 className={styles.title}>
+        <Typography variant="heading3" as="h2" className={styles.title}>
           <Link to={`/recipes/${recipe.slug}`} className={styles.titleLink}>
             {recipe.title}
           </Link>
-        </h2>
+        </Typography>
 
         <div className={styles.tags}>
           {recipe.tags.map((tag) => (

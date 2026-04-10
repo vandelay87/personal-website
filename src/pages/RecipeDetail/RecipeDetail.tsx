@@ -1,5 +1,6 @@
 import Button from '@components/Button'
 import Image from '@components/Image'
+import Typography from '@components/Typography'
 import NotFound from '@pages/NotFound'
 import { useContext, useEffect, useState, type FC } from 'react'
 import { Link, useParams } from 'react-router-dom'
@@ -122,7 +123,7 @@ const RecipeDetail: FC = () => {
         className={styles.coverImage}
       />
 
-      <h1 className={styles.title}>{recipe.title}</h1>
+      <Typography variant="heading1" className={styles.title}>{recipe.title}</Typography>
 
       <div className={styles.meta}>
         <span>{recipe.authorName}</span>
@@ -146,15 +147,15 @@ const RecipeDetail: FC = () => {
         ))}
       </div>
 
-      <p className={styles.intro}>{recipe.intro}</p>
+      <Typography variant="bodyLarge" className={styles.intro}>{recipe.intro}</Typography>
 
       <section>
-        <h2 className={styles.sectionHeading}>Ingredients</h2>
+        <Typography variant="heading2" className={styles.sectionHeading}>Ingredients</Typography>
         <RecipeIngredients ingredients={recipe.ingredients} />
       </section>
 
       <section>
-        <h2 className={styles.sectionHeading}>Method</h2>
+        <Typography variant="heading2" className={styles.sectionHeading}>Method</Typography>
         <RecipeSteps steps={recipe.steps} />
       </section>
     </article>
