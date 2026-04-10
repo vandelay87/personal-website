@@ -1,0 +1,22 @@
+.list {
+  padding-inline-start: var(--space-6);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.item {
+  padding-inline-start: var(--space-2);
+}
+
+.text {
+  margin: 0 0 var(--space-3);
+}
+
+.image {
+  display: block;
+  max-width: 100%;
+  border-radius: var(--radius-none);
+  border: var(--border-width) solid var(--color-border);
+}
