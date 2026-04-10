@@ -1,5 +1,6 @@
 import Button from '@components/Button'
 import Grid from '@components/Grid'
+import Loading from '@components/Loading'
 import Typography from '@components/Typography'
 import { useState, useEffect, useCallback, useMemo, type FC } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -69,16 +70,7 @@ const Recipes: FC = () => {
         <Typography variant="heading1" className={styles.heading}>
           Recipes
         </Typography>
-        <div className={styles.grid}>
-          {Array.from({ length: 6 }, (_, i) => (
-            <div
-              key={i}
-              className={styles.skeleton}
-              role="status"
-              aria-label="Loading"
-            />
-          ))}
-        </div>
+        <Loading />
       </>
     )
   }
