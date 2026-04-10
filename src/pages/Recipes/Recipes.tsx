@@ -14,16 +14,12 @@ const Recipes: FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTag = searchParams.get('tag')
 
-  const [recipes, setRecipes] = useState<RecipeIndex[]>([])
+  const [recipes, setRecipes] = useState<RecipeIndex[] | null>(null)
   const [tags, setTags] = useState<Tag[]>([])
-  const [loading, setLoading] = useState(true)
-  const [showSkeleton, setShowSkeleton] = useState(false)
   const [error, setError] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
   const loadData = useCallback(async () => {
-    setLoading(true)
-    setShowSkeleton(false)
     setError(false)
     try {
       const [recipesData, tagsData] = await Promise.all([fetchRecipes(), fetchTags()])
@@ -31,20 +27,12 @@ const Recipes: FC = () => {
       setTags(tagsData)
     } catch {
       setError(true)
-    } finally {
-      setLoading(false)
     }
   }, [])
 
   useEffect(() => {
     loadData()
   }, [loadData])
-
-  useEffect(() => {
-    if (!loading) return
-    const timer = setTimeout(() => setShowSkeleton(true), 200)
-    return () => clearTimeout(timer)
-  }, [loading])
 
   const handleTagClick = (tag: string) => {
     if (activeTag === tag) {
@@ -65,7 +53,7 @@ const Recipes: FC = () => {
 
   const filteredRecipes = useMemo(
     () =>
-      recipes.filter((recipe) => {
+      (recipes ?? []).filter((recipe) => {
         const matchesTag = !activeTag || recipe.tags.includes(activeTag)
         const matchesSearch =
           !searchQuery ||
@@ -75,8 +63,7 @@ const Recipes: FC = () => {
     [recipes, activeTag, searchQuery],
   )
 
-  if (loading) {
-    if (!showSkeleton) return null
+  if (recipes === null && !error) {
     return (
       <>
         <Typography variant="heading1" className={styles.heading}>
@@ -114,7 +101,7 @@ const Recipes: FC = () => {
     )
   }
 
-  if (recipes.length === 0) {
+  if (recipes !== null && recipes.length === 0) {
     return (
       <>
         <Typography variant="heading1" className={styles.heading}>

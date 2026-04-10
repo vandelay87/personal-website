@@ -77,16 +77,14 @@ describe('Recipes page', () => {
     expect(screen.getByText('Italian Pasta Carbonara')).toBeInTheDocument()
   })
 
-  it('shows skeleton placeholders while loading', async () => {
+  it('shows skeleton placeholders while loading', () => {
     vi.mocked(fetchRecipes).mockReturnValue(new Promise(() => {}))
     vi.mocked(fetchTags).mockReturnValue(new Promise(() => {}))
 
     renderRecipes()
 
-    await waitFor(() => {
-      const skeletons = screen.getAllByRole('status', { name: /loading/i })
-      expect(skeletons.length).toBeGreaterThanOrEqual(1)
-    })
+    const skeletons = screen.getAllByRole('status', { name: /loading/i })
+    expect(skeletons.length).toBeGreaterThanOrEqual(1)
   })
 
   it('filters by tag via URL search param (?tag=Italian)', async () => {
