@@ -1,4 +1,6 @@
+import type { FC } from 'react'
 import type { Tag } from '../../types/recipe'
+import styles from './RecipeTagFilter.module.css'
 
 export interface RecipeTagFilterProps {
   tags: Tag[]
@@ -6,8 +8,22 @@ export interface RecipeTagFilterProps {
   onTagClick: (tag: string) => void
 }
 
-const RecipeTagFilter = (_props: RecipeTagFilterProps) => {
-  return null
+const RecipeTagFilter: FC<RecipeTagFilterProps> = ({ tags, activeTag, onTagClick }) => {
+  return (
+    <div className={styles.wrapper}>
+      {tags.map(({ tag, count }) => (
+        <button
+          key={tag}
+          type="button"
+          className={styles.tag}
+          aria-pressed={activeTag === tag ? 'true' : 'false'}
+          onClick={() => onTagClick(tag)}
+        >
+          {tag} ({count})
+        </button>
+      ))}
+    </div>
+  )
 }
 
 export default RecipeTagFilter

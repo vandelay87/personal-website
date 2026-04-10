@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
-import RecipeTagFilter from './RecipeTagFilter'
 import type { Tag } from '../../types/recipe'
+import RecipeTagFilter from './RecipeTagFilter'
 
 const mockTags: Tag[] = [
   { tag: 'Italian', count: 5 },

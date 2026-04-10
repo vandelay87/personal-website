@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect } from 'vitest'
-import RecipeCard from './RecipeCard'
 import type { RecipeIndex } from '../../types/recipe'
+import RecipeCard from './RecipeCard'
 
 const mockRecipe: RecipeIndex = {
   id: 'rec-001',
