@@ -1,3 +1,5 @@
+import Image from '@components/Image'
+import Typography from '@components/Typography'
 import type { FC } from 'react'
 import { Link } from 'react-router-dom'
 import type { RecipeIndex } from '../../types/recipe'
@@ -7,7 +9,7 @@ export interface RecipeCardProps {
   recipe: RecipeIndex
 }
 
-const IMAGE_BASE = 'https://akli.dev/images/processed'
+const IMAGE_BASE = 'https://akli.dev/images'
 
 const RecipeCard: FC<RecipeCardProps> = ({ recipe }) => {
   const thumbnailSrc = `${IMAGE_BASE}/${recipe.coverImage.key}-thumb.webp`
@@ -15,20 +17,20 @@ const RecipeCard: FC<RecipeCardProps> = ({ recipe }) => {
   return (
     <article className={styles.card}>
       <div className={styles.imageWrapper}>
-        <img
+        <Image
           src={thumbnailSrc}
           alt={recipe.coverImage.alt}
-          loading="lazy"
+          aspectRatio="16/9"
           className={styles.image}
         />
       </div>
 
       <div className={styles.body}>
-        <h2 className={styles.title}>
+        <Typography variant="heading3" as="h2" className={styles.title}>
           <Link to={`/recipes/${recipe.slug}`} className={styles.titleLink}>
             {recipe.title}
           </Link>
-        </h2>
+        </Typography>
 
         <div className={styles.tags}>
           {recipe.tags.map((tag) => (
