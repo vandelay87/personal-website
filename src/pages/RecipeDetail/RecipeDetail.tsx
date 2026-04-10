@@ -1,4 +1,5 @@
 import Button from '@components/Button'
+import Image from '@components/Image'
 import NotFound from '@pages/NotFound'
 import { useContext, useEffect, useState, type FC } from 'react'
 import { Link, useParams } from 'react-router-dom'
@@ -112,11 +113,12 @@ const RecipeDetail: FC = () => {
 
   return (
     <article className={styles.page}>
-      <img
-        srcSet={`${IMAGE_BASE}/${recipe.coverImage.key}-medium.webp 800w, ${IMAGE_BASE}/${recipe.coverImage.key}-full.webp 1200w`}
+      <Image
         src={`${IMAGE_BASE}/${recipe.coverImage.key}-medium.webp`}
+        srcSet={`${IMAGE_BASE}/${recipe.coverImage.key}-medium.webp 800w, ${IMAGE_BASE}/${recipe.coverImage.key}-full.webp 1200w`}
         alt={recipe.coverImage.alt}
-        loading="eager"
+        priority
+        maxWidth="var(--max-w-site)"
         className={styles.coverImage}
       />
 

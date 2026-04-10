@@ -1,3 +1,4 @@
+import Image from '@components/Image'
 import type { FC } from 'react'
 import type { Step } from '../../types/recipe'
 import styles from './RecipeSteps.module.css'
@@ -14,10 +15,9 @@ const RecipeSteps: FC<RecipeStepsProps> = ({ steps }) => (
       <li key={step.order} className={styles.item}>
         <p className={styles.text}>{step.text}</p>
         {step.image && (
-          <img
+          <Image
             src={`${IMAGE_BASE}/${step.image.key}-medium.webp`}
             alt={step.image.alt}
-            loading="lazy"
             className={styles.image}
           />
         )}

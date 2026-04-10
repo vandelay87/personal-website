@@ -1,3 +1,4 @@
+import Image from '@components/Image'
 import type { FC } from 'react'
 import { Link } from 'react-router-dom'
 import type { RecipeIndex } from '../../types/recipe'
@@ -15,10 +16,10 @@ const RecipeCard: FC<RecipeCardProps> = ({ recipe }) => {
   return (
     <article className={styles.card}>
       <div className={styles.imageWrapper}>
-        <img
+        <Image
           src={thumbnailSrc}
           alt={recipe.coverImage.alt}
-          loading="lazy"
+          aspectRatio="16/9"
           className={styles.image}
         />
       </div>
