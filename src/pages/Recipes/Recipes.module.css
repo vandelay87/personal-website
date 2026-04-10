@@ -33,7 +33,7 @@
 
 .skeleton {
   aspect-ratio: 3 / 4;
-  background: var(--color-surface-alt);
+  background: var(--color-bg-subtle);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-none);
   animation: pulse 1.5s ease-in-out infinite;

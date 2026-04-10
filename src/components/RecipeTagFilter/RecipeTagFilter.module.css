@@ -32,3 +32,9 @@
   outline: var(--border-width) solid var(--color-primary);
   outline-offset: 2px;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .tag {
+    transition: none;
+  }
+}

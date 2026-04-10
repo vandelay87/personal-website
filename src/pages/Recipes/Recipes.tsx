@@ -1,5 +1,5 @@
 import Typography from '@components/Typography'
-import { useState, useEffect, useCallback, type FC } from 'react'
+import { useState, useEffect, useCallback, useMemo, type FC } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { fetchRecipes, fetchTags } from '../../api/recipes'
 import RecipeCard from '../../components/RecipeCard'
@@ -53,13 +53,17 @@ const Recipes: FC = () => {
     setSearchQuery('')
   }
 
-  const filteredRecipes = recipes.filter((recipe) => {
-    const matchesTag = !activeTag || recipe.tags.includes(activeTag)
-    const matchesSearch =
-      !searchQuery ||
-      recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesTag && matchesSearch
-  })
+  const filteredRecipes = useMemo(
+    () =>
+      recipes.filter((recipe) => {
+        const matchesTag = !activeTag || recipe.tags.includes(activeTag)
+        const matchesSearch =
+          !searchQuery ||
+          recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
+        return matchesTag && matchesSearch
+      }),
+    [recipes, activeTag, searchQuery],
+  )
 
   if (loading) {
     return (
