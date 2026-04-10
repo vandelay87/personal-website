@@ -7,7 +7,7 @@ export interface RecipeCardProps {
   recipe: RecipeIndex
 }
 
-const IMAGE_BASE = 'https://akli.dev/images/processed'
+const IMAGE_BASE = 'https://akli.dev/images'
 
 const RecipeCard: FC<RecipeCardProps> = ({ recipe }) => {
   const thumbnailSrc = `${IMAGE_BASE}/${recipe.coverImage.key}-thumb.webp`
