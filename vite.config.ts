@@ -98,6 +98,14 @@ export default defineConfig(({ isSsrBuild }) => ({
       '@hooks': '/src/hooks',
     },
   },
+  server: {
+    proxy: {
+      '/recipes': {
+        target: 'https://api.akli.dev',
+        changeOrigin: true,
+      },
+    },
+  },
   ssr: {
     noExternal: true,
     external: ['node:fs', 'node:path'],

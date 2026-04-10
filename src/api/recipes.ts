@@ -1,6 +1,6 @@
 import type { RecipeIndex, Recipe, Tag } from '../types/recipe'
 
-const API_BASE = 'https://api.akli.dev'
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'https://api.akli.dev'
 
 export const fetchRecipes = async (): Promise<RecipeIndex[]> => {
   const response = await fetch(`${API_BASE}/recipes`)
