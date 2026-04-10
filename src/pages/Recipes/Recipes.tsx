@@ -1,4 +1,5 @@
 import Button from '@components/Button'
+import Grid from '@components/Grid'
 import Typography from '@components/Typography'
 import { useState, useEffect, useCallback, useMemo, type FC } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -139,13 +140,11 @@ const Recipes: FC = () => {
           </Button>
         </div>
       ) : (
-        <ul className={styles.grid}>
+        <Grid columns={3}>
           {filteredRecipes.map((recipe) => (
-            <li key={recipe.id} className={styles.gridItem}>
-              <RecipeCard recipe={recipe} />
-            </li>
+            <RecipeCard key={recipe.id} recipe={recipe} />
           ))}
-        </ul>
+        </Grid>
       )}
     </>
   )

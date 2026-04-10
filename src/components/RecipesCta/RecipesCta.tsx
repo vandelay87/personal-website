@@ -1,3 +1,4 @@
+import Grid from '@components/Grid'
 import Link from '@components/Link'
 import RecipeCard from '@components/RecipeCard'
 import Typography from '@components/Typography'
@@ -67,11 +68,11 @@ const RecipesCta: FC = () => {
         <Typography variant="heading2" id="recipes-section-title" className={styles.heading}>
           From the Kitchen
         </Typography>
-        <div className={styles.grid}>
+        <Grid columns={3}>
           {recipes.map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} eager hideTags hideMeta />
           ))}
-        </div>
+        </Grid>
         <div className={styles.tags}>
           {uniqueTags.map((tag) => (
             <span key={tag} className={styles.tag}>

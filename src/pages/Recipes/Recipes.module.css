@@ -27,10 +27,6 @@
   }
 }
 
-.gridItem {
-  list-style: none;
-}
-
 .skeleton {
   aspect-ratio: 3 / 4;
   background: var(--color-bg-subtle);
