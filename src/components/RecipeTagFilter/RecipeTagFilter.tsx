@@ -1,3 +1,4 @@
+import Button from '@components/Button'
 import type { FC } from 'react'
 import type { Tag } from '../../types/recipe'
 import styles from './RecipeTagFilter.module.css'
@@ -12,15 +13,15 @@ const RecipeTagFilter: FC<RecipeTagFilterProps> = ({ tags, activeTag, onTagClick
   return (
     <div className={styles.wrapper}>
       {tags.map(({ tag, count }) => (
-        <button
+        <Button
           key={tag}
-          type="button"
+          variant="secondary"
           className={styles.tag}
-          aria-pressed={activeTag === tag ? 'true' : 'false'}
+          ariaPressed={activeTag === tag ? 'true' : 'false'}
           onClick={() => onTagClick(tag)}
         >
           {tag} ({count})
-        </button>
+        </Button>
       ))}
     </div>
   )

@@ -10,11 +10,6 @@
   font-size: var(--font-size-sm);
   font-family: var(--font-mono);
   font-weight: var(--font-weight-normal);
-  color: var(--color-text);
-  background: var(--color-surface);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  cursor: pointer;
 }
 
 .tag:hover {
@@ -26,15 +21,4 @@
   background: var(--color-primary);
   color: var(--color-on-primary);
   font-weight: var(--font-weight-bold);
-}
-
-.tag:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tag {
-    transition: none;
-  }
 }
