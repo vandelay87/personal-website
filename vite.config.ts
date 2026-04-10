@@ -100,9 +100,10 @@ export default defineConfig(({ isSsrBuild }) => ({
   },
   server: {
     proxy: {
-      '/recipes': {
+      '/api': {
         target: 'https://api.akli.dev',
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },
