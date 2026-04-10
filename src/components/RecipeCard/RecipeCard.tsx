@@ -7,11 +7,14 @@ import styles from './RecipeCard.module.css'
 
 export interface RecipeCardProps {
   recipe: RecipeIndex
+  eager?: boolean
+  hideTags?: boolean
+  hideMeta?: boolean
 }
 
 const IMAGE_BASE = 'https://akli.dev/images'
 
-const RecipeCard: FC<RecipeCardProps> = ({ recipe }) => {
+const RecipeCard: FC<RecipeCardProps> = ({ recipe, eager = false, hideTags = false, hideMeta = false }) => {
   const thumbnailSrc = `${IMAGE_BASE}/${recipe.coverImage.key}-thumb.webp`
 
   return (
@@ -22,6 +25,7 @@ const RecipeCard: FC<RecipeCardProps> = ({ recipe }) => {
           alt={recipe.coverImage.alt}
           aspectRatio="16/9"
           className={styles.image}
+          lazy={!eager}
         />
       </div>
 
@@ -32,21 +36,25 @@ const RecipeCard: FC<RecipeCardProps> = ({ recipe }) => {
           </Link>
         </Typography>
 
-        <div className={styles.tags}>
-          {recipe.tags.map((tag) => (
-            <span key={tag} className={styles.tag}>
-              {tag}
-            </span>
-          ))}
-        </div>
+        {!hideTags && (
+          <div className={styles.tags}>
+            {recipe.tags.map((tag) => (
+              <span key={tag} className={styles.tag}>
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
 
-        <div className={styles.meta}>
-          <span>Prep: {recipe.prepTime} min</span>
-          <span className={styles.separator}>·</span>
-          <span>Cook: {recipe.cookTime} min</span>
-          <span className={styles.separator}>·</span>
-          <span>Serves: {recipe.servings}</span>
-        </div>
+        {!hideMeta && (
+          <div className={styles.meta}>
+            <span>Prep: {recipe.prepTime} min</span>
+            <span className={styles.separator}>·</span>
+            <span>Cook: {recipe.cookTime} min</span>
+            <span className={styles.separator}>·</span>
+            <span>Serves: {recipe.servings}</span>
+          </div>
+        )}
       </div>
     </article>
   )

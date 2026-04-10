@@ -1,0 +1,91 @@
+import Grid from '@components/Grid'
+import Link from '@components/Link'
+import RecipeCard from '@components/RecipeCard'
+import Typography from '@components/Typography'
+import { FC, useEffect, useMemo, useState } from 'react'
+import { fetchRecipes } from '../../api/recipes'
+import type { RecipeIndex } from '../../types/recipe'
+import styles from './RecipesCta.module.css'
+
+type Status = 'loading' | 'loaded' | 'empty' | 'error'
+
+const MAX_RECIPES = 3
+
+const RecipesCta: FC = () => {
+  const [recipes, setRecipes] = useState<RecipeIndex[]>([])
+  const [status, setStatus] = useState<Status>('loading')
+
+  useEffect(() => {
+    fetchRecipes()
+      .then((data) => {
+        const latest = data.slice(0, MAX_RECIPES)
+        if (latest.length === 0) {
+          setStatus('empty')
+        } else {
+          setRecipes(latest)
+          setStatus('loaded')
+        }
+      })
+      .catch(() => {
+        setStatus('error')
+      })
+  }, [])
+
+  const uniqueTags = useMemo(
+    () => [...new Set(recipes.flatMap((r) => r.tags))],
+    [recipes]
+  )
+
+  if (status === 'empty' || status === 'error') {
+    return null
+  }
+
+  if (status === 'loading') {
+    return (
+      <section className={styles.section} aria-labelledby="recipes-section-title">
+        <div className={styles.inner}>
+          <Typography variant="heading2" id="recipes-section-title" className={styles.heading}>
+            From the Kitchen
+          </Typography>
+          <div className={styles.grid}>
+            {Array.from({ length: MAX_RECIPES }, (_, i) => (
+              <div
+                key={i}
+                role="status"
+                aria-label="Loading recipe"
+                className={styles.skeleton}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <section className={styles.section} aria-labelledby="recipes-section-title">
+      <div className={styles.inner}>
+        <Typography variant="heading2" id="recipes-section-title" className={styles.heading}>
+          From the Kitchen
+        </Typography>
+        <Grid columns={3}>
+          {recipes.map((recipe) => (
+            <RecipeCard key={recipe.id} recipe={recipe} eager hideTags hideMeta />
+          ))}
+        </Grid>
+        <div className={styles.tags}>
+          {uniqueTags.map((tag) => (
+            <span key={tag} className={styles.tag}>
+              {tag}
+            </span>
+          ))}
+        </div>
+        <Link to="/recipes" className={styles.link}>
+          View all recipes
+        </Link>
+      </div>
+    </section>
+  )
+}
+
+export default RecipesCta

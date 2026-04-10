@@ -2,6 +2,7 @@ import AppsCta from '@components/AppsCta'
 import CVDownload from '@components/CVDownload'
 import FullPageHeader from '@components/FullPageHeader'
 import type { FullPageHeaderProps } from '@components/FullPageHeader'
+import RecipesCta from '@components/RecipesCta'
 import img from '../../assets/profile.webp'
 
 const FULL_PAGE_HEADER_PROPS: FullPageHeaderProps = {
@@ -18,6 +19,7 @@ export default function Home() {
       <FullPageHeader {...FULL_PAGE_HEADER_PROPS} />
       <CVDownload />
       <AppsCta />
+      <RecipesCta />
     </>
   )
 }
