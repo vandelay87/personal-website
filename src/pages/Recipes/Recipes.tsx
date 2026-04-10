@@ -1,3 +1,5 @@
-const Recipes = () => <div>Recipes page</div>
+const Recipes = () => {
+  return null
+}
 
 export default Recipes
