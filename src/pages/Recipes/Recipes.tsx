@@ -1,3 +1,4 @@
+import Button from '@components/Button'
 import Typography from '@components/Typography'
 import { useState, useEffect, useCallback, useMemo, type FC } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -95,9 +96,9 @@ const Recipes: FC = () => {
           <Typography variant="bodyLarge">
             Something went wrong loading recipes.
           </Typography>
-          <button type="button" onClick={loadData} className={styles.retryButton}>
+          <Button variant="secondary" onClick={loadData}>
             Retry
-          </button>
+          </Button>
         </div>
       </>
     )
@@ -133,13 +134,9 @@ const Recipes: FC = () => {
       {filteredRecipes.length === 0 ? (
         <div className={styles.empty}>
           <Typography variant="bodyLarge">No recipes found</Typography>
-          <button
-            type="button"
-            onClick={handleClearFilters}
-            className={styles.clearButton}
-          >
+          <Button variant="secondary" onClick={handleClearFilters}>
             Clear filter
-          </button>
+          </Button>
         </div>
       ) : (
         <ul className={styles.grid}>
