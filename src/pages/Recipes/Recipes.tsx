@@ -17,11 +17,13 @@ const Recipes: FC = () => {
   const [recipes, setRecipes] = useState<RecipeIndex[]>([])
   const [tags, setTags] = useState<Tag[]>([])
   const [loading, setLoading] = useState(true)
+  const [showSkeleton, setShowSkeleton] = useState(false)
   const [error, setError] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
   const loadData = useCallback(async () => {
     setLoading(true)
+    setShowSkeleton(false)
     setError(false)
     try {
       const [recipesData, tagsData] = await Promise.all([fetchRecipes(), fetchTags()])
@@ -37,6 +39,12 @@ const Recipes: FC = () => {
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  useEffect(() => {
+    if (!loading) return
+    const timer = setTimeout(() => setShowSkeleton(true), 200)
+    return () => clearTimeout(timer)
+  }, [loading])
 
   const handleTagClick = (tag: string) => {
     if (activeTag === tag) {
@@ -68,6 +76,7 @@ const Recipes: FC = () => {
   )
 
   if (loading) {
+    if (!showSkeleton) return null
     return (
       <>
         <Typography variant="heading1" className={styles.heading}>
