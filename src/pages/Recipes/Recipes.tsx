@@ -70,7 +70,9 @@ const Recipes: FC = () => {
         <Typography variant="heading1" className={styles.heading}>
           Recipes
         </Typography>
-        <Loading />
+        <div className={styles.loadingWrapper}>
+          <Loading />
+        </div>
       </>
     )
   }
