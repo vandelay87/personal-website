@@ -127,6 +127,60 @@ describe('entry-server render', () => {
     })
   })
 
+  describe('recipe detail page /recipes/:slug with prefetched data', () => {
+    const mockRecipe = {
+      id: 'r1',
+      title: 'Spaghetti Bolognese',
+      slug: 'spaghetti-bolognese',
+      coverImage: { key: 'spaghetti-cover', alt: 'A bowl of spaghetti bolognese' },
+      tags: ['Italian', 'Pasta'],
+      prepTime: 15,
+      cookTime: 45,
+      servings: 4,
+      createdAt: '2026-03-01T12:00:00Z',
+      intro: 'A classic Italian pasta dish with rich meat sauce.',
+      ingredients: [
+        { item: 'spaghetti', quantity: '400', unit: 'g' },
+        { item: 'minced beef', quantity: '500', unit: 'g' },
+      ],
+      steps: [
+        { order: 1, text: 'Boil the pasta.' },
+        { order: 2, text: 'Brown the mince.' },
+      ],
+      authorId: 'a1',
+      authorName: 'Akli Aissat',
+      updatedAt: '2026-03-02T10:00:00Z',
+      status: 'published',
+    }
+
+    it('produces HTML containing the recipe title', async () => {
+      const html = await render('/recipes/spaghetti-bolognese', { recipe: mockRecipe })
+      expect(html).toContain('Spaghetti Bolognese')
+    })
+
+    it('produces HTML containing Open Graph meta tags for the recipe', async () => {
+      const html = await render('/recipes/spaghetti-bolognese', { recipe: mockRecipe })
+      expect(html).toContain('property="og:title" content="Spaghetti Bolognese')
+      expect(html).toContain('property="og:description"')
+      expect(html).toContain('property="og:image"')
+      expect(html).toContain('property="og:type" content="article"')
+    })
+
+    it('produces HTML containing Twitter card meta tags for the recipe', async () => {
+      const html = await render('/recipes/spaghetti-bolognese', { recipe: mockRecipe })
+      expect(html).toContain('name="twitter:card" content="summary_large_image"')
+      expect(html).toContain('name="twitter:title"')
+      expect(html).toContain('name="twitter:image"')
+    })
+
+    it('still renders without prefetched data (loading/fallback state)', async () => {
+      const html = await render('/recipes/spaghetti-bolognese')
+      expect(html).toBeTruthy()
+      expect(html).toContain('<div id="root">')
+      expect(html).not.toContain('<div id="root"></div>')
+    })
+  })
+
   describe('error handling', () => {
     it('rejects or signals an error when the render crashes', async () => {
       vi.resetModules()
