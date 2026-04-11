@@ -10,6 +10,15 @@ vi.mock('@api/auth', () => ({
   refreshSession: vi.fn(),
 }))
 
+const fakeIdToken = (payload: Record<string, unknown>): string => {
+  const header = btoa(JSON.stringify({ alg: 'RS256' }))
+  const body = btoa(JSON.stringify(payload))
+  return `${header}.${body}.fakesig`
+}
+
+const adminIdToken = fakeIdToken({ email: 'admin@example.com', 'cognito:groups': ['admin'] })
+const contributorIdToken = fakeIdToken({ email: 'contributor@example.com', 'cognito:groups': ['contributor'] })
+
 const TestConsumer = () => {
   const { user, isAuthenticated, isAdmin, login, logout, getAccessToken } = useAuth()
   return (
@@ -47,7 +56,7 @@ describe('AuthProvider', () => {
     vi.mocked(authApi.getCurrentSession).mockReturnValue(null)
     vi.mocked(authApi.login).mockResolvedValue({
       accessToken: 'access-123',
-      idToken: 'id-123',
+      idToken: adminIdToken,
       refreshToken: 'refresh-123',
     })
 
@@ -69,7 +78,7 @@ describe('AuthProvider', () => {
     vi.mocked(authApi.getCurrentSession).mockReturnValue({
       accessToken: 'access-123',
       refreshToken: 'refresh-123',
-      idToken: 'id-123',
+      idToken: adminIdToken,
     })
 
     render(
@@ -90,7 +99,7 @@ describe('AuthProvider', () => {
     vi.mocked(authApi.getCurrentSession).mockReturnValue(null)
     vi.mocked(authApi.login).mockResolvedValue({
       accessToken: 'access-admin',
-      idToken: 'id-admin',
+      idToken: adminIdToken,
       refreshToken: 'refresh-admin',
     })
 
@@ -113,7 +122,7 @@ describe('AuthProvider', () => {
     vi.mocked(authApi.getCurrentSession).mockReturnValue({
       accessToken: 'access-stored',
       refreshToken: 'refresh-stored',
-      idToken: 'id-stored',
+      idToken: adminIdToken,
     })
 
     render(
@@ -129,7 +138,7 @@ describe('AuthProvider', () => {
     vi.mocked(authApi.getCurrentSession).mockReturnValue({
       accessToken: 'access-current',
       refreshToken: 'refresh-current',
-      idToken: 'id-current',
+      idToken: adminIdToken,
     })
 
     let token: string | undefined

@@ -14,16 +14,16 @@ export interface AuthContextValue {
 const decodeIdToken = (idToken: string): User => {
   try {
     const parts = idToken.split('.')
-    if (parts.length !== 3) {
-      return { email: 'user', groups: ['admin'] }
-    }
-    const payload = JSON.parse(atob(parts[1]))
+    if (parts.length !== 3) return null
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+    const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4)
+    const payload = JSON.parse(atob(padded))
     return {
       email: payload.email ?? '',
       groups: payload['cognito:groups'] ?? [],
     }
   } catch {
-    return { email: 'user', groups: ['admin'] }
+    return null
   }
 }
 
@@ -52,6 +52,10 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       return { user: null, isAuthenticated: false }
     }
     const user = decodeIdToken(session.idToken)
+    if (!user) {
+      authApi.logout()
+      return { user: null, isAuthenticated: false }
+    }
     return { user, isAuthenticated: true }
   }
 
@@ -70,8 +74,10 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       localStorage.setItem('refreshToken', result.refreshToken)
 
       const decoded = decodeIdToken(result.idToken)
-      setUser(decoded)
-      setIsAuthenticated(true)
+      if (decoded) {
+        setUser(decoded)
+        setIsAuthenticated(true)
+      }
     }
 
     return result
