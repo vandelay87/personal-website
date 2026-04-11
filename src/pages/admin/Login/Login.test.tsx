@@ -131,7 +131,8 @@ describe('Login page', () => {
     fillAndSubmitLoginForm('admin@example.com', 'password123')
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /log in/i })).toBeDisabled()
+      const submitButton = screen.getByRole('button', { name: /loading/i })
+      expect(submitButton).toBeDisabled()
     })
   })
 

@@ -33,7 +33,7 @@ const App = () => {
           <Route
             path="/admin/*"
             element={
-              <Suspense fallback={<Loading />}>
+              <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-12) 0' }}><Loading /></div>}>
                 <Routes>
                   <Route path="login" element={<Login />} />
                   <Route path="recipes" element={<ProtectedRoute><RecipeList /></ProtectedRoute>} />

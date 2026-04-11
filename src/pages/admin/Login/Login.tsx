@@ -1,6 +1,6 @@
-
 import { completeNewPassword } from '@api/auth'
 import Button from '@components/Button'
+import Loading from '@components/Loading'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import type { AuthChallenge } from '@types/auth'
@@ -47,7 +47,10 @@ const Login = () => {
     } catch (err) {
       if (err instanceof TypeError) {
         setError('Something went wrong. Please try again.')
-      } else if (err instanceof Error && (err.message.includes('401') || err.message.includes('Unauthorized'))) {
+      } else if (
+        err instanceof Error &&
+        (err.message.includes('401') || err.message.includes('Unauthorized'))
+      ) {
         setError('Incorrect email or password')
       } else {
         setError('Something went wrong. Please try again.')
@@ -69,7 +72,7 @@ const Login = () => {
     setLoading(true)
 
     try {
-      await completeNewPassword(challenge!.session, newPassword)
+      await completeNewPassword(email, challenge!.session, newPassword)
       navigate(redirectTo)
     } catch {
       setError('Something went wrong. Please try again.')
@@ -120,8 +123,8 @@ const Login = () => {
             </p>
           )}
 
-          <Button type="submit" onClick={() => {}} disabled={loading}>
-            Set new password
+          <Button type="submit" disabled={loading}>
+            {loading ? <Loading size="small" /> : 'Set new password'}
           </Button>
         </form>
       </div>
@@ -146,6 +149,7 @@ const Login = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             aria-describedby={error ? 'form-error' : undefined}
+            required
           />
         </div>
 
@@ -160,6 +164,7 @@ const Login = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             aria-describedby={error ? 'form-error' : undefined}
+            required
           />
         </div>
 
@@ -169,8 +174,8 @@ const Login = () => {
           </p>
         )}
 
-        <Button type="submit" onClick={() => {}} disabled={loading}>
-          Log in
+        <Button type="submit" disabled={loading}>
+          {loading ? <Loading size="small" /> : 'Log in'}
         </Button>
       </form>
     </div>
