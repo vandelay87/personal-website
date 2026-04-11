@@ -1,7 +1,7 @@
 
 import { getUploadUrl } from '@api/recipes'
 import Button from '@components/Button'
-import { useRef, useState, type ChangeEvent, type FC } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent, type FC } from 'react'
 
 import styles from './ImageUpload.module.css'
 
@@ -18,6 +18,12 @@ const ImageUpload: FC<ImageUploadProps> = ({ onUpload, currentKey, getToken }) =
   const [error, setError] = useState<string | null>(null)
   const [lastFile, setLastFile] = useState<File | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview)
+    }
+  }, [preview])
 
   const handleClick = () => {
     inputRef.current?.click()

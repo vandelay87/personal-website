@@ -19,6 +19,10 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({ title, message, onConfirm, onCa
   const dialogRef = useRef<HTMLDivElement>(null)
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') {
+      onCancel()
+      return
+    }
     if (e.key === 'Tab') {
       const dialog = dialogRef.current
       if (!dialog) return
@@ -52,6 +56,7 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({ title, message, onConfirm, onCa
       <div
         ref={dialogRef}
         role="dialog"
+        aria-modal="true"
         aria-labelledby={TITLE_ID}
         className={styles.dialog}
         onKeyDown={handleKeyDown}
