@@ -38,23 +38,23 @@ vi.mock('@pages/RecipeDetail', () => ({
   default: () => <div>Recipe detail page</div>,
 }))
 
-vi.mock('@pages/Login', () => ({
+vi.mock('@pages/admin/Login', () => ({
   default: () => <div>Login page</div>,
 }))
 
-vi.mock('@pages/AdminRecipeList', () => ({
+vi.mock('@pages/admin/RecipeList', () => ({
   default: () => <div>Admin recipe list</div>,
 }))
 
-vi.mock('@pages/RecipeEditor', () => ({
+vi.mock('@pages/admin/RecipeEditor', () => ({
   default: () => <div>Recipe editor</div>,
 }))
 
-vi.mock('@pages/RecipePreview', () => ({
+vi.mock('@pages/admin/RecipePreview', () => ({
   default: () => <div>Recipe preview</div>,
 }))
 
-vi.mock('@pages/UserManagement', () => ({
+vi.mock('@pages/admin/UserManagement', () => ({
   default: () => <div>User management</div>,
 }))
 

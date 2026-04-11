@@ -12,11 +12,11 @@ import Recipes from '@pages/Recipes'
 import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 
-const Login = lazy(() => import('@pages/Login'))
-const AdminRecipeList = lazy(() => import('@pages/AdminRecipeList'))
-const RecipeEditor = lazy(() => import('@pages/RecipeEditor'))
-const RecipePreview = lazy(() => import('@pages/RecipePreview'))
-const UserManagement = lazy(() => import('@pages/UserManagement'))
+const Login = lazy(() => import('@pages/admin/Login'))
+const RecipeList = lazy(() => import('@pages/admin/RecipeList'))
+const RecipeEditor = lazy(() => import('@pages/admin/RecipeEditor'))
+const RecipePreview = lazy(() => import('@pages/admin/RecipePreview'))
+const UserManagement = lazy(() => import('@pages/admin/UserManagement'))
 
 const App = () => {
   return (
@@ -36,7 +36,7 @@ const App = () => {
               <Suspense fallback={<Loading />}>
                 <Routes>
                   <Route path="login" element={<Login />} />
-                  <Route path="recipes" element={<ProtectedRoute><AdminRecipeList /></ProtectedRoute>} />
+                  <Route path="recipes" element={<ProtectedRoute><RecipeList /></ProtectedRoute>} />
                   <Route path="recipes/new" element={<ProtectedRoute><RecipeEditor /></ProtectedRoute>} />
                   <Route path="recipes/:id/edit" element={<ProtectedRoute><RecipeEditor /></ProtectedRoute>} />
                   <Route path="recipes/:id/preview" element={<ProtectedRoute><RecipePreview /></ProtectedRoute>} />
