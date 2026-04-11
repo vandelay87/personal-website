@@ -110,7 +110,7 @@ const Recipes: FC = () => {
   }
 
   return (
-    <>
+    <div className={styles.page}>
       <Typography variant="heading1" className={styles.heading}>
         Recipes
       </Typography>
@@ -144,7 +144,7 @@ const Recipes: FC = () => {
           ))}
         </Grid>
       )}
-    </>
+    </div>
   )
 }
 
