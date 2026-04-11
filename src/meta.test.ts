@@ -30,7 +30,7 @@ vi.mock('./pages/Blog/posts/index', () => ({
   formatDate: (d: string) => d,
 }))
 
-import { getMetaTags, normalisePath, escapeHtml } from './meta'
+import { getMetaTags, normalisePath, escapeHtml, isKnownRoute } from './meta'
 
 describe('normalisePath', () => {
   it('strips trailing slash from /apps/', () => {
@@ -354,5 +354,94 @@ describe('getMetaTags', () => {
       const meta = getMetaTags('/blog/nonexistent-slug')
       expect(meta.robots).toBe('noindex')
     })
+  })
+
+  describe('recipe detail route /recipes/<slug> with recipe data', () => {
+    const mockRecipe = {
+      id: 'r1',
+      title: 'Spaghetti Bolognese',
+      slug: 'spaghetti-bolognese',
+      coverImage: { key: 'spaghetti-cover', alt: 'A bowl of spaghetti bolognese' },
+      tags: ['Italian', 'Pasta'],
+      prepTime: 15,
+      cookTime: 45,
+      servings: 4,
+      createdAt: '2026-03-01T12:00:00Z',
+      intro: 'A classic Italian pasta dish with rich meat sauce.',
+      ingredients: [
+        { item: 'spaghetti', quantity: '400', unit: 'g' },
+        { item: 'minced beef', quantity: '500', unit: 'g' },
+      ],
+      steps: [
+        { order: 1, text: 'Boil the pasta.' },
+        { order: 2, text: 'Brown the mince.' },
+      ],
+      authorId: 'a1',
+      authorName: 'Akli Aissat',
+      updatedAt: '2026-03-02T10:00:00Z',
+      status: 'published',
+    }
+
+    const longIntroRecipe = {
+      ...mockRecipe,
+      slug: 'long-intro-recipe',
+      intro:
+        'This is a very long introduction that exceeds one hundred and sixty characters in length so we can verify that the description is properly truncated when generating Open Graph meta tags for social sharing previews on various platforms.',
+    }
+
+    it('returns og:title matching the recipe title', () => {
+      const meta = getMetaTags('/recipes/spaghetti-bolognese', { recipe: mockRecipe })
+      expect(meta.og.title).toBe('Spaghetti Bolognese | Akli Aissat')
+    })
+
+    it('returns og:description from the recipe intro', () => {
+      const meta = getMetaTags('/recipes/spaghetti-bolognese', { recipe: mockRecipe })
+      expect(meta.og.description).toBe('A classic Italian pasta dish with rich meat sauce.')
+    })
+
+    it('returns og:description truncated to 160 chars when intro is longer', () => {
+      const meta = getMetaTags('/recipes/long-intro-recipe', { recipe: longIntroRecipe })
+      expect(meta.og.description.length).toBeLessThanOrEqual(160)
+    })
+
+    it('returns og:image with cover medium URL', () => {
+      const meta = getMetaTags('/recipes/spaghetti-bolognese', { recipe: mockRecipe })
+      expect(meta.og.image).toBeDefined()
+      expect(meta.og.image).toContain('spaghetti-cover')
+      expect(meta.og.image).toContain('-medium')
+    })
+
+    it('returns og:type as article', () => {
+      const meta = getMetaTags('/recipes/spaghetti-bolognese', { recipe: mockRecipe })
+      expect(meta.og.type).toBe('article')
+    })
+
+    it('returns twitter:card as summary_large_image', () => {
+      const meta = getMetaTags('/recipes/spaghetti-bolognese', { recipe: mockRecipe })
+      expect(meta.twitter.card).toBe('summary_large_image')
+    })
+
+    it('returns twitter:title matching the recipe title', () => {
+      const meta = getMetaTags('/recipes/spaghetti-bolognese', { recipe: mockRecipe })
+      expect(meta.twitter.title).toBe('Spaghetti Bolognese | Akli Aissat')
+    })
+
+    it('returns twitter:description from the recipe intro', () => {
+      const meta = getMetaTags('/recipes/spaghetti-bolognese', { recipe: mockRecipe })
+      expect(meta.twitter.description).toBe('A classic Italian pasta dish with rich meat sauce.')
+    })
+
+    it('returns twitter:image with cover medium URL', () => {
+      const meta = getMetaTags('/recipes/spaghetti-bolognese', { recipe: mockRecipe })
+      expect(meta.twitter.image).toBeDefined()
+      expect(meta.twitter.image).toContain('spaghetti-cover')
+      expect(meta.twitter.image).toContain('-medium')
+    })
+  })
+})
+
+describe('isKnownRoute', () => {
+  it('recognises /recipes/:slug pattern', () => {
+    expect(isKnownRoute('/recipes/some-slug')).toBe(true)
   })
 })

@@ -1,0 +1,41 @@
+/* RecipesCta component styles */
+
+.section {
+  position: relative;
+  padding-block: var(--space-12);
+}
+
+.section::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  inline-size: 100vw;
+  transform: translateX(-50%);
+  border-block-start: var(--border-width) solid var(--color-border-subtle);
+}
+
+.inner {
+  text-align: center;
+}
+
+.heading {
+  margin-block-end: var(--space-6);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  margin-block-end: var(--space-8);
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.body {
+  margin-block-start: var(--space-8);
+}

@@ -5,6 +5,8 @@ import { PassThrough } from 'node:stream'
 import { renderToPipeableStream } from 'react-dom/server'
 import { StaticRouter } from 'react-router-dom'
 import App from './App'
+import { RecipeDataContext } from './contexts/RecipeDataContext'
+import type { RecipeData } from './contexts/RecipeDataContext'
 import { getMetaTags, escapeHtml } from './meta'
 
 // Read the client-built index.html (copied into dist/server/ by build:prod).
@@ -29,8 +31,8 @@ try {
 
 const [templateBeforeOutlet, templateAfterOutlet] = template.split('<!--ssr-outlet-->')
 
-const buildHeadHtml = (routePath: string): string => {
-  const meta = getMetaTags(routePath)
+const buildHeadHtml = (routePath: string, data?: RecipeData): string => {
+  const meta = getMetaTags(routePath, data)
   const lines: string[] = []
 
   lines.push(`<title>${escapeHtml(meta.title)}</title>`)
@@ -79,14 +81,16 @@ const buildHeadHtml = (routePath: string): string => {
 }
 
 
-export const render = (url: string): Promise<string> =>
+export const render = (url: string, data?: RecipeData): Promise<string> =>
   new Promise<string>((resolve, reject) => {
-    const head = buildHeadHtml(url)
+    const head = buildHeadHtml(url, data)
     const beforeHtml = templateBeforeOutlet.replace('<!--ssr-head-->', head)
 
     const { pipe } = renderToPipeableStream(
       <StaticRouter location={url}>
-        <App />
+        <RecipeDataContext.Provider value={data ?? {}}>
+          <App />
+        </RecipeDataContext.Provider>
       </StaticRouter>,
       {
         onAllReady() {

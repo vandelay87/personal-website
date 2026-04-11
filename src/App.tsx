@@ -5,6 +5,8 @@ import Blog from '@pages/Blog'
 import BlogPost from '@pages/Blog/BlogPost'
 import Home from '@pages/Home'
 import NotFound from '@pages/NotFound'
+import RecipeDetail from '@pages/RecipeDetail'
+import Recipes from '@pages/Recipes'
 import { Routes, Route } from 'react-router-dom'
 
 const App = () => {
@@ -17,6 +19,8 @@ const App = () => {
           <Route path="/apps" element={<Apps />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/recipes" element={<Recipes />} />
+          <Route path="/recipes/:slug" element={<RecipeDetail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>

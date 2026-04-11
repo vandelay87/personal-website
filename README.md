@@ -37,7 +37,10 @@ pnpm dev
 ```
 src/
   components/    # Reusable components (<Name>/<Name>.tsx + index.ts)
-  pages/         # Route pages (Home, Apps, Blog, NotFound)
+  pages/         # Route pages (Home, Apps, Blog, Recipes, RecipeDetail, NotFound)
+  api/           # API service layers (recipes)
+  types/         # Shared TypeScript interfaces
+  contexts/      # React contexts (RecipeDataContext for SSR)
   hooks/         # Custom hooks
   styles/        # Design tokens and animations
   assets/        # Images and static files
@@ -55,6 +58,8 @@ tests/
 - `/apps/pokedex` — Searchable Gen 1 Pokemon encyclopedia (deployed separately)
 - `/blog` — Technical blog with tag filtering
 - `/blog/:slug` — Individual blog posts (MDX with code blocks, callouts, file trees)
+- `/recipes` — Recipe listing with search and tag filtering
+- `/recipes/:slug` — Recipe detail with SSR for SEO and Open Graph
 
 ## Design
 

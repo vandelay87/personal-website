@@ -1,0 +1,34 @@
+.page {
+  padding-block-end: var(--space-12);
+}
+
+.heading {
+  margin-block-end: var(--space-2);
+}
+
+.intro {
+  margin-block-end: var(--space-8);
+}
+
+.loadingWrapper {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-12) 0;
+}
+
+.empty {
+  text-align: center;
+  padding: var(--space-12) 0;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
