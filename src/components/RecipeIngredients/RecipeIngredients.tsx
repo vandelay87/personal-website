@@ -8,9 +8,9 @@ export interface RecipeIngredientsProps {
 
 const RecipeIngredients: FC<RecipeIngredientsProps> = ({ ingredients }) => (
   <ul className={styles.list}>
-    {ingredients.map((ingredient) => (
-      <li key={ingredient.item} className={styles.item}>
-        {ingredient.quantity} {ingredient.item}
+    {ingredients.map((ingredient, idx) => (
+      <li key={`${ingredient.item}-${idx}`} className={styles.item}>
+        {ingredient.quantity} {ingredient.unit} {ingredient.item}
       </li>
     ))}
   </ul>

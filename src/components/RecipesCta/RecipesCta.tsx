@@ -16,8 +16,10 @@ const RecipesCta: FC = () => {
   const [status, setStatus] = useState<Status>('loading')
 
   useEffect(() => {
+    let cancelled = false
     fetchRecipes()
       .then((data) => {
+        if (cancelled) return
         const latest = data.slice(0, MAX_RECIPES)
         if (latest.length === 0) {
           setStatus('empty')
@@ -27,8 +29,9 @@ const RecipesCta: FC = () => {
         }
       })
       .catch(() => {
-        setStatus('error')
+        if (!cancelled) setStatus('error')
       })
+    return () => { cancelled = true }
   }, [])
 
   if (status !== 'loaded') {

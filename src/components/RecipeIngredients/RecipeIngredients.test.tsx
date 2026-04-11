@@ -23,14 +23,8 @@ describe('RecipeIngredients', () => {
   it('shows quantity, unit, and item name for each ingredient', () => {
     render(<RecipeIngredients ingredients={mockIngredients} />)
 
-    expect(screen.getByText(/200/)).toBeInTheDocument()
-    expect(screen.getByText(/g/)).toBeInTheDocument()
-    expect(screen.getByText(/flour/)).toBeInTheDocument()
-
-    expect(screen.getByText(/100/)).toBeInTheDocument()
-    expect(screen.getByText(/sugar/)).toBeInTheDocument()
-
-    expect(screen.getByText(/50/)).toBeInTheDocument()
-    expect(screen.getByText(/butter/)).toBeInTheDocument()
+    expect(screen.getByText('200 g flour')).toBeInTheDocument()
+    expect(screen.getByText('100 g sugar')).toBeInTheDocument()
+    expect(screen.getByText('50 g butter')).toBeInTheDocument()
   })
 })
