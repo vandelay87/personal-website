@@ -1,11 +1,11 @@
+import { getUploadUrl } from '@api/recipes'
 import ImageUpload from '@components/ImageUpload'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { vi } from 'vitest'
 
 vi.mock('@api/recipes', () => ({
   getUploadUrl: vi.fn(),
 }))
-
-import { getUploadUrl } from '@api/recipes'
 
 const mockGetUploadUrl = vi.mocked(getUploadUrl)
 

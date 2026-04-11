@@ -1,16 +1,17 @@
 import AdminLayout from '@components/AdminLayout'
+import { useAuth } from '@contexts/AuthContext'
 import { render, screen, fireEvent } from '@testing-library/react'
+import type { ReactElement } from 'react'
 import { MemoryRouter } from 'react-router-dom'
+import { vi } from 'vitest'
 
 vi.mock('@contexts/AuthContext', () => ({
   useAuth: vi.fn(),
 }))
 
-import { useAuth } from '@contexts/AuthContext'
-
 const mockUseAuth = vi.mocked(useAuth)
 
-const renderWithRouter = (ui: React.ReactElement, { route = '/admin/recipes' } = {}) => {
+const renderWithRouter = (ui: ReactElement, { route = '/admin/recipes' } = {}) => {
   return render(<MemoryRouter initialEntries={[route]}>{ui}</MemoryRouter>)
 }
 
