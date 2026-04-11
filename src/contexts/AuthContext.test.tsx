@@ -17,7 +17,7 @@ const fakeIdToken = (payload: Record<string, unknown>): string => {
 }
 
 const adminIdToken = fakeIdToken({ email: 'admin@example.com', 'cognito:groups': ['admin'] })
-const contributorIdToken = fakeIdToken({ email: 'contributor@example.com', 'cognito:groups': ['contributor'] })
+const _contributorIdToken = fakeIdToken({ email: 'contributor@example.com', 'cognito:groups': ['contributor'] })
 
 const TestConsumer = () => {
   const { user, isAuthenticated, isAdmin, login, logout, getAccessToken } = useAuth()
