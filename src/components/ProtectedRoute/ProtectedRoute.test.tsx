@@ -1,8 +1,8 @@
+import { useAuth } from '@contexts/AuthContext'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 
-import { useAuth } from '@contexts/AuthContext'
 
 import ProtectedRoute from './ProtectedRoute'
 
@@ -41,7 +41,7 @@ describe('ProtectedRoute', () => {
       isAuthenticated: false,
       isAdmin: false,
       user: null,
-      loading: true,
+      loading: false,
       login: vi.fn(),
       logout: vi.fn(),
       getAccessToken: vi.fn(),

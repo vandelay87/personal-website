@@ -6,6 +6,7 @@ export interface AuthContextValue {
   user: User | null
   isAuthenticated: boolean
   isAdmin: boolean
+  loading: boolean
   login: (email: string, password: string) => Promise<AuthResult>
   logout: () => void
   getAccessToken: () => Promise<string>
@@ -34,6 +35,7 @@ export const AuthContext = createContext<AuthContextValue>({
   user: null,
   isAuthenticated: false,
   isAdmin: false,
+  loading: true,
   login: async () => {
     throw new Error('Not implemented')
   },
@@ -62,6 +64,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const initial = initSession()
   const [user, setUser] = useState<User | null>(initial.user)
   const [isAuthenticated, setIsAuthenticated] = useState(initial.isAuthenticated)
+  const [loading] = useState(false)
 
   const isAdmin = user?.groups.includes('admin') ?? false
 
@@ -96,7 +99,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, isAdmin, login, logout, getAccessToken }}
+      value={{ user, isAuthenticated, isAdmin, loading, login, logout, getAccessToken }}
     >
       {children}
     </AuthContext.Provider>

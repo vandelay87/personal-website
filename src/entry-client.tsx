@@ -1,4 +1,5 @@
 import ScrollToTop from '@components/ScrollToTop'
+import { AuthProvider } from '@contexts/AuthContext'
 import { StrictMode } from 'react'
 import { hydrateRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
@@ -9,8 +10,10 @@ hydrateRoot(
   document.getElementById('root')!,
   <StrictMode>
     <BrowserRouter>
-      <ScrollToTop />
-      <App />
+      <AuthProvider>
+        <ScrollToTop />
+        <App />
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>
 )

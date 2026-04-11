@@ -68,6 +68,7 @@ export const KNOWN_ROUTES = new Set(Object.keys(routeMeta))
 
 export const isKnownRoute = (path: string): boolean => {
   if (KNOWN_ROUTES.has(path)) return true
+  if (path.startsWith('/admin')) return true
   const blogPostMatch = path.match(/^\/blog\/(.+)$/)
   if (blogPostMatch) {
     const post = postsModule.getPost(blogPostMatch[1])
