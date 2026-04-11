@@ -34,6 +34,10 @@
   border-bottom: var(--border-width) solid var(--color-border);
 }
 
+.imageWrapper > figure > div {
+  border: none;
+}
+
 .image {
   width: 100%;
   height: 100%;
