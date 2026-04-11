@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
+import type { Ingredient } from '@types/recipe'
 import { describe, it, expect } from 'vitest'
-import type { Ingredient } from '../../types/recipe'
 import RecipeIngredients from './RecipeIngredients'
 
 const mockIngredients: Ingredient[] = [

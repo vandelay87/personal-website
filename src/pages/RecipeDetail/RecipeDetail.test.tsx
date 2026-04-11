@@ -1,14 +1,14 @@
+import { fetchRecipe } from '@api/recipes'
+import { RecipeDataContext } from '@contexts/RecipeDataContext'
 import { render, screen, waitFor } from '@testing-library/react'
+import type { Recipe } from '@types/recipe'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-vi.mock('../../api/recipes', () => ({
+import RecipeDetail from './RecipeDetail'
+
+vi.mock('@api/recipes', () => ({
   fetchRecipe: vi.fn(),
 }))
-
-import { fetchRecipe } from '../../api/recipes'
-import { RecipeDataContext } from '../../contexts/RecipeDataContext'
-import type { Recipe } from '../../types/recipe'
-import RecipeDetail from './RecipeDetail'
 
 const mockRecipe: Recipe = {
   id: 'recipe-1',

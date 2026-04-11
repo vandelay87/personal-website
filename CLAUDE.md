@@ -22,7 +22,7 @@ To write a new PRD, copy `docs/prds/template.md` and fill it in.
 - Components live in `src/components/<Name>/<Name>.tsx` with a barrel `index.ts`
 - Pages live in `src/pages/<Name>/<Name>.tsx` with a barrel `index.ts`
 - Each component/page has a co-located test file `<Name>.test.tsx`
-- Use path aliases: `@components/`, `@pages/`, `@hooks/`
+- Use path aliases: `@api/`, `@components/`, `@contexts/`, `@hooks/`, `@pages/`, `@types/`
 - Dark mode via `data-theme` attribute on the document root
 - Neo-brutalist design: use `var(--radius-none)` for border-radius — no rounded corners on any component
 - Use const arrow functions, not function declarations — enforced by ESLint (`func-style: expression`)

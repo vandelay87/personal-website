@@ -11,9 +11,12 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
+      "@api/*": ["src/api/*"],
       "@components/*": ["src/components/*"],
+      "@contexts/*": ["src/contexts/*"],
+      "@hooks/*": ["src/hooks/*"],
       "@pages/*": ["src/pages/*"],
-      "@hooks/*": ["src/hooks/*"]
+      "@types/*": ["src/types/*"]
     },
     "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
     "resolveJsonModule": true,

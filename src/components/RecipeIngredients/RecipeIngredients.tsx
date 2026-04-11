@@ -1,5 +1,5 @@
+import type { Ingredient } from '@types/recipe'
 import type { FC } from 'react'
-import type { Ingredient } from '../../types/recipe'
 import styles from './RecipeIngredients.module.css'
 
 export interface RecipeIngredientsProps {

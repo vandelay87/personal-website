@@ -1,10 +1,10 @@
+import { fetchRecipes } from '@api/recipes'
 import Grid from '@components/Grid'
 import Link from '@components/Link'
 import RecipeCard from '@components/RecipeCard'
 import Typography from '@components/Typography'
+import type { RecipeIndex } from '@types/recipe'
 import { FC, useEffect, useState } from 'react'
-import { fetchRecipes } from '../../api/recipes'
-import type { RecipeIndex } from '../../types/recipe'
 import styles from './RecipesCta.module.css'
 
 type Status = 'loading' | 'loaded' | 'empty' | 'error'

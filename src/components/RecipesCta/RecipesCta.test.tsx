@@ -1,14 +1,13 @@
+import { fetchRecipes } from '@api/recipes'
 import { render, screen, waitFor } from '@testing-library/react'
+import type { RecipeIndex } from '@types/recipe'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import RecipesCta from './RecipesCta'
 
-vi.mock('../../api/recipes', () => ({
+vi.mock('@api/recipes', () => ({
   fetchRecipes: vi.fn(),
 }))
-
-import { fetchRecipes } from '../../api/recipes'
-import type { RecipeIndex } from '../../types/recipe'
-import RecipesCta from './RecipesCta'
 
 const mockRecipes: RecipeIndex[] = [
   {

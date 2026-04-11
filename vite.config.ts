@@ -93,9 +93,12 @@ export default defineConfig(({ isSsrBuild }) => ({
   ],
   resolve: {
     alias: {
+      '@api': '/src/api',
       '@components': '/src/components',
-      '@pages': '/src/pages',
+      '@contexts': '/src/contexts',
       '@hooks': '/src/hooks',
+      '@pages': '/src/pages',
+      '@types': '/src/types',
     },
   },
   server: {

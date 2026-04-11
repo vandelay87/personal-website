@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
+import type { Tag } from '@types/recipe'
 import { describe, it, expect, vi } from 'vitest'
-import type { Tag } from '../../types/recipe'
 import RecipeTagFilter from './RecipeTagFilter'
 
 const mockTags: Tag[] = [

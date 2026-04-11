@@ -1,8 +1,8 @@
 import Image from '@components/Image'
 import Typography from '@components/Typography'
+import { RECIPE_IMAGE_BASE, type RecipeIndex } from '@types/recipe'
 import type { FC } from 'react'
 import { Link } from 'react-router-dom'
-import { RECIPE_IMAGE_BASE, type RecipeIndex } from '../../types/recipe'
 import styles from './RecipeCard.module.css'
 
 export interface RecipeCardProps {

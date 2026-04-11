@@ -1,6 +1,6 @@
 import Button from '@components/Button'
+import type { Tag } from '@types/recipe'
 import type { FC } from 'react'
-import type { Tag } from '../../types/recipe'
 import styles from './RecipeTagFilter.module.css'
 
 export interface RecipeTagFilterProps {
