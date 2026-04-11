@@ -38,6 +38,38 @@ vi.mock('@pages/RecipeDetail', () => ({
   default: () => <div>Recipe detail page</div>,
 }))
 
+vi.mock('@pages/Login', () => ({
+  default: () => <div>Login page</div>,
+}))
+
+vi.mock('@pages/AdminRecipeList', () => ({
+  default: () => <div>Admin recipe list</div>,
+}))
+
+vi.mock('@pages/RecipeEditor', () => ({
+  default: () => <div>Recipe editor</div>,
+}))
+
+vi.mock('@pages/RecipePreview', () => ({
+  default: () => <div>Recipe preview</div>,
+}))
+
+vi.mock('@pages/UserManagement', () => ({
+  default: () => <div>User management</div>,
+}))
+
+vi.mock('@contexts/AuthContext', () => ({
+  useAuth: () => ({
+    isAuthenticated: true,
+    isAdmin: true,
+    user: { email: 'admin@test.com', groups: ['admin'] },
+    loading: false,
+    login: vi.fn(),
+    logout: vi.fn(),
+    getAccessToken: vi.fn(),
+  }),
+}))
+
 import App from './App'
 
 const renderApp = (route: string) =>
@@ -56,5 +88,35 @@ describe('App routing', () => {
   it('renders RecipeDetail page at /recipes/:slug', () => {
     renderApp('/recipes/test-slug')
     expect(screen.getByText('Recipe detail page')).toBeInTheDocument()
+  })
+
+  it('renders Login page at /admin/login', async () => {
+    renderApp('/admin/login')
+    expect(await screen.findByText('Login page')).toBeInTheDocument()
+  })
+
+  it('renders admin recipes at /admin/recipes', async () => {
+    renderApp('/admin/recipes')
+    expect(await screen.findByText('Admin recipe list')).toBeInTheDocument()
+  })
+
+  it('renders recipe editor at /admin/recipes/new', async () => {
+    renderApp('/admin/recipes/new')
+    expect(await screen.findByText('Recipe editor')).toBeInTheDocument()
+  })
+
+  it('renders recipe editor at /admin/recipes/:id/edit', async () => {
+    renderApp('/admin/recipes/abc123/edit')
+    expect(await screen.findByText('Recipe editor')).toBeInTheDocument()
+  })
+
+  it('renders recipe preview at /admin/recipes/:id/preview', async () => {
+    renderApp('/admin/recipes/abc123/preview')
+    expect(await screen.findByText('Recipe preview')).toBeInTheDocument()
+  })
+
+  it('renders user management at /admin/users', async () => {
+    renderApp('/admin/users')
+    expect(await screen.findByText('User management')).toBeInTheDocument()
   })
 })
