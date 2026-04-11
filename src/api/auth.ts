@@ -1,24 +1,46 @@
 import type { AuthResult, AuthTokens } from '@types/auth'
 
-export const login = async (_email: string, _password: string): Promise<AuthResult> => {
-  throw new Error('Not implemented')
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'https://api.akli.dev'
+
+export const login = async (email: string, password: string): Promise<AuthResult> => {
+  const response = await fetch(`${API_BASE}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  })
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`)
+  }
+  return response.json()
 }
 
 export const completeNewPassword = async (
-  _session: string,
-  _newPassword: string
+  session: string,
+  newPassword: string
 ): Promise<AuthTokens> => {
-  throw new Error('Not implemented')
-}
-
-export const logout = (): void => {
-  throw new Error('Not implemented')
+  const response = await fetch(`${API_BASE}/auth/confirm-new-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session, newPassword }),
+  })
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`)
+  }
+  return response.json()
 }
 
 export const refreshSession = async (
-  _refreshToken: string
+  refreshToken: string
 ): Promise<{ accessToken: string; idToken: string }> => {
-  throw new Error('Not implemented')
+  const response = await fetch(`${API_BASE}/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken }),
+  })
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`)
+  }
+  return response.json()
 }
 
 export const getCurrentSession = (): {
@@ -26,5 +48,19 @@ export const getCurrentSession = (): {
   refreshToken: string
   idToken: string
 } | null => {
-  throw new Error('Not implemented')
+  const accessToken = localStorage.getItem('accessToken')
+  const refreshToken = localStorage.getItem('refreshToken')
+  const idToken = localStorage.getItem('idToken')
+
+  if (!accessToken || !refreshToken || !idToken) {
+    return null
+  }
+
+  return { accessToken, refreshToken, idToken }
+}
+
+export const logout = (): void => {
+  localStorage.removeItem('accessToken')
+  localStorage.removeItem('refreshToken')
+  localStorage.removeItem('idToken')
 }

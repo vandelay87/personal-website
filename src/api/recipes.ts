@@ -26,37 +26,94 @@ export const fetchTags = async (): Promise<Tag[]> => {
   return response.json()
 }
 
-export const fetchMyRecipes = async (_token: string): Promise<Recipe[]> => {
-  throw new Error('Not implemented')
+export const fetchMyRecipes = async (token: string): Promise<Recipe[]> => {
+  const response = await fetch(`${API_BASE}/me/recipes`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`)
+  }
+  return response.json()
 }
 
-export const createRecipe = async (_token: string, _data: Partial<Recipe>): Promise<Recipe> => {
-  throw new Error('Not implemented')
+export const createRecipe = async (token: string, data: Partial<Recipe>): Promise<Recipe> => {
+  const response = await fetch(`${API_BASE}/recipes`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`)
+  }
+  return response.json()
 }
 
 export const updateRecipe = async (
-  _token: string,
-  _id: string,
-  _data: Partial<Recipe>
+  token: string,
+  id: string,
+  data: Partial<Recipe>
 ): Promise<Recipe> => {
-  throw new Error('Not implemented')
+  const response = await fetch(`${API_BASE}/recipes/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`)
+  }
+  return response.json()
 }
 
-export const publishRecipe = async (_token: string, _id: string): Promise<void> => {
-  throw new Error('Not implemented')
+export const publishRecipe = async (token: string, id: string): Promise<void> => {
+  const response = await fetch(`${API_BASE}/recipes/${id}/publish`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`)
+  }
 }
 
-export const unpublishRecipe = async (_token: string, _id: string): Promise<void> => {
-  throw new Error('Not implemented')
+export const unpublishRecipe = async (token: string, id: string): Promise<void> => {
+  const response = await fetch(`${API_BASE}/recipes/${id}/unpublish`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`)
+  }
 }
 
-export const deleteRecipe = async (_token: string, _id: string): Promise<void> => {
-  throw new Error('Not implemented')
+export const deleteRecipe = async (token: string, id: string): Promise<void> => {
+  const response = await fetch(`${API_BASE}/recipes/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`)
+  }
 }
 
 export const getUploadUrl = async (
-  _token: string,
-  _params: { recipeId: string; imageType: string; stepOrder?: number }
+  token: string,
+  params: { recipeId: string; imageType: string; stepOrder?: number }
 ): Promise<{ uploadUrl: string; key: string }> => {
-  throw new Error('Not implemented')
+  const response = await fetch(`${API_BASE}/recipes/images/upload-url`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(params),
+  })
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`)
+  }
+  return response.json()
 }

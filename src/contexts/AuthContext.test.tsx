@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import * as authApi from '@api/auth'
 import { render, screen, act } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { AuthProvider, useAuth } from './AuthContext'
 
 vi.mock('@api/auth', () => ({
@@ -8,8 +9,6 @@ vi.mock('@api/auth', () => ({
   getCurrentSession: vi.fn(),
   refreshSession: vi.fn(),
 }))
-
-import * as authApi from '@api/auth'
 
 const TestConsumer = () => {
   const { user, isAuthenticated, isAdmin, login, logout, getAccessToken } = useAuth()
