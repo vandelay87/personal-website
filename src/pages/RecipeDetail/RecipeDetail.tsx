@@ -1,5 +1,6 @@
 import Button from '@components/Button'
 import Image from '@components/Image'
+import Loading from '@components/Loading'
 import Typography from '@components/Typography'
 import NotFound from '@pages/NotFound'
 import { useContext, useEffect, useState, type FC } from 'react'
@@ -8,10 +9,9 @@ import { fetchRecipe } from '../../api/recipes'
 import RecipeIngredients from '../../components/RecipeIngredients'
 import RecipeSteps from '../../components/RecipeSteps'
 import { RecipeDataContext } from '../../contexts/RecipeDataContext'
-import type { Recipe } from '../../types/recipe'
+import { RECIPE_IMAGE_BASE, type Recipe } from '../../types/recipe'
 import styles from './RecipeDetail.module.css'
 
-const IMAGE_BASE = 'https://akli.dev/images'
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString)
@@ -72,8 +72,8 @@ const RecipeDetail: FC = () => {
 
   if (loading) {
     return (
-      <div className={styles.loading} role="status" aria-label="Loading">
-        Loading...
+      <div className={styles.loading}>
+        <Loading />
       </div>
     )
   }
@@ -115,8 +115,8 @@ const RecipeDetail: FC = () => {
   return (
     <article className={styles.page}>
       <Image
-        src={`${IMAGE_BASE}/${recipe.coverImage.key}-medium.webp`}
-        srcSet={`${IMAGE_BASE}/${recipe.coverImage.key}-medium.webp 800w, ${IMAGE_BASE}/${recipe.coverImage.key}-full.webp 1200w`}
+        src={`${RECIPE_IMAGE_BASE}/${recipe.coverImage.key}-medium.webp`}
+        srcSet={`${RECIPE_IMAGE_BASE}/${recipe.coverImage.key}-medium.webp 800w, ${RECIPE_IMAGE_BASE}/${recipe.coverImage.key}-full.webp 1200w`}
         alt={recipe.coverImage.alt}
         priority
         maxWidth="var(--max-w-site)"

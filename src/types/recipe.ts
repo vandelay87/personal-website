@@ -1,3 +1,5 @@
+export const RECIPE_IMAGE_BASE = 'https://akli.dev/images'
+
 export interface RecipeImage {
   key: string
   alt: string
