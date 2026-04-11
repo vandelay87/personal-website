@@ -31,30 +31,8 @@ const RecipesCta: FC = () => {
       })
   }, [])
 
-  if (status === 'empty' || status === 'error') {
+  if (status !== 'loaded') {
     return null
-  }
-
-  if (status === 'loading') {
-    return (
-      <section className={styles.section} aria-labelledby="recipes-section-title">
-        <div className={styles.inner}>
-          <Typography variant="heading2" id="recipes-section-title" className={styles.heading}>
-            From the Kitchen
-          </Typography>
-          <div className={styles.grid}>
-            {Array.from({ length: MAX_RECIPES }, (_, i) => (
-              <div
-                key={i}
-                role="status"
-                aria-label="Loading recipe"
-                className={styles.skeleton}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-    )
   }
 
   return (

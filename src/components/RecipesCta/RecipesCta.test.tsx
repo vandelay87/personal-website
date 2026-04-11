@@ -111,13 +111,12 @@ describe('RecipesCta', () => {
     expect(screen.queryByText(/from the kitchen/i)).not.toBeInTheDocument()
   })
 
-  it('shows skeleton placeholders while loading', () => {
+  it('renders nothing while loading', () => {
     vi.mocked(fetchRecipes).mockReturnValue(new Promise(() => {}))
 
     renderRecipesCta()
 
-    const skeletons = screen.getAllByRole('status', { name: /loading/i })
-    expect(skeletons.length).toBeGreaterThanOrEqual(1)
+    expect(screen.queryByRole('heading', { name: /from the kitchen/i })).not.toBeInTheDocument()
   })
 
   it('includes a heading and link to /recipes', async () => {

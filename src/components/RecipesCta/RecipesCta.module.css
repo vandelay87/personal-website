@@ -36,30 +36,6 @@
   }
 }
 
-.skeleton {
-  block-size: 16rem;
-  background: var(--color-bg-subtle);
-  border: var(--border-width) solid var(--color-border-subtle);
-  border-radius: var(--radius-none);
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .skeleton {
-    animation: none;
-  }
-}
-
 .link {
   display: inline-block;
 }
