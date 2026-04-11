@@ -36,6 +36,6 @@
   }
 }
 
-.link {
-  display: inline-block;
+.body {
+  margin-block-start: var(--space-8);
 }

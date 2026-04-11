@@ -46,9 +46,13 @@ const RecipesCta: FC = () => {
             <RecipeCard key={recipe.id} recipe={recipe} eager hideTags hideMeta />
           ))}
         </Grid>
-        <Link to="/recipes" className={styles.link}>
-          View all recipes
-        </Link>
+        <Typography variant="bodyLarge" className={styles.body}>
+          Browse all recipes in the{' '}
+          <Link to="/recipes" underline={true}>
+            kitchen
+          </Link>
+          .
+        </Typography>
       </div>
     </section>
   )

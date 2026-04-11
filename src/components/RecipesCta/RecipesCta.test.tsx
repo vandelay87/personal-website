@@ -127,6 +127,6 @@ describe('RecipesCta', () => {
     })
 
     expect(screen.getByRole('heading', { name: /from the kitchen/i })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /recipes/i })).toHaveAttribute('href', '/recipes')
+    expect(screen.getByRole('link', { name: /kitchen/i })).toHaveAttribute('href', '/recipes')
   })
 })
