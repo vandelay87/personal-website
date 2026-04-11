@@ -25,3 +25,38 @@ export const fetchTags = async (): Promise<Tag[]> => {
   }
   return response.json()
 }
+
+export const fetchMyRecipes = async (_token: string): Promise<Recipe[]> => {
+  throw new Error('Not implemented')
+}
+
+export const createRecipe = async (_token: string, _data: Partial<Recipe>): Promise<Recipe> => {
+  throw new Error('Not implemented')
+}
+
+export const updateRecipe = async (
+  _token: string,
+  _id: string,
+  _data: Partial<Recipe>
+): Promise<Recipe> => {
+  throw new Error('Not implemented')
+}
+
+export const publishRecipe = async (_token: string, _id: string): Promise<void> => {
+  throw new Error('Not implemented')
+}
+
+export const unpublishRecipe = async (_token: string, _id: string): Promise<void> => {
+  throw new Error('Not implemented')
+}
+
+export const deleteRecipe = async (_token: string, _id: string): Promise<void> => {
+  throw new Error('Not implemented')
+}
+
+export const getUploadUrl = async (
+  _token: string,
+  _params: { recipeId: string; imageType: string; stepOrder?: number }
+): Promise<{ uploadUrl: string; key: string }> => {
+  throw new Error('Not implemented')
+}
