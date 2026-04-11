@@ -67,8 +67,7 @@ describe('RecipeDetail page', () => {
       screen.getByRole('heading', { level: 1, name: 'Test Recipe' })
     ).toBeInTheDocument()
 
-    // Author and date
-    expect(screen.getByText(/Akli/)).toBeInTheDocument()
+    // Date and metadata
     expect(screen.getByText(/10 April 2026/i)).toBeInTheDocument()
 
     // Ingredients

@@ -121,23 +121,14 @@ const RecipeDetail: FC = () => {
         priority
         maxWidth="var(--max-w-site)"
         className={styles.coverImage}
+        containerClassName={styles.coverImageWrapper}
       />
 
       <Typography variant="heading1" className={styles.title}>{recipe.title}</Typography>
 
-      <div className={styles.meta}>
-        <span>{recipe.authorName}</span>
-        <span className={styles.separator}>·</span>
-        <time dateTime={recipe.createdAt}>{formatDate(recipe.createdAt)}</time>
-      </div>
-
-      <div className={styles.metaBar}>
-        <span>Prep: {recipe.prepTime} min</span>
-        <span className={styles.separator}>·</span>
-        <span>Cook: {recipe.cookTime} min</span>
-        <span className={styles.separator}>·</span>
-        <span>Serves: {recipe.servings}</span>
-      </div>
+      <Typography variant="body">
+        <time dateTime={recipe.createdAt}>{formatDate(recipe.createdAt)}</time> · {recipe.prepTime} min prep · {recipe.cookTime} min cook · Serves {recipe.servings}
+      </Typography>
 
       <div className={styles.tags}>
         {recipe.tags.map((tag) => (
@@ -149,12 +140,12 @@ const RecipeDetail: FC = () => {
 
       <Typography variant="bodyLarge" className={styles.intro}>{recipe.intro}</Typography>
 
-      <section>
+      <section className={styles.section}>
         <Typography variant="heading2" className={styles.sectionHeading}>Ingredients</Typography>
         <RecipeIngredients ingredients={recipe.ingredients} />
       </section>
 
-      <section>
+      <section className={styles.section}>
         <Typography variant="heading2" className={styles.sectionHeading}>Method</Typography>
         <RecipeSteps steps={recipe.steps} />
       </section>

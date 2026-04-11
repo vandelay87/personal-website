@@ -95,7 +95,7 @@ describe('RecipesCta', () => {
     })
 
     expect(container.querySelector('section')).not.toBeInTheDocument()
-    expect(screen.queryByText(/from the kitchen/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/favourite recipes/i)).not.toBeInTheDocument()
   })
 
   it('does not render the section when the API fails', async () => {
@@ -108,7 +108,7 @@ describe('RecipesCta', () => {
     })
 
     expect(container.querySelector('section')).not.toBeInTheDocument()
-    expect(screen.queryByText(/from the kitchen/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/favourite recipes/i)).not.toBeInTheDocument()
   })
 
   it('renders nothing while loading', () => {
@@ -116,7 +116,7 @@ describe('RecipesCta', () => {
 
     renderRecipesCta()
 
-    expect(screen.queryByRole('heading', { name: /from the kitchen/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /favourite recipes/i })).not.toBeInTheDocument()
   })
 
   it('includes a heading and link to /recipes', async () => {
@@ -126,7 +126,7 @@ describe('RecipesCta', () => {
       expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
     })
 
-    expect(screen.getByRole('heading', { name: /from the kitchen/i })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /kitchen/i })).toHaveAttribute('href', '/recipes')
+    expect(screen.getByRole('heading', { name: /favourite recipes/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /recipes/i })).toHaveAttribute('href', '/recipes')
   })
 })

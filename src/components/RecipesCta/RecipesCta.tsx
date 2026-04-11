@@ -39,7 +39,7 @@ const RecipesCta: FC = () => {
     <section className={styles.section} aria-labelledby="recipes-section-title">
       <div className={styles.inner}>
         <Typography variant="heading2" id="recipes-section-title" className={styles.heading}>
-          From the Kitchen
+          Favourite Recipes
         </Typography>
         <Grid columns={3}>
           {recipes.map((recipe) => (
@@ -47,9 +47,9 @@ const RecipesCta: FC = () => {
           ))}
         </Grid>
         <Typography variant="bodyLarge" className={styles.body}>
-          Browse all recipes in the{' '}
+          A collection of my favourite recipes. Browse all{' '}
           <Link to="/recipes" underline={true}>
-            kitchen
+            recipes
           </Link>
           .
         </Typography>
