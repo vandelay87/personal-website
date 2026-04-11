@@ -59,7 +59,7 @@ describe('RecipesCta', () => {
     vi.mocked(fetchRecipes).mockResolvedValue(mockRecipes)
   })
 
-  it('renders up to 3 latest recipe cards with cover image, title, and tags', async () => {
+  it('renders up to 3 latest recipe cards with cover image and title', async () => {
     renderRecipesCta()
 
     await waitFor(() => {
@@ -71,11 +71,6 @@ describe('RecipesCta', () => {
     expect(screen.getByRole('img', { name: 'Margherita pizza' })).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Thai green curry' })).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Pasta carbonara' })).toBeInTheDocument()
-
-    expect(screen.getByText('Italian')).toBeInTheDocument()
-    expect(screen.getByText('Quick')).toBeInTheDocument()
-    expect(screen.getByText('Thai')).toBeInTheDocument()
-    expect(screen.getByText('Spicy')).toBeInTheDocument()
   })
 
   it('shows available cards when fewer than 3 recipes exist', async () => {

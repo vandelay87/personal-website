@@ -2,7 +2,7 @@ import Grid from '@components/Grid'
 import Link from '@components/Link'
 import RecipeCard from '@components/RecipeCard'
 import Typography from '@components/Typography'
-import { FC, useEffect, useMemo, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { fetchRecipes } from '../../api/recipes'
 import type { RecipeIndex } from '../../types/recipe'
 import styles from './RecipesCta.module.css'
@@ -30,11 +30,6 @@ const RecipesCta: FC = () => {
         setStatus('error')
       })
   }, [])
-
-  const uniqueTags = useMemo(
-    () => [...new Set(recipes.flatMap((r) => r.tags))],
-    [recipes]
-  )
 
   if (status === 'empty' || status === 'error') {
     return null
@@ -73,13 +68,6 @@ const RecipesCta: FC = () => {
             <RecipeCard key={recipe.id} recipe={recipe} eager hideTags hideMeta />
           ))}
         </Grid>
-        <div className={styles.tags}>
-          {uniqueTags.map((tag) => (
-            <span key={tag} className={styles.tag}>
-              {tag}
-            </span>
-          ))}
-        </div>
         <Link to="/recipes" className={styles.link}>
           View all recipes
         </Link>
