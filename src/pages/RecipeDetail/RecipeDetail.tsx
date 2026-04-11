@@ -1,5 +1,6 @@
 import Button from '@components/Button'
 import Image from '@components/Image'
+import Loading from '@components/Loading'
 import Typography from '@components/Typography'
 import NotFound from '@pages/NotFound'
 import { useContext, useEffect, useState, type FC } from 'react'
@@ -8,10 +9,9 @@ import { fetchRecipe } from '../../api/recipes'
 import RecipeIngredients from '../../components/RecipeIngredients'
 import RecipeSteps from '../../components/RecipeSteps'
 import { RecipeDataContext } from '../../contexts/RecipeDataContext'
-import type { Recipe } from '../../types/recipe'
+import { RECIPE_IMAGE_BASE, type Recipe } from '../../types/recipe'
 import styles from './RecipeDetail.module.css'
 
-const IMAGE_BASE = 'https://akli.dev/images'
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString)
@@ -72,8 +72,8 @@ const RecipeDetail: FC = () => {
 
   if (loading) {
     return (
-      <div className={styles.loading} role="status" aria-label="Loading">
-        Loading...
+      <div className={styles.loading}>
+        <Loading />
       </div>
     )
   }
@@ -115,29 +115,20 @@ const RecipeDetail: FC = () => {
   return (
     <article className={styles.page}>
       <Image
-        src={`${IMAGE_BASE}/${recipe.coverImage.key}-medium.webp`}
-        srcSet={`${IMAGE_BASE}/${recipe.coverImage.key}-medium.webp 800w, ${IMAGE_BASE}/${recipe.coverImage.key}-full.webp 1200w`}
+        src={`${RECIPE_IMAGE_BASE}/${recipe.coverImage.key}-medium.webp`}
+        srcSet={`${RECIPE_IMAGE_BASE}/${recipe.coverImage.key}-medium.webp 800w, ${RECIPE_IMAGE_BASE}/${recipe.coverImage.key}-full.webp 1200w`}
         alt={recipe.coverImage.alt}
         priority
         maxWidth="var(--max-w-site)"
         className={styles.coverImage}
+        containerClassName={styles.coverImageWrapper}
       />
 
       <Typography variant="heading1" className={styles.title}>{recipe.title}</Typography>
 
-      <div className={styles.meta}>
-        <span>{recipe.authorName}</span>
-        <span className={styles.separator}>·</span>
-        <time dateTime={recipe.createdAt}>{formatDate(recipe.createdAt)}</time>
-      </div>
-
-      <div className={styles.metaBar}>
-        <span>Prep: {recipe.prepTime} min</span>
-        <span className={styles.separator}>·</span>
-        <span>Cook: {recipe.cookTime} min</span>
-        <span className={styles.separator}>·</span>
-        <span>Serves: {recipe.servings}</span>
-      </div>
+      <Typography variant="body">
+        <time dateTime={recipe.createdAt}>{formatDate(recipe.createdAt)}</time> · {recipe.prepTime} min prep · {recipe.cookTime} min cook · Serves {recipe.servings}
+      </Typography>
 
       <div className={styles.tags}>
         {recipe.tags.map((tag) => (
@@ -149,12 +140,12 @@ const RecipeDetail: FC = () => {
 
       <Typography variant="bodyLarge" className={styles.intro}>{recipe.intro}</Typography>
 
-      <section>
+      <section className={styles.section}>
         <Typography variant="heading2" className={styles.sectionHeading}>Ingredients</Typography>
         <RecipeIngredients ingredients={recipe.ingredients} />
       </section>
 
-      <section>
+      <section className={styles.section}>
         <Typography variant="heading2" className={styles.sectionHeading}>Method</Typography>
         <RecipeSteps steps={recipe.steps} />
       </section>

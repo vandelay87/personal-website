@@ -36,45 +36,6 @@
   }
 }
 
-.skeleton {
-  block-size: 16rem;
-  background: var(--color-bg-subtle);
-  border: var(--border-width) solid var(--color-border-subtle);
-  border-radius: var(--radius-none);
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .skeleton {
-    animation: none;
-  }
-}
-
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-2);
-  margin-block-end: var(--space-6);
-}
-
-.tag {
-  padding: var(--space-1) var(--space-3);
-  border: var(--border-width) solid var(--color-border-subtle);
-  border-radius: var(--radius-none);
-  font-size: var(--text-sm);
-}
-
-.link {
-  display: inline-block;
+.body {
+  margin-block-start: var(--space-8);
 }

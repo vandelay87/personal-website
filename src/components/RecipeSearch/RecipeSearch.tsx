@@ -2,11 +2,16 @@ import { useState, useEffect, type FC } from 'react'
 import styles from './RecipeSearch.module.css'
 
 export interface RecipeSearchProps {
+  value: string
   onSearch: (query: string) => void
 }
 
-const RecipeSearch: FC<RecipeSearchProps> = ({ onSearch }) => {
-  const [value, setValue] = useState('')
+const RecipeSearch: FC<RecipeSearchProps> = ({ value: controlledValue, onSearch }) => {
+  const [value, setValue] = useState(controlledValue)
+
+  useEffect(() => {
+    setValue(controlledValue)
+  }, [controlledValue])
 
   useEffect(() => {
     const timer = setTimeout(() => {

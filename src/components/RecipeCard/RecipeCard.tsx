@@ -2,7 +2,7 @@ import Image from '@components/Image'
 import Typography from '@components/Typography'
 import type { FC } from 'react'
 import { Link } from 'react-router-dom'
-import type { RecipeIndex } from '../../types/recipe'
+import { RECIPE_IMAGE_BASE, type RecipeIndex } from '../../types/recipe'
 import styles from './RecipeCard.module.css'
 
 export interface RecipeCardProps {
@@ -12,10 +12,9 @@ export interface RecipeCardProps {
   hideMeta?: boolean
 }
 
-const IMAGE_BASE = 'https://akli.dev/images'
 
 const RecipeCard: FC<RecipeCardProps> = ({ recipe, eager = false, hideTags = false, hideMeta = false }) => {
-  const thumbnailSrc = `${IMAGE_BASE}/${recipe.coverImage.key}-thumb.webp`
+  const thumbnailSrc = `${RECIPE_IMAGE_BASE}/${recipe.coverImage.key}-thumb.webp`
 
   return (
     <article className={styles.card}>

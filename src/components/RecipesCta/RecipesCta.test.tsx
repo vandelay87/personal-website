@@ -59,7 +59,7 @@ describe('RecipesCta', () => {
     vi.mocked(fetchRecipes).mockResolvedValue(mockRecipes)
   })
 
-  it('renders up to 3 latest recipe cards with cover image, title, and tags', async () => {
+  it('renders up to 3 latest recipe cards with cover image and title', async () => {
     renderRecipesCta()
 
     await waitFor(() => {
@@ -71,11 +71,6 @@ describe('RecipesCta', () => {
     expect(screen.getByRole('img', { name: 'Margherita pizza' })).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Thai green curry' })).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Pasta carbonara' })).toBeInTheDocument()
-
-    expect(screen.getByText('Italian')).toBeInTheDocument()
-    expect(screen.getByText('Quick')).toBeInTheDocument()
-    expect(screen.getByText('Thai')).toBeInTheDocument()
-    expect(screen.getByText('Spicy')).toBeInTheDocument()
   })
 
   it('shows available cards when fewer than 3 recipes exist', async () => {
@@ -100,7 +95,7 @@ describe('RecipesCta', () => {
     })
 
     expect(container.querySelector('section')).not.toBeInTheDocument()
-    expect(screen.queryByText(/from the kitchen/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/favourite recipes/i)).not.toBeInTheDocument()
   })
 
   it('does not render the section when the API fails', async () => {
@@ -113,16 +108,15 @@ describe('RecipesCta', () => {
     })
 
     expect(container.querySelector('section')).not.toBeInTheDocument()
-    expect(screen.queryByText(/from the kitchen/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/favourite recipes/i)).not.toBeInTheDocument()
   })
 
-  it('shows skeleton placeholders while loading', () => {
+  it('renders nothing while loading', () => {
     vi.mocked(fetchRecipes).mockReturnValue(new Promise(() => {}))
 
     renderRecipesCta()
 
-    const skeletons = screen.getAllByRole('status', { name: /loading/i })
-    expect(skeletons.length).toBeGreaterThanOrEqual(1)
+    expect(screen.queryByRole('heading', { name: /favourite recipes/i })).not.toBeInTheDocument()
   })
 
   it('includes a heading and link to /recipes', async () => {
@@ -132,7 +126,7 @@ describe('RecipesCta', () => {
       expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
     })
 
-    expect(screen.getByRole('heading', { name: /from the kitchen/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /favourite recipes/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /recipes/i })).toHaveAttribute('href', '/recipes')
   })
 })

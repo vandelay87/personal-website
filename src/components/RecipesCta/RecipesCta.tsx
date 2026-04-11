@@ -2,7 +2,7 @@ import Grid from '@components/Grid'
 import Link from '@components/Link'
 import RecipeCard from '@components/RecipeCard'
 import Typography from '@components/Typography'
-import { FC, useEffect, useMemo, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { fetchRecipes } from '../../api/recipes'
 import type { RecipeIndex } from '../../types/recipe'
 import styles from './RecipesCta.module.css'
@@ -31,58 +31,28 @@ const RecipesCta: FC = () => {
       })
   }, [])
 
-  const uniqueTags = useMemo(
-    () => [...new Set(recipes.flatMap((r) => r.tags))],
-    [recipes]
-  )
-
-  if (status === 'empty' || status === 'error') {
+  if (status !== 'loaded') {
     return null
-  }
-
-  if (status === 'loading') {
-    return (
-      <section className={styles.section} aria-labelledby="recipes-section-title">
-        <div className={styles.inner}>
-          <Typography variant="heading2" id="recipes-section-title" className={styles.heading}>
-            From the Kitchen
-          </Typography>
-          <div className={styles.grid}>
-            {Array.from({ length: MAX_RECIPES }, (_, i) => (
-              <div
-                key={i}
-                role="status"
-                aria-label="Loading recipe"
-                className={styles.skeleton}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-    )
   }
 
   return (
     <section className={styles.section} aria-labelledby="recipes-section-title">
       <div className={styles.inner}>
         <Typography variant="heading2" id="recipes-section-title" className={styles.heading}>
-          From the Kitchen
+          Favourite Recipes
         </Typography>
         <Grid columns={3}>
           {recipes.map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} eager hideTags hideMeta />
           ))}
         </Grid>
-        <div className={styles.tags}>
-          {uniqueTags.map((tag) => (
-            <span key={tag} className={styles.tag}>
-              {tag}
-            </span>
-          ))}
-        </div>
-        <Link to="/recipes" className={styles.link}>
-          View all recipes
-        </Link>
+        <Typography variant="bodyLarge" className={styles.body}>
+          A collection of my favourite recipes. Browse all{' '}
+          <Link to="/recipes" underline={true}>
+            recipes
+          </Link>
+          .
+        </Typography>
       </div>
     </section>
   )

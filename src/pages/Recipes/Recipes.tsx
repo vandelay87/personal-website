@@ -1,5 +1,6 @@
 import Button from '@components/Button'
 import Grid from '@components/Grid'
+import Loading from '@components/Loading'
 import Typography from '@components/Typography'
 import { useState, useEffect, useCallback, useMemo, type FC } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -14,23 +15,22 @@ const Recipes: FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTag = searchParams.get('tag')
 
-  const [recipes, setRecipes] = useState<RecipeIndex[]>([])
+  const [recipes, setRecipes] = useState<RecipeIndex[] | null>(null)
   const [tags, setTags] = useState<Tag[]>([])
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
   const loadData = useCallback(async () => {
-    setLoading(true)
     setError(false)
     try {
-      const [recipesData, tagsData] = await Promise.all([fetchRecipes(), fetchTags()])
+      const [recipesData, tagsData] = await Promise.all([
+        fetchRecipes(),
+        fetchTags(),
+      ])
       setRecipes(recipesData)
       setTags(tagsData)
     } catch {
       setError(true)
-    } finally {
-      setLoading(false)
     }
   }, [])
 
@@ -57,31 +57,24 @@ const Recipes: FC = () => {
 
   const filteredRecipes = useMemo(
     () =>
-      recipes.filter((recipe) => {
+      (recipes ?? []).filter((recipe) => {
         const matchesTag = !activeTag || recipe.tags.includes(activeTag)
         const matchesSearch =
           !searchQuery ||
           recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
         return matchesTag && matchesSearch
       }),
-    [recipes, activeTag, searchQuery],
+    [recipes, activeTag, searchQuery]
   )
 
-  if (loading) {
+  if (recipes === null && !error) {
     return (
       <>
         <Typography variant="heading1" className={styles.heading}>
           Recipes
         </Typography>
-        <div className={styles.grid}>
-          {Array.from({ length: 6 }, (_, i) => (
-            <div
-              key={i}
-              className={styles.skeleton}
-              role="status"
-              aria-label="Loading"
-            />
-          ))}
+        <div className={styles.loadingWrapper}>
+          <Loading />
         </div>
       </>
     )
@@ -105,7 +98,7 @@ const Recipes: FC = () => {
     )
   }
 
-  if (recipes.length === 0) {
+  if (recipes !== null && recipes.length === 0) {
     return (
       <>
         <Typography variant="heading1" className={styles.heading}>
@@ -117,7 +110,7 @@ const Recipes: FC = () => {
   }
 
   return (
-    <>
+    <div className={styles.page}>
       <Typography variant="heading1" className={styles.heading}>
         Recipes
       </Typography>
@@ -125,11 +118,16 @@ const Recipes: FC = () => {
         A collection of tried-and-tested recipes from my kitchen.
       </Typography>
 
-      <RecipeSearch onSearch={handleSearch} />
-      <RecipeTagFilter tags={tags} activeTag={activeTag} onTagClick={handleTagClick} />
+      <RecipeSearch value={searchQuery} onSearch={handleSearch} />
+      <RecipeTagFilter
+        tags={tags}
+        activeTag={activeTag}
+        onTagClick={handleTagClick}
+      />
 
       <div role="status" aria-live="polite" className={styles.srOnly}>
-        {filteredRecipes.length} {filteredRecipes.length === 1 ? 'recipe' : 'recipes'} found
+        {filteredRecipes.length}{' '}
+        {filteredRecipes.length === 1 ? 'recipe' : 'recipes'} found
       </div>
 
       {filteredRecipes.length === 0 ? (
@@ -146,7 +144,7 @@ const Recipes: FC = () => {
           ))}
         </Grid>
       )}
-    </>
+    </div>
   )
 }
 
