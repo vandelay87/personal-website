@@ -80,7 +80,7 @@ describe('completeNewPassword', () => {
       })
     )
 
-    const result = await completeNewPassword('session-abc', 'newPass123!')
+    const result = await completeNewPassword('test@example.com', 'session-abc', 'newPass123!')
 
     expect(result).toEqual({
       accessToken: 'access-new',

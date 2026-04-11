@@ -15,13 +15,14 @@ export const login = async (email: string, password: string): Promise<AuthResult
 }
 
 export const completeNewPassword = async (
+  email: string,
   session: string,
   newPassword: string
 ): Promise<AuthTokens> => {
   const response = await fetch(`${API_BASE}/auth/confirm-new-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ session, newPassword }),
+    body: JSON.stringify({ email, session, newPassword }),
   })
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`)
