@@ -23,7 +23,10 @@ const Recipes: FC = () => {
   const loadData = useCallback(async () => {
     setError(false)
     try {
-      const [recipesData, tagsData] = await Promise.all([fetchRecipes(), fetchTags()])
+      const [recipesData, tagsData] = await Promise.all([
+        fetchRecipes(),
+        fetchTags(),
+      ])
       setRecipes(recipesData)
       setTags(tagsData)
     } catch {
@@ -61,7 +64,7 @@ const Recipes: FC = () => {
           recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
         return matchesTag && matchesSearch
       }),
-    [recipes, activeTag, searchQuery],
+    [recipes, activeTag, searchQuery]
   )
 
   if (recipes === null && !error) {
@@ -115,11 +118,16 @@ const Recipes: FC = () => {
         A collection of tried-and-tested recipes from my kitchen.
       </Typography>
 
-      <RecipeSearch onSearch={handleSearch} />
-      <RecipeTagFilter tags={tags} activeTag={activeTag} onTagClick={handleTagClick} />
+      <RecipeSearch value={searchQuery} onSearch={handleSearch} />
+      <RecipeTagFilter
+        tags={tags}
+        activeTag={activeTag}
+        onTagClick={handleTagClick}
+      />
 
       <div role="status" aria-live="polite" className={styles.srOnly}>
-        {filteredRecipes.length} {filteredRecipes.length === 1 ? 'recipe' : 'recipes'} found
+        {filteredRecipes.length}{' '}
+        {filteredRecipes.length === 1 ? 'recipe' : 'recipes'} found
       </div>
 
       {filteredRecipes.length === 0 ? (

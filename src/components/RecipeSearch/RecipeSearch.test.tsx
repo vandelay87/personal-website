@@ -12,7 +12,7 @@ describe('RecipeSearch', () => {
   })
 
   it('renders a search input with aria-label', () => {
-    render(<RecipeSearch onSearch={vi.fn()} />)
+    render(<RecipeSearch value="" onSearch={vi.fn()} />)
 
     const input = screen.getByRole('searchbox', { name: /search recipes/i })
     expect(input).toBeInTheDocument()
@@ -20,7 +20,7 @@ describe('RecipeSearch', () => {
 
   it('calls onSearch callback after 300ms debounce', () => {
     const onSearch = vi.fn()
-    render(<RecipeSearch onSearch={onSearch} />)
+    render(<RecipeSearch value="" onSearch={onSearch} />)
 
     const input = screen.getByRole('searchbox', { name: /search recipes/i })
     fireEvent.change(input, { target: { value: 'pizza' } })
@@ -35,7 +35,7 @@ describe('RecipeSearch', () => {
 
   it('does not call onSearch before debounce period', () => {
     const onSearch = vi.fn()
-    render(<RecipeSearch onSearch={onSearch} />)
+    render(<RecipeSearch value="" onSearch={onSearch} />)
 
     const input = screen.getByRole('searchbox', { name: /search recipes/i })
     fireEvent.change(input, { target: { value: 'pasta' } })
