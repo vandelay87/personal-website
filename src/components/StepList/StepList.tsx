@@ -7,7 +7,6 @@ import styles from './StepList.module.css'
 export interface StepListProps {
   steps: Step[]
   onChange: (steps: Step[]) => void
-  getToken: () => Promise<string>
 }
 
 const renumber = (steps: Step[]): Step[] =>

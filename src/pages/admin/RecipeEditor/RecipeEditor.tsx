@@ -243,7 +243,7 @@ const RecipeEditor: FC = () => {
         </div>
 
         <div className={styles.section}>
-          <StepList steps={steps} onChange={setSteps} getToken={getAccessToken} />
+          <StepList steps={steps} onChange={setSteps} />
           {errors.steps && <span className={styles.error}>{errors.steps}</span>}
         </div>
 
