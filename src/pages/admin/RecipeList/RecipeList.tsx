@@ -7,11 +7,13 @@ import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import type { Recipe } from '@types/recipe'
 import { useCallback, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import styles from './RecipeList.module.css'
 
 const RecipeList = () => {
-  const { getAccessToken } = useAuth()
+  const { getAccessToken, logout } = useAuth()
+  const navigate = useNavigate()
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -24,12 +26,18 @@ const RecipeList = () => {
       const token = await getAccessToken()
       const data = await fetchMyRecipes(token)
       setRecipes(data)
-    } catch {
-      setError(true)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : ''
+      if (message.includes('401') || message.includes('Session expired') || message.includes('No session')) {
+        logout()
+        navigate('/admin/login')
+      } else {
+        setError(true)
+      }
     } finally {
       setLoading(false)
     }
-  }, [getAccessToken])
+  }, [getAccessToken, logout, navigate])
 
   useEffect(() => {
     loadRecipes()
@@ -56,7 +64,9 @@ const RecipeList = () => {
   if (loading) {
     return (
       <div className={styles.page}>
-        <Loading />
+        <div className={styles.loadingWrapper}>
+          <Loading />
+        </div>
       </div>
     )
   }

@@ -16,7 +16,9 @@ const fakeIdToken = (payload: Record<string, unknown>): string => {
   return `${header}.${body}.fakesig`
 }
 
-const adminIdToken = fakeIdToken({ email: 'admin@example.com', 'cognito:groups': ['admin'] })
+const futureExp = Math.floor(Date.now() / 1000) + 3600
+const adminIdToken = fakeIdToken({ email: 'admin@example.com', 'cognito:groups': ['admin'], exp: futureExp })
+const fakeAccessToken = fakeIdToken({ sub: 'user-id', exp: futureExp })
 const _contributorIdToken = fakeIdToken({ email: 'contributor@example.com', 'cognito:groups': ['contributor'] })
 
 const TestConsumer = () => {
@@ -136,7 +138,7 @@ describe('AuthProvider', () => {
 
   it('getAccessToken returns the current access token', async () => {
     vi.mocked(authApi.getCurrentSession).mockReturnValue({
-      accessToken: 'access-current',
+      accessToken: fakeAccessToken,
       refreshToken: 'refresh-current',
       idToken: adminIdToken,
     })
@@ -165,6 +167,6 @@ describe('AuthProvider', () => {
       screen.getByText('Get Token').click()
     })
 
-    expect(token).toBe('access-current')
+    expect(token).toBe(fakeAccessToken)
   })
 })
