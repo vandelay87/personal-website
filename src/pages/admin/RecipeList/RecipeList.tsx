@@ -44,21 +44,29 @@ const RecipeList = () => {
   }, [loadRecipes])
 
   const handlePublish = async (recipe: Recipe) => {
-    const token = await getAccessToken()
-    if (recipe.status === 'published') {
-      await unpublishRecipe(token, recipe.id)
-    } else {
-      await publishRecipe(token, recipe.id)
+    try {
+      const token = await getAccessToken()
+      if (recipe.status === 'published') {
+        await unpublishRecipe(token, recipe.id)
+      } else {
+        await publishRecipe(token, recipe.id)
+      }
+      await loadRecipes()
+    } catch {
+      setError(true)
     }
-    await loadRecipes()
   }
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return
-    const token = await getAccessToken()
-    await deleteRecipe(token, deleteTarget.id)
-    setDeleteTarget(null)
-    await loadRecipes()
+    try {
+      const token = await getAccessToken()
+      await deleteRecipe(token, deleteTarget.id)
+      setDeleteTarget(null)
+      await loadRecipes()
+    } catch {
+      setError(true)
+    }
   }
 
   if (loading) {
@@ -101,6 +109,7 @@ const RecipeList = () => {
         </Link>
       </div>
 
+      <div className={styles.tableWrapper}>
       <table className={styles.table}>
         <thead>
           <tr>
@@ -123,26 +132,29 @@ const RecipeList = () => {
               <td>{recipe.tags.join(', ')}</td>
               <td>{new Date(recipe.updatedAt).toLocaleDateString()}</td>
               <td className={styles.actions}>
-                <Link to={`/admin/recipes/${recipe.id}/edit`} ariaLabel={`Edit ${recipe.title}`}>
-                  Edit
-                </Link>
-                <Link
-                  to={`/admin/recipes/${recipe.id}/preview`}
-                  ariaLabel={`Preview ${recipe.title}`}
-                >
-                  Preview
-                </Link>
-                <Button onClick={() => handlePublish(recipe)} variant="secondary">
-                  {recipe.status === 'published' ? 'Unpublish' : 'Publish'}
-                </Button>
-                <Button onClick={() => setDeleteTarget(recipe)} variant="secondary">
-                  Delete
-                </Button>
+                <div className={styles.actionsInner}>
+                  <Link to={`/admin/recipes/${recipe.id}/edit`} ariaLabel={`Edit ${recipe.title}`}>
+                    Edit
+                  </Link>
+                  <Link
+                    to={`/admin/recipes/${recipe.id}/preview`}
+                    ariaLabel={`Preview ${recipe.title}`}
+                  >
+                    Preview
+                  </Link>
+                  <button type="button" className={styles.actionLink} onClick={() => handlePublish(recipe)}>
+                    {recipe.status === 'published' ? 'Unpublish' : 'Publish'}
+                  </button>
+                  <button type="button" className={styles.actionLink} onClick={() => setDeleteTarget(recipe)}>
+                    Delete
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      </div>
 
       <ConfirmDialog
         title="Delete recipe"

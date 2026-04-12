@@ -24,6 +24,10 @@
   font-weight: var(--font-weight-semibold);
 }
 
+.tableWrapper {
+  overflow-x: auto;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -35,7 +39,13 @@
 .table td {
   padding: var(--space-3) var(--space-4);
   text-align: left;
+  vertical-align: middle;
   border-bottom: var(--border-width) solid var(--color-border);
+  white-space: nowrap;
+}
+
+.table td:first-child {
+  white-space: normal;
 }
 
 .table th {
@@ -56,17 +66,41 @@
 }
 
 .badge[data-status='published'] {
-  background: var(--color-success-bg, #dcfce7);
-  color: var(--color-success-text, #166534);
+  background: var(--color-bg-subtle);
+  color: var(--color-text);
+  border-color: var(--color-primary);
 }
 
 .badge[data-status='draft'] {
-  background: var(--color-warning-bg, #fef9c3);
-  color: var(--color-warning-text, #854d0e);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
 }
 
-.actions {
+.actionsInner {
   display: flex;
   gap: var(--space-2);
   align-items: center;
+}
+
+.table td.actions {
+  border-bottom: none;
+}
+
+.actionLink {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-link);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.actionLink:hover {
+  color: var(--color-link-hover);
+}
+
+.actionLink:focus-visible {
+  outline: var(--border-width) solid var(--color-primary);
+  outline-offset: 2px;
 }
