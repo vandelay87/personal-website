@@ -403,7 +403,6 @@ describe('RecipeEditor page', () => {
       const dialog = await screen.findByRole('dialog')
       expect(dialog).toBeInTheDocument()
       expect(within(dialog).getByText(/unsaved changes/i)).toBeInTheDocument()
-      // We should still be on the editor page — navigation blocked
       expect(screen.getByRole('textbox', { name: /title/i })).toBeInTheDocument()
     })
   })
@@ -448,7 +447,6 @@ describe('RecipeEditor page', () => {
         expect(screen.getByRole('button', { name: /add ingredient/i })).toBeInTheDocument()
       })
 
-      // Need at least 2 ingredients to remove — add one first
       await user.click(screen.getByRole('button', { name: /add ingredient/i }))
 
       const removeButtons = screen.getAllByRole('button', { name: /remove ingredient/i })
@@ -467,7 +465,6 @@ describe('RecipeEditor page', () => {
         expect(screen.getByRole('button', { name: /add ingredient/i })).toBeInTheDocument()
       })
 
-      // Need at least 2 ingredients to reorder
       await user.click(screen.getByRole('button', { name: /add ingredient/i }))
 
       const moveDownButtons = screen.getAllByRole('button', { name: /move down ingredient/i })
@@ -558,14 +555,12 @@ describe('RecipeEditor page', () => {
 
       await user.click(screen.getByRole('button', { name: /save as draft/i }))
 
-      // The session-expired banner is visible to the user
       await waitFor(() => {
         expect(
           screen.getByText(/session expired.*please log in again/i)
         ).toBeInTheDocument()
       })
 
-      // Form state is preserved — the editor did not unmount and inputs still hold their values
       expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('My Recipe')
       expect(screen.getByRole('textbox', { name: /intro/i })).toHaveValue('A great recipe')
     })

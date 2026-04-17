@@ -95,14 +95,13 @@ const RecipeEditor: FC = () => {
   const [submitting, setSubmitting] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
-  const [announcement, setAnnouncement] = useState<{ message: string; nonce: number }>({
-    message: '',
-    nonce: 0,
-  })
+  const [announcement, setAnnouncement] = useState({ message: '', toggle: false })
   const [sessionExpired, setSessionExpired] = useState(false)
 
   const titleRef = useRef<HTMLInputElement>(null)
   const introRef = useRef<HTMLTextAreaElement>(null)
+  const pathnameRef = useRef(location.pathname)
+  pathnameRef.current = location.pathname
 
   const setField = useCallback(
     <K extends keyof Omit<FormState, 'dirty'>>(field: K, value: FormState[K]) => {
@@ -147,7 +146,7 @@ const RecipeEditor: FC = () => {
       } catch (err) {
         if (isSessionError(err)) {
           logout()
-          navigate(`/admin/login?redirect=${encodeURIComponent(location.pathname)}`)
+          navigate(`/admin/login?redirect=${encodeURIComponent(pathnameRef.current)}`)
           return
         }
         setToast({ message: 'Error loading recipe', type: 'error' })
@@ -156,7 +155,7 @@ const RecipeEditor: FC = () => {
       }
     }
     loadRecipe()
-  }, [id, getAccessToken, logout, navigate, location.pathname])
+  }, [id, getAccessToken, logout, navigate])
 
   const validate = (): FormErrors => {
     const next: FormErrors = {}
@@ -230,7 +229,7 @@ const RecipeEditor: FC = () => {
   }, [])
 
   const announce = useCallback((message: string) => {
-    setAnnouncement((prev) => ({ message, nonce: prev.nonce + 1 }))
+    setAnnouncement((prev) => ({ message, toggle: !prev.toggle }))
   }, [])
 
   const setIngredients = useCallback((next: Ingredient[]) => setField('ingredients', next), [setField])
@@ -401,9 +400,7 @@ const RecipeEditor: FC = () => {
       </form>
 
       <div className="sr-only" role="status" aria-live="polite">
-        {announcement.message
-          ? `${announcement.message}${announcement.nonce % 2 === 1 ? '\u200B' : ''}`
-          : ''}
+        {announcement.message && `${announcement.message}${announcement.toggle ? '\u200B' : ''}`}
       </div>
 
       {toast && (

@@ -24,19 +24,16 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
   }
 
   const handleRemove = (index: number) => {
-    if (ingredients.length <= 1) return
     remove(index)
     onAnnounce?.('Ingredient removed')
   }
 
   const handleMoveUp = (index: number) => {
-    if (index <= 0) return
     moveUp(index)
     onAnnounce?.(`Ingredient ${index + 1} moved up`)
   }
 
   const handleMoveDown = (index: number) => {
-    if (index >= ingredients.length - 1) return
     moveDown(index)
     onAnnounce?.(`Ingredient ${index + 1} moved down`)
   }

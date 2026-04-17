@@ -42,19 +42,16 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken, onAn
   }
 
   const handleRemove = (index: number) => {
-    if (steps.length <= 1) return
     remove(index)
     onAnnounce?.('Step removed')
   }
 
   const handleMoveUp = (index: number) => {
-    if (index <= 0) return
     moveUp(index)
     onAnnounce?.(`Step ${index + 1} moved up`)
   }
 
   const handleMoveDown = (index: number) => {
-    if (index >= steps.length - 1) return
     moveDown(index)
     onAnnounce?.(`Step ${index + 1} moved down`)
   }
