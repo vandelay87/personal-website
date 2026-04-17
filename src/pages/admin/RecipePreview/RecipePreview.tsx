@@ -1,3 +1,4 @@
+import { isSessionError } from '@api/auth'
 import { fetchMyRecipes, publishRecipe } from '@api/recipes'
 import Link from '@components/Link'
 import Loading from '@components/Loading'
@@ -9,11 +10,6 @@ import { useCallback, useEffect, useState, type FC } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import styles from './RecipePreview.module.css'
-
-const isSessionError = (err: unknown): boolean => {
-  const message = err instanceof Error ? err.message : ''
-  return /session expired|no session/i.test(message)
-}
 
 const RecipePreview: FC = () => {
   const { id } = useParams<{ id: string }>()

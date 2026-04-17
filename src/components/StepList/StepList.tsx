@@ -2,7 +2,7 @@ import Button from '@components/Button'
 import ImageUpload from '@components/ImageUpload'
 import { useReorderableList } from '@hooks/useReorderableList'
 import type { RecipeImage, Step } from '@models/recipe'
-import { useCallback, type CSSProperties, type FC } from 'react'
+import { useCallback, type FC } from 'react'
 
 import styles from './StepList.module.css'
 
@@ -13,8 +13,6 @@ export interface StepListProps {
   getToken?: () => Promise<string>
   onAnnounce?: (message: string) => void
 }
-
-const TOUCH_TARGET: CSSProperties = { minWidth: '44px', minHeight: '44px' }
 
 const renumber = (steps: Step[]): Step[] =>
   steps.map((step, i) => ({ ...step, order: i + 1 }))
@@ -100,7 +98,7 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken, onAn
               ariaLabel={`Move up step ${index + 1}`}
               variant="secondary"
               disabled={index === 0}
-              style={TOUCH_TARGET}
+              className={styles.actionButton}
             >
               ↑
             </Button>
@@ -109,7 +107,7 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken, onAn
               ariaLabel={`Move down step ${index + 1}`}
               variant="secondary"
               disabled={index === steps.length - 1}
-              style={TOUCH_TARGET}
+              className={styles.actionButton}
             >
               ↓
             </Button>
@@ -118,7 +116,7 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken, onAn
               ariaLabel={`Remove step ${index + 1}`}
               variant="secondary"
               disabled={steps.length <= 1}
-              style={TOUCH_TARGET}
+              className={styles.actionButton}
             >
               Remove
             </Button>

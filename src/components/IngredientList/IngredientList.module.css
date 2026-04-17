@@ -49,6 +49,11 @@
   gap: var(--space-1);
 }
 
+.actionButton {
+  min-width: 44px;
+  min-height: 44px;
+}
+
 @media (min-width: 768px) {
   .row {
     grid-template-columns: 5rem 5rem 1fr auto;

@@ -65,3 +65,8 @@ export const logout = (): void => {
   localStorage.removeItem('refreshToken')
   localStorage.removeItem('idToken')
 }
+
+export const isSessionError = (err: unknown): boolean => {
+  const message = err instanceof Error ? err.message : ''
+  return /session expired|no session|401/i.test(message)
+}

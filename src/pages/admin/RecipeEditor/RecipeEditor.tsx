@@ -1,3 +1,4 @@
+import { isSessionError } from '@api/auth'
 import { createRecipe, fetchMyRecipes, fetchTags, updateRecipe } from '@api/recipes'
 import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
@@ -11,7 +12,7 @@ import Toast from '@components/Toast'
 import { useAuth } from '@contexts/AuthContext'
 import type { Ingredient, Recipe, Step, Tag } from '@models/recipe'
 import { useCallback, useEffect, useReducer, useRef, useState, type FC } from 'react'
-import { useBlocker, useLocation, useParams } from 'react-router-dom'
+import { useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import styles from './RecipeEditor.module.css'
 
@@ -81,16 +82,12 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
   }
 }
 
-const isSessionError = (err: unknown): boolean => {
-  const message = err instanceof Error ? err.message : ''
-  return /session expired|no session/i.test(message)
-}
-
 const RecipeEditor: FC = () => {
   const { id } = useParams<{ id: string }>()
   const isEditMode = Boolean(id)
-  const { getAccessToken } = useAuth()
+  const { getAccessToken, logout } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
 
   const [form, dispatch] = useReducer(formReducer, initialFormState)
   const [existingTags, setExistingTags] = useState<string[]>([])
@@ -98,7 +95,10 @@ const RecipeEditor: FC = () => {
   const [submitting, setSubmitting] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
-  const [announcement, setAnnouncement] = useState('')
+  const [announcement, setAnnouncement] = useState<{ message: string; nonce: number }>({
+    message: '',
+    nonce: 0,
+  })
   const [sessionExpired, setSessionExpired] = useState(false)
 
   const titleRef = useRef<HTMLInputElement>(null)
@@ -144,14 +144,19 @@ const RecipeEditor: FC = () => {
         const recipe = recipes.find((r) => r.id === id)
         if (!recipe) throw new Error('Recipe not found')
         dispatch({ type: 'LOAD_RECIPE', recipe })
-      } catch {
+      } catch (err) {
+        if (isSessionError(err)) {
+          logout()
+          navigate(`/admin/login?redirect=${encodeURIComponent(location.pathname)}`)
+          return
+        }
         setToast({ message: 'Error loading recipe', type: 'error' })
       } finally {
         setLoading(false)
       }
     }
     loadRecipe()
-  }, [id, getAccessToken])
+  }, [id, getAccessToken, logout, navigate, location.pathname])
 
   const validate = (): FormErrors => {
     const next: FormErrors = {}
@@ -225,7 +230,7 @@ const RecipeEditor: FC = () => {
   }, [])
 
   const announce = useCallback((message: string) => {
-    setAnnouncement(message)
+    setAnnouncement((prev) => ({ message, nonce: prev.nonce + 1 }))
   }, [])
 
   const setIngredients = useCallback((next: Ingredient[]) => setField('ingredients', next), [setField])
@@ -396,7 +401,9 @@ const RecipeEditor: FC = () => {
       </form>
 
       <div className="sr-only" role="status" aria-live="polite">
-        {announcement}
+        {announcement.message
+          ? `${announcement.message}${announcement.nonce % 2 === 1 ? '\u200B' : ''}`
+          : ''}
       </div>
 
       {toast && (

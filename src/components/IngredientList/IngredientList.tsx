@@ -1,7 +1,7 @@
 import Button from '@components/Button'
 import { useReorderableList } from '@hooks/useReorderableList'
 import type { Ingredient } from '@models/recipe'
-import type { CSSProperties, FC } from 'react'
+import type { FC } from 'react'
 
 import styles from './IngredientList.module.css'
 
@@ -10,8 +10,6 @@ export interface IngredientListProps {
   onChange: (ingredients: Ingredient[]) => void
   onAnnounce?: (message: string) => void
 }
-
-const TOUCH_TARGET: CSSProperties = { minWidth: '44px', minHeight: '44px' }
 
 const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnnounce }) => {
   const { add, remove, update, moveUp, moveDown } = useReorderableList(ingredients, onChange)
@@ -83,7 +81,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
               ariaLabel={`Move up ingredient ${index + 1}`}
               variant="secondary"
               disabled={index === 0}
-              style={TOUCH_TARGET}
+              className={styles.actionButton}
             >
               ↑
             </Button>
@@ -92,7 +90,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
               ariaLabel={`Move down ingredient ${index + 1}`}
               variant="secondary"
               disabled={index === ingredients.length - 1}
-              style={TOUCH_TARGET}
+              className={styles.actionButton}
             >
               ↓
             </Button>
@@ -101,7 +99,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
               ariaLabel={`Remove ingredient ${index + 1}`}
               variant="secondary"
               disabled={ingredients.length <= 1}
-              style={TOUCH_TARGET}
+              className={styles.actionButton}
             >
               Remove
             </Button>
