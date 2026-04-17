@@ -185,17 +185,19 @@ describe('entry-server render', () => {
     it('rejects or signals an error when the render crashes', async () => {
       vi.resetModules()
 
-      vi.doMock('./App', () => ({
-        default: () => {
-          throw new Error('Simulated render crash')
-        },
+      const CrashingComponent = () => {
+        throw new Error('Simulated render crash')
+      }
+
+      vi.doMock('./routes', () => ({
+        routes: [{ path: '*', element: <CrashingComponent /> }],
       }))
 
       const { render: renderWithError } = await import('./entry-server')
 
       await expect(renderWithError('/')).rejects.toThrow()
 
-      vi.doUnmock('./App')
+      vi.doUnmock('./routes')
       vi.resetModules()
     })
   })

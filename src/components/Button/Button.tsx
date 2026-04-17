@@ -1,4 +1,4 @@
-import { ReactNode, ReactElement } from 'react'
+import { ReactNode, ReactElement, type CSSProperties } from 'react'
 import styles from './Button.module.css'
 
 interface ButtonProps {
@@ -10,6 +10,7 @@ interface ButtonProps {
   ariaLabel?: string
   ariaPressed?: 'true' | 'false'
   className?: string
+  style?: CSSProperties
 }
 
 const Button = ({
@@ -21,6 +22,7 @@ const Button = ({
   ariaLabel,
   ariaPressed,
   className: extraClassName,
+  style,
 }: ButtonProps): ReactElement => {
   const className = [styles.button, styles[variant], extraClassName].filter(Boolean).join(' ')
 
@@ -32,6 +34,7 @@ const Button = ({
       disabled={disabled}
       aria-label={ariaLabel}
       aria-pressed={ariaPressed}
+      style={style}
     >
       {children}
     </button>

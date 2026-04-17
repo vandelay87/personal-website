@@ -2,7 +2,7 @@ import Button from '@components/Button'
 import ImageUpload from '@components/ImageUpload'
 import { useReorderableList } from '@hooks/useReorderableList'
 import type { RecipeImage, Step } from '@models/recipe'
-import { useCallback, type FC } from 'react'
+import { useCallback, type CSSProperties, type FC } from 'react'
 
 import styles from './StepList.module.css'
 
@@ -11,12 +11,15 @@ export interface StepListProps {
   onChange: (steps: Step[]) => void
   recipeId?: string
   getToken?: () => Promise<string>
+  onAnnounce?: (message: string) => void
 }
+
+const TOUCH_TARGET: CSSProperties = { minWidth: '44px', minHeight: '44px' }
 
 const renumber = (steps: Step[]): Step[] =>
   steps.map((step, i) => ({ ...step, order: i + 1 }))
 
-const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken }) => {
+const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken, onAnnounce }) => {
   const onChangeRenumbered = useCallback(
     (next: Step[]) => onChange(renumber(next)),
     [onChange]
@@ -37,6 +40,25 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken }) =>
 
   const handleAdd = () => {
     add({ order: steps.length + 1, text: '' })
+    onAnnounce?.('Step added')
+  }
+
+  const handleRemove = (index: number) => {
+    if (steps.length <= 1) return
+    remove(index)
+    onAnnounce?.('Step removed')
+  }
+
+  const handleMoveUp = (index: number) => {
+    if (index <= 0) return
+    moveUp(index)
+    onAnnounce?.(`Step ${index + 1} moved up`)
+  }
+
+  const handleMoveDown = (index: number) => {
+    if (index >= steps.length - 1) return
+    moveDown(index)
+    onAnnounce?.(`Step ${index + 1} moved down`)
   }
 
   return (
@@ -74,26 +96,29 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken }) =>
           </div>
           <div className={styles.actions}>
             <Button
-              onClick={() => moveUp(index)}
+              onClick={() => handleMoveUp(index)}
               ariaLabel={`Move up step ${index + 1}`}
               variant="secondary"
               disabled={index === 0}
+              style={TOUCH_TARGET}
             >
               ↑
             </Button>
             <Button
-              onClick={() => moveDown(index)}
+              onClick={() => handleMoveDown(index)}
               ariaLabel={`Move down step ${index + 1}`}
               variant="secondary"
               disabled={index === steps.length - 1}
+              style={TOUCH_TARGET}
             >
               ↓
             </Button>
             <Button
-              onClick={() => remove(index)}
+              onClick={() => handleRemove(index)}
               ariaLabel={`Remove step ${index + 1}`}
               variant="secondary"
               disabled={steps.length <= 1}
+              style={TOUCH_TARGET}
             >
               Remove
             </Button>

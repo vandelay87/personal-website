@@ -3,14 +3,7 @@ import { useAuth } from '@contexts/AuthContext'
 import type { Recipe } from '@models/recipe'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import {
-  createMemoryRouter,
-  Link,
-  MemoryRouter,
-  Route,
-  RouterProvider,
-  Routes,
-} from 'react-router-dom'
+import { createMemoryRouter, Link, RouterProvider } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import RecipeEditor from './RecipeEditor'
@@ -46,15 +39,16 @@ const mockRecipe: Recipe = {
   status: 'draft',
 }
 
-const renderEditor = (route = '/admin/recipes/new') =>
-  render(
-    <MemoryRouter initialEntries={[route]}>
-      <Routes>
-        <Route path="/admin/recipes/new" element={<RecipeEditor />} />
-        <Route path="/admin/recipes/:id/edit" element={<RecipeEditor />} />
-      </Routes>
-    </MemoryRouter>
+const renderEditor = (route = '/admin/recipes/new') => {
+  const router = createMemoryRouter(
+    [
+      { path: '/admin/recipes/new', element: <RecipeEditor /> },
+      { path: '/admin/recipes/:id/edit', element: <RecipeEditor /> },
+    ],
+    { initialEntries: [route] }
   )
+  return render(<RouterProvider router={router} />)
+}
 
 describe('RecipeEditor page', () => {
   beforeEach(() => {
@@ -275,9 +269,9 @@ describe('RecipeEditor page', () => {
     await user.click(screen.getByRole('button', { name: /save as draft/i }))
 
     await waitFor(() => {
-      expect(screen.getByRole('status')).toBeInTheDocument()
       expect(screen.getByText(/recipe saved/i)).toBeInTheDocument()
     })
+    expect(screen.getAllByRole('status').length).toBeGreaterThan(0)
   })
 
   it('shows error toast on API failure', async () => {
@@ -303,9 +297,9 @@ describe('RecipeEditor page', () => {
     await user.click(screen.getByRole('button', { name: /save as draft/i }))
 
     await waitFor(() => {
-      expect(screen.getByRole('status')).toBeInTheDocument()
       expect(screen.getByText(/error/i)).toBeInTheDocument()
     })
+    expect(screen.getAllByRole('status').length).toBeGreaterThan(0)
   })
 
   it('first invalid field is focused on validation failure', async () => {
