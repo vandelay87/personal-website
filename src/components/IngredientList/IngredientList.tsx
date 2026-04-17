@@ -1,4 +1,5 @@
 import Button from '@components/Button'
+import { useReorderableList } from '@hooks/useReorderableList'
 import type { Ingredient } from '@models/recipe'
 import type { FC } from 'react'
 
@@ -10,34 +11,14 @@ export interface IngredientListProps {
 }
 
 const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange }) => {
+  const { add, remove, update, moveUp, moveDown } = useReorderableList(ingredients, onChange)
+
   const handleFieldChange = (index: number, field: keyof Ingredient, value: string) => {
-    const next = ingredients.map((ing, i) =>
-      i === index ? { ...ing, [field]: value } : ing
-    )
-    onChange(next)
+    update(index, { ...ingredients[index], [field]: value })
   }
 
   const handleAdd = () => {
-    onChange([...ingredients, { item: '', quantity: '', unit: '' }])
-  }
-
-  const handleRemove = (index: number) => {
-    if (ingredients.length <= 1) return
-    onChange(ingredients.filter((_, i) => i !== index))
-  }
-
-  const handleMoveUp = (index: number) => {
-    if (index <= 0) return
-    const next = [...ingredients]
-    ;[next[index - 1], next[index]] = [next[index], next[index - 1]]
-    onChange(next)
-  }
-
-  const handleMoveDown = (index: number) => {
-    if (index >= ingredients.length - 1) return
-    const next = [...ingredients]
-    ;[next[index], next[index + 1]] = [next[index + 1], next[index]]
-    onChange(next)
+    add({ item: '', quantity: '', unit: '' })
   }
 
   return (
@@ -76,7 +57,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange }) => {
           </label>
           <div className={styles.actions}>
             <Button
-              onClick={() => handleMoveUp(index)}
+              onClick={() => moveUp(index)}
               ariaLabel={`Move up ingredient ${index + 1}`}
               variant="secondary"
               disabled={index === 0}
@@ -84,7 +65,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange }) => {
               ↑
             </Button>
             <Button
-              onClick={() => handleMoveDown(index)}
+              onClick={() => moveDown(index)}
               ariaLabel={`Move down ingredient ${index + 1}`}
               variant="secondary"
               disabled={index === ingredients.length - 1}
@@ -92,7 +73,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange }) => {
               ↓
             </Button>
             <Button
-              onClick={() => handleRemove(index)}
+              onClick={() => remove(index)}
               ariaLabel={`Remove ingredient ${index + 1}`}
               variant="secondary"
               disabled={ingredients.length <= 1}

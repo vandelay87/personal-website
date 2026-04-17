@@ -1,86 +1,94 @@
 import { renderHook, act } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { useReorderableList } from './useReorderableList'
 
 describe('useReorderableList', () => {
   it('add appends an item', () => {
-    const { result } = renderHook(() => useReorderableList(['a', 'b']))
+    const onChange = vi.fn()
+    const { result } = renderHook(() => useReorderableList(['a', 'b'], onChange))
 
     act(() => {
       result.current.add('c')
     })
 
-    expect(result.current.items).toEqual(['a', 'b', 'c'])
+    expect(onChange).toHaveBeenCalledWith(['a', 'b', 'c'])
   })
 
   it('remove removes item at index', () => {
-    const { result } = renderHook(() => useReorderableList(['a', 'b', 'c']))
+    const onChange = vi.fn()
+    const { result } = renderHook(() => useReorderableList(['a', 'b', 'c'], onChange))
 
     act(() => {
       result.current.remove(1)
     })
 
-    expect(result.current.items).toEqual(['a', 'c'])
+    expect(onChange).toHaveBeenCalledWith(['a', 'c'])
   })
 
-  it('remove does not remove when only 1 item (minimum enforced)', () => {
-    const { result } = renderHook(() => useReorderableList(['a']))
+  it('remove does not fire when only 1 item (minimum enforced)', () => {
+    const onChange = vi.fn()
+    const { result } = renderHook(() => useReorderableList(['a'], onChange))
 
     act(() => {
       result.current.remove(0)
     })
 
-    expect(result.current.items).toEqual(['a'])
+    expect(onChange).not.toHaveBeenCalled()
   })
 
   it('moveUp swaps item with previous', () => {
-    const { result } = renderHook(() => useReorderableList(['a', 'b', 'c']))
+    const onChange = vi.fn()
+    const { result } = renderHook(() => useReorderableList(['a', 'b', 'c'], onChange))
 
     act(() => {
       result.current.moveUp(2)
     })
 
-    expect(result.current.items).toEqual(['a', 'c', 'b'])
+    expect(onChange).toHaveBeenCalledWith(['a', 'c', 'b'])
   })
 
   it('moveUp does nothing at index 0 (boundary)', () => {
-    const { result } = renderHook(() => useReorderableList(['a', 'b', 'c']))
+    const onChange = vi.fn()
+    const { result } = renderHook(() => useReorderableList(['a', 'b', 'c'], onChange))
 
     act(() => {
       result.current.moveUp(0)
     })
 
-    expect(result.current.items).toEqual(['a', 'b', 'c'])
+    expect(onChange).not.toHaveBeenCalled()
   })
 
   it('moveDown swaps item with next', () => {
-    const { result } = renderHook(() => useReorderableList(['a', 'b', 'c']))
+    const onChange = vi.fn()
+    const { result } = renderHook(() => useReorderableList(['a', 'b', 'c'], onChange))
 
     act(() => {
       result.current.moveDown(0)
     })
 
-    expect(result.current.items).toEqual(['b', 'a', 'c'])
+    expect(onChange).toHaveBeenCalledWith(['b', 'a', 'c'])
   })
 
   it('moveDown does nothing at last index (boundary)', () => {
-    const { result } = renderHook(() => useReorderableList(['a', 'b', 'c']))
+    const onChange = vi.fn()
+    const { result } = renderHook(() => useReorderableList(['a', 'b', 'c'], onChange))
 
     act(() => {
       result.current.moveDown(2)
     })
 
-    expect(result.current.items).toEqual(['a', 'b', 'c'])
+    expect(onChange).not.toHaveBeenCalled()
   })
 
   it('update replaces item at index', () => {
-    const { result } = renderHook(() => useReorderableList(['a', 'b', 'c']))
+    const onChange = vi.fn()
+    const { result } = renderHook(() => useReorderableList(['a', 'b', 'c'], onChange))
 
     act(() => {
       result.current.update(1, 'x')
     })
 
-    expect(result.current.items).toEqual(['a', 'x', 'c'])
+    expect(onChange).toHaveBeenCalledWith(['a', 'x', 'c'])
   })
 })

@@ -1,7 +1,8 @@
 import Button from '@components/Button'
 import ImageUpload from '@components/ImageUpload'
-import type { Step } from '@models/recipe'
-import type { FC } from 'react'
+import { useReorderableList } from '@hooks/useReorderableList'
+import type { RecipeImage, Step } from '@models/recipe'
+import { useCallback, type FC } from 'react'
 
 import styles from './StepList.module.css'
 
@@ -16,41 +17,26 @@ const renumber = (steps: Step[]): Step[] =>
   steps.map((step, i) => ({ ...step, order: i + 1 }))
 
 const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken }) => {
+  const onChangeRenumbered = useCallback(
+    (next: Step[]) => onChange(renumber(next)),
+    [onChange]
+  )
+  const { add, remove, update, moveUp, moveDown } = useReorderableList(steps, onChangeRenumbered)
+
   const handleTextChange = (index: number, text: string) => {
-    const next = steps.map((s, i) => (i === index ? { ...s, text } : s))
-    onChange(next)
+    update(index, { ...steps[index], text })
   }
 
-  const updateImage = (index: number, patch: { key?: string; alt?: string }) => {
-    const next = steps.map((s, i) =>
-      i === index
-        ? { ...s, image: { key: s.image?.key ?? '', alt: s.image?.alt ?? '', ...patch } }
-        : s
-    )
-    onChange(next)
+  const updateImage = (index: number, patch: Partial<RecipeImage>) => {
+    const existing = steps[index].image
+    update(index, {
+      ...steps[index],
+      image: { key: existing?.key ?? '', alt: existing?.alt ?? '', ...patch },
+    })
   }
 
   const handleAdd = () => {
-    onChange([...steps, { order: steps.length + 1, text: '' }])
-  }
-
-  const handleRemove = (index: number) => {
-    if (steps.length <= 1) return
-    onChange(renumber(steps.filter((_, i) => i !== index)))
-  }
-
-  const handleMoveUp = (index: number) => {
-    if (index <= 0) return
-    const next = [...steps]
-    ;[next[index - 1], next[index]] = [next[index], next[index - 1]]
-    onChange(renumber(next))
-  }
-
-  const handleMoveDown = (index: number) => {
-    if (index >= steps.length - 1) return
-    const next = [...steps]
-    ;[next[index], next[index + 1]] = [next[index + 1], next[index]]
-    onChange(renumber(next))
+    add({ order: steps.length + 1, text: '' })
   }
 
   return (
@@ -88,7 +74,7 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken }) =>
           </div>
           <div className={styles.actions}>
             <Button
-              onClick={() => handleMoveUp(index)}
+              onClick={() => moveUp(index)}
               ariaLabel={`Move up step ${index + 1}`}
               variant="secondary"
               disabled={index === 0}
@@ -96,7 +82,7 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken }) =>
               ↑
             </Button>
             <Button
-              onClick={() => handleMoveDown(index)}
+              onClick={() => moveDown(index)}
               ariaLabel={`Move down step ${index + 1}`}
               variant="secondary"
               disabled={index === steps.length - 1}
@@ -104,7 +90,7 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken }) =>
               ↓
             </Button>
             <Button
-              onClick={() => handleRemove(index)}
+              onClick={() => remove(index)}
               ariaLabel={`Remove step ${index + 1}`}
               variant="secondary"
               disabled={steps.length <= 1}
