@@ -1,9 +1,16 @@
 import { createRecipe, fetchMyRecipes, fetchTags, updateRecipe } from '@api/recipes'
 import { useAuth } from '@contexts/AuthContext'
 import type { Recipe } from '@models/recipe'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import {
+  createMemoryRouter,
+  Link,
+  MemoryRouter,
+  Route,
+  RouterProvider,
+  Routes,
+} from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import RecipeEditor from './RecipeEditor'
@@ -313,6 +320,260 @@ describe('RecipeEditor page', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('textbox', { name: /title/i })).toHaveFocus()
+    })
+  })
+
+  describe('unsaved-changes confirmation', () => {
+    it('does not prevent beforeunload when the form is pristine', async () => {
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toBeInTheDocument()
+      })
+
+      const event = new Event('beforeunload', { cancelable: true })
+      window.dispatchEvent(event)
+
+      expect(event.defaultPrevented).toBe(false)
+    })
+
+    it('prevents beforeunload once the user has made edits (dirty form)', async () => {
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toBeInTheDocument()
+      })
+
+      await user.type(screen.getByRole('textbox', { name: /title/i }), 'My Recipe')
+
+      const event = new Event('beforeunload', { cancelable: true })
+      window.dispatchEvent(event)
+
+      expect(event.defaultPrevented).toBe(true)
+    })
+
+    it('does not prevent beforeunload after a successful save (form becomes pristine)', async () => {
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toBeInTheDocument()
+      })
+
+      await user.type(screen.getByRole('textbox', { name: /title/i }), 'My Recipe')
+      await user.type(screen.getByRole('textbox', { name: /intro/i }), 'A great recipe')
+      await user.type(screen.getAllByRole('textbox', { name: /item/i })[0], 'Flour')
+      await user.type(screen.getAllByRole('textbox', { name: /step.*text/i })[0], 'Mix it all')
+
+      await user.click(screen.getByRole('button', { name: /save as draft/i }))
+
+      await waitFor(() => {
+        expect(createRecipe).toHaveBeenCalled()
+      })
+
+      const event = new Event('beforeunload', { cancelable: true })
+      window.dispatchEvent(event)
+
+      expect(event.defaultPrevented).toBe(false)
+    })
+
+    it('blocks React Router navigation and shows a confirmation dialogue when the form is dirty', async () => {
+      const user = userEvent.setup()
+
+      const EditorWithBackLink = () => (
+        <>
+          <Link to="/admin/recipes">Back to list</Link>
+          <RecipeEditor />
+        </>
+      )
+
+      const router = createMemoryRouter(
+        [
+          { path: '/admin/recipes/new', element: <EditorWithBackLink /> },
+          { path: '/admin/recipes', element: <div>Recipe list page</div> },
+        ],
+        { initialEntries: ['/admin/recipes/new'] }
+      )
+
+      render(<RouterProvider router={router} />)
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toBeInTheDocument()
+      })
+
+      await user.type(screen.getByRole('textbox', { name: /title/i }), 'My Recipe')
+
+      await user.click(screen.getByRole('link', { name: /back to list/i }))
+
+      const dialog = await screen.findByRole('dialog')
+      expect(dialog).toBeInTheDocument()
+      expect(within(dialog).getByText(/unsaved changes/i)).toBeInTheDocument()
+      // We should still be on the editor page — navigation blocked
+      expect(screen.getByRole('textbox', { name: /title/i })).toBeInTheDocument()
+    })
+  })
+
+  describe('dynamic list announcements (aria-live)', () => {
+    const findLiveRegionWith = (pattern: RegExp) => {
+      const statusRegions = screen.getAllByRole('status')
+      const match = statusRegions.find(
+        (region) =>
+          region.getAttribute('aria-live') === 'polite' && pattern.test(region.textContent ?? '')
+      )
+      if (!match) {
+        throw new Error(
+          `No aria-live="polite" region with text matching ${pattern}. Regions: ${statusRegions
+            .map((r) => r.textContent)
+            .join(' | ')}`
+        )
+      }
+      return match
+    }
+
+    it('announces when an ingredient is added', async () => {
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /add ingredient/i })).toBeInTheDocument()
+      })
+
+      await user.click(screen.getByRole('button', { name: /add ingredient/i }))
+
+      await waitFor(() => {
+        expect(findLiveRegionWith(/ingredient added/i)).toBeInTheDocument()
+      })
+    })
+
+    it('announces when an ingredient is removed', async () => {
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /add ingredient/i })).toBeInTheDocument()
+      })
+
+      // Need at least 2 ingredients to remove — add one first
+      await user.click(screen.getByRole('button', { name: /add ingredient/i }))
+
+      const removeButtons = screen.getAllByRole('button', { name: /remove ingredient/i })
+      await user.click(removeButtons[0])
+
+      await waitFor(() => {
+        expect(findLiveRegionWith(/ingredient removed/i)).toBeInTheDocument()
+      })
+    })
+
+    it('announces when an ingredient is reordered', async () => {
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /add ingredient/i })).toBeInTheDocument()
+      })
+
+      // Need at least 2 ingredients to reorder
+      await user.click(screen.getByRole('button', { name: /add ingredient/i }))
+
+      const moveDownButtons = screen.getAllByRole('button', { name: /move down ingredient/i })
+      await user.click(moveDownButtons[0])
+
+      await waitFor(() => {
+        expect(findLiveRegionWith(/ingredient.*moved/i)).toBeInTheDocument()
+      })
+    })
+
+    it('announces when a step is added', async () => {
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /add step/i })).toBeInTheDocument()
+      })
+
+      await user.click(screen.getByRole('button', { name: /add step/i }))
+
+      await waitFor(() => {
+        expect(findLiveRegionWith(/step added/i)).toBeInTheDocument()
+      })
+    })
+
+    it('announces when a step is removed', async () => {
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /add step/i })).toBeInTheDocument()
+      })
+
+      await user.click(screen.getByRole('button', { name: /add step/i }))
+
+      const removeButtons = screen.getAllByRole('button', { name: /remove step/i })
+      await user.click(removeButtons[0])
+
+      await waitFor(() => {
+        expect(findLiveRegionWith(/step removed/i)).toBeInTheDocument()
+      })
+    })
+
+    it('announces when a step is reordered', async () => {
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /add step/i })).toBeInTheDocument()
+      })
+
+      await user.click(screen.getByRole('button', { name: /add step/i }))
+
+      const moveDownButtons = screen.getAllByRole('button', { name: /move down step/i })
+      await user.click(moveDownButtons[0])
+
+      await waitFor(() => {
+        expect(findLiveRegionWith(/step.*moved/i)).toBeInTheDocument()
+      })
+    })
+  })
+
+  describe('session expiry mid-edit', () => {
+    it('preserves form state and shows a session-expired message when getAccessToken throws', async () => {
+      vi.mocked(useAuth).mockReturnValue({
+        getAccessToken: vi.fn().mockRejectedValue(new Error('Session expired')),
+        isAdmin: true,
+        user: { email: 'admin@akli.dev', groups: ['admin'] },
+        isAuthenticated: true,
+        loading: false,
+        login: vi.fn(),
+        logout: vi.fn(),
+      })
+
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toBeInTheDocument()
+      })
+
+      const titleInput = screen.getByRole('textbox', { name: /title/i })
+      const introInput = screen.getByRole('textbox', { name: /intro/i })
+      await user.type(titleInput, 'My Recipe')
+      await user.type(introInput, 'A great recipe')
+      await user.type(screen.getAllByRole('textbox', { name: /item/i })[0], 'Flour')
+      await user.type(screen.getAllByRole('textbox', { name: /step.*text/i })[0], 'Mix it all')
+
+      await user.click(screen.getByRole('button', { name: /save as draft/i }))
+
+      // The session-expired banner is visible to the user
+      await waitFor(() => {
+        expect(
+          screen.getByText(/session expired.*please log in again/i)
+        ).toBeInTheDocument()
+      })
+
+      // Form state is preserved — the editor did not unmount and inputs still hold their values
+      expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('My Recipe')
+      expect(screen.getByRole('textbox', { name: /intro/i })).toHaveValue('A great recipe')
     })
   })
 })

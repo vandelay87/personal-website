@@ -67,4 +67,47 @@ describe('StepList', () => {
       { order: 2, text: 'Preheat oven' },
     ])
   })
+
+  describe('accessibility — touch targets', () => {
+    const parsePx = (value: string): number => {
+      const parsed = parseFloat(value)
+      return Number.isNaN(parsed) ? 0 : parsed
+    }
+
+    it('move up buttons meet the 44x44px minimum touch target', () => {
+      const onChange = vi.fn()
+      render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} />)
+
+      const moveUpButtons = screen.getAllByRole('button', { name: /move up/i })
+      moveUpButtons.forEach((button) => {
+        const computed = getComputedStyle(button)
+        expect(parsePx(computed.minWidth)).toBeGreaterThanOrEqual(44)
+        expect(parsePx(computed.minHeight)).toBeGreaterThanOrEqual(44)
+      })
+    })
+
+    it('move down buttons meet the 44x44px minimum touch target', () => {
+      const onChange = vi.fn()
+      render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} />)
+
+      const moveDownButtons = screen.getAllByRole('button', { name: /move down/i })
+      moveDownButtons.forEach((button) => {
+        const computed = getComputedStyle(button)
+        expect(parsePx(computed.minWidth)).toBeGreaterThanOrEqual(44)
+        expect(parsePx(computed.minHeight)).toBeGreaterThanOrEqual(44)
+      })
+    })
+
+    it('remove buttons meet the 44x44px minimum touch target', () => {
+      const onChange = vi.fn()
+      render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} />)
+
+      const removeButtons = screen.getAllByRole('button', { name: /remove step/i })
+      removeButtons.forEach((button) => {
+        const computed = getComputedStyle(button)
+        expect(parsePx(computed.minWidth)).toBeGreaterThanOrEqual(44)
+        expect(parsePx(computed.minHeight)).toBeGreaterThanOrEqual(44)
+      })
+    })
+  })
 })
