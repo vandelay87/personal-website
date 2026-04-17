@@ -28,6 +28,31 @@
   gap: var(--space-3);
 }
 
+.actionLink {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-link);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.actionLink:hover:not(:disabled) {
+  color: var(--color-link-hover);
+}
+
+.actionLink:focus-visible {
+  outline: var(--border-width) solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.actionLink:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .stateWrapper {
   display: flex;
   justify-content: center;

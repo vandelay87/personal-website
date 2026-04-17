@@ -1,5 +1,4 @@
 import { fetchMyRecipes, publishRecipe } from '@api/recipes'
-import Button from '@components/Button'
 import Link from '@components/Link'
 import Loading from '@components/Loading'
 import RecipeDetailView from '@components/RecipeDetailView'
@@ -92,13 +91,14 @@ const RecipePreview: FC = () => {
             </Typography>
             <div className={styles.bannerActions}>
               <Link to={editHref}>Edit</Link>
-              <Button
+              <button
+                type="button"
+                className={styles.actionLink}
                 onClick={handlePublish}
                 disabled={publishing}
-                ariaLabel={publishing ? 'Publishing' : undefined}
               >
-                {publishing ? <Loading size="small" /> : 'Publish'}
-              </Button>
+                {publishing ? 'Publishing…' : 'Publish'}
+              </button>
             </div>
           </>
         ) : (
