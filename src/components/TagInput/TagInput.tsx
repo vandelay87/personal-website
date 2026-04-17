@@ -8,9 +8,17 @@ export interface TagInputProps {
   tags: string[]
   onChange: (tags: string[]) => void
   existingTags?: string[]
+  inputId?: string
+  placeholder?: string
 }
 
-const TagInput: FC<TagInputProps> = ({ tags, onChange, existingTags = [] }) => {
+const TagInput: FC<TagInputProps> = ({
+  tags,
+  onChange,
+  existingTags = [],
+  inputId,
+  placeholder,
+}) => {
   const [inputValue, setInputValue] = useState('')
   const listboxId = useId()
 
@@ -62,6 +70,7 @@ const TagInput: FC<TagInputProps> = ({ tags, onChange, existingTags = [] }) => {
 
       <div className={styles.inputWrapper}>
         <input
+          id={inputId}
           role="combobox"
           aria-expanded={isExpanded}
           aria-controls={listboxId}
@@ -69,6 +78,7 @@ const TagInput: FC<TagInputProps> = ({ tags, onChange, existingTags = [] }) => {
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           className={styles.input}
+          placeholder={placeholder}
         />
 
         {isExpanded && (

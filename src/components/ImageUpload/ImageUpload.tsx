@@ -1,7 +1,7 @@
 
 import { getUploadUrl } from '@api/recipes'
 import Button from '@components/Button'
-import { useEffect, useRef, useState, type ChangeEvent, type FC } from 'react'
+import { useEffect, useId, useRef, useState, type ChangeEvent, type FC } from 'react'
 
 import styles from './ImageUpload.module.css'
 
@@ -9,11 +9,22 @@ export interface ImageUploadProps {
   onUpload: (key: string) => void
   currentKey?: string
   getToken: () => Promise<string>
+  id?: string
+  imageType?: 'cover' | 'step'
+  stepOrder?: number
 }
 
 const MAX_SIZE = 10 * 1024 * 1024
 
-const ImageUpload: FC<ImageUploadProps> = ({ onUpload, currentKey, getToken }) => {
+const ImageUpload: FC<ImageUploadProps> = ({
+  onUpload,
+  currentKey,
+  getToken,
+  id,
+  imageType = 'cover',
+  stepOrder,
+}) => {
+  const inputId = useId()
   const [preview, setPreview] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [lastFile, setLastFile] = useState<File | null>(null)
@@ -48,8 +59,9 @@ const ImageUpload: FC<ImageUploadProps> = ({ onUpload, currentKey, getToken }) =
     try {
       const token = await getToken()
       const { uploadUrl, key } = await getUploadUrl(token, {
-        recipeId: '',
-        imageType: file.type,
+        recipeId: id ?? '',
+        imageType,
+        ...(imageType === 'step' && stepOrder !== undefined ? { stepOrder } : {}),
       })
       await fetch(uploadUrl, {
         method: 'PUT',
@@ -79,7 +91,7 @@ const ImageUpload: FC<ImageUploadProps> = ({ onUpload, currentKey, getToken }) =
         accept="image/*"
         onChange={handleChange}
         className={styles.input}
-        id="image-upload-input"
+        id={inputId}
         aria-label="Upload image"
       />
 

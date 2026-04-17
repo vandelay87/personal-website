@@ -16,7 +16,7 @@ describe('StepList', () => {
     const onChange = vi.fn()
     render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} />)
 
-    const textareas = screen.getAllByRole('textbox', { name: /step.*text/i })
+    const textareas = screen.getAllByRole('textbox', { name: /^step \d+ text$/i })
     expect(textareas).toHaveLength(2)
     expect(textareas[0]).toHaveValue('Preheat oven')
     expect(textareas[1]).toHaveValue('Mix ingredients')

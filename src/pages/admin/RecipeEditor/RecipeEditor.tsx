@@ -1,4 +1,4 @@
-import { createRecipe, fetchRecipe, fetchTags, updateRecipe } from '@api/recipes'
+import { createRecipe, fetchMyRecipes, fetchTags, updateRecipe } from '@api/recipes'
 import Button from '@components/Button'
 import ImageUpload from '@components/ImageUpload'
 import IngredientList from '@components/IngredientList'
@@ -63,7 +63,10 @@ const RecipeEditor: FC = () => {
     if (!id) return
     const loadRecipe = async () => {
       try {
-        const recipe = await fetchRecipe(id)
+        const token = await getAccessToken()
+        const recipes = await fetchMyRecipes(token)
+        const recipe = recipes.find((r) => r.id === id)
+        if (!recipe) throw new Error('Recipe not found')
         setTitle(recipe.title)
         setIntro(recipe.intro)
         setPrepTime(recipe.prepTime)
@@ -82,7 +85,7 @@ const RecipeEditor: FC = () => {
       }
     }
     loadRecipe()
-  }, [id])
+  }, [id, getAccessToken])
 
   const validate = (): FormErrors => {
     const next: FormErrors = {}
@@ -151,12 +154,17 @@ const RecipeEditor: FC = () => {
   }, [])
 
   if (loading) {
-    return <Loading />
+    return (
+      <div className={styles.loadingWrapper}>
+        <Loading />
+      </div>
+    )
   }
 
   return (
     <div className={styles.container}>
       <form
+        className={styles.form}
         onSubmit={(e) => {
           e.preventDefault()
         }}
@@ -195,6 +203,7 @@ const RecipeEditor: FC = () => {
             onUpload={setCoverImageKey}
             currentKey={coverImageKey || undefined}
             getToken={getAccessToken}
+            id={id}
           />
         </div>
 
@@ -234,7 +243,16 @@ const RecipeEditor: FC = () => {
         </div>
 
         <div className={styles.section}>
-          <TagInput tags={tags} onChange={setTags} existingTags={existingTags} />
+          <div className={styles.field}>
+            <label htmlFor="recipe-tags">Tags</label>
+            <TagInput
+              inputId="recipe-tags"
+              tags={tags}
+              onChange={setTags}
+              existingTags={existingTags}
+              placeholder="Add a tag and press Enter"
+            />
+          </div>
         </div>
 
         <div className={styles.section}>
@@ -243,7 +261,12 @@ const RecipeEditor: FC = () => {
         </div>
 
         <div className={styles.section}>
-          <StepList steps={steps} onChange={setSteps} />
+          <StepList
+            steps={steps}
+            onChange={setSteps}
+            recipeId={id}
+            getToken={getAccessToken}
+          />
           {errors.steps && <span className={styles.error}>{errors.steps}</span>}
         </div>
 
@@ -254,7 +277,7 @@ const RecipeEditor: FC = () => {
               type="button"
               disabled={submitting}
             >
-              Save changes
+              {submitting ? <Loading size="small" /> : 'Save changes'}
             </Button>
           ) : (
             <>
@@ -264,14 +287,14 @@ const RecipeEditor: FC = () => {
                 variant="secondary"
                 disabled={submitting}
               >
-                Save as draft
+                {submitting ? <Loading size="small" /> : 'Save as draft'}
               </Button>
               <Button
                 onClick={() => handleSubmit('published')}
                 type="button"
                 disabled={submitting}
               >
-                Publish
+                {submitting ? <Loading size="small" /> : 'Publish'}
               </Button>
             </>
           )}

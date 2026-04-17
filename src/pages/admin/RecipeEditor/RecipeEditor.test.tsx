@@ -1,4 +1,4 @@
-import { createRecipe, fetchRecipe, fetchTags, updateRecipe } from '@api/recipes'
+import { createRecipe, fetchMyRecipes, fetchTags, updateRecipe } from '@api/recipes'
 import { useAuth } from '@contexts/AuthContext'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -11,7 +11,7 @@ import RecipeEditor from './RecipeEditor'
 vi.mock('@api/recipes', () => ({
   createRecipe: vi.fn(),
   updateRecipe: vi.fn(),
-  fetchRecipe: vi.fn(),
+  fetchMyRecipes: vi.fn(),
   fetchTags: vi.fn(),
   getUploadUrl: vi.fn(),
 }))
@@ -65,7 +65,7 @@ describe('RecipeEditor page', () => {
       { tag: 'Italian', count: 5 },
       { tag: 'Thai', count: 3 },
     ])
-    vi.mocked(fetchRecipe).mockResolvedValue(mockRecipe)
+    vi.mocked(fetchMyRecipes).mockResolvedValue([mockRecipe])
     vi.mocked(createRecipe).mockResolvedValue(mockRecipe)
     vi.mocked(updateRecipe).mockResolvedValue(mockRecipe)
   })
