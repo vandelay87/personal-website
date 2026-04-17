@@ -5,7 +5,7 @@ import Link from '@components/Link'
 import Loading from '@components/Loading'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
-import type { Recipe } from '@types/recipe'
+import type { Recipe } from '@models/recipe'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 

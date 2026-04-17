@@ -1,4 +1,4 @@
-import type { Recipe } from '@types/recipe'
+import type { Recipe } from '@models/recipe'
 import { createContext } from 'react'
 
 export interface RecipeData {

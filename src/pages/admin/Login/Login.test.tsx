@@ -1,7 +1,7 @@
 import { completeNewPassword } from '@api/auth'
 import { useAuth } from '@contexts/AuthContext'
+import type { AuthChallenge, AuthTokens } from '@models/auth'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import type { AuthChallenge, AuthTokens } from '@types/auth'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 

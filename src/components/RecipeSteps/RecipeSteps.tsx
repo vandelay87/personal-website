@@ -1,6 +1,6 @@
 import Image from '@components/Image'
 import Typography from '@components/Typography'
-import { RECIPE_IMAGE_BASE, type Step } from '@types/recipe'
+import { RECIPE_IMAGE_BASE, type Step } from '@models/recipe'
 import type { FC } from 'react'
 import styles from './RecipeSteps.module.css'
 

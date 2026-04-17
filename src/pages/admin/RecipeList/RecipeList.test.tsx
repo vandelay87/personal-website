@@ -1,7 +1,7 @@
 import { deleteRecipe, fetchMyRecipes, publishRecipe, unpublishRecipe } from '@api/recipes'
 import { useAuth } from '@contexts/AuthContext'
+import type { Recipe } from '@models/recipe'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import type { Recipe } from '@types/recipe'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 

@@ -1,4 +1,4 @@
-import type { RecipeIndex, Recipe, Tag } from '@types/recipe'
+import type { RecipeIndex, Recipe, Tag } from '@models/recipe'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
   fetchRecipes,

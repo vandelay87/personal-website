@@ -3,7 +3,7 @@ import Grid from '@components/Grid'
 import Link from '@components/Link'
 import RecipeCard from '@components/RecipeCard'
 import Typography from '@components/Typography'
-import type { RecipeIndex } from '@types/recipe'
+import type { RecipeIndex } from '@models/recipe'
 import { FC, useEffect, useState } from 'react'
 import styles from './RecipesCta.module.css'
 
