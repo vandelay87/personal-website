@@ -52,7 +52,7 @@ const RecipePreview: FC = () => {
   }, [id, getAccessToken])
 
   const handlePublish = useCallback(async () => {
-    if (!recipe || publishing) return
+    if (!recipe) return
     setPublishing(true)
     try {
       const token = await getAccessToken()
@@ -61,7 +61,7 @@ const RecipePreview: FC = () => {
     } finally {
       setPublishing(false)
     }
-  }, [recipe, publishing, getAccessToken])
+  }, [recipe, getAccessToken])
 
   if (loading) {
     return (
@@ -84,17 +84,19 @@ const RecipePreview: FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.banner} role="region" aria-label="Preview status">
+      <div className={styles.banner} role="status" aria-live="polite">
         {isDraft ? (
           <>
             <Typography variant="body" className={styles.bannerMessage}>
               Preview — this recipe is not yet published
             </Typography>
             <div className={styles.bannerActions}>
-              <Link to={editHref} className={styles.bannerLink}>
-                Edit
-              </Link>
-              <Button onClick={handlePublish} disabled={publishing}>
+              <Link to={editHref}>Edit</Link>
+              <Button
+                onClick={handlePublish}
+                disabled={publishing}
+                ariaLabel={publishing ? 'Publishing' : undefined}
+              >
                 {publishing ? <Loading size="small" /> : 'Publish'}
               </Button>
             </div>
@@ -105,12 +107,8 @@ const RecipePreview: FC = () => {
               This recipe is published
             </Typography>
             <div className={styles.bannerActions}>
-              <Link to={editHref} className={styles.bannerLink}>
-                Edit
-              </Link>
-              <Link to={`/recipes/${recipe.slug}`} className={styles.bannerLink}>
-                View public page
-              </Link>
+              <Link to={editHref}>Edit</Link>
+              <Link to={`/recipes/${recipe.slug}`}>View public page</Link>
             </div>
           </>
         )}
