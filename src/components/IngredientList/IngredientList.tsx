@@ -1,5 +1,5 @@
 import Button from '@components/Button'
-import type { Ingredient } from '@types/recipe'
+import type { Ingredient } from '@models/recipe'
 import type { FC } from 'react'
 
 import styles from './IngredientList.module.css'

@@ -1,6 +1,6 @@
 import Button from '@components/Button'
 import ImageUpload from '@components/ImageUpload'
-import type { Step } from '@types/recipe'
+import type { Step } from '@models/recipe'
 import type { FC } from 'react'
 
 import styles from './StepList.module.css'

@@ -1,4 +1,4 @@
-import type { AuthResult, AuthTokens } from '@types/auth'
+import type { AuthResult, AuthTokens } from '@models/auth'
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'https://api.akli.dev'
 

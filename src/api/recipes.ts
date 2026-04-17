@@ -1,4 +1,4 @@
-import type { RecipeIndex, Recipe, Tag } from '@types/recipe'
+import type { RecipeIndex, Recipe, Tag } from '@models/recipe'
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'https://api.akli.dev'
 

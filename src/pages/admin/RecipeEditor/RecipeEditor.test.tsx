@@ -1,8 +1,8 @@
 import { createRecipe, fetchMyRecipes, fetchTags, updateRecipe } from '@api/recipes'
 import { useAuth } from '@contexts/AuthContext'
+import type { Recipe } from '@models/recipe'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { Recipe } from '@types/recipe'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 

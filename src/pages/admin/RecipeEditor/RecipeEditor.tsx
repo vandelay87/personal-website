@@ -7,7 +7,7 @@ import StepList from '@components/StepList'
 import TagInput from '@components/TagInput'
 import Toast from '@components/Toast'
 import { useAuth } from '@contexts/AuthContext'
-import type { Ingredient, Step, Tag } from '@types/recipe'
+import type { Ingredient, Step, Tag } from '@models/recipe'
 import { useCallback, useEffect, useRef, useState, type FC } from 'react'
 import { useParams } from 'react-router-dom'
 

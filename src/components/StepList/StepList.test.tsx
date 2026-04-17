@@ -1,6 +1,6 @@
+import type { Step } from '@models/recipe'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { Step } from '@types/recipe'
 import { describe, expect, it, vi } from 'vitest'
 
 import StepList from './StepList'

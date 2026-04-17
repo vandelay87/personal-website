@@ -1,5 +1,5 @@
+import type { Ingredient } from '@models/recipe'
 import { render, screen } from '@testing-library/react'
-import type { Ingredient } from '@types/recipe'
 import { describe, it, expect } from 'vitest'
 import RecipeIngredients from './RecipeIngredients'
 

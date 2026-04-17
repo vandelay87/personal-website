@@ -1,6 +1,6 @@
 import { fetchRecipes, fetchTags } from '@api/recipes'
+import type { RecipeIndex, Tag } from '@models/recipe'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
-import type { RecipeIndex, Tag } from '@types/recipe'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import Recipes from './Recipes'

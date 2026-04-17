@@ -3,7 +3,7 @@ import Button from '@components/Button'
 import Loading from '@components/Loading'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
-import type { AuthChallenge } from '@types/auth'
+import type { AuthChallenge } from '@models/auth'
 import { type FormEvent, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 

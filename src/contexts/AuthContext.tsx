@@ -1,5 +1,5 @@
 import * as authApi from '@api/auth'
-import type { AuthResult, AuthTokens, User } from '@types/auth'
+import type { AuthResult, AuthTokens, User } from '@models/auth'
 import { createContext, useContext, useState, type FC, type ReactNode } from 'react'
 
 export interface AuthContextValue {
