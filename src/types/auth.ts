@@ -16,9 +16,12 @@ export interface User {
   groups: string[]
 }
 
+export type AdminRole = 'admin' | 'contributor'
+export type AdminUserStatus = 'confirmed' | 'pending'
+
 export interface AdminUser {
   email: string
   userId: string
-  role: string
-  status: string
+  role: AdminRole
+  status: AdminUserStatus
 }

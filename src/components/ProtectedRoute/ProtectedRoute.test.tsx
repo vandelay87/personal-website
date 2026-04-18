@@ -27,15 +27,23 @@ const renderProtectedRoute = (initialPath: string, requiredRole?: string) =>
   render(
     <MemoryRouter initialEntries={[initialPath]}>
       <Routes>
+        <Route path="/admin/login" element={<div>Login page</div>} />
         <Route
-          path="/admin/*"
+          path="/admin/recipes"
+          element={
+            <ProtectedRoute>
+              <div>Recipes page</div>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
           element={
             <ProtectedRoute requiredRole={requiredRole}>
               <div>Protected content</div>
             </ProtectedRoute>
           }
         />
-        <Route path="/admin/login" element={<div>Login page</div>} />
       </Routes>
       <LocationDisplay />
     </MemoryRouter>
@@ -55,7 +63,7 @@ describe('ProtectedRoute', () => {
 
     renderProtectedRoute('/admin/recipes')
 
-    expect(screen.queryByText('Protected content')).not.toBeInTheDocument()
+    expect(screen.queryByText('Recipes page')).not.toBeInTheDocument()
     expect(screen.getByTestId('location')).toHaveTextContent('/admin/login')
   })
 
@@ -90,7 +98,7 @@ describe('ProtectedRoute', () => {
 
     renderProtectedRoute('/admin/recipes')
 
-    expect(screen.getByText('Protected content')).toBeInTheDocument()
+    expect(screen.getByText('Recipes page')).toBeInTheDocument()
   })
 
   it('shows loading spinner while checking auth', () => {
@@ -107,7 +115,7 @@ describe('ProtectedRoute', () => {
     renderProtectedRoute('/admin/recipes')
 
     expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument()
-    expect(screen.queryByText('Protected content')).not.toBeInTheDocument()
+    expect(screen.queryByText('Recipes page')).not.toBeInTheDocument()
   })
 
   it('redirects non-admin from admin-only route', () => {

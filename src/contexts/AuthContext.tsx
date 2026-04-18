@@ -1,6 +1,6 @@
 import * as authApi from '@api/auth'
 import type { AuthResult, AuthTokens, User } from '@models/auth'
-import { createContext, useContext, useState, type FC, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useMemo, useState, type FC, type ReactNode } from 'react'
 
 export interface AuthContextValue {
   user: User | null
@@ -68,7 +68,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const isAdmin = user?.groups.includes('admin') ?? false
 
-  const login = async (email: string, password: string): Promise<AuthResult> => {
+  const login = useCallback(async (email: string, password: string): Promise<AuthResult> => {
     const result = await authApi.login(email, password)
 
     if (isTokenResult(result)) {
@@ -84,28 +84,15 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     }
 
     return result
-  }
+  }, [])
 
-  const logout = (): void => {
+  const logout = useCallback((): void => {
     authApi.logout()
     setUser(null)
     setIsAuthenticated(false)
-  }
+  }, [])
 
-  const isTokenExpired = (token: string): boolean => {
-    try {
-      const parts = token.split('.')
-      if (parts.length !== 3) return true
-      const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
-      const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4)
-      const payload = JSON.parse(atob(padded))
-      return !payload.exp || payload.exp * 1000 < Date.now()
-    } catch {
-      return true
-    }
-  }
-
-  const getAccessToken = async (): Promise<string> => {
+  const getAccessToken = useCallback(async (): Promise<string> => {
     const session = authApi.getCurrentSession()
     if (!session) {
       throw new Error('No session')
@@ -129,13 +116,25 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     } catch {
       throw new Error('Session expired')
     }
-  }
+  }, [])
 
-  return (
-    <AuthContext.Provider
-      value={{ user, isAuthenticated, isAdmin, loading, login, logout, getAccessToken }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({ user, isAuthenticated, isAdmin, loading, login, logout, getAccessToken }),
+    [user, isAuthenticated, isAdmin, loading, login, logout, getAccessToken]
   )
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
+
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return true
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+    const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4)
+    const payload = JSON.parse(atob(padded))
+    return !payload.exp || payload.exp * 1000 < Date.now()
+  } catch {
+    return true
+  }
 }
