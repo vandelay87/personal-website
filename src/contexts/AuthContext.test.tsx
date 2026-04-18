@@ -213,8 +213,6 @@ describe('AuthProvider', () => {
   })
 
   it('getAccessToken throws "Session expired" when refresh fails', async () => {
-    // Note: AuthContext throws here; the redirect-to-login behaviour on
-    // refresh failure is verified in ProtectedRoute's own tests.
     vi.mocked(authApi.getCurrentSession).mockReturnValue({
       accessToken: expiredAccessToken,
       refreshToken: 'refresh-current',

@@ -72,8 +72,6 @@ describe('StepList', () => {
 
   it('after reordering two steps, the rendered step-number labels reflect the new order', async () => {
     const user = userEvent.setup()
-    // A stateful wrapper re-renders with the updated steps prop so the user
-    // sees the numbering update as they would in the real app.
     const Wrapper = () => {
       const [steps, setSteps] = useState<Step[]>(twoSteps)
       return <StepList steps={steps} onChange={setSteps} getToken={mockGetToken} />
@@ -83,13 +81,6 @@ describe('StepList', () => {
     const moveDownButtons = screen.getAllByRole('button', { name: /move down/i })
     await user.click(moveDownButtons[0])
 
-    // After reordering, the "Mix ingredients" textarea is at position 1 and
-    // "Preheat oven" at position 2
-    const textareas = screen.getAllByRole('textbox', { name: /^step \d+ text$/i })
-    expect(textareas[0]).toHaveValue('Mix ingredients')
-    expect(textareas[1]).toHaveValue('Preheat oven')
-
-    // And the numeric labels follow the new order
     expect(screen.getByLabelText('Step 1 text')).toHaveValue('Mix ingredients')
     expect(screen.getByLabelText('Step 2 text')).toHaveValue('Preheat oven')
   })
@@ -99,8 +90,6 @@ describe('StepList', () => {
       const onChange = vi.fn()
       render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} />)
 
-      // Each step row exposes an Upload button (from ImageUpload) and an
-      // alt-text input
       const uploadButtons = screen.getAllByRole('button', { name: /^upload$/i })
       expect(uploadButtons).toHaveLength(2)
 

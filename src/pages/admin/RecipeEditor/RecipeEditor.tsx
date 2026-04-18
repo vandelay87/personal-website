@@ -299,13 +299,15 @@ const RecipeEditor: FC = () => {
         </div>
 
         <div className={styles.section}>
-          <ImageUpload
-            onUpload={setCoverImageKey}
-            currentKey={form.coverImageKey || undefined}
-            getToken={getAccessToken}
-            id={id}
-          />
-          {errors.coverImage && <span className={styles.error}>{errors.coverImage}</span>}
+          <div className={styles.field}>
+            <ImageUpload
+              onUpload={setCoverImageKey}
+              currentKey={form.coverImageKey || undefined}
+              getToken={getAccessToken}
+              id={id}
+            />
+            {errors.coverImage && <span className={styles.error}>{errors.coverImage}</span>}
+          </div>
 
           <div className={styles.field}>
             <label htmlFor="recipe-cover-alt">Cover image alt text</label>

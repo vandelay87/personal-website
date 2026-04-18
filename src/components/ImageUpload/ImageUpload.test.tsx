@@ -29,6 +29,7 @@ describe('ImageUpload', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    vi.restoreAllMocks()
   })
 
   it('renders an upload area', () => {

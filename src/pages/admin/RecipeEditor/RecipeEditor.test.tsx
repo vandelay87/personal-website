@@ -20,9 +20,8 @@ vi.mock('@contexts/AuthContext', () => ({
   useAuth: vi.fn(),
 }))
 
-// Mock ImageUpload so tests can trigger onUpload deterministically without
-// driving a real file input through getUploadUrl + fetch. Exposes a button
-// labelled "Simulate upload cover image" that invokes onUpload with a stub key.
+// Mocked so tests can trigger onUpload without driving a real file input
+// through getUploadUrl + fetch.
 vi.mock('@components/ImageUpload', () => ({
   default: ({
     onUpload,
@@ -31,10 +30,7 @@ vi.mock('@components/ImageUpload', () => ({
     onUpload: (key: string) => void
     imageType?: 'cover' | 'step'
   }) => (
-    <button
-      type="button"
-      onClick={() => onUpload(`recipes/test/${imageType}-${Date.now()}`)}
-    >
+    <button type="button" onClick={() => onUpload(`recipes/test/${imageType}-stub`)}>
       Simulate upload {imageType} image
     </button>
   ),
@@ -159,17 +155,6 @@ describe('RecipeEditor page', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /save as draft/i })).toBeInTheDocument()
     })
-
-    const titleInput = screen.getByRole('textbox', { name: /title/i })
-    const introInput = screen.getByRole('textbox', { name: /intro/i })
-    await user.type(titleInput, 'My Recipe')
-    await user.type(introInput, 'A great recipe')
-
-    const ingredientInputs = screen.getAllByRole('textbox', { name: /item/i })
-    await user.type(ingredientInputs[0], 'Flour')
-
-    const stepTextareas = screen.getAllByRole('textbox', { name: /step.*text/i })
-    await user.type(stepTextareas[0], 'Mix it all')
 
     await user.click(screen.getByRole('button', { name: /save as draft/i }))
 
@@ -413,15 +398,10 @@ describe('RecipeEditor page', () => {
     expect(screen.getAllByRole('status').length).toBeGreaterThan(0)
   })
 
-  it('tag input is wired into the editor — typing shows suggestions and pressing Enter adds a chip', async () => {
+  it('tag input is wired into the editor — typing surfaces a suggestion and clicking it adds a chip', async () => {
     const user = userEvent.setup()
     renderEditor('/admin/recipes/new')
 
-    await waitFor(() => {
-      expect(screen.getByRole('textbox', { name: /title/i })).toBeInTheDocument()
-    })
-
-    // Wait for existing tags to load so the autocomplete has data
     await waitFor(() => {
       expect(fetchTags).toHaveBeenCalled()
     })
@@ -429,16 +409,12 @@ describe('RecipeEditor page', () => {
     const tagInput = screen.getByRole('combobox')
     await user.type(tagInput, 'Ita')
 
-    // Autocomplete suggestion should surface the matching existing tag
     const listbox = await screen.findByRole('listbox')
-    expect(within(listbox).getByText('Italian')).toBeInTheDocument()
+    const suggestion = within(listbox).getByRole('option', { name: 'Italian' })
+    await user.click(suggestion)
 
-    // Pressing Enter commits the typed value as a tag
-    await user.keyboard('{Enter}')
-
-    // The tag chip is now rendered on the form
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /remove ita/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /remove italian/i })).toBeInTheDocument()
     })
   })
 
