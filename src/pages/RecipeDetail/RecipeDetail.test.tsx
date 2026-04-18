@@ -1,7 +1,7 @@
 import { fetchRecipe } from '@api/recipes'
 import { RecipeDataContext } from '@contexts/RecipeDataContext'
+import type { Recipe } from '@models/recipe'
 import { render, screen, waitFor } from '@testing-library/react'
-import type { Recipe } from '@types/recipe'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import RecipeDetail from './RecipeDetail'

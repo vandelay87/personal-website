@@ -1,5 +1,5 @@
 import Button from '@components/Button'
-import type { Tag } from '@types/recipe'
+import type { Tag } from '@models/recipe'
 import type { FC } from 'react'
 import styles from './RecipeTagFilter.module.css'
 

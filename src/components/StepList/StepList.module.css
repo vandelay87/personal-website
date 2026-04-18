@@ -1,0 +1,94 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr;
+  grid-template-areas:
+    "number body"
+    ".      actions";
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+
+.stepNumber {
+  grid-area: number;
+  font-weight: var(--font-weight-bold);
+  padding-top: var(--space-2);
+  text-align: center;
+}
+
+.body {
+  grid-area: body;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .row {
+    grid-template-columns: 1.5rem 1fr auto;
+    grid-template-areas: "number body actions";
+  }
+}
+
+.imageBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.altInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-none);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+  font-family: var(--font-sans);
+}
+
+.altInput:focus-visible {
+  outline: var(--border-width) solid var(--color-primary);
+}
+
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-none);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+  font-family: var(--font-sans);
+  resize: vertical;
+  min-height: 4rem;
+}
+
+.textarea:focus-visible {
+  outline: var(--border-width) solid var(--color-primary);
+}
+
+.actions {
+  grid-area: actions;
+  display: flex;
+  gap: var(--space-1);
+}
+
+@media (min-width: 768px) {
+  .actions {
+    padding-top: var(--space-2);
+  }
+}
+
+.actionButton {
+  min-width: 44px;
+  min-height: 44px;
+}

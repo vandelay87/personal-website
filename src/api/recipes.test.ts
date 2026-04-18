@@ -1,6 +1,17 @@
-import type { RecipeIndex, Recipe, Tag } from '@types/recipe'
+import type { RecipeIndex, Recipe, Tag } from '@models/recipe'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fetchRecipes, fetchRecipe, fetchTags } from './recipes'
+import {
+  fetchRecipes,
+  fetchRecipe,
+  fetchTags,
+  fetchMyRecipes,
+  createRecipe,
+  updateRecipe,
+  publishRecipe,
+  unpublishRecipe,
+  deleteRecipe,
+  getUploadUrl,
+} from './recipes'
 
 const mockRecipeIndex: RecipeIndex = {
   id: 'r1',
@@ -171,5 +182,179 @@ describe('fetchTags', () => {
     )
 
     await expect(fetchTags()).rejects.toThrow('503')
+  })
+})
+
+describe('authenticated recipe endpoints', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  describe('fetchMyRecipes', () => {
+    it('sends token and returns recipes', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve([mockRecipe]),
+        })
+      )
+
+      const result = await fetchMyRecipes('token-123')
+
+      expect(result).toEqual([mockRecipe])
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/me/recipes'),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: 'Bearer token-123',
+          }),
+        })
+      )
+    })
+  })
+
+  describe('createRecipe', () => {
+    it('POST with token and data', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockRecipe),
+        })
+      )
+
+      const data = { title: 'New Recipe' }
+      const result = await createRecipe('token-123', data)
+
+      expect(result).toEqual(mockRecipe)
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/recipes'),
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            Authorization: 'Bearer token-123',
+          }),
+          body: JSON.stringify(data),
+        })
+      )
+    })
+  })
+
+  describe('updateRecipe', () => {
+    it('PUT with token, id, and data', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockRecipe),
+        })
+      )
+
+      const data = { title: 'Updated Recipe' }
+      const result = await updateRecipe('token-123', 'r1', data)
+
+      expect(result).toEqual(mockRecipe)
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/recipes/r1'),
+        expect.objectContaining({
+          method: 'PUT',
+          headers: expect.objectContaining({
+            Authorization: 'Bearer token-123',
+          }),
+          body: JSON.stringify(data),
+        })
+      )
+    })
+  })
+
+  describe('publishRecipe', () => {
+    it('PATCH with token', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(undefined) })
+      )
+
+      await publishRecipe('token-123', 'r1')
+
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/recipes/r1/publish'),
+        expect.objectContaining({
+          method: 'PATCH',
+          headers: expect.objectContaining({
+            Authorization: 'Bearer token-123',
+          }),
+        })
+      )
+    })
+  })
+
+  describe('unpublishRecipe', () => {
+    it('PATCH with token', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(undefined) })
+      )
+
+      await unpublishRecipe('token-123', 'r1')
+
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/recipes/r1/unpublish'),
+        expect.objectContaining({
+          method: 'PATCH',
+          headers: expect.objectContaining({
+            Authorization: 'Bearer token-123',
+          }),
+        })
+      )
+    })
+  })
+
+  describe('deleteRecipe', () => {
+    it('DELETE with token', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(undefined) })
+      )
+
+      await deleteRecipe('token-123', 'r1')
+
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/recipes/r1'),
+        expect.objectContaining({
+          method: 'DELETE',
+          headers: expect.objectContaining({
+            Authorization: 'Bearer token-123',
+          }),
+        })
+      )
+    })
+  })
+
+  describe('getUploadUrl', () => {
+    it('POST with token and params', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ uploadUrl: 'https://s3.example.com/upload', key: 'img-key' }),
+        })
+      )
+
+      const params = { recipeId: 'r1', imageType: 'cover' }
+      const result = await getUploadUrl('token-123', params)
+
+      expect(result).toEqual({ uploadUrl: 'https://s3.example.com/upload', key: 'img-key' })
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/recipes/images/upload-url'),
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            Authorization: 'Bearer token-123',
+          }),
+          body: JSON.stringify(params),
+        })
+      )
+    })
   })
 })

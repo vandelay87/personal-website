@@ -98,7 +98,7 @@ export default defineConfig(({ isSsrBuild }) => ({
       '@contexts': '/src/contexts',
       '@hooks': '/src/hooks',
       '@pages': '/src/pages',
-      '@types': '/src/types',
+      '@models': '/src/types',
     },
   },
   server: {

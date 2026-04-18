@@ -444,4 +444,28 @@ describe('isKnownRoute', () => {
   it('recognises /recipes/:slug pattern', () => {
     expect(isKnownRoute('/recipes/some-slug')).toBe(true)
   })
+
+  it('returns true for /admin/login', () => {
+    expect(isKnownRoute('/admin/login')).toBe(true)
+  })
+
+  it('returns true for /admin/recipes', () => {
+    expect(isKnownRoute('/admin/recipes')).toBe(true)
+  })
+
+  it('returns true for /admin/recipes/new', () => {
+    expect(isKnownRoute('/admin/recipes/new')).toBe(true)
+  })
+
+  it('returns true for /admin/recipes/:id/edit', () => {
+    expect(isKnownRoute('/admin/recipes/some-id/edit')).toBe(true)
+  })
+
+  it('returns true for /admin/recipes/:id/preview', () => {
+    expect(isKnownRoute('/admin/recipes/some-id/preview')).toBe(true)
+  })
+
+  it('returns true for /admin/users', () => {
+    expect(isKnownRoute('/admin/users')).toBe(true)
+  })
 })

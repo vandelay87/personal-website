@@ -1,5 +1,5 @@
+import type { RecipeIndex } from '@models/recipe'
 import { render, screen } from '@testing-library/react'
-import type { RecipeIndex } from '@types/recipe'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect } from 'vitest'
 import RecipeCard from './RecipeCard'

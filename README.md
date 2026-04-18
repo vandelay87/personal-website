@@ -37,10 +37,10 @@ pnpm dev
 ```
 src/
   components/    # Reusable components (<Name>/<Name>.tsx + index.ts)
-  pages/         # Route pages (Home, Apps, Blog, Recipes, RecipeDetail, NotFound)
-  api/           # API service layers (recipes)
+  pages/         # Route pages (Home, Apps, Blog, Recipes, RecipeDetail, NotFound, admin/*)
+  api/           # API service layers (recipes, auth, users)
   types/         # Shared TypeScript interfaces
-  contexts/      # React contexts (RecipeDataContext for SSR)
+  contexts/      # React contexts (RecipeDataContext for SSR, AuthContext)
   hooks/         # Custom hooks
   styles/        # Design tokens and animations
   assets/        # Images and static files
@@ -60,6 +60,13 @@ tests/
 - `/blog/:slug` — Individual blog posts (MDX with code blocks, callouts, file trees)
 - `/recipes` — Recipe listing with search and tag filtering
 - `/recipes/:slug` — Recipe detail with SSR for SEO and Open Graph
+- `/admin/login` — Cognito-backed login with new-password challenge
+- `/admin/recipes` — Recipe management list (protected)
+- `/admin/recipes/new` and `/admin/recipes/:slug/edit` — Recipe editor form (protected)
+- `/admin/recipes/:slug/preview` — Recipe preview (protected)
+- `/admin/users` — User management (protected)
+
+Admin routes are code-split via `React.lazy` and gated by `ProtectedRoute`, which reads auth state from `AuthContext`.
 
 ## Design
 

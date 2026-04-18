@@ -3,11 +3,15 @@ import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { PassThrough } from 'node:stream'
 import { renderToPipeableStream } from 'react-dom/server'
-import { StaticRouter } from 'react-router-dom'
-import App from './App'
+import {
+  createStaticHandler,
+  createStaticRouter,
+  StaticRouterProvider,
+} from 'react-router-dom'
 import { RecipeDataContext } from './contexts/RecipeDataContext'
 import type { RecipeData } from './contexts/RecipeDataContext'
 import { getMetaTags, escapeHtml } from './meta'
+import { routes } from './routes'
 
 // Read the client-built index.html (copied into dist/server/ by build:prod).
 // Has hashed CSS/JS asset links. Falls back to minimal template for tests.
@@ -80,18 +84,25 @@ const buildHeadHtml = (routePath: string, data?: RecipeData): string => {
   return lines.join('\n    ')
 }
 
+const handler = createStaticHandler(routes)
 
-export const render = (url: string, data?: RecipeData): Promise<string> =>
-  new Promise<string>((resolve, reject) => {
-    const head = buildHeadHtml(url, data)
-    const beforeHtml = templateBeforeOutlet.replace('<!--ssr-head-->', head)
+export const render = async (url: string, data?: RecipeData): Promise<string> => {
+  const request = new Request(`http://localhost${url}`)
+  const context = await handler.query(request)
 
+  if (context instanceof Response) {
+    throw new Error(`Unexpected redirect response during SSR: ${context.status}`)
+  }
+
+  const router = createStaticRouter(handler.dataRoutes, context)
+  const head = buildHeadHtml(url, data)
+  const beforeHtml = templateBeforeOutlet.replace('<!--ssr-head-->', head)
+
+  return new Promise<string>((resolve, reject) => {
     const { pipe } = renderToPipeableStream(
-      <StaticRouter location={url}>
-        <RecipeDataContext.Provider value={data ?? {}}>
-          <App />
-        </RecipeDataContext.Provider>
-      </StaticRouter>,
+      <RecipeDataContext.Provider value={data ?? {}}>
+        <StaticRouterProvider router={router} context={context} />
+      </RecipeDataContext.Provider>,
       {
         onAllReady() {
           const reactStream = new PassThrough({ encoding: 'utf-8' })
@@ -117,3 +128,4 @@ export const render = (url: string, data?: RecipeData): Promise<string> =>
       }
     )
   })
+}

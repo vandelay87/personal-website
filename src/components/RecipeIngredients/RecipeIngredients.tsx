@@ -1,4 +1,4 @@
-import type { Ingredient } from '@types/recipe'
+import type { Ingredient } from '@models/recipe'
 import type { FC } from 'react'
 import styles from './RecipeIngredients.module.css'
 

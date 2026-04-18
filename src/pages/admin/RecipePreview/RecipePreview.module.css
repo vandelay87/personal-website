@@ -1,0 +1,60 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  max-width: var(--max-w-site);
+  margin: var(--space-6) auto 0;
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-none);
+}
+
+.bannerMessage {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.bannerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.actionLink {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-link);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.actionLink:hover:not(:disabled) {
+  color: var(--color-link-hover);
+}
+
+.actionLink:focus-visible {
+  outline: var(--border-width) solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.actionLink:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.stateWrapper {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-12);
+}
