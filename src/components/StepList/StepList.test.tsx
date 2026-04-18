@@ -1,6 +1,7 @@
 import type { Step } from '@models/recipe'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { useState } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
 import StepList from './StepList'
@@ -67,6 +68,72 @@ describe('StepList', () => {
       { order: 1, text: 'Mix ingredients' },
       { order: 2, text: 'Preheat oven' },
     ])
+  })
+
+  it('after reordering two steps, the rendered step-number labels reflect the new order', async () => {
+    const user = userEvent.setup()
+    // A stateful wrapper re-renders with the updated steps prop so the user
+    // sees the numbering update as they would in the real app.
+    const Wrapper = () => {
+      const [steps, setSteps] = useState<Step[]>(twoSteps)
+      return <StepList steps={steps} onChange={setSteps} getToken={mockGetToken} />
+    }
+    render(<Wrapper />)
+
+    const moveDownButtons = screen.getAllByRole('button', { name: /move down/i })
+    await user.click(moveDownButtons[0])
+
+    // After reordering, the "Mix ingredients" textarea is at position 1 and
+    // "Preheat oven" at position 2
+    const textareas = screen.getAllByRole('textbox', { name: /^step \d+ text$/i })
+    expect(textareas[0]).toHaveValue('Mix ingredients')
+    expect(textareas[1]).toHaveValue('Preheat oven')
+
+    // And the numeric labels follow the new order
+    expect(screen.getByLabelText('Step 1 text')).toHaveValue('Mix ingredients')
+    expect(screen.getByLabelText('Step 2 text')).toHaveValue('Preheat oven')
+  })
+
+  describe('per-step image upload (when getToken is provided)', () => {
+    it('renders an image upload control and an alt-text input per step', () => {
+      const onChange = vi.fn()
+      render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} />)
+
+      // Each step row exposes an Upload button (from ImageUpload) and an
+      // alt-text input
+      const uploadButtons = screen.getAllByRole('button', { name: /^upload$/i })
+      expect(uploadButtons).toHaveLength(2)
+
+      expect(screen.getByLabelText('Step 1 image alt text')).toBeInTheDocument()
+      expect(screen.getByLabelText('Step 2 image alt text')).toBeInTheDocument()
+    })
+
+    it('does not render the image upload control when getToken is not provided', () => {
+      const onChange = vi.fn()
+      render(<StepList steps={twoSteps} onChange={onChange} />)
+
+      expect(screen.queryByRole('button', { name: /^upload$/i })).not.toBeInTheDocument()
+      expect(screen.queryByLabelText('Step 1 image alt text')).not.toBeInTheDocument()
+    })
+
+    it('typing in the alt-text input calls onChange with the updated step', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      render(
+        <StepList
+          steps={[makeStep(1, 'Preheat oven')]}
+          onChange={onChange}
+          getToken={mockGetToken}
+        />
+      )
+
+      const altInput = screen.getByLabelText('Step 1 image alt text')
+      await user.type(altInput, 'A')
+
+      expect(onChange).toHaveBeenCalledWith([
+        { order: 1, text: 'Preheat oven', image: { key: '', alt: 'A' } },
+      ])
+    })
   })
 
   describe('accessibility — touch targets', () => {

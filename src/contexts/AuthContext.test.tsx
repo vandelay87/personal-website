@@ -17,8 +17,10 @@ const fakeIdToken = (payload: Record<string, unknown>): string => {
 }
 
 const futureExp = Math.floor(Date.now() / 1000) + 3600
+const pastExp = Math.floor(Date.now() / 1000) - 3600
 const adminIdToken = fakeIdToken({ email: 'admin@example.com', 'cognito:groups': ['admin'], exp: futureExp })
 const fakeAccessToken = fakeIdToken({ sub: 'user-id', exp: futureExp })
+const expiredAccessToken = fakeIdToken({ sub: 'user-id', exp: pastExp })
 const _contributorIdToken = fakeIdToken({ email: 'contributor@example.com', 'cognito:groups': ['contributor'] })
 
 const TestConsumer = () => {
@@ -168,5 +170,87 @@ describe('AuthProvider', () => {
     })
 
     expect(token).toBe(fakeAccessToken)
+  })
+
+  it('getAccessToken auto-refreshes an expired access token and returns the new one', async () => {
+    const refreshedAccessToken = fakeIdToken({ sub: 'user-id', exp: futureExp, refreshed: true })
+    vi.mocked(authApi.getCurrentSession).mockReturnValue({
+      accessToken: expiredAccessToken,
+      refreshToken: 'refresh-current',
+      idToken: adminIdToken,
+    })
+    vi.mocked(authApi.refreshSession).mockResolvedValue({
+      accessToken: refreshedAccessToken,
+      idToken: adminIdToken,
+    })
+
+    let token: string | undefined
+    const TokenConsumer = () => {
+      const { getAccessToken } = useAuth()
+      return (
+        <button
+          onClick={async () => {
+            token = await getAccessToken()
+          }}
+        >
+          Get Token
+        </button>
+      )
+    }
+
+    render(
+      <AuthProvider>
+        <TokenConsumer />
+      </AuthProvider>
+    )
+
+    await act(async () => {
+      screen.getByText('Get Token').click()
+    })
+
+    expect(authApi.refreshSession).toHaveBeenCalledWith('refresh-current')
+    expect(token).toBe(refreshedAccessToken)
+  })
+
+  it('getAccessToken throws "Session expired" when refresh fails', async () => {
+    // Note: AuthContext throws here; the redirect-to-login behaviour on
+    // refresh failure is verified in ProtectedRoute's own tests.
+    vi.mocked(authApi.getCurrentSession).mockReturnValue({
+      accessToken: expiredAccessToken,
+      refreshToken: 'refresh-current',
+      idToken: adminIdToken,
+    })
+    vi.mocked(authApi.refreshSession).mockRejectedValue(new Error('401 Unauthorized'))
+
+    let caught: Error | undefined
+    const TokenConsumer = () => {
+      const { getAccessToken } = useAuth()
+      return (
+        <button
+          onClick={async () => {
+            try {
+              await getAccessToken()
+            } catch (err) {
+              caught = err as Error
+            }
+          }}
+        >
+          Get Token
+        </button>
+      )
+    }
+
+    render(
+      <AuthProvider>
+        <TokenConsumer />
+      </AuthProvider>
+    )
+
+    await act(async () => {
+      screen.getByText('Get Token').click()
+    })
+
+    expect(caught).toBeInstanceOf(Error)
+    expect(caught?.message).toBe('Session expired')
   })
 })

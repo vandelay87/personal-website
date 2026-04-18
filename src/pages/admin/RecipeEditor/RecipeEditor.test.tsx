@@ -302,6 +302,35 @@ describe('RecipeEditor page', () => {
     expect(screen.getAllByRole('status').length).toBeGreaterThan(0)
   })
 
+  it('tag input is wired into the editor — typing shows suggestions and pressing Enter adds a chip', async () => {
+    const user = userEvent.setup()
+    renderEditor('/admin/recipes/new')
+
+    await waitFor(() => {
+      expect(screen.getByRole('textbox', { name: /title/i })).toBeInTheDocument()
+    })
+
+    // Wait for existing tags to load so the autocomplete has data
+    await waitFor(() => {
+      expect(fetchTags).toHaveBeenCalled()
+    })
+
+    const tagInput = screen.getByRole('combobox')
+    await user.type(tagInput, 'Ita')
+
+    // Autocomplete suggestion should surface the matching existing tag
+    const listbox = await screen.findByRole('listbox')
+    expect(within(listbox).getByText('Italian')).toBeInTheDocument()
+
+    // Pressing Enter commits the typed value as a tag
+    await user.keyboard('{Enter}')
+
+    // The tag chip is now rendered on the form
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /remove ita/i })).toBeInTheDocument()
+    })
+  })
+
   it('first invalid field is focused on validation failure', async () => {
     const user = userEvent.setup()
     renderEditor('/admin/recipes/new')

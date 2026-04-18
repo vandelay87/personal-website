@@ -1,6 +1,7 @@
 import { getUploadUrl } from '@api/recipes'
 import ImageUpload from '@components/ImageUpload'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { vi } from 'vitest'
 
 vi.mock('@api/recipes', () => ({
@@ -135,5 +136,60 @@ describe('ImageUpload', () => {
     render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} currentKey="img/existing.jpg" />)
 
     expect(screen.getByRole('button', { name: /replace/i })).toBeInTheDocument()
+  })
+
+  it('clicking the Upload button opens the file picker', async () => {
+    const clickSpy = vi.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {})
+
+    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} />)
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: /upload/i }))
+
+    expect(clickSpy).toHaveBeenCalled()
+  })
+
+  it('clicking the Replace button opens the file picker', async () => {
+    const clickSpy = vi.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {})
+
+    render(
+      <ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} currentKey="img/existing.jpg" />
+    )
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: /replace/i }))
+
+    expect(clickSpy).toHaveBeenCalled()
+  })
+
+  it('clicking Retry after a failed upload re-attempts the upload', async () => {
+    mockGetUploadUrl.mockRejectedValueOnce(new Error('Network error'))
+
+    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} />)
+
+    const file = new File(['x'], 'photo.png', { type: 'image/png' })
+    Object.defineProperty(file, 'size', { value: 1024 })
+
+    const input = screen.getByLabelText(/upload/i) || document.querySelector('input[type="file"]')
+    fireEvent.change(input!, { target: { files: [file] } })
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
+    })
+
+    // Set the second attempt to succeed
+    mockGetUploadUrl.mockResolvedValue({
+      uploadUrl: 'https://s3.example.com/upload',
+      key: 'img/123.jpg',
+    })
+    vi.mocked(globalThis.fetch).mockResolvedValue(new Response(null, { status: 200 }))
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: /retry/i }))
+
+    await waitFor(() => {
+      expect(mockGetUploadUrl).toHaveBeenCalledTimes(2)
+    })
+    expect(mockOnUpload).toHaveBeenCalledWith('img/123.jpg')
   })
 })
