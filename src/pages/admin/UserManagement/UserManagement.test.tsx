@@ -88,8 +88,8 @@ describe('Admin UserManagement page', () => {
       expect(screen.getAllByText(/contributor/i).length).toBeGreaterThanOrEqual(2)
 
       // Status values
-      expect(screen.getAllByText(/confirmed/i).length).toBeGreaterThanOrEqual(2)
-      expect(screen.getByText(/pending/i)).toBeInTheDocument()
+      expect(screen.getAllByText('Confirmed').length).toBeGreaterThanOrEqual(2)
+      expect(screen.getByText('Pending')).toBeInTheDocument()
     })
 
     it('calls fetchUsers with the current access token on mount', async () => {

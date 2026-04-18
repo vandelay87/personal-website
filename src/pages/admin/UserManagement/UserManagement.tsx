@@ -209,7 +209,7 @@ const UserManagement = () => {
                     </td>
                     <td>
                       <span className={styles.status} data-status={userRow.status}>
-                        {userRow.status === 'confirmed' ? 'Confirmed' : 'Invite sent'}
+                        {userRow.status === 'confirmed' ? 'Confirmed' : 'Pending'}
                       </span>
                     </td>
                     <td className={styles.actions}>
