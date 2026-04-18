@@ -63,6 +63,15 @@ const renderRecipeList = () =>
     </MemoryRouter>
   )
 
+const renderRecipeListWithAccessDenied = () =>
+  render(
+    <MemoryRouter
+      initialEntries={[{ pathname: '/admin/recipes', state: { accessDenied: true } }]}
+    >
+      <RecipeList />
+    </MemoryRouter>
+  )
+
 describe('Admin RecipeList page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
@@ -195,5 +204,17 @@ describe('Admin RecipeList page', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
     })
+  })
+
+  it('shows an "Access denied" toast when navigated here with accessDenied state', async () => {
+    renderRecipeListWithAccessDenied()
+
+    const toast = await screen.findByText(/access denied/i)
+    expect(toast).toBeInTheDocument()
+
+    // The toast should use role="status" for accessibility (aria-live)
+    const statuses = await screen.findAllByRole('status')
+    const accessDeniedStatus = statuses.find((el) => /access denied/i.test(el.textContent ?? ''))
+    expect(accessDeniedStatus).toBeDefined()
   })
 })

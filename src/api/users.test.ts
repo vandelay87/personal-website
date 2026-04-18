@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fetchUsers, inviteUser, removeUser } from './users'
+import { fetchUsers, inviteUser, removeUser, UserExistsError } from './users'
 
 beforeEach(() => {
   vi.restoreAllMocks()
@@ -68,6 +68,21 @@ describe('inviteUser', () => {
         }),
         body: JSON.stringify({ email: 'new@example.com', role: 'editor' }),
       })
+    )
+  })
+
+  it('throws UserExistsError when the response is 409', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 409,
+        statusText: 'Conflict',
+      })
+    )
+
+    await expect(inviteUser('token-123', 'dup@example.com', 'contributor')).rejects.toBeInstanceOf(
+      UserExistsError
     )
   })
 })

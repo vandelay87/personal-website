@@ -14,7 +14,13 @@ const mockedUseAuth = vi.mocked(useAuth)
 
 const LocationDisplay = () => {
   const location = useLocation()
-  return <div data-testid="location">{location.pathname}{location.search}</div>
+  const state = location.state as { accessDenied?: boolean } | null
+  return (
+    <div data-testid="location" data-access-denied={state?.accessDenied ? 'true' : 'false'}>
+      {location.pathname}
+      {location.search}
+    </div>
+  )
 }
 
 const renderProtectedRoute = (initialPath: string, requiredRole?: string) =>
@@ -119,5 +125,21 @@ describe('ProtectedRoute', () => {
 
     expect(screen.queryByText('Protected content')).not.toBeInTheDocument()
     expect(screen.getByTestId('location')).toHaveTextContent('/admin/recipes')
+  })
+
+  it('passes accessDenied state when redirecting a non-admin from an admin-only route', () => {
+    mockedUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      isAdmin: false,
+      user: { email: 'test@example.com', groups: ['contributor'] },
+      loading: false,
+      login: vi.fn(),
+      logout: vi.fn(),
+      getAccessToken: vi.fn(),
+    })
+
+    renderProtectedRoute('/admin/users', 'admin')
+
+    expect(screen.getByTestId('location')).toHaveAttribute('data-access-denied', 'true')
   })
 })
