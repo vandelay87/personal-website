@@ -70,3 +70,14 @@ export const isSessionError = (err: unknown): boolean => {
   const message = err instanceof Error ? err.message : ''
   return /session expired|no session|401/i.test(message)
 }
+
+export const handleSessionError = (
+  err: unknown,
+  logout: () => void,
+  navigate: (path: string) => void
+): boolean => {
+  if (!isSessionError(err)) return false
+  logout()
+  navigate('/admin/login')
+  return true
+}

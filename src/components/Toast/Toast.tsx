@@ -1,20 +1,26 @@
 import Button from '@components/Button'
-import { useEffect, type FC } from 'react'
+import { useEffect, useRef, type FC } from 'react'
 
 
 import styles from './Toast.module.css'
 
-export interface ToastProps {
+export interface ToastState {
   message: string
   type: 'success' | 'error'
+}
+
+export interface ToastProps extends ToastState {
   onDismiss: () => void
 }
 
 const Toast: FC<ToastProps> = ({ message, type, onDismiss }) => {
+  const onDismissRef = useRef(onDismiss)
+  onDismissRef.current = onDismiss
+
   useEffect(() => {
-    const timer = setTimeout(onDismiss, 5000)
+    const timer = setTimeout(() => onDismissRef.current(), 5000)
     return () => clearTimeout(timer)
-  }, [onDismiss])
+  }, [])
 
   return (
     <div

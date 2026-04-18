@@ -21,7 +21,7 @@ const ProtectedRoute: FC<ProtectedRouteProps> = ({ children, requiredRole }) => 
   }
 
   if (requiredRole === 'admin' && !isAdmin) {
-    return <Navigate to="/admin/recipes" replace />
+    return <Navigate to="/admin/recipes" replace state={{ accessDenied: true }} />
   }
 
   return <>{children}</>
