@@ -127,6 +127,84 @@ describe('RecipeEditor page', () => {
     })
   })
 
+  it('shows cover-image-required error when saving with no cover image', async () => {
+    const user = userEvent.setup()
+    renderEditor('/admin/recipes/new')
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /save as draft/i })).toBeInTheDocument()
+    })
+
+    const titleInput = screen.getByRole('textbox', { name: /title/i })
+    const introInput = screen.getByRole('textbox', { name: /intro/i })
+    await user.type(titleInput, 'My Recipe')
+    await user.type(introInput, 'A great recipe')
+
+    const ingredientInputs = screen.getAllByRole('textbox', { name: /item/i })
+    await user.type(ingredientInputs[0], 'Flour')
+
+    const stepTextareas = screen.getAllByRole('textbox', { name: /step.*text/i })
+    await user.type(stepTextareas[0], 'Mix it all')
+
+    await user.click(screen.getByRole('button', { name: /save as draft/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText(/cover image is required/i)).toBeInTheDocument()
+    })
+
+    expect(createRecipe).not.toHaveBeenCalled()
+  })
+
+  it('shows alt-text-required error when saving with a cover image but no alt text', async () => {
+    const recipeWithoutAlt: Recipe = {
+      ...mockRecipe,
+      coverImage: { key: 'recipes/rec-001/cover', alt: '' },
+    }
+    vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithoutAlt])
+
+    const user = userEvent.setup()
+    renderEditor('/admin/recipes/rec-001/edit')
+
+    await waitFor(() => {
+      expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+    })
+
+    await user.click(screen.getByRole('button', { name: /save changes/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText(/alt text is required/i)).toBeInTheDocument()
+    })
+
+    expect(updateRecipe).not.toHaveBeenCalled()
+  })
+
+  it('editing the cover-image alt text updates the form value', async () => {
+    const user = userEvent.setup()
+    renderEditor('/admin/recipes/rec-001/edit')
+
+    await waitFor(() => {
+      expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+    })
+
+    const altInput = screen.getByLabelText(/cover image alt text/i)
+    await user.clear(altInput)
+    await user.type(altInput, 'A steaming bowl of spaghetti bolognese')
+
+    await user.click(screen.getByRole('button', { name: /save changes/i }))
+
+    await waitFor(() => {
+      expect(updateRecipe).toHaveBeenCalledWith(
+        'token-123',
+        'rec-001',
+        expect.objectContaining({
+          coverImage: expect.objectContaining({
+            alt: 'A steaming bowl of spaghetti bolognese',
+          }),
+        })
+      )
+    })
+  })
+
   it('validates at least 1 ingredient with item filled', async () => {
     const user = userEvent.setup()
     renderEditor('/admin/recipes/new')
