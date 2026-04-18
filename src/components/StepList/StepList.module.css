@@ -87,3 +87,8 @@
     padding-top: var(--space-2);
   }
 }
+
+.actionButton {
+  min-width: 44px;
+  min-height: 44px;
+}

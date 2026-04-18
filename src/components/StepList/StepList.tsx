@@ -11,12 +11,13 @@ export interface StepListProps {
   onChange: (steps: Step[]) => void
   recipeId?: string
   getToken?: () => Promise<string>
+  onAnnounce?: (message: string) => void
 }
 
 const renumber = (steps: Step[]): Step[] =>
   steps.map((step, i) => ({ ...step, order: i + 1 }))
 
-const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken }) => {
+const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken, onAnnounce }) => {
   const onChangeRenumbered = useCallback(
     (next: Step[]) => onChange(renumber(next)),
     [onChange]
@@ -37,6 +38,22 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken }) =>
 
   const handleAdd = () => {
     add({ order: steps.length + 1, text: '' })
+    onAnnounce?.('Step added')
+  }
+
+  const handleRemove = (index: number) => {
+    remove(index)
+    onAnnounce?.('Step removed')
+  }
+
+  const handleMoveUp = (index: number) => {
+    moveUp(index)
+    onAnnounce?.(`Step ${index + 1} moved up`)
+  }
+
+  const handleMoveDown = (index: number) => {
+    moveDown(index)
+    onAnnounce?.(`Step ${index + 1} moved down`)
   }
 
   return (
@@ -74,26 +91,29 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken }) =>
           </div>
           <div className={styles.actions}>
             <Button
-              onClick={() => moveUp(index)}
+              onClick={() => handleMoveUp(index)}
               ariaLabel={`Move up step ${index + 1}`}
               variant="secondary"
               disabled={index === 0}
+              className={styles.actionButton}
             >
               ↑
             </Button>
             <Button
-              onClick={() => moveDown(index)}
+              onClick={() => handleMoveDown(index)}
               ariaLabel={`Move down step ${index + 1}`}
               variant="secondary"
               disabled={index === steps.length - 1}
+              className={styles.actionButton}
             >
               ↓
             </Button>
             <Button
-              onClick={() => remove(index)}
+              onClick={() => handleRemove(index)}
               ariaLabel={`Remove step ${index + 1}`}
               variant="secondary"
               disabled={steps.length <= 1}
+              className={styles.actionButton}
             >
               Remove
             </Button>

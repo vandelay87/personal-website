@@ -11,11 +11,21 @@ export interface ConfirmDialogProps {
   onConfirm: () => void
   onCancel: () => void
   isOpen: boolean
+  confirmLabel?: string
+  cancelLabel?: string
 }
 
 const TITLE_ID = 'confirm-dialog-title'
 
-const ConfirmDialog: FC<ConfirmDialogProps> = ({ title, message, onConfirm, onCancel, isOpen }) => {
+const ConfirmDialog: FC<ConfirmDialogProps> = ({
+  title,
+  message,
+  onConfirm,
+  onCancel,
+  isOpen,
+  confirmLabel = 'Confirm',
+  cancelLabel = 'Cancel',
+}) => {
   const dialogRef = useRef<HTMLDivElement>(null)
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -69,10 +79,10 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({ title, message, onConfirm, onCa
         </Typography>
         <div className={styles.actions}>
           <Button onClick={onCancel} variant="secondary">
-            Cancel
+            {cancelLabel}
           </Button>
           <Button onClick={onConfirm} variant="primary">
-            Confirm
+            {confirmLabel}
           </Button>
         </div>
       </div>

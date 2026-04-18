@@ -1,3 +1,4 @@
+import { isSessionError } from '@api/auth'
 import { deleteRecipe, fetchMyRecipes, publishRecipe, unpublishRecipe } from '@api/recipes'
 import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
@@ -27,8 +28,7 @@ const RecipeList = () => {
       const data = await fetchMyRecipes(token)
       setRecipes(data)
     } catch (err) {
-      const message = err instanceof Error ? err.message : ''
-      if (message.includes('401') || message.includes('Session expired') || message.includes('No session')) {
+      if (isSessionError(err)) {
         logout()
         navigate('/admin/login')
       } else {

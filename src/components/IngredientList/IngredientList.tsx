@@ -8,9 +8,10 @@ import styles from './IngredientList.module.css'
 export interface IngredientListProps {
   ingredients: Ingredient[]
   onChange: (ingredients: Ingredient[]) => void
+  onAnnounce?: (message: string) => void
 }
 
-const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange }) => {
+const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnnounce }) => {
   const { add, remove, update, moveUp, moveDown } = useReorderableList(ingredients, onChange)
 
   const handleFieldChange = (index: number, field: keyof Ingredient, value: string) => {
@@ -19,6 +20,22 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange }) => {
 
   const handleAdd = () => {
     add({ item: '', quantity: '', unit: '' })
+    onAnnounce?.('Ingredient added')
+  }
+
+  const handleRemove = (index: number) => {
+    remove(index)
+    onAnnounce?.('Ingredient removed')
+  }
+
+  const handleMoveUp = (index: number) => {
+    moveUp(index)
+    onAnnounce?.(`Ingredient ${index + 1} moved up`)
+  }
+
+  const handleMoveDown = (index: number) => {
+    moveDown(index)
+    onAnnounce?.(`Ingredient ${index + 1} moved down`)
   }
 
   return (
@@ -57,26 +74,29 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange }) => {
           </label>
           <div className={styles.actions}>
             <Button
-              onClick={() => moveUp(index)}
+              onClick={() => handleMoveUp(index)}
               ariaLabel={`Move up ingredient ${index + 1}`}
               variant="secondary"
               disabled={index === 0}
+              className={styles.actionButton}
             >
               ↑
             </Button>
             <Button
-              onClick={() => moveDown(index)}
+              onClick={() => handleMoveDown(index)}
               ariaLabel={`Move down ingredient ${index + 1}`}
               variant="secondary"
               disabled={index === ingredients.length - 1}
+              className={styles.actionButton}
             >
               ↓
             </Button>
             <Button
-              onClick={() => remove(index)}
+              onClick={() => handleRemove(index)}
               ariaLabel={`Remove ingredient ${index + 1}`}
               variant="secondary"
               disabled={ingredients.length <= 1}
+              className={styles.actionButton}
             >
               Remove
             </Button>

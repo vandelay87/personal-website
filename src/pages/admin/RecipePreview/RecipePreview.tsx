@@ -1,3 +1,4 @@
+import { isSessionError } from '@api/auth'
 import { fetchMyRecipes, publishRecipe } from '@api/recipes'
 import Link from '@components/Link'
 import Loading from '@components/Loading'
@@ -6,13 +7,14 @@ import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import type { Recipe } from '@models/recipe'
 import { useCallback, useEffect, useState, type FC } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import styles from './RecipePreview.module.css'
 
 const RecipePreview: FC = () => {
   const { id } = useParams<{ id: string }>()
-  const { getAccessToken } = useAuth()
+  const { getAccessToken, logout } = useAuth()
+  const navigate = useNavigate()
 
   const [recipe, setRecipe] = useState<Recipe | undefined>()
   const [loading, setLoading] = useState(true)
@@ -36,8 +38,14 @@ const RecipePreview: FC = () => {
         } else {
           setRecipe(found)
         }
-      } catch {
-        if (!cancelled) setNotFound(true)
+      } catch (err) {
+        if (cancelled) return
+        if (isSessionError(err)) {
+          logout()
+          navigate('/admin/login')
+          return
+        }
+        setNotFound(true)
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -48,7 +56,7 @@ const RecipePreview: FC = () => {
     return () => {
       cancelled = true
     }
-  }, [id, getAccessToken])
+  }, [id, getAccessToken, logout, navigate])
 
   const handlePublish = useCallback(async () => {
     if (!recipe) return

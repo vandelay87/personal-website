@@ -88,3 +88,17 @@
   gap: var(--space-3);
   padding: var(--space-6) 0;
 }
+
+.sessionBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-none);
+  background: var(--color-warning, var(--color-surface));
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+}

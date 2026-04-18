@@ -108,7 +108,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const getAccessToken = async (): Promise<string> => {
     const session = authApi.getCurrentSession()
     if (!session) {
-      logout()
       throw new Error('No session')
     }
 
@@ -128,7 +127,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
       return refreshed.accessToken
     } catch {
-      logout()
       throw new Error('Session expired')
     }
   }

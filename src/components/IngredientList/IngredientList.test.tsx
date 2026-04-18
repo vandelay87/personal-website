@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
 import IngredientList from './IngredientList'
+import styles from './IngredientList.module.css'
 
 const makeIngredient = (item: string, quantity = '', unit = ''): Ingredient => ({
   item,
@@ -96,5 +97,40 @@ describe('IngredientList', () => {
 
     expect(moveUpButtons.length).toBeGreaterThan(0)
     expect(moveDownButtons.length).toBeGreaterThan(0)
+  })
+
+  describe('accessibility — touch targets', () => {
+    // Note: jsdom does not apply CSS Modules styles to computed style, so we
+    // assert the button carries the action-button class, which is styled to
+    // the 44x44px minimum in IngredientList.module.css.
+    it('move up buttons carry the action-button class (44x44px min)', () => {
+      const onChange = vi.fn()
+      render(<IngredientList ingredients={twoIngredients} onChange={onChange} />)
+
+      const moveUpButtons = screen.getAllByRole('button', { name: /move up/i })
+      moveUpButtons.forEach((button) => {
+        expect(button).toHaveClass(styles.actionButton)
+      })
+    })
+
+    it('move down buttons carry the action-button class (44x44px min)', () => {
+      const onChange = vi.fn()
+      render(<IngredientList ingredients={twoIngredients} onChange={onChange} />)
+
+      const moveDownButtons = screen.getAllByRole('button', { name: /move down/i })
+      moveDownButtons.forEach((button) => {
+        expect(button).toHaveClass(styles.actionButton)
+      })
+    })
+
+    it('remove buttons carry the action-button class (44x44px min)', () => {
+      const onChange = vi.fn()
+      render(<IngredientList ingredients={twoIngredients} onChange={onChange} />)
+
+      const removeButtons = screen.getAllByRole('button', { name: /remove ingredient/i })
+      removeButtons.forEach((button) => {
+        expect(button).toHaveClass(styles.actionButton)
+      })
+    })
   })
 })
