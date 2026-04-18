@@ -21,6 +21,8 @@ interface FormErrors {
   intro?: string
   ingredients?: string
   steps?: string
+  coverImage?: string
+  coverImageAlt?: string
 }
 
 interface FormState {
@@ -167,6 +169,11 @@ const RecipeEditor: FC = () => {
     if (!form.steps.some((s) => s.text.trim())) {
       next.steps = 'At least one step with text is required'
     }
+    if (!form.coverImageKey.trim()) {
+      next.coverImage = 'Cover image is required'
+    } else if (!form.coverImageAlt.trim()) {
+      next.coverImageAlt = 'Alt text is required'
+    }
     return next
   }
 
@@ -298,6 +305,22 @@ const RecipeEditor: FC = () => {
             getToken={getAccessToken}
             id={id}
           />
+          {errors.coverImage && <span className={styles.error}>{errors.coverImage}</span>}
+
+          <div className={styles.field}>
+            <label htmlFor="recipe-cover-alt">Cover image alt text</label>
+            <input
+              id="recipe-cover-alt"
+              type="text"
+              value={form.coverImageAlt}
+              onChange={(e) => setField('coverImageAlt', e.target.value)}
+              className={styles.input}
+              aria-invalid={errors.coverImageAlt ? 'true' : undefined}
+            />
+            {errors.coverImageAlt && (
+              <span className={styles.error}>{errors.coverImageAlt}</span>
+            )}
+          </div>
         </div>
 
         <div className={styles.section}>

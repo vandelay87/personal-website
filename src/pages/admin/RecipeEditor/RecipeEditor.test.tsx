@@ -2,7 +2,7 @@ import { createRecipe, fetchMyRecipes, fetchTags, updateRecipe } from '@api/reci
 import { useAuth } from '@contexts/AuthContext'
 import type { Recipe } from '@models/recipe'
 import { render, screen, waitFor, within } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { createMemoryRouter, Link, RouterProvider } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -19,6 +19,31 @@ vi.mock('@api/recipes', () => ({
 vi.mock('@contexts/AuthContext', () => ({
   useAuth: vi.fn(),
 }))
+
+// Mock ImageUpload so tests can trigger onUpload deterministically without
+// driving a real file input through getUploadUrl + fetch. Exposes a button
+// labelled "Simulate upload cover image" that invokes onUpload with a stub key.
+vi.mock('@components/ImageUpload', () => ({
+  default: ({
+    onUpload,
+    imageType = 'cover',
+  }: {
+    onUpload: (key: string) => void
+    imageType?: 'cover' | 'step'
+  }) => (
+    <button
+      type="button"
+      onClick={() => onUpload(`recipes/test/${imageType}-${Date.now()}`)}
+    >
+      Simulate upload {imageType} image
+    </button>
+  ),
+}))
+
+const fillValidCoverImage = async (user: UserEvent) => {
+  await user.click(screen.getByRole('button', { name: /simulate upload cover image/i }))
+  await user.type(screen.getByLabelText(/cover image alt text/i), 'Cover alt text')
+}
 
 const mockRecipe: Recipe = {
   id: 'rec-001',
@@ -267,6 +292,8 @@ describe('RecipeEditor page', () => {
     const stepTextareas = screen.getAllByRole('textbox', { name: /step.*text/i })
     await user.type(stepTextareas[0], 'Mix it all')
 
+    await fillValidCoverImage(user)
+
     await user.click(screen.getByRole('button', { name: /save as draft/i }))
 
     await waitFor(() => {
@@ -295,6 +322,8 @@ describe('RecipeEditor page', () => {
 
     const stepTextareas = screen.getAllByRole('textbox', { name: /step.*text/i })
     await user.type(stepTextareas[0], 'Mix it all')
+
+    await fillValidCoverImage(user)
 
     await user.click(screen.getByRole('button', { name: /publish/i }))
 
@@ -344,6 +373,8 @@ describe('RecipeEditor page', () => {
     const stepTextareas = screen.getAllByRole('textbox', { name: /step.*text/i })
     await user.type(stepTextareas[0], 'Mix it all')
 
+    await fillValidCoverImage(user)
+
     await user.click(screen.getByRole('button', { name: /save as draft/i }))
 
     await waitFor(() => {
@@ -371,6 +402,8 @@ describe('RecipeEditor page', () => {
 
     const stepTextareas = screen.getAllByRole('textbox', { name: /step.*text/i })
     await user.type(stepTextareas[0], 'Mix it all')
+
+    await fillValidCoverImage(user)
 
     await user.click(screen.getByRole('button', { name: /save as draft/i }))
 
@@ -466,6 +499,8 @@ describe('RecipeEditor page', () => {
       await user.type(screen.getByRole('textbox', { name: /intro/i }), 'A great recipe')
       await user.type(screen.getAllByRole('textbox', { name: /item/i })[0], 'Flour')
       await user.type(screen.getAllByRole('textbox', { name: /step.*text/i })[0], 'Mix it all')
+
+      await fillValidCoverImage(user)
 
       await user.click(screen.getByRole('button', { name: /save as draft/i }))
 
@@ -659,6 +694,8 @@ describe('RecipeEditor page', () => {
       await user.type(introInput, 'A great recipe')
       await user.type(screen.getAllByRole('textbox', { name: /item/i })[0], 'Flour')
       await user.type(screen.getAllByRole('textbox', { name: /step.*text/i })[0], 'Mix it all')
+
+      await fillValidCoverImage(user)
 
       await user.click(screen.getByRole('button', { name: /save as draft/i }))
 
