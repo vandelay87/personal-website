@@ -23,6 +23,7 @@ The recipe API (PRD 2) provides CRUD endpoints, but there is no UI for authentic
 - **Role changes** — changing a user's role (contributor → admin) after creation is deferred.
 - **Bulk operations** — deleting or publishing multiple recipes at once is deferred.
 - **Drag-and-drop reordering** — move up/down buttons are used for ingredient and step reordering in v1. Drag-and-drop can be added later.
+- **Drag-and-drop file upload** — the `ImageUpload` component is click-to-upload only in v1. Drag-and-drop file handling can be added later.
 - **Forgotten password flow** — users can contact the admin to reset their account. Self-service password reset is deferred.
 - **Recipe analytics** — view counts, popular recipes, etc. are not in scope.
 - **Offline support** — no service worker or local storage persistence for draft recipes.
@@ -101,7 +102,7 @@ Structured form with sections:
 - Title (text input, required)
 - Intro (textarea, required)
 - Cover image (upload area with preview, required)
-  - Click to upload or drag file onto the area
+  - Click to upload
   - Shows image preview after upload
   - "Replace" button to change the image
   - Alt text input (required)
@@ -283,7 +284,7 @@ Following existing conventions (`src/components/<Name>/<Name>.tsx` + barrel + te
 
 ### Image Upload Flow
 
-1. User selects/drops a file in the `ImageUpload` component.
+1. User selects a file in the `ImageUpload` component.
 2. Component shows a local preview via `URL.createObjectURL()`.
 3. Component calls `getUploadUrl()` to get a presigned S3 URL and the S3 key.
 4. Component uploads the file directly to S3 via `PUT` to the presigned URL.
@@ -424,7 +425,7 @@ Follow test-driven development: write component tests with Vitest + Testing Libr
 - [ ] `AuthContext` tests: provides user info after login, handles logout (clears state), auto-refreshes expired tokens, redirects to login when refresh fails.
 - [ ] `AdminRecipeList` tests: renders recipe list, shows empty state, shows status badges, handles delete with confirmation, handles publish/unpublish toggle.
 - [ ] `RecipeForm` tests: renders empty form for create, populates form for edit, validates required fields (title, cover image, intro, 1 ingredient, 1 step), saves as draft, publishes, shows validation errors inline, tag autocomplete shows suggestions and adds tags, ingredient add/remove/reorder, step add/remove/reorder, shows unsaved changes prompt.
-- [ ] `ImageUpload` tests: shows file picker on click, handles file drop, displays local preview, handles upload success, handles upload error with retry, rejects files over 10MB, rejects non-image files.
+- [ ] `ImageUpload` tests: shows file picker on click, displays local preview, handles upload success, handles upload error with retry, rejects files over 10MB, rejects non-image files.
 - [ ] `TagInput` tests: shows autocomplete dropdown matching input, adds tag on Enter, adds tag on click, creates new tag for non-matching input, removes tag on chip X click.
 - [ ] `IngredientList` tests: adds rows, removes rows (minimum enforced), reorders with move up/down (boundary disabled).
 - [ ] `StepList` tests: adds rows with text + optional image, removes rows (minimum enforced), reorders, step numbers update after reorder.
