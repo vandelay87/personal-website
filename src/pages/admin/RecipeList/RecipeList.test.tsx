@@ -179,6 +179,22 @@ describe('Admin RecipeList page', () => {
     })
   })
 
+  it('clicking Unpublish on a published recipe calls unpublishRecipe', async () => {
+    renderRecipeList()
+
+    await waitFor(() => {
+      expect(screen.getByText('Thai Green Curry')).toBeInTheDocument()
+    })
+
+    const unpublishButton = screen.getByRole('button', { name: /unpublish/i })
+    fireEvent.click(unpublishButton)
+
+    await waitFor(() => {
+      expect(unpublishRecipe).toHaveBeenCalledWith('token-123', 'rec-002')
+    })
+    expect(publishRecipe).not.toHaveBeenCalled()
+  })
+
   it('shows empty state when no recipes exist', async () => {
     vi.mocked(fetchMyRecipes).mockResolvedValue([])
     renderRecipeList()

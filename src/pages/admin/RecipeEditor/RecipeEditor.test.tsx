@@ -2,7 +2,7 @@ import { createRecipe, fetchMyRecipes, fetchTags, updateRecipe } from '@api/reci
 import { useAuth } from '@contexts/AuthContext'
 import type { Recipe } from '@models/recipe'
 import { render, screen, waitFor, within } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { createMemoryRouter, Link, RouterProvider } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -19,6 +19,27 @@ vi.mock('@api/recipes', () => ({
 vi.mock('@contexts/AuthContext', () => ({
   useAuth: vi.fn(),
 }))
+
+// Mocked so tests can trigger onUpload without driving a real file input
+// through getUploadUrl + fetch.
+vi.mock('@components/ImageUpload', () => ({
+  default: ({
+    onUpload,
+    imageType = 'cover',
+  }: {
+    onUpload: (key: string) => void
+    imageType?: 'cover' | 'step'
+  }) => (
+    <button type="button" onClick={() => onUpload(`recipes/test/${imageType}-stub`)}>
+      Simulate upload {imageType} image
+    </button>
+  ),
+}))
+
+const fillValidCoverImage = async (user: UserEvent) => {
+  await user.click(screen.getByRole('button', { name: /simulate upload cover image/i }))
+  await user.type(screen.getByLabelText(/cover image alt text/i), 'Cover alt text')
+}
 
 const mockRecipe: Recipe = {
   id: 'rec-001',
@@ -127,6 +148,73 @@ describe('RecipeEditor page', () => {
     })
   })
 
+  it('shows cover-image-required error when saving with no cover image', async () => {
+    const user = userEvent.setup()
+    renderEditor('/admin/recipes/new')
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /save as draft/i })).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: /save as draft/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText(/cover image is required/i)).toBeInTheDocument()
+    })
+
+    expect(createRecipe).not.toHaveBeenCalled()
+  })
+
+  it('shows alt-text-required error when saving with a cover image but no alt text', async () => {
+    const recipeWithoutAlt: Recipe = {
+      ...mockRecipe,
+      coverImage: { key: 'recipes/rec-001/cover', alt: '' },
+    }
+    vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithoutAlt])
+
+    const user = userEvent.setup()
+    renderEditor('/admin/recipes/rec-001/edit')
+
+    await waitFor(() => {
+      expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+    })
+
+    await user.click(screen.getByRole('button', { name: /save changes/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText(/alt text is required/i)).toBeInTheDocument()
+    })
+
+    expect(updateRecipe).not.toHaveBeenCalled()
+  })
+
+  it('editing the cover-image alt text updates the form value', async () => {
+    const user = userEvent.setup()
+    renderEditor('/admin/recipes/rec-001/edit')
+
+    await waitFor(() => {
+      expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+    })
+
+    const altInput = screen.getByLabelText(/cover image alt text/i)
+    await user.clear(altInput)
+    await user.type(altInput, 'A steaming bowl of spaghetti bolognese')
+
+    await user.click(screen.getByRole('button', { name: /save changes/i }))
+
+    await waitFor(() => {
+      expect(updateRecipe).toHaveBeenCalledWith(
+        'token-123',
+        'rec-001',
+        expect.objectContaining({
+          coverImage: expect.objectContaining({
+            alt: 'A steaming bowl of spaghetti bolognese',
+          }),
+        })
+      )
+    })
+  })
+
   it('validates at least 1 ingredient with item filled', async () => {
     const user = userEvent.setup()
     renderEditor('/admin/recipes/new')
@@ -189,6 +277,8 @@ describe('RecipeEditor page', () => {
     const stepTextareas = screen.getAllByRole('textbox', { name: /step.*text/i })
     await user.type(stepTextareas[0], 'Mix it all')
 
+    await fillValidCoverImage(user)
+
     await user.click(screen.getByRole('button', { name: /save as draft/i }))
 
     await waitFor(() => {
@@ -217,6 +307,8 @@ describe('RecipeEditor page', () => {
 
     const stepTextareas = screen.getAllByRole('textbox', { name: /step.*text/i })
     await user.type(stepTextareas[0], 'Mix it all')
+
+    await fillValidCoverImage(user)
 
     await user.click(screen.getByRole('button', { name: /publish/i }))
 
@@ -266,6 +358,8 @@ describe('RecipeEditor page', () => {
     const stepTextareas = screen.getAllByRole('textbox', { name: /step.*text/i })
     await user.type(stepTextareas[0], 'Mix it all')
 
+    await fillValidCoverImage(user)
+
     await user.click(screen.getByRole('button', { name: /save as draft/i }))
 
     await waitFor(() => {
@@ -294,12 +388,34 @@ describe('RecipeEditor page', () => {
     const stepTextareas = screen.getAllByRole('textbox', { name: /step.*text/i })
     await user.type(stepTextareas[0], 'Mix it all')
 
+    await fillValidCoverImage(user)
+
     await user.click(screen.getByRole('button', { name: /save as draft/i }))
 
     await waitFor(() => {
       expect(screen.getByText(/error/i)).toBeInTheDocument()
     })
     expect(screen.getAllByRole('status').length).toBeGreaterThan(0)
+  })
+
+  it('tag input is wired into the editor — typing surfaces a suggestion and clicking it adds a chip', async () => {
+    const user = userEvent.setup()
+    renderEditor('/admin/recipes/new')
+
+    await waitFor(() => {
+      expect(fetchTags).toHaveBeenCalled()
+    })
+
+    const tagInput = screen.getByRole('combobox')
+    await user.type(tagInput, 'Ita')
+
+    const listbox = await screen.findByRole('listbox')
+    const suggestion = within(listbox).getByRole('option', { name: 'Italian' })
+    await user.click(suggestion)
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /remove italian/i })).toBeInTheDocument()
+    })
   })
 
   it('first invalid field is focused on validation failure', async () => {
@@ -359,6 +475,8 @@ describe('RecipeEditor page', () => {
       await user.type(screen.getByRole('textbox', { name: /intro/i }), 'A great recipe')
       await user.type(screen.getAllByRole('textbox', { name: /item/i })[0], 'Flour')
       await user.type(screen.getAllByRole('textbox', { name: /step.*text/i })[0], 'Mix it all')
+
+      await fillValidCoverImage(user)
 
       await user.click(screen.getByRole('button', { name: /save as draft/i }))
 
@@ -552,6 +670,8 @@ describe('RecipeEditor page', () => {
       await user.type(introInput, 'A great recipe')
       await user.type(screen.getAllByRole('textbox', { name: /item/i })[0], 'Flour')
       await user.type(screen.getAllByRole('textbox', { name: /step.*text/i })[0], 'Mix it all')
+
+      await fillValidCoverImage(user)
 
       await user.click(screen.getByRole('button', { name: /save as draft/i }))
 
