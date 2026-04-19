@@ -1,14 +1,11 @@
 import * as authApi from '@api/auth'
 import * as authContext from '@contexts/AuthContext'
-import { act, renderHook, waitFor } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { act, configure, renderHook, waitFor } from '@testing-library/react'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 
 import { useAutosave } from './useAutosave'
 
-// Mock handleSessionError so we can spy on it; keep the other exports intact
-// because AuthContext (re-exported under this alias above) pulls them in at
-// module init time for the hook's consumers.
 vi.mock('@api/auth', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@api/auth')>()
   return {
@@ -58,6 +55,14 @@ afterEach(() => {
 })
 
 describe('useAutosave — state machine', () => {
+  beforeAll(() => {
+    configure({ asyncUtilTimeout: 5000 })
+  })
+
+  afterAll(() => {
+    configure({ asyncUtilTimeout: 1000 })
+  })
+
   it('status is idle on first render', () => {
     const saveFn = vi.fn().mockResolvedValue(undefined)
     const { result } = renderHook(() =>
@@ -323,21 +328,22 @@ describe('useAutosave — debounce timing + lifecycle', () => {
     })
     expect(saveFn).not.toHaveBeenCalled()
 
-    Object.defineProperty(document, 'visibilityState', {
-      value: 'hidden',
-      configurable: true,
-    })
-    await act(async () => {
-      document.dispatchEvent(new Event('visibilitychange'))
-    })
+    try {
+      Object.defineProperty(document, 'visibilityState', {
+        value: 'hidden',
+        configurable: true,
+      })
+      await act(async () => {
+        document.dispatchEvent(new Event('visibilitychange'))
+      })
 
-    expect(saveFn).toHaveBeenCalledTimes(1)
-
-    // Restore so later tests are unaffected.
-    Object.defineProperty(document, 'visibilityState', {
-      value: 'visible',
-      configurable: true,
-    })
+      expect(saveFn).toHaveBeenCalledTimes(1)
+    } finally {
+      Object.defineProperty(document, 'visibilityState', {
+        value: 'visible',
+        configurable: true,
+      })
+    }
   })
 
   it('flushes the pending save on unmount', async () => {
@@ -363,6 +369,14 @@ describe('useAutosave — debounce timing + lifecycle', () => {
 })
 
 describe('useAutosave — 401 handling', () => {
+  beforeAll(() => {
+    configure({ asyncUtilTimeout: 5000 })
+  })
+
+  afterAll(() => {
+    configure({ asyncUtilTimeout: 1000 })
+  })
+
   it('invokes handleSessionError with (err, logout, navigate) when saveFn rejects with a 401', async () => {
     const authErr = new Error('401 Unauthorized')
     const saveFn = vi.fn().mockRejectedValue(authErr)

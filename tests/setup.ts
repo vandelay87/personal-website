@@ -1,8 +1,5 @@
 import '@testing-library/jest-dom'
-import { configure } from '@testing-library/react'
 import { vi } from 'vitest'
-
-configure({ asyncUtilTimeout: 5000 })
 
 export class MockIntersectionObserver {
   observe: ReturnType<typeof vi.fn>

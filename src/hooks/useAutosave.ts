@@ -21,6 +21,7 @@ const stripDirty = <T extends { dirty: boolean }>(state: T): Omit<T, 'dirty'> =>
   return rest as Omit<T, 'dirty'>
 }
 
+// Assumes state fields have stable key ordering — safe for the reducer's static shape
 const isEqualSnapshot = <T extends { dirty: boolean }>(
   a: T | null,
   b: T
@@ -51,6 +52,7 @@ export const useAutosave = <T extends { dirty: boolean }>(
   const abortRef = useRef<AbortController | null>(null)
   const pendingRef = useRef(false)
   const latestFireIdRef = useRef(0)
+  const isMountedRef = useRef(true)
 
   stateRef.current = state
   saveFnRef.current = saveFn
@@ -72,20 +74,22 @@ export const useAutosave = <T extends { dirty: boolean }>(
     abortRef.current = controller
     const fireId = ++latestFireIdRef.current
 
-    setStatus('saving')
+    if (isMountedRef.current) setStatus('saving')
 
     try {
       await saveFnRef.current(snapshot, controller.signal)
       if (controller.signal.aborted) return
       if (fireId !== latestFireIdRef.current) return
       lastSavedSnapshotRef.current = snapshot
-      setLastSavedAt(new Date())
-      setStatus('saved')
+      if (isMountedRef.current) {
+        setLastSavedAt(new Date())
+        setStatus('saved')
+      }
     } catch (err) {
       if (controller.signal.aborted) return
       if (fireId !== latestFireIdRef.current) return
       const redirected = handleSessionError(err, logoutRef.current, navigateRef.current)
-      if (!redirected) {
+      if (!redirected && isMountedRef.current) {
         setStatus('error')
       }
     }
@@ -125,10 +129,14 @@ export const useAutosave = <T extends { dirty: boolean }>(
 
   useEffect(() => {
     return () => {
+      isMountedRef.current = false
+      abortRef.current?.abort()
       if (pendingRef.current) {
         clearTimer()
         pendingRef.current = false
-        void saveFnRef.current(stateRef.current, new AbortController().signal)
+        // fire-and-forget: hook is unmounting, no state to update or redirect to dispatch
+        const flushController = new AbortController()
+        void saveFnRef.current(stateRef.current, flushController.signal)
       } else {
         clearTimer()
       }
