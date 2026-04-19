@@ -1,4 +1,4 @@
-import { createRecipe, fetchMyRecipes, fetchTags, updateRecipe } from '@api/recipes'
+import { fetchMyRecipes, fetchTags, updateRecipe } from '@api/recipes'
 import { useAuth } from '@contexts/AuthContext'
 import type { Recipe } from '@models/recipe'
 import { render, screen, waitFor, within } from '@testing-library/react'
@@ -9,7 +9,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import RecipeEditor from './RecipeEditor'
 
 vi.mock('@api/recipes', () => ({
-  createRecipe: vi.fn(),
   updateRecipe: vi.fn(),
   fetchMyRecipes: vi.fn(),
   fetchTags: vi.fn(),
@@ -88,7 +87,6 @@ describe('RecipeEditor page', () => {
       { tag: 'Thai', count: 3 },
     ])
     vi.mocked(fetchMyRecipes).mockResolvedValue([mockRecipe])
-    vi.mocked(createRecipe).mockResolvedValue(mockRecipe)
     vi.mocked(updateRecipe).mockResolvedValue(mockRecipe)
   })
 
@@ -161,8 +159,6 @@ describe('RecipeEditor page', () => {
     await waitFor(() => {
       expect(screen.getByText(/cover image is required/i)).toBeInTheDocument()
     })
-
-    expect(createRecipe).not.toHaveBeenCalled()
   })
 
   it('shows alt-text-required error when saving with a cover image but no alt text', async () => {
@@ -258,68 +254,6 @@ describe('RecipeEditor page', () => {
     })
   })
 
-  it('"Save as draft" calls createRecipe with status: "draft"', async () => {
-    const user = userEvent.setup()
-    renderEditor('/admin/recipes/new')
-
-    await waitFor(() => {
-      expect(screen.getByRole('textbox', { name: /title/i })).toBeInTheDocument()
-    })
-
-    const titleInput = screen.getByRole('textbox', { name: /title/i })
-    const introInput = screen.getByRole('textbox', { name: /intro/i })
-    await user.type(titleInput, 'My Recipe')
-    await user.type(introInput, 'A great recipe')
-
-    const ingredientInputs = screen.getAllByRole('textbox', { name: /item/i })
-    await user.type(ingredientInputs[0], 'Flour')
-
-    const stepTextareas = screen.getAllByRole('textbox', { name: /step.*text/i })
-    await user.type(stepTextareas[0], 'Mix it all')
-
-    await fillValidCoverImage(user)
-
-    await user.click(screen.getByRole('button', { name: /save as draft/i }))
-
-    await waitFor(() => {
-      expect(createRecipe).toHaveBeenCalledWith(
-        'token-123',
-        expect.objectContaining({ status: 'draft' })
-      )
-    })
-  })
-
-  it('"Publish" calls createRecipe with status: "published"', async () => {
-    const user = userEvent.setup()
-    renderEditor('/admin/recipes/new')
-
-    await waitFor(() => {
-      expect(screen.getByRole('textbox', { name: /title/i })).toBeInTheDocument()
-    })
-
-    const titleInput = screen.getByRole('textbox', { name: /title/i })
-    const introInput = screen.getByRole('textbox', { name: /intro/i })
-    await user.type(titleInput, 'My Recipe')
-    await user.type(introInput, 'A great recipe')
-
-    const ingredientInputs = screen.getAllByRole('textbox', { name: /item/i })
-    await user.type(ingredientInputs[0], 'Flour')
-
-    const stepTextareas = screen.getAllByRole('textbox', { name: /step.*text/i })
-    await user.type(stepTextareas[0], 'Mix it all')
-
-    await fillValidCoverImage(user)
-
-    await user.click(screen.getByRole('button', { name: /publish/i }))
-
-    await waitFor(() => {
-      expect(createRecipe).toHaveBeenCalledWith(
-        'token-123',
-        expect.objectContaining({ status: 'published' })
-      )
-    })
-  })
-
   it('"Save changes" (edit mode) calls updateRecipe preserving current status', async () => {
     const user = userEvent.setup()
     renderEditor('/admin/recipes/rec-001/edit')
@@ -339,58 +273,16 @@ describe('RecipeEditor page', () => {
     })
   })
 
-  it('shows success toast after save', async () => {
-    const user = userEvent.setup()
-    renderEditor('/admin/recipes/new')
-
-    await waitFor(() => {
-      expect(screen.getByRole('textbox', { name: /title/i })).toBeInTheDocument()
-    })
-
-    const titleInput = screen.getByRole('textbox', { name: /title/i })
-    const introInput = screen.getByRole('textbox', { name: /intro/i })
-    await user.type(titleInput, 'My Recipe')
-    await user.type(introInput, 'A great recipe')
-
-    const ingredientInputs = screen.getAllByRole('textbox', { name: /item/i })
-    await user.type(ingredientInputs[0], 'Flour')
-
-    const stepTextareas = screen.getAllByRole('textbox', { name: /step.*text/i })
-    await user.type(stepTextareas[0], 'Mix it all')
-
-    await fillValidCoverImage(user)
-
-    await user.click(screen.getByRole('button', { name: /save as draft/i }))
-
-    await waitFor(() => {
-      expect(screen.getByText(/recipe saved/i)).toBeInTheDocument()
-    })
-    expect(screen.getAllByRole('status').length).toBeGreaterThan(0)
-  })
-
   it('shows error toast on API failure', async () => {
-    vi.mocked(createRecipe).mockRejectedValue(new Error('500 Internal Server Error'))
+    vi.mocked(updateRecipe).mockRejectedValue(new Error('500 Internal Server Error'))
     const user = userEvent.setup()
-    renderEditor('/admin/recipes/new')
+    renderEditor('/admin/recipes/rec-001/edit')
 
     await waitFor(() => {
-      expect(screen.getByRole('textbox', { name: /title/i })).toBeInTheDocument()
+      expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
     })
 
-    const titleInput = screen.getByRole('textbox', { name: /title/i })
-    const introInput = screen.getByRole('textbox', { name: /intro/i })
-    await user.type(titleInput, 'My Recipe')
-    await user.type(introInput, 'A great recipe')
-
-    const ingredientInputs = screen.getAllByRole('textbox', { name: /item/i })
-    await user.type(ingredientInputs[0], 'Flour')
-
-    const stepTextareas = screen.getAllByRole('textbox', { name: /step.*text/i })
-    await user.type(stepTextareas[0], 'Mix it all')
-
-    await fillValidCoverImage(user)
-
-    await user.click(screen.getByRole('button', { name: /save as draft/i }))
+    await user.click(screen.getByRole('button', { name: /save changes/i }))
 
     await waitFor(() => {
       expect(screen.getByText(/error/i)).toBeInTheDocument()
@@ -461,33 +353,6 @@ describe('RecipeEditor page', () => {
       window.dispatchEvent(event)
 
       expect(event.defaultPrevented).toBe(true)
-    })
-
-    it('does not prevent beforeunload after a successful save (form becomes pristine)', async () => {
-      const user = userEvent.setup()
-      renderEditor('/admin/recipes/new')
-
-      await waitFor(() => {
-        expect(screen.getByRole('textbox', { name: /title/i })).toBeInTheDocument()
-      })
-
-      await user.type(screen.getByRole('textbox', { name: /title/i }), 'My Recipe')
-      await user.type(screen.getByRole('textbox', { name: /intro/i }), 'A great recipe')
-      await user.type(screen.getAllByRole('textbox', { name: /item/i })[0], 'Flour')
-      await user.type(screen.getAllByRole('textbox', { name: /step.*text/i })[0], 'Mix it all')
-
-      await fillValidCoverImage(user)
-
-      await user.click(screen.getByRole('button', { name: /save as draft/i }))
-
-      await waitFor(() => {
-        expect(createRecipe).toHaveBeenCalled()
-      })
-
-      const event = new Event('beforeunload', { cancelable: true })
-      window.dispatchEvent(event)
-
-      expect(event.defaultPrevented).toBe(false)
     })
 
     it('blocks React Router navigation and shows a confirmation dialogue when the form is dirty', async () => {
