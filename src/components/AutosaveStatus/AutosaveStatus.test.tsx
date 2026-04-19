@@ -44,44 +44,56 @@ describe('AutosaveStatus', () => {
       vi.useRealTimers()
     })
 
-    it('renders "Saved · just now" when saved less than a minute ago', () => {
+    it('renders "Saved" and "· just now" when saved less than a minute ago', () => {
       const lastSavedAt = new Date(FIXED_NOW.getTime() - 10 * 1000)
 
-      render(
+      const { container } = render(
         <AutosaveStatus status="saved" lastSavedAt={lastSavedAt} onRetry={noop} />
       )
 
-      expect(screen.getByText(/saved · just now/i)).toBeInTheDocument()
+      const text = (container.textContent ?? '').toLowerCase()
+
+      expect(text).toContain('saved')
+      expect(text).toContain('just now')
     })
 
-    it('renders "Saved · 2m ago" when saved 2 minutes ago', () => {
+    it('renders "Saved" and "· 2m ago" when saved 2 minutes ago', () => {
       const lastSavedAt = new Date(FIXED_NOW.getTime() - 2 * 60 * 1000)
 
-      render(
+      const { container } = render(
         <AutosaveStatus status="saved" lastSavedAt={lastSavedAt} onRetry={noop} />
       )
 
-      expect(screen.getByText(/saved · 2m ago/i)).toBeInTheDocument()
+      const text = (container.textContent ?? '').toLowerCase()
+
+      expect(text).toContain('saved')
+      expect(text).toContain('2m ago')
     })
 
-    it('renders "Saved · 1h ago" when saved ~65 minutes ago', () => {
+    it('renders "Saved" and "· 1h ago" when saved ~65 minutes ago', () => {
       const lastSavedAt = new Date(FIXED_NOW.getTime() - 65 * 60 * 1000)
 
-      render(
+      const { container } = render(
         <AutosaveStatus status="saved" lastSavedAt={lastSavedAt} onRetry={noop} />
       )
 
-      expect(screen.getByText(/saved · 1h ago/i)).toBeInTheDocument()
+      const text = (container.textContent ?? '').toLowerCase()
+
+      expect(text).toContain('saved')
+      expect(text).toContain('1h ago')
     })
 
-    it('renders "Saved · 3d ago" when saved ~72 hours ago', () => {
+    it('renders "Saved" and "· 3d ago" when saved ~72 hours ago', () => {
       const lastSavedAt = new Date(FIXED_NOW.getTime() - 72 * 60 * 60 * 1000)
 
-      render(
+      const { container } = render(
         <AutosaveStatus status="saved" lastSavedAt={lastSavedAt} onRetry={noop} />
       )
 
-      expect(screen.getByText(/saved · 3d ago/i)).toBeInTheDocument()
+      const text = (container.textContent ?? '').toLowerCase()
+
+      expect(text).toContain('saved')
+      expect(text).toContain('3d ago')
     })
 
     it('renders an icon marker alongside the text', () => {
@@ -91,7 +103,8 @@ describe('AutosaveStatus', () => {
         <AutosaveStatus status="saved" lastSavedAt={lastSavedAt} onRetry={noop} />
       )
 
-      const icon = container.querySelector('[aria-hidden="true"]')
+      const liveRegion = container.querySelector('[role="status"]')
+      const icon = liveRegion?.querySelector('[aria-hidden="true"]')
 
       expect(icon).not.toBeNull()
     })
@@ -130,7 +143,8 @@ describe('AutosaveStatus', () => {
         <AutosaveStatus status="error" lastSavedAt={null} onRetry={noop} />
       )
 
-      const icon = container.querySelector('[aria-hidden="true"]')
+      const liveRegion = container.querySelector('[role="status"]')
+      const icon = liveRegion?.querySelector('[aria-hidden="true"]')
 
       expect(icon).not.toBeNull()
     })
@@ -191,31 +205,32 @@ describe('AutosaveStatus', () => {
     it('updates the relative-time text from "just now" to "1m ago" after 60s', () => {
       const lastSavedAt = new Date(FIXED_NOW.getTime() - 10 * 1000)
 
-      render(
+      const { container } = render(
         <AutosaveStatus status="saved" lastSavedAt={lastSavedAt} onRetry={noop} />
       )
 
-      expect(screen.getByText(/saved · just now/i)).toBeInTheDocument()
+      expect((container.textContent ?? '').toLowerCase()).toContain('just now')
 
       act(() => {
         vi.advanceTimersByTime(60 * 1000)
       })
 
-      expect(screen.getByText(/saved · 1m ago/i)).toBeInTheDocument()
+      expect((container.textContent ?? '').toLowerCase()).toContain('1m ago')
     })
 
-    it('wraps the relative-time text in a node whose aria-live is absent or "off" so ticks are not announced', () => {
+    it('places the relative-time outside the live region and marks it aria-hidden so screen readers skip it', () => {
       const lastSavedAt = new Date(FIXED_NOW.getTime() - 10 * 1000)
 
-      render(
+      const { container } = render(
         <AutosaveStatus status="saved" lastSavedAt={lastSavedAt} onRetry={noop} />
       )
 
+      const liveRegion = container.querySelector('[role="status"]')
       const relativeTimeNode = screen.getByText(/just now/i)
-      const ariaLive = relativeTimeNode.getAttribute('aria-live')
 
-      // Acceptable: absent, or explicitly "off"
-      expect(ariaLive === null || ariaLive === 'off').toBe(true)
+      expect(liveRegion).not.toBeNull()
+      expect(relativeTimeNode).toHaveAttribute('aria-hidden', 'true')
+      expect(liveRegion?.contains(relativeTimeNode)).toBe(false)
     })
   })
 })

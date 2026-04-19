@@ -1,4 +1,4 @@
-import type { FC, JSX } from 'react'
+import type { FC } from 'react'
 import { useEffect, useState } from 'react'
 import styles from './AutosaveStatus.module.css'
 
@@ -22,6 +22,20 @@ const formatRelativeTime = (date: Date, now: Date): string => {
 const cx = (...classNames: Array<string | false | undefined>): string =>
   classNames.filter(Boolean).join(' ')
 
+const TRANSITION_TEXT: Record<AutosaveStatusProps['status'], string> = {
+  idle: '',
+  saving: 'Saving…',
+  saved: 'Saved',
+  error: 'Failed to save',
+}
+
+const ICON_CLASS: Record<AutosaveStatusProps['status'], string | undefined> = {
+  idle: undefined,
+  saving: styles.iconSaving,
+  saved: styles.iconSaved,
+  error: styles.iconError,
+}
+
 const AutosaveStatus: FC<AutosaveStatusProps> = ({ status, lastSavedAt, onRetry }) => {
   const [now, setNow] = useState<number>(() => Date.now())
 
@@ -38,41 +52,32 @@ const AutosaveStatus: FC<AutosaveStatusProps> = ({ status, lastSavedAt, onRetry 
   }, [status, lastSavedAt])
 
   const ariaLive = status === 'error' ? 'assertive' : 'polite'
-
-  const renderIcon = (stateClass: string): JSX.Element => (
-    <span aria-hidden="true" className={cx(styles.icon, stateClass)} />
-  )
+  const transitionText = TRANSITION_TEXT[status]
+  const iconClass = ICON_CLASS[status]
 
   return (
-    <span role="status" aria-live={ariaLive} className={styles.container}>
-      {status === 'saving' && (
-        <>
-          {renderIcon(styles.iconSaving)}
-          <span className={styles.text}>Saving…</span>
-        </>
-      )}
+    <span className={styles.container}>
+      <span role="status" aria-live={ariaLive} className={styles.liveRegion}>
+        {status !== 'idle' && (
+          <>
+            <span aria-hidden="true" className={cx(styles.icon, iconClass)} />
+            <span className={styles.text}>{transitionText}</span>
+          </>
+        )}
+      </span>
       {status === 'saved' && lastSavedAt !== null && (
-        <>
-          {renderIcon(styles.iconSaved)}
-          <span aria-live="off" className={cx(styles.text, styles.relativeTime)}>
-            {`Saved · ${formatRelativeTime(lastSavedAt, new Date(now))}`}
-          </span>
-        </>
+        <span aria-hidden="true" className={styles.relativeTime}>
+          {`· ${formatRelativeTime(lastSavedAt, new Date(now))}`}
+        </span>
       )}
       {status === 'error' && (
-        <>
-          {renderIcon(styles.iconError)}
-          <span className={styles.text}>
-            Failed to save ·{' '}
-            <button
-              type="button"
-              className={styles.retryButton}
-              onClick={() => { onRetry() }}
-            >
-              Retry
-            </button>
-          </span>
-        </>
+        <button
+          type="button"
+          className={styles.retryButton}
+          onClick={() => { onRetry() }}
+        >
+          Retry
+        </button>
       )}
     </span>
   )

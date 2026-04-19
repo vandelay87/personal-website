@@ -33,8 +33,11 @@
   background-color: var(--color-error);
 }
 
-.iconIdle {
-  background-color: var(--color-text-muted);
+.liveRegion {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .text {
@@ -43,8 +46,8 @@
 }
 
 .relativeTime {
-  /* Inherits from .text; separate class kept so the TSX can target the
-     aria-live="off" wrapper without extra visual treatment. */
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
 }
 
 .retryButton {
