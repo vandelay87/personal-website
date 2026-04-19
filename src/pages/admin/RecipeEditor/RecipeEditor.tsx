@@ -1,5 +1,5 @@
 import { isSessionError } from '@api/auth'
-import { createRecipe, fetchMyRecipes, fetchTags, updateRecipe } from '@api/recipes'
+import { fetchMyRecipes, fetchTags, updateRecipe } from '@api/recipes'
 import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
 import ImageUpload from '@components/ImageUpload'
@@ -36,7 +36,7 @@ interface FormState {
   steps: Step[]
   coverImageKey: string
   coverImageAlt: string
-  status: string
+  status: Recipe['status']
   dirty: boolean
 }
 
@@ -185,7 +185,7 @@ const RecipeEditor: FC = () => {
     }
   }, [])
 
-  const handleSubmit = async (targetStatus: string) => {
+  const handleSubmit = async (targetStatus: Recipe['status']) => {
     const validationErrors = validate()
     setErrors(validationErrors)
 
@@ -213,7 +213,8 @@ const RecipeEditor: FC = () => {
       if (isEditMode && id) {
         await updateRecipe(token, id, data)
       } else {
-        await createRecipe(token, data)
+        // TODO(#153): create-on-mount flow replaces this branch — draft-on-mount + autosave + publish button.
+        throw new Error('not implemented — pending #153')
       }
 
       dispatch({ type: 'MARK_PRISTINE' })
