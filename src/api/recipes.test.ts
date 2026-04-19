@@ -46,17 +46,11 @@ const mockTags: Tag[] = [
   { tag: 'Quick', count: 5 },
 ]
 
-// Type-level assertions — the Recipe 'status' field must be the narrowed
-// union 'draft' | 'published'. These compile-time checks are exempt from
-// the test-file eslint unused-vars rule via the `^_` prefix.
 const _statusOk: Recipe['status'] = 'draft'
 const _statusOk2: Recipe['status'] = 'published'
 // @ts-expect-error — 'archived' is not a valid status
 const _statusBad: Recipe['status'] = 'archived'
-
-// Runtime check that a Recipe literal with an optional `ttl` field is
-// accepted by the type (TS enforces this structurally).
-const _recipeWithTtl: Recipe & { ttl?: number } = { ...mockRecipe, ttl: 123 }
+const _recipeWithTtl: Recipe = { ...mockRecipe, ttl: 123 }
 
 beforeEach(() => {
   vi.restoreAllMocks()
