@@ -1,0 +1,86 @@
+/* AutosaveStatus component styles */
+
+.container {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  color: var(--color-text);
+}
+
+.icon {
+  display: inline-block;
+  flex-shrink: 0;
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  border-radius: var(--radius-none);
+  background-color: var(--color-text-muted);
+}
+
+.iconSaving {
+  background-color: var(--color-text-muted);
+  animation: autosaveStatusPulse 1.2s ease-in-out infinite;
+}
+
+.iconSaved {
+  background-color: var(--color-success);
+}
+
+.iconError {
+  background-color: var(--color-error);
+}
+
+.iconIdle {
+  background-color: var(--color-text-muted);
+}
+
+.text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.relativeTime {
+  /* Inherits from .text; separate class kept so the TSX can target the
+     aria-live="off" wrapper without extra visual treatment. */
+}
+
+.retryButton {
+  padding: 0;
+  font: inherit;
+  color: var(--color-primary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-none);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.retryButton:hover {
+  color: var(--color-primary-hover);
+}
+
+.retryButton:focus-visible {
+  outline: var(--border-width) solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@keyframes autosaveStatusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iconSaving {
+    animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
