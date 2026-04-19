@@ -5,7 +5,6 @@ import {
   fetchRecipe,
   fetchTags,
   fetchMyRecipes,
-  createRecipe,
   updateRecipe,
   publishRecipe,
   unpublishRecipe,
@@ -46,6 +45,18 @@ const mockTags: Tag[] = [
   { tag: 'Italian', count: 3 },
   { tag: 'Quick', count: 5 },
 ]
+
+// Type-level assertions — the Recipe 'status' field must be the narrowed
+// union 'draft' | 'published'. These compile-time checks are exempt from
+// the test-file eslint unused-vars rule via the `^_` prefix.
+const _statusOk: Recipe['status'] = 'draft'
+const _statusOk2: Recipe['status'] = 'published'
+// @ts-expect-error — 'archived' is not a valid status
+const _statusBad: Recipe['status'] = 'archived'
+
+// Runtime check that a Recipe literal with an optional `ttl` field is
+// accepted by the type (TS enforces this structurally).
+const _recipeWithTtl: Recipe & { ttl?: number } = { ...mockRecipe, ttl: 123 }
 
 beforeEach(() => {
   vi.restoreAllMocks()
@@ -214,35 +225,89 @@ describe('authenticated recipe endpoints', () => {
     })
   })
 
-  describe('createRecipe', () => {
-    it('POST with token and data', async () => {
+  describe('createDraft', () => {
+    it('POST /recipes/drafts with token and returns { id, slug }', async () => {
       vi.stubGlobal(
         'fetch',
         vi.fn().mockResolvedValue({
           ok: true,
-          json: () => Promise.resolve(mockRecipe),
+          json: () => Promise.resolve({ id: 'r1', slug: 'my-slug' }),
         })
       )
 
-      const data = { title: 'New Recipe' }
-      const result = await createRecipe('token-123', data)
+      const mod = await import('./recipes')
+      const result = await mod.createDraft('token-123')
 
-      expect(result).toEqual(mockRecipe)
+      expect(result).toEqual({ id: 'r1', slug: 'my-slug' })
       expect(fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/recipes'),
+        expect.stringContaining('/recipes/drafts'),
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
+            'Content-Type': 'application/json',
             Authorization: 'Bearer token-123',
           }),
-          body: JSON.stringify(data),
         })
       )
+    })
+
+    it('throws with 401 on unauthorised', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: false,
+          status: 401,
+          statusText: 'Unauthorized',
+        })
+      )
+
+      const mod = await import('./recipes')
+      await expect(mod.createDraft('bad-token')).rejects.toThrow('401')
+    })
+  })
+
+  describe('fetchAllRecipes', () => {
+    it('GET /recipes/admin with token and returns the array verbatim', async () => {
+      // Deployed backend returns a plain Recipe[] (not { recipes: Recipe[] }).
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve([mockRecipe]),
+        })
+      )
+
+      const mod = await import('./recipes')
+      const result = await mod.fetchAllRecipes('token-123')
+
+      expect(result).toEqual([mockRecipe])
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/recipes/admin'),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: 'Bearer token-123',
+          }),
+        })
+      )
+    })
+
+    it('throws with 401 on unauthorised', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: false,
+          status: 401,
+          statusText: 'Unauthorized',
+        })
+      )
+
+      const mod = await import('./recipes')
+      await expect(mod.fetchAllRecipes('bad-token')).rejects.toThrow('401')
     })
   })
 
   describe('updateRecipe', () => {
-    it('PUT with token, id, and data', async () => {
+    it('PATCH with token, id, and data', async () => {
       vi.stubGlobal(
         'fetch',
         vi.fn().mockResolvedValue({
@@ -258,7 +323,7 @@ describe('authenticated recipe endpoints', () => {
       expect(fetch).toHaveBeenCalledWith(
         expect.stringContaining('/recipes/r1'),
         expect.objectContaining({
-          method: 'PUT',
+          method: 'PATCH',
           headers: expect.objectContaining({
             Authorization: 'Bearer token-123',
           }),
@@ -269,14 +334,16 @@ describe('authenticated recipe endpoints', () => {
   })
 
   describe('publishRecipe', () => {
-    it('PATCH with token', async () => {
+    it('PATCH and returns the updated Recipe with status=published', async () => {
+      const published: Recipe = { ...mockRecipe, status: 'published' }
       vi.stubGlobal(
         'fetch',
-        vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(undefined) })
+        vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(published) })
       )
 
-      await publishRecipe('token-123', 'r1')
+      const result = await publishRecipe('token-123', 'r1')
 
+      expect(result).toEqual(published)
       expect(fetch).toHaveBeenCalledWith(
         expect.stringContaining('/recipes/r1/publish'),
         expect.objectContaining({
@@ -287,17 +354,32 @@ describe('authenticated recipe endpoints', () => {
         })
       )
     })
+
+    it('throws with 401 on unauthorised', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: false,
+          status: 401,
+          statusText: 'Unauthorized',
+        })
+      )
+
+      await expect(publishRecipe('bad-token', 'r1')).rejects.toThrow('401')
+    })
   })
 
   describe('unpublishRecipe', () => {
-    it('PATCH with token', async () => {
+    it('PATCH and returns the updated Recipe with status=draft', async () => {
+      const draft: Recipe = { ...mockRecipe, status: 'draft' }
       vi.stubGlobal(
         'fetch',
-        vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(undefined) })
+        vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(draft) })
       )
 
-      await unpublishRecipe('token-123', 'r1')
+      const result = await unpublishRecipe('token-123', 'r1')
 
+      expect(result).toEqual(draft)
       expect(fetch).toHaveBeenCalledWith(
         expect.stringContaining('/recipes/r1/unpublish'),
         expect.objectContaining({
@@ -307,6 +389,19 @@ describe('authenticated recipe endpoints', () => {
           }),
         })
       )
+    })
+
+    it('throws with 401 on unauthorised', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: false,
+          status: 401,
+          statusText: 'Unauthorized',
+        })
+      )
+
+      await expect(unpublishRecipe('bad-token', 'r1')).rejects.toThrow('401')
     })
   })
 
@@ -356,5 +451,12 @@ describe('authenticated recipe endpoints', () => {
         })
       )
     })
+  })
+})
+
+describe('createRecipe removal', () => {
+  it('does not export createRecipe', async () => {
+    const mod = await import('./recipes')
+    expect('createRecipe' in mod).toBe(false)
   })
 })
