@@ -51,7 +51,6 @@ export const useAutosave = <T extends { dirty: boolean }>(
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const pendingRef = useRef(false)
-  const latestFireIdRef = useRef(0)
   const isMountedRef = useRef(true)
 
   stateRef.current = state
@@ -72,14 +71,12 @@ export const useAutosave = <T extends { dirty: boolean }>(
     }
     const controller = new AbortController()
     abortRef.current = controller
-    const fireId = ++latestFireIdRef.current
 
     if (isMountedRef.current) setStatus('saving')
 
     try {
       await saveFnRef.current(snapshot, controller.signal)
       if (controller.signal.aborted) return
-      if (fireId !== latestFireIdRef.current) return
       lastSavedSnapshotRef.current = snapshot
       if (isMountedRef.current) {
         setLastSavedAt(new Date())
@@ -87,7 +84,6 @@ export const useAutosave = <T extends { dirty: boolean }>(
       }
     } catch (err) {
       if (controller.signal.aborted) return
-      if (fireId !== latestFireIdRef.current) return
       const redirected = handleSessionError(err, logoutRef.current, navigateRef.current)
       if (!redirected && isMountedRef.current) {
         setStatus('error')

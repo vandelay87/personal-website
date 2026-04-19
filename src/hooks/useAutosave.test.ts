@@ -54,15 +54,15 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
+beforeAll(() => {
+  configure({ asyncUtilTimeout: 5000 })
+})
+
+afterAll(() => {
+  configure({ asyncUtilTimeout: 1000 })
+})
+
 describe('useAutosave — state machine', () => {
-  beforeAll(() => {
-    configure({ asyncUtilTimeout: 5000 })
-  })
-
-  afterAll(() => {
-    configure({ asyncUtilTimeout: 1000 })
-  })
-
   it('status is idle on first render', () => {
     const saveFn = vi.fn().mockResolvedValue(undefined)
     const { result } = renderHook(() =>
@@ -369,14 +369,6 @@ describe('useAutosave — debounce timing + lifecycle', () => {
 })
 
 describe('useAutosave — 401 handling', () => {
-  beforeAll(() => {
-    configure({ asyncUtilTimeout: 5000 })
-  })
-
-  afterAll(() => {
-    configure({ asyncUtilTimeout: 1000 })
-  })
-
   it('invokes handleSessionError with (err, logout, navigate) when saveFn rejects with a 401', async () => {
     const authErr = new Error('401 Unauthorized')
     const saveFn = vi.fn().mockRejectedValue(authErr)
