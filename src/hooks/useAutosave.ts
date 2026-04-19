@@ -3,12 +3,14 @@ import { useAuth } from '@contexts/AuthContext'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+export type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error'
+
 export interface UseAutosaveOptions {
   intervalMs?: number
 }
 
 export interface UseAutosaveResult {
-  status: 'idle' | 'saving' | 'saved' | 'error'
+  status: AutosaveStatus
   lastSavedAt: Date | null
   retry: () => void
 }

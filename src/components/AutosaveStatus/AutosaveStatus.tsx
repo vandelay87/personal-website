@@ -1,9 +1,10 @@
+import type { AutosaveStatus as AutosaveStatusValue } from '@hooks/useAutosave'
 import type { FC } from 'react'
 import { useEffect, useState } from 'react'
 import styles from './AutosaveStatus.module.css'
 
 export interface AutosaveStatusProps {
-  status: 'idle' | 'saving' | 'saved' | 'error'
+  status: AutosaveStatusValue
   lastSavedAt: Date | null
   onRetry: () => void
 }
@@ -22,14 +23,14 @@ const formatRelativeTime = (date: Date, now: Date): string => {
 const cx = (...classNames: Array<string | false | undefined>): string =>
   classNames.filter(Boolean).join(' ')
 
-const TRANSITION_TEXT: Record<AutosaveStatusProps['status'], string> = {
+const TRANSITION_TEXT: Record<AutosaveStatusValue, string> = {
   idle: '',
   saving: 'Saving…',
   saved: 'Saved',
   error: 'Failed to save',
 }
 
-const ICON_CLASS: Record<AutosaveStatusProps['status'], string | undefined> = {
+const ICON_CLASS: Record<AutosaveStatusValue, string | undefined> = {
   idle: undefined,
   saving: styles.iconSaving,
   saved: styles.iconSaved,
