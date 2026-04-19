@@ -43,7 +43,7 @@ URL is `/admin/recipes/:id/edit`; editor fetches and derives its mode from `stat
 Fetches via a new `fetchAllRecipes()` client helper that returns both statuses. Renders the existing inline badge pattern extracted into `src/components/StatusBadge/StatusBadge.tsx` — CSS migrated verbatim from `RecipeList.module.css`, no visual diff. Sorted by `updatedAt` desc, client-side. Search filters across both statuses unchanged.
 
 **Autosave cadence**
-Debounced 5s after the last *dirty* change. The reducer's existing `form.dirty` flag gates the fire — no autosave on hydration from `LOAD_RECIPE` or on an empty diff. On `visibilitychange` → `hidden` and on unmount, pending autosaves flush immediately. In-flight saves are aborted via `AbortController` when a newer save fires; the latest snapshot wins. On a 401, the existing shared `handleSessionError(err, logout, navigate)` pattern (already used at `RecipeList.tsx` and the editor's manual save path) redirects with a `redirect=` param — autosave must not silently swallow 401s. `MARK_PRISTINE` is dispatched on autosave success so `useBlocker(form.dirty)` and the existing `beforeunload` handler correctly gate navigation only when there are unflushed changes.
+Debounced 2s after the last *dirty* change. The reducer's existing `form.dirty` flag gates the fire — no autosave on hydration from `LOAD_RECIPE` or on an empty diff. On `visibilitychange` → `hidden` and on unmount, pending autosaves flush immediately. In-flight saves are aborted via `AbortController` when a newer save fires; the latest snapshot wins. On a 401, the existing shared `handleSessionError(err, logout, navigate)` pattern (already used at `RecipeList.tsx` and the editor's manual save path) redirects with a `redirect=` param — autosave must not silently swallow 401s. `MARK_PRISTINE` is dispatched on autosave success so `useBlocker(form.dirty)` and the existing `beforeunload` handler correctly gate navigation only when there are unflushed changes.
 
 **States**
 - Empty draft list — existing admin-empty-state component, text "No recipes yet — create your first".
@@ -77,7 +77,7 @@ The `Recipe` shape gains a `status: 'draft' | 'published'` field and an optional
 - Mount:
   - `/admin/recipes/new` → `createDraft()`, `LOAD_RECIPE` dispatch with the response, `navigate(..., { replace: true })`, set a `recentlyCreatedId` ref so the load-by-id effect skips the immediate refetch.
   - `/admin/recipes/:id/edit` → existing fetch effect; mode derived from `status`.
-- New hook `useAutosave(reducerState, saveFn, { intervalMs: 5000 })`:
+- New hook `useAutosave(reducerState, saveFn, { intervalMs: 2000 })`:
   - Latest-state ref to prevent stale closures.
   - `AbortController` — new fire aborts previous in-flight.
   - `document.addEventListener('visibilitychange', ...)` → flush on hidden.
@@ -127,7 +127,7 @@ The `Recipe` shape gains a `status: 'draft' | 'published'` field and an optional
 **Testing approach (Vitest + Testing Library)**
 - Autosave hook — split into two suites:
   - **State-machine** tests (no fake timers): assert `idle → saving → saved | error`, retry behaviour, abort-on-next-fire. TDD-first.
-  - **Debounce-timing** integration tests: `vi.useFakeTimers()` in `beforeEach`, `vi.useRealTimers()` in `afterEach`, `userEvent.setup({ advanceTimers: vi.advanceTimersByTime })`. Covers 5s debounce, visibilitychange flush, unmount flush, stale-closure guard.
+  - **Debounce-timing** integration tests: `vi.useFakeTimers()` in `beforeEach`, `vi.useRealTimers()` in `afterEach`, `userEvent.setup({ advanceTimers: vi.advanceTimersByTime })`. Covers 2s debounce, visibilitychange flush, unmount flush, stale-closure guard.
 - Editor mode-switching: draft → publish transitions the UI into published mode in place; published → unpublish flushes autosave then flips to draft; 401 during autosave redirects via `handleSessionError`.
 - Discard flow: `ConfirmDialog` appears, confirm calls `deleteRecipe`, cancel does nothing.
 - `ImageUpload` prop tightening: TS compile check in CI enforces it (`@ts-expect-error` test on a deliberate undefined pass).
@@ -144,7 +144,7 @@ API client (`src/api/recipes.ts`):
 Editor (`src/pages/admin/RecipeEditor/RecipeEditor.tsx`):
 - [ ] Mounting at `/admin/recipes/new` calls `createDraft()` and replaces the URL with `/admin/recipes/:id/edit` without triggering a refetch against the just-created draft.
 - [ ] On a new draft, the cover image uploads successfully without a prior manual save.
-- [ ] Autosave debounces 5s after the last dirty change and skips saves when pristine or the diff is empty.
+- [ ] Autosave debounces 2s after the last dirty change and skips saves when pristine or the diff is empty.
 - [ ] An in-flight autosave is aborted via `AbortController` when a newer save fires.
 - [ ] On `visibilitychange` → hidden and on unmount, pending autosaves flush immediately.
 - [ ] A 401 during autosave invokes `handleSessionError(err, logout, navigate)`.
