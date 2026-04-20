@@ -10,6 +10,7 @@ import {
 } from '@api/recipes'
 import AutosaveStatus from '@components/AutosaveStatus'
 import Button from '@components/Button'
+import Callout from '@components/Callout'
 import ConfirmDialog from '@components/ConfirmDialog'
 import ImageUpload from '@components/ImageUpload'
 import IngredientList from '@components/IngredientList'
@@ -563,7 +564,7 @@ const RecipeEditor: FC = () => {
         </div>
 
         {form.mode === 'draft' && !canPublish && (
-          <div className={styles.missingFields}>
+          <Callout type="warning">
             <p id={`${MISSING_FIELDS_ID}-label`}>Add the following before publishing:</p>
             <ul
               id={MISSING_FIELDS_ID}
@@ -574,7 +575,7 @@ const RecipeEditor: FC = () => {
                 <li key={field}>{field}</li>
               ))}
             </ul>
-          </div>
+          </Callout>
         )}
       </form>
 

@@ -101,13 +101,6 @@
   font-size: var(--font-size-sm);
 }
 
-.missingFields {
-  padding: var(--space-4);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background: var(--color-surface);
-}
-
 .missingFieldsList {
   margin: var(--space-2) 0 0;
   padding-left: var(--space-6);
