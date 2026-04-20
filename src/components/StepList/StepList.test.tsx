@@ -16,7 +16,7 @@ describe('StepList', () => {
 
   it('renders step rows with text textarea', () => {
     const onChange = vi.fn()
-    render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} />)
+    render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} recipeId="test-recipe-id" />)
 
     const textareas = screen.getAllByRole('textbox', { name: /^step \d+ text$/i })
     expect(textareas).toHaveLength(2)
@@ -26,7 +26,7 @@ describe('StepList', () => {
 
   it('step numbers auto-update', () => {
     const onChange = vi.fn()
-    render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} />)
+    render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} recipeId="test-recipe-id" />)
 
     expect(screen.getByText('1')).toBeInTheDocument()
     expect(screen.getByText('2')).toBeInTheDocument()
@@ -35,7 +35,7 @@ describe('StepList', () => {
   it('"Add step" button adds new row', async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
-    render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} />)
+    render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} recipeId="test-recipe-id" />)
 
     const addButton = screen.getByRole('button', { name: /add step/i })
     await user.click(addButton)
@@ -49,7 +49,7 @@ describe('StepList', () => {
   it('remove button removes a row (minimum 1 enforced)', () => {
     const onChange = vi.fn()
     render(
-      <StepList steps={[makeStep(1, 'Only step')]} onChange={onChange} getToken={mockGetToken} />
+      <StepList steps={[makeStep(1, 'Only step')]} onChange={onChange} getToken={mockGetToken} recipeId="test-recipe-id" />
     )
 
     const removeButton = screen.getByRole('button', { name: /remove/i })
@@ -59,7 +59,7 @@ describe('StepList', () => {
   it('move up/down reorder and renumber steps', async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
-    render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} />)
+    render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} recipeId="test-recipe-id" />)
 
     const moveDownButtons = screen.getAllByRole('button', { name: /move down/i })
     await user.click(moveDownButtons[0])
@@ -74,7 +74,7 @@ describe('StepList', () => {
     const user = userEvent.setup()
     const Wrapper = () => {
       const [steps, setSteps] = useState<Step[]>(twoSteps)
-      return <StepList steps={steps} onChange={setSteps} getToken={mockGetToken} />
+      return <StepList steps={steps} onChange={setSteps} getToken={mockGetToken} recipeId="test-recipe-id" />
     }
     render(<Wrapper />)
 
@@ -88,7 +88,7 @@ describe('StepList', () => {
   describe('per-step image upload (when getToken is provided)', () => {
     it('renders an image upload control and an alt-text input per step', () => {
       const onChange = vi.fn()
-      render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} />)
+      render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} recipeId="test-recipe-id" />)
 
       const uploadButtons = screen.getAllByRole('button', { name: /^upload$/i })
       expect(uploadButtons).toHaveLength(2)
@@ -99,7 +99,7 @@ describe('StepList', () => {
 
     it('does not render the image upload control when getToken is not provided', () => {
       const onChange = vi.fn()
-      render(<StepList steps={twoSteps} onChange={onChange} />)
+      render(<StepList steps={twoSteps} onChange={onChange} recipeId="test-recipe-id" />)
 
       expect(screen.queryByRole('button', { name: /^upload$/i })).not.toBeInTheDocument()
       expect(screen.queryByLabelText('Step 1 image alt text')).not.toBeInTheDocument()
@@ -113,6 +113,7 @@ describe('StepList', () => {
           steps={[makeStep(1, 'Preheat oven')]}
           onChange={onChange}
           getToken={mockGetToken}
+          recipeId="test-recipe-id"
         />
       )
 
@@ -131,7 +132,7 @@ describe('StepList', () => {
     // the 44x44px minimum in StepList.module.css.
     it('move up buttons carry the action-button class (44x44px min)', () => {
       const onChange = vi.fn()
-      render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} />)
+      render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} recipeId="test-recipe-id" />)
 
       const moveUpButtons = screen.getAllByRole('button', { name: /move up/i })
       moveUpButtons.forEach((button) => {
@@ -141,7 +142,7 @@ describe('StepList', () => {
 
     it('move down buttons carry the action-button class (44x44px min)', () => {
       const onChange = vi.fn()
-      render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} />)
+      render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} recipeId="test-recipe-id" />)
 
       const moveDownButtons = screen.getAllByRole('button', { name: /move down/i })
       moveDownButtons.forEach((button) => {
@@ -151,7 +152,7 @@ describe('StepList', () => {
 
     it('remove buttons carry the action-button class (44x44px min)', () => {
       const onChange = vi.fn()
-      render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} />)
+      render(<StepList steps={twoSteps} onChange={onChange} getToken={mockGetToken} recipeId="test-recipe-id" />)
 
       const removeButtons = screen.getAllByRole('button', { name: /remove step/i })
       removeButtons.forEach((button) => {

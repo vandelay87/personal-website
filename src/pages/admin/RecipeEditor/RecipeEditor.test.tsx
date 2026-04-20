@@ -100,8 +100,7 @@ vi.mock('@hooks/useAutosave', async (importOriginal) => {
 // (and trigger onUpload without a real file input).
 interface ImageUploadStubProps {
   onUpload: (key: string) => void
-  recipeId?: string
-  id?: string
+  recipeId: string
   imageType?: 'cover' | 'step'
 }
 
@@ -109,13 +108,11 @@ vi.mock('@components/ImageUpload', () => ({
   default: ({
     onUpload,
     recipeId,
-    id,
     imageType = 'cover',
   }: ImageUploadStubProps) => {
-    const passedId = recipeId ?? id ?? ''
     return (
       <div>
-        <span data-testid={`image-upload-recipe-id-${imageType}`}>{passedId}</span>
+        <span data-testid={`image-upload-recipe-id-${imageType}`}>{recipeId}</span>
         <button type="button" onClick={() => onUpload(`recipes/test/${imageType}-stub`)}>
           Simulate upload {imageType} image
         </button>

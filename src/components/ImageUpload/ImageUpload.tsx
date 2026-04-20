@@ -9,7 +9,7 @@ export interface ImageUploadProps {
   onUpload: (key: string) => void
   currentKey?: string
   getToken: () => Promise<string>
-  id?: string
+  recipeId: string
   imageType?: 'cover' | 'step'
   stepOrder?: number
 }
@@ -20,7 +20,7 @@ const ImageUpload: FC<ImageUploadProps> = ({
   onUpload,
   currentKey,
   getToken,
-  id,
+  recipeId,
   imageType = 'cover',
   stepOrder,
 }) => {
@@ -59,7 +59,7 @@ const ImageUpload: FC<ImageUploadProps> = ({
     try {
       const token = await getToken()
       const { uploadUrl, key } = await getUploadUrl(token, {
-        recipeId: id ?? '',
+        recipeId,
         imageType,
         ...(imageType === 'step' && stepOrder !== undefined ? { stepOrder } : {}),
       })
