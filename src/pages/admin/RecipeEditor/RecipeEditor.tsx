@@ -2,7 +2,7 @@ import { isSessionError } from '@api/auth'
 import {
   createDraft,
   deleteRecipe,
-  fetchMyRecipes,
+  fetchAllRecipes,
   fetchTags,
   publishRecipe,
   unpublishRecipe,
@@ -247,7 +247,7 @@ const RecipeEditor: FC = () => {
         }
       }
       try {
-        const recipes = await fetchMyRecipes(token)
+        const recipes = await fetchAllRecipes(token)
         const recipe = recipes.find((r) => r.id === routeId)
         if (!recipe) throw new Error('Recipe not found')
         dispatch({ type: 'LOAD_RECIPE', recipe })
@@ -266,14 +266,14 @@ const RecipeEditor: FC = () => {
 
   const saveFn = useCallback(
     async (state: FormState, signal: AbortSignal) => {
-      if (!state.id) return
+      if (!state.id) throw new Error('autosave skipped: no recipe id yet')
       const token = await getAccessToken()
       await updateRecipe(token, state.id, buildPatchPayload(state), signal)
     },
     [getAccessToken]
   )
 
-  const { status: autosaveStatus, lastSavedAt, retry } = useAutosave(form, saveFn, {
+  const { status: autosaveStatus, lastSavedAt, retry, flush } = useAutosave(form, saveFn, {
     intervalMs: 2000,
   })
 
@@ -290,10 +290,10 @@ const RecipeEditor: FC = () => {
     if (!form.id) return
     setSubmitting(true)
     try {
+      // Flush any pending autosave so the server has the latest field values
+      // before the publish endpoint runs its validation.
+      await flush()
       const token = await getAccessToken()
-      // Flush any pending autosave before publishing so the server has the
-      // latest field values.
-      await updateRecipe(token, form.id, buildPatchPayload(form))
       const updated = await publishRecipe(token, form.id)
       dispatch({ type: 'MARK_PRISTINE' })
       dispatch({ type: 'SET_MODE', mode: updated.status })
@@ -334,6 +334,9 @@ const RecipeEditor: FC = () => {
     if (!form.id) return
     setSubmitting(true)
     try {
+      // Flush any pending autosave first so an in-flight PATCH with
+      // status: 'published' cannot race the unpublish and silently re-publish.
+      await flush()
       const token = await getAccessToken()
       const updated = await unpublishRecipe(token, form.id)
       dispatch({ type: 'SET_MODE', mode: updated.status })
@@ -385,7 +388,9 @@ const RecipeEditor: FC = () => {
   const setTags = useCallback((next: string[]) => setField('tags', next), [setField])
   const setCoverImageKey = useCallback((key: string) => setField('coverImageKey', key), [setField])
 
-  if (loading) {
+  // Block form render while createDraft is in-flight — prevents the user
+  // typing into a form whose autosave cannot yet PATCH (no id).
+  if (loading || (isNewPath && !form.id && !sessionExpired)) {
     return (
       <div className={styles.loadingWrapper}>
         <Loading />
@@ -540,14 +545,6 @@ const RecipeEditor: FC = () => {
                 ariaDescribedBy={!canPublish ? MISSING_FIELDS_ID : undefined}
               >
                 {submitting ? <Loading size="small" /> : 'Publish'}
-              </Button>
-              <Button
-                onClick={handleUpdate}
-                type="button"
-                variant="secondary"
-                disabled={submitting}
-              >
-                {submitting ? <Loading size="small" /> : 'Save draft'}
               </Button>
               <Button
                 onClick={() => setDiscardDialogOpen(true)}

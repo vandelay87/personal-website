@@ -47,6 +47,7 @@ interface AutosaveMockControls {
   reset: () => void
   hookResult: UseAutosaveResult
   retryMock: ReturnType<typeof vi.fn>
+  flushMock: ReturnType<typeof vi.fn>
   callCount: number
 }
 
@@ -55,8 +56,9 @@ const autosaveControls: AutosaveMockControls = {
   setResult: () => {},
   triggerSuccess: async () => {},
   reset: () => {},
-  hookResult: { status: 'idle', lastSavedAt: null, retry: vi.fn() },
+  hookResult: { status: 'idle', lastSavedAt: null, retry: vi.fn(), flush: vi.fn().mockResolvedValue(undefined) },
   retryMock: vi.fn(),
+  flushMock: vi.fn().mockResolvedValue(undefined),
   callCount: 0,
 }
 
@@ -174,10 +176,12 @@ describe('RecipeEditor page', () => {
     autosaveControls.lastArgs = { state: null, saveFn: null, options: null }
     autosaveControls.callCount = 0
     autosaveControls.retryMock = vi.fn()
+    autosaveControls.flushMock = vi.fn().mockResolvedValue(undefined)
     autosaveControls.hookResult = {
       status: 'idle',
       lastSavedAt: null,
       retry: autosaveControls.retryMock,
+      flush: autosaveControls.flushMock,
     }
 
     vi.mocked(useAuth).mockReturnValue({
@@ -348,6 +352,7 @@ describe('RecipeEditor page', () => {
         status: 'saving' as AutosaveStatus,
         lastSavedAt: null,
         retry: vi.fn(),
+        flush: vi.fn().mockResolvedValue(undefined),
       }
 
       renderEditor('/admin/recipes/new')
@@ -362,6 +367,7 @@ describe('RecipeEditor page', () => {
         status: 'saved' as AutosaveStatus,
         lastSavedAt: new Date('2026-04-19T12:00:00Z'),
         retry: vi.fn(),
+        flush: vi.fn().mockResolvedValue(undefined),
       }
 
       renderEditor('/admin/recipes/new')
@@ -887,7 +893,7 @@ describe('RecipeEditor page', () => {
         expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
       })
 
-      await user.click(screen.getByRole('button', { name: /update|save/i }))
+      await user.click(screen.getByRole('button', { name: /publish|update/i }))
 
       await waitFor(() => {
         expect(
