@@ -26,7 +26,7 @@ import { useBlocker, useLocation, useNavigate, useParams } from 'react-router-do
 
 import styles from './RecipeEditor.module.css'
 
-type EditorMode = 'draft' | 'published'
+type EditorMode = Recipe['status']
 
 interface FormState {
   id: string
@@ -182,6 +182,15 @@ const RecipeEditor: FC = () => {
     []
   )
 
+  const handleError = useCallback((err: unknown, fallback?: string) => {
+    if (isSessionError(err)) {
+      setSessionExpired(true)
+      return
+    }
+    const message = err instanceof Error ? err.message : 'An error occurred'
+    setToast({ message: fallback ?? `Error: ${message}`, type: 'error' })
+  }, [])
+
   const blocker = useBlocker(form.dirty)
 
   useEffect(() => {
@@ -220,15 +229,11 @@ const RecipeEditor: FC = () => {
         dispatch({ type: 'LOAD_RECIPE', recipe: draftFromCreated(id, slug) })
         navigate(`/admin/recipes/${id}/edit`, { replace: true })
       } catch (err) {
-        if (isSessionError(err)) {
-          setSessionExpired(true)
-        } else {
-          setToast({ message: 'Error creating draft', type: 'error' })
-        }
+        handleError(err, 'Error creating draft')
       }
     }
     createNewDraft()
-  }, [isNewPath, getAccessToken, navigate])
+  }, [isNewPath, getAccessToken, navigate, handleError])
 
   // Fetch on edit mount, skipping the draft we just created.
   useEffect(() => {
@@ -242,9 +247,7 @@ const RecipeEditor: FC = () => {
       try {
         token = await getAccessToken()
       } catch (err) {
-        if (isSessionError(err)) {
-          setSessionExpired(true)
-        }
+        handleError(err)
       }
       try {
         const recipes = await fetchAllRecipes(token)
@@ -252,17 +255,13 @@ const RecipeEditor: FC = () => {
         if (!recipe) throw new Error('Recipe not found')
         dispatch({ type: 'LOAD_RECIPE', recipe })
       } catch (err) {
-        if (isSessionError(err)) {
-          setSessionExpired(true)
-        } else {
-          setToast({ message: 'Error loading recipe', type: 'error' })
-        }
+        handleError(err, 'Error loading recipe')
       } finally {
         setLoading(false)
       }
     }
     loadRecipe()
-  }, [routeId, getAccessToken])
+  }, [routeId, getAccessToken, handleError])
 
   const saveFn = useCallback(
     async (state: FormState, signal: AbortSignal) => {
@@ -299,12 +298,7 @@ const RecipeEditor: FC = () => {
       dispatch({ type: 'SET_MODE', mode: updated.status })
       setToast({ message: 'Recipe published', type: 'success' })
     } catch (err) {
-      if (isSessionError(err)) {
-        setSessionExpired(true)
-      } else {
-        const message = err instanceof Error ? err.message : 'An error occurred'
-        setToast({ message: `Error: ${message}`, type: 'error' })
-      }
+      handleError(err)
     } finally {
       setSubmitting(false)
     }
@@ -319,12 +313,7 @@ const RecipeEditor: FC = () => {
       dispatch({ type: 'MARK_PRISTINE' })
       setToast({ message: 'Recipe updated', type: 'success' })
     } catch (err) {
-      if (isSessionError(err)) {
-        setSessionExpired(true)
-      } else {
-        const message = err instanceof Error ? err.message : 'An error occurred'
-        setToast({ message: `Error: ${message}`, type: 'error' })
-      }
+      handleError(err)
     } finally {
       setSubmitting(false)
     }
@@ -342,12 +331,7 @@ const RecipeEditor: FC = () => {
       dispatch({ type: 'SET_MODE', mode: updated.status })
       setToast({ message: 'Recipe unpublished', type: 'success' })
     } catch (err) {
-      if (isSessionError(err)) {
-        setSessionExpired(true)
-      } else {
-        const message = err instanceof Error ? err.message : 'An error occurred'
-        setToast({ message: `Error: ${message}`, type: 'error' })
-      }
+      handleError(err)
     } finally {
       setSubmitting(false)
     }
@@ -366,12 +350,7 @@ const RecipeEditor: FC = () => {
       navigate('/admin/recipes')
     } catch (err) {
       setDiscardDialogOpen(false)
-      if (isSessionError(err)) {
-        setSessionExpired(true)
-      } else {
-        const message = err instanceof Error ? err.message : 'An error occurred'
-        setToast({ message: `Error: ${message}`, type: 'error' })
-      }
+      handleError(err)
     }
   }
 
