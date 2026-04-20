@@ -1,5 +1,14 @@
 import { isSessionError } from '@api/auth'
-import { fetchMyRecipes, fetchTags, updateRecipe } from '@api/recipes'
+import {
+  createDraft,
+  deleteRecipe,
+  fetchAllRecipes,
+  fetchTags,
+  publishRecipe,
+  unpublishRecipe,
+  updateRecipe,
+} from '@api/recipes'
+import AutosaveStatus from '@components/AutosaveStatus'
 import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
 import ImageUpload from '@components/ImageUpload'
@@ -10,22 +19,18 @@ import StepList from '@components/StepList'
 import TagInput from '@components/TagInput'
 import Toast from '@components/Toast'
 import { useAuth } from '@contexts/AuthContext'
+import { useAutosave } from '@hooks/useAutosave'
 import type { Ingredient, Recipe, Step, Tag } from '@models/recipe'
 import { useCallback, useEffect, useReducer, useRef, useState, type FC } from 'react'
 import { useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import styles from './RecipeEditor.module.css'
 
-interface FormErrors {
-  title?: string
-  intro?: string
-  ingredients?: string
-  steps?: string
-  coverImage?: string
-  coverImageAlt?: string
-}
+type EditorMode = Recipe['status']
 
 interface FormState {
+  id: string
+  slug: string
   title: string
   intro: string
   prepTime: number
@@ -36,16 +41,23 @@ interface FormState {
   steps: Step[]
   coverImageKey: string
   coverImageAlt: string
-  status: Recipe['status']
+  mode: EditorMode
   dirty: boolean
 }
 
+type SettableField = Exclude<keyof FormState, 'dirty' | 'mode' | 'id' | 'slug'>
+
 type FormAction =
-  | { type: 'SET_FIELD'; field: keyof Omit<FormState, 'dirty'>; value: FormState[keyof Omit<FormState, 'dirty'>] }
+  | { type: 'SET_FIELD'; field: SettableField; value: FormState[SettableField] }
   | { type: 'LOAD_RECIPE'; recipe: Recipe }
   | { type: 'MARK_PRISTINE' }
+  | { type: 'SET_MODE'; mode: EditorMode }
+
+const MISSING_FIELDS_ID = 'publish-missing-fields'
 
 const initialFormState: FormState = {
+  id: '',
+  slug: '',
   title: '',
   intro: '',
   prepTime: 0,
@@ -56,61 +68,128 @@ const initialFormState: FormState = {
   steps: [{ order: 1, text: '' }],
   coverImageKey: '',
   coverImageAlt: '',
-  status: 'draft',
+  mode: 'draft',
   dirty: false,
 }
+
+const recipeToFormState = (recipe: Recipe): FormState => ({
+  id: recipe.id,
+  slug: recipe.slug,
+  title: recipe.title,
+  intro: recipe.intro,
+  prepTime: recipe.prepTime,
+  cookTime: recipe.cookTime,
+  servings: recipe.servings,
+  tags: recipe.tags,
+  ingredients: recipe.ingredients.length > 0 ? recipe.ingredients : [{ item: '', quantity: '', unit: '' }],
+  steps: recipe.steps.length > 0 ? recipe.steps : [{ order: 1, text: '' }],
+  coverImageKey: recipe.coverImage.key,
+  coverImageAlt: recipe.coverImage.alt,
+  mode: recipe.status,
+  dirty: false,
+})
 
 const formReducer = (state: FormState, action: FormAction): FormState => {
   switch (action.type) {
     case 'SET_FIELD':
       return { ...state, [action.field]: action.value, dirty: true }
     case 'LOAD_RECIPE':
-      return {
-        title: action.recipe.title,
-        intro: action.recipe.intro,
-        prepTime: action.recipe.prepTime,
-        cookTime: action.recipe.cookTime,
-        servings: action.recipe.servings,
-        tags: action.recipe.tags,
-        ingredients: action.recipe.ingredients,
-        steps: action.recipe.steps,
-        coverImageKey: action.recipe.coverImage.key,
-        coverImageAlt: action.recipe.coverImage.alt,
-        status: action.recipe.status,
-        dirty: false,
-      }
+      return recipeToFormState(action.recipe)
     case 'MARK_PRISTINE':
       return { ...state, dirty: false }
+    case 'SET_MODE':
+      return { ...state, mode: action.mode }
   }
 }
 
+const buildPatchPayload = (form: FormState): Partial<Recipe> => ({
+  title: form.title,
+  intro: form.intro,
+  prepTime: form.prepTime,
+  cookTime: form.cookTime,
+  servings: form.servings,
+  tags: form.tags,
+  ingredients: form.ingredients,
+  steps: form.steps,
+  coverImage: { key: form.coverImageKey, alt: form.coverImageAlt },
+  status: form.mode,
+})
+
+const computeMissingFields = (form: FormState): string[] => {
+  const missing: string[] = []
+  if (!form.title.trim()) missing.push('Title')
+  if (!form.intro.trim()) missing.push('Intro')
+  if (!form.coverImageKey.trim()) missing.push('Cover image')
+  if (!form.coverImageAlt.trim()) missing.push('Cover image alt text')
+  if (!form.ingredients.some((ing) => ing.item.trim())) missing.push('At least one ingredient')
+  if (!form.steps.some((s) => s.text.trim())) missing.push('At least one step')
+  return missing
+}
+
+const draftFromCreated = (id: string, slug: string): Recipe => ({
+  id,
+  slug,
+  title: '',
+  intro: '',
+  coverImage: { key: '', alt: '' },
+  tags: [],
+  prepTime: 0,
+  cookTime: 0,
+  servings: 0,
+  ingredients: [],
+  steps: [],
+  authorId: '',
+  authorName: '',
+  createdAt: '',
+  updatedAt: '',
+  status: 'draft',
+})
+
+const EDIT_PATH_PATTERN = /^\/admin\/recipes\/([^/]+)\/edit\/?$/
+const NEW_PATH = '/admin/recipes/new'
+
+const deriveRouteId = (pathname: string, paramId: string | undefined): string | undefined => {
+  if (paramId) return paramId
+  const match = pathname.match(EDIT_PATH_PATTERN)
+  return match ? match[1] : undefined
+}
+
 const RecipeEditor: FC = () => {
-  const { id } = useParams<{ id: string }>()
-  const isEditMode = Boolean(id)
-  const { getAccessToken, logout } = useAuth()
+  const { id: paramId } = useParams<{ id: string }>()
+  const { getAccessToken } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
 
+  const routeId = deriveRouteId(location.pathname, paramId)
+  const isNewPath = location.pathname === NEW_PATH
+
   const [form, dispatch] = useReducer(formReducer, initialFormState)
   const [existingTags, setExistingTags] = useState<string[]>([])
-  const [loading, setLoading] = useState(isEditMode)
+  const [loading, setLoading] = useState(Boolean(routeId))
   const [submitting, setSubmitting] = useState(false)
-  const [errors, setErrors] = useState<FormErrors>({})
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [announcement, setAnnouncement] = useState({ message: '', toggle: false })
   const [sessionExpired, setSessionExpired] = useState(false)
+  const [discardDialogOpen, setDiscardDialogOpen] = useState(false)
 
-  const titleRef = useRef<HTMLInputElement>(null)
-  const introRef = useRef<HTMLTextAreaElement>(null)
-  const pathnameRef = useRef(location.pathname)
-  pathnameRef.current = location.pathname
+  const recentlyCreatedIdRef = useRef<string | null>(null)
+  const creatingDraftRef = useRef(false)
 
   const setField = useCallback(
-    <K extends keyof Omit<FormState, 'dirty'>>(field: K, value: FormState[K]) => {
+    <K extends SettableField>(field: K, value: FormState[K]) => {
       dispatch({ type: 'SET_FIELD', field, value })
     },
     []
   )
+
+  const handleError = useCallback((err: unknown, fallback?: string) => {
+    if (isSessionError(err)) {
+      setSessionExpired(true)
+      return
+    }
+    const message = err instanceof Error ? err.message : 'An error occurred'
+    setToast({ message: fallback ?? `Error: ${message}`, type: 'error' })
+  }, [])
 
   const blocker = useBlocker(form.dirty)
 
@@ -136,99 +215,142 @@ const RecipeEditor: FC = () => {
     loadTags()
   }, [])
 
+  // Draft-on-mount: when landing on /admin/recipes/new, create a draft and
+  // replace the URL with /admin/recipes/:id/edit so subsequent saves use PATCH.
   useEffect(() => {
-    if (!id) return
-    const loadRecipe = async () => {
+    if (!isNewPath) return
+    if (creatingDraftRef.current) return
+    creatingDraftRef.current = true
+    const createNewDraft = async () => {
       try {
         const token = await getAccessToken()
-        const recipes = await fetchMyRecipes(token)
-        const recipe = recipes.find((r) => r.id === id)
+        const { id, slug } = await createDraft(token)
+        recentlyCreatedIdRef.current = id
+        dispatch({ type: 'LOAD_RECIPE', recipe: draftFromCreated(id, slug) })
+        navigate(`/admin/recipes/${id}/edit`, { replace: true })
+      } catch (err) {
+        handleError(err, 'Error creating draft')
+      }
+    }
+    createNewDraft()
+  }, [isNewPath, getAccessToken, navigate, handleError])
+
+  // Fetch on edit mount, skipping the draft we just created.
+  useEffect(() => {
+    if (!routeId) return
+    if (recentlyCreatedIdRef.current === routeId) {
+      setLoading(false)
+      return
+    }
+    const loadRecipe = async () => {
+      let token = ''
+      try {
+        token = await getAccessToken()
+      } catch (err) {
+        handleError(err)
+      }
+      try {
+        const recipes = await fetchAllRecipes(token)
+        const recipe = recipes.find((r) => r.id === routeId)
         if (!recipe) throw new Error('Recipe not found')
         dispatch({ type: 'LOAD_RECIPE', recipe })
       } catch (err) {
-        if (isSessionError(err)) {
-          logout()
-          navigate(`/admin/login?redirect=${encodeURIComponent(pathnameRef.current)}`)
-          return
-        }
-        setToast({ message: 'Error loading recipe', type: 'error' })
+        handleError(err, 'Error loading recipe')
       } finally {
         setLoading(false)
       }
     }
     loadRecipe()
-  }, [id, getAccessToken, logout, navigate])
+  }, [routeId, getAccessToken, handleError])
 
-  const validate = (): FormErrors => {
-    const next: FormErrors = {}
-    if (!form.title.trim()) next.title = 'Title is required'
-    if (!form.intro.trim()) next.intro = 'Intro is required'
-    if (!form.ingredients.some((ing) => ing.item.trim())) {
-      next.ingredients = 'At least one ingredient with an item is required'
+  const saveFn = useCallback(
+    async (state: FormState, signal: AbortSignal) => {
+      if (!state.id) throw new Error('autosave skipped: no recipe id yet')
+      const token = await getAccessToken()
+      await updateRecipe(token, state.id, buildPatchPayload(state), signal)
+    },
+    [getAccessToken]
+  )
+
+  const { status: autosaveStatus, lastSavedAt, retry, flush } = useAutosave(form, saveFn, {
+    intervalMs: 2000,
+  })
+
+  useEffect(() => {
+    if (autosaveStatus === 'saved') {
+      dispatch({ type: 'MARK_PRISTINE' })
     }
-    if (!form.steps.some((s) => s.text.trim())) {
-      next.steps = 'At least one step with text is required'
+  }, [autosaveStatus, lastSavedAt])
+
+  const missingFields = computeMissingFields(form)
+  const canPublish = missingFields.length === 0
+
+  const handlePublish = async () => {
+    if (!form.id) return
+    setSubmitting(true)
+    try {
+      // Flush any pending autosave so the server has the latest field values
+      // before the publish endpoint runs its validation.
+      await flush()
+      const token = await getAccessToken()
+      const updated = await publishRecipe(token, form.id)
+      dispatch({ type: 'MARK_PRISTINE' })
+      dispatch({ type: 'SET_MODE', mode: updated.status })
+      setToast({ message: 'Recipe published', type: 'success' })
+    } catch (err) {
+      handleError(err)
+    } finally {
+      setSubmitting(false)
     }
-    if (!form.coverImageKey.trim()) {
-      next.coverImage = 'Cover image is required'
-    } else if (!form.coverImageAlt.trim()) {
-      next.coverImageAlt = 'Alt text is required'
-    }
-    return next
   }
 
-  const focusFirstError = useCallback((validationErrors: FormErrors) => {
-    if (validationErrors.title) {
-      titleRef.current?.focus()
-    } else if (validationErrors.intro) {
-      introRef.current?.focus()
-    }
-  }, [])
-
-  const handleSubmit = async (targetStatus: Recipe['status']) => {
-    const validationErrors = validate()
-    setErrors(validationErrors)
-
-    if (Object.keys(validationErrors).length > 0) {
-      focusFirstError(validationErrors)
-      return
-    }
-
+  const handleUpdate = async () => {
+    if (!form.id) return
     setSubmitting(true)
     try {
       const token = await getAccessToken()
-      const data = {
-        title: form.title,
-        intro: form.intro,
-        prepTime: form.prepTime,
-        cookTime: form.cookTime,
-        servings: form.servings,
-        tags: form.tags,
-        ingredients: form.ingredients,
-        steps: form.steps,
-        coverImage: { key: form.coverImageKey, alt: form.coverImageAlt },
-        status: targetStatus,
-      }
-
-      if (isEditMode && id) {
-        await updateRecipe(token, id, data)
-      } else {
-        // TODO(#153): create-on-mount flow replaces this branch — draft-on-mount + autosave + publish button.
-        throw new Error('not implemented — pending #153')
-      }
-
+      await updateRecipe(token, form.id, buildPatchPayload(form))
       dispatch({ type: 'MARK_PRISTINE' })
-      const message = targetStatus === 'published' ? 'Recipe published' : 'Recipe saved'
-      setToast({ message, type: 'success' })
+      setToast({ message: 'Recipe updated', type: 'success' })
     } catch (err) {
-      if (isSessionError(err)) {
-        setSessionExpired(true)
-      } else {
-        const message = err instanceof Error ? err.message : 'An error occurred'
-        setToast({ message: `Error: ${message}`, type: 'error' })
-      }
+      handleError(err)
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  const handleUnpublish = async () => {
+    if (!form.id) return
+    setSubmitting(true)
+    try {
+      // Flush any pending autosave first so an in-flight PATCH with
+      // status: 'published' cannot race the unpublish and silently re-publish.
+      await flush()
+      const token = await getAccessToken()
+      const updated = await unpublishRecipe(token, form.id)
+      dispatch({ type: 'SET_MODE', mode: updated.status })
+      setToast({ message: 'Recipe unpublished', type: 'success' })
+    } catch (err) {
+      handleError(err)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleDiscardConfirm = async () => {
+    if (!form.id) {
+      setDiscardDialogOpen(false)
+      return
+    }
+    try {
+      const token = await getAccessToken()
+      await deleteRecipe(token, form.id)
+      dispatch({ type: 'MARK_PRISTINE' })
+      setDiscardDialogOpen(false)
+      navigate('/admin/recipes')
+    } catch (err) {
+      setDiscardDialogOpen(false)
+      handleError(err)
     }
   }
 
@@ -245,7 +367,9 @@ const RecipeEditor: FC = () => {
   const setTags = useCallback((next: string[]) => setField('tags', next), [setField])
   const setCoverImageKey = useCallback((key: string) => setField('coverImageKey', key), [setField])
 
-  if (loading) {
+  // Block form render while createDraft is in-flight — prevents the user
+  // typing into a form whose autosave cannot yet PATCH (no id).
+  if (loading || (isNewPath && !form.id && !sessionExpired)) {
     return (
       <div className={styles.loadingWrapper}>
         <Loading />
@@ -254,6 +378,7 @@ const RecipeEditor: FC = () => {
   }
 
   const loginHref = `/admin/login?redirect=${encodeURIComponent(location.pathname)}`
+  const recipeId = form.id || routeId
 
   return (
     <div className={styles.container}>
@@ -263,6 +388,14 @@ const RecipeEditor: FC = () => {
           <Link to={loginHref}>Log in again</Link>
         </div>
       )}
+
+      <div className={styles.header}>
+        <AutosaveStatus
+          status={autosaveStatus}
+          lastSavedAt={lastSavedAt}
+          onRetry={retry}
+        />
+      </div>
 
       <form
         className={styles.form}
@@ -274,28 +407,22 @@ const RecipeEditor: FC = () => {
           <div className={styles.field}>
             <label htmlFor="recipe-title">Title</label>
             <input
-              ref={titleRef}
               id="recipe-title"
               type="text"
               value={form.title}
               onChange={(e) => setField('title', e.target.value)}
               className={styles.input}
-              aria-invalid={errors.title ? 'true' : undefined}
             />
-            {errors.title && <span className={styles.error}>{errors.title}</span>}
           </div>
 
           <div className={styles.field}>
             <label htmlFor="recipe-intro">Intro</label>
             <textarea
-              ref={introRef}
               id="recipe-intro"
               value={form.intro}
               onChange={(e) => setField('intro', e.target.value)}
               className={styles.textarea}
-              aria-invalid={errors.intro ? 'true' : undefined}
             />
-            {errors.intro && <span className={styles.error}>{errors.intro}</span>}
           </div>
         </div>
 
@@ -305,9 +432,8 @@ const RecipeEditor: FC = () => {
               onUpload={setCoverImageKey}
               currentKey={form.coverImageKey || undefined}
               getToken={getAccessToken}
-              id={id}
+              id={recipeId}
             />
-            {errors.coverImage && <span className={styles.error}>{errors.coverImage}</span>}
           </div>
 
           <div className={styles.field}>
@@ -318,11 +444,7 @@ const RecipeEditor: FC = () => {
               value={form.coverImageAlt}
               onChange={(e) => setField('coverImageAlt', e.target.value)}
               className={styles.input}
-              aria-invalid={errors.coverImageAlt ? 'true' : undefined}
             />
-            {errors.coverImageAlt && (
-              <span className={styles.error}>{errors.coverImageAlt}</span>
-            )}
           </div>
         </div>
 
@@ -380,49 +502,69 @@ const RecipeEditor: FC = () => {
             onChange={setIngredients}
             onAnnounce={announce}
           />
-          {errors.ingredients && <span className={styles.error}>{errors.ingredients}</span>}
         </div>
 
         <div className={styles.section}>
           <StepList
             steps={form.steps}
             onChange={setSteps}
-            recipeId={id}
+            recipeId={recipeId}
             getToken={getAccessToken}
             onAnnounce={announce}
           />
-          {errors.steps && <span className={styles.error}>{errors.steps}</span>}
         </div>
 
         <div className={styles.actions}>
-          {isEditMode ? (
-            <Button
-              onClick={() => handleSubmit(form.status)}
-              type="button"
-              disabled={submitting}
-            >
-              {submitting ? <Loading size="small" /> : 'Save changes'}
-            </Button>
-          ) : (
+          {form.mode === 'draft' ? (
             <>
               <Button
-                onClick={() => handleSubmit('draft')}
+                onClick={handlePublish}
+                type="button"
+                disabled={submitting || !canPublish}
+                ariaDescribedBy={!canPublish ? MISSING_FIELDS_ID : undefined}
+              >
+                {submitting ? <Loading size="small" /> : 'Publish'}
+              </Button>
+              <Button
+                onClick={() => setDiscardDialogOpen(true)}
                 type="button"
                 variant="secondary"
                 disabled={submitting}
               >
-                {submitting ? <Loading size="small" /> : 'Save as draft'}
+                Discard draft
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button onClick={handleUpdate} type="button" disabled={submitting}>
+                {submitting ? <Loading size="small" /> : 'Update'}
               </Button>
               <Button
-                onClick={() => handleSubmit('published')}
+                onClick={handleUnpublish}
                 type="button"
+                variant="secondary"
                 disabled={submitting}
               >
-                {submitting ? <Loading size="small" /> : 'Publish'}
+                Unpublish
               </Button>
             </>
           )}
         </div>
+
+        {form.mode === 'draft' && !canPublish && (
+          <div className={styles.missingFields}>
+            <p id={`${MISSING_FIELDS_ID}-label`}>Add the following before publishing:</p>
+            <ul
+              id={MISSING_FIELDS_ID}
+              aria-labelledby={`${MISSING_FIELDS_ID}-label`}
+              className={styles.missingFieldsList}
+            >
+              {missingFields.map((field) => (
+                <li key={field}>{field}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </form>
 
       <div className="sr-only" role="status" aria-live="polite">
@@ -441,6 +583,16 @@ const RecipeEditor: FC = () => {
         cancelLabel="Stay on this page"
         onConfirm={() => blocker.proceed?.()}
         onCancel={() => blocker.reset?.()}
+      />
+
+      <ConfirmDialog
+        isOpen={discardDialogOpen}
+        title="Discard draft?"
+        message="This will permanently delete this draft recipe. This action cannot be undone."
+        confirmLabel="Discard"
+        cancelLabel="Cancel"
+        onConfirm={handleDiscardConfirm}
+        onCancel={() => setDiscardDialogOpen(false)}
       />
     </div>
   )

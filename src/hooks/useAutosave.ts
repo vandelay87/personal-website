@@ -13,6 +13,7 @@ export interface UseAutosaveResult {
   status: AutosaveStatus
   lastSavedAt: Date | null
   retry: () => void
+  flush: () => Promise<void>
 }
 
 const DEFAULT_INTERVAL_MS = 2000
@@ -93,11 +94,11 @@ export const useAutosave = <T extends { dirty: boolean }>(
     }
   }, [])
 
-  const flushPending = useCallback(() => {
+  const flushPending = useCallback(async () => {
     if (!pendingRef.current) return
     clearTimer()
     pendingRef.current = false
-    void runSave(stateRef.current)
+    await runSave(stateRef.current)
   }, [clearTimer, runSave])
 
   useEffect(() => {
@@ -116,7 +117,7 @@ export const useAutosave = <T extends { dirty: boolean }>(
   useEffect(() => {
     const onVisibility = () => {
       if (document.visibilityState === 'hidden') {
-        flushPending()
+        void flushPending()
       }
     }
     document.addEventListener('visibilitychange', onVisibility)
@@ -147,5 +148,5 @@ export const useAutosave = <T extends { dirty: boolean }>(
     void runSave(stateRef.current)
   }, [clearTimer, runSave])
 
-  return { status, lastSavedAt, retry }
+  return { status, lastSavedAt, retry, flush: flushPending }
 }
