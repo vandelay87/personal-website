@@ -49,6 +49,7 @@ export const getCurrentSession = (): {
   refreshToken: string
   idToken: string
 } | null => {
+  if (typeof window === 'undefined') return null
   const accessToken = localStorage.getItem('accessToken')
   const refreshToken = localStorage.getItem('refreshToken')
   const idToken = localStorage.getItem('idToken')

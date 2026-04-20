@@ -8,6 +8,7 @@ import {
   createStaticRouter,
   StaticRouterProvider,
 } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
 import { RecipeDataContext } from './contexts/RecipeDataContext'
 import type { RecipeData } from './contexts/RecipeDataContext'
 import { getMetaTags, escapeHtml } from './meta'
@@ -100,9 +101,11 @@ export const render = async (url: string, data?: RecipeData): Promise<string> =>
 
   return new Promise<string>((resolve, reject) => {
     const { pipe } = renderToPipeableStream(
-      <RecipeDataContext.Provider value={data ?? {}}>
-        <StaticRouterProvider router={router} context={context} />
-      </RecipeDataContext.Provider>,
+      <AuthProvider>
+        <RecipeDataContext.Provider value={data ?? {}}>
+          <StaticRouterProvider router={router} context={context} />
+        </RecipeDataContext.Provider>
+      </AuthProvider>,
       {
         onAllReady() {
           const reactStream = new PassThrough({ encoding: 'utf-8' })
