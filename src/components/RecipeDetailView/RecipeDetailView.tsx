@@ -2,7 +2,7 @@ import Image from '@components/Image'
 import RecipeIngredients from '@components/RecipeIngredients'
 import RecipeSteps from '@components/RecipeSteps'
 import Typography from '@components/Typography'
-import { RECIPE_IMAGE_BASE, type Recipe } from '@models/recipe'
+import { recipeImageUrl, type Recipe } from '@models/recipe'
 import type { FC } from 'react'
 import { Link } from 'react-router-dom'
 
@@ -24,8 +24,8 @@ const formatDate = (dateString: string): string => {
 const RecipeDetailView: FC<RecipeDetailViewProps> = ({ recipe }) => (
   <article className={styles.page}>
     <Image
-      src={`${RECIPE_IMAGE_BASE}/${recipe.coverImage.key}-medium.webp`}
-      srcSet={`${RECIPE_IMAGE_BASE}/${recipe.coverImage.key}-medium.webp 800w, ${RECIPE_IMAGE_BASE}/${recipe.coverImage.key}-full.webp 1200w`}
+      src={recipeImageUrl(recipe.coverImage.key, 'medium')}
+      srcSet={`${recipeImageUrl(recipe.coverImage.key, 'medium')} 800w, ${recipeImageUrl(recipe.coverImage.key, 'full')} 1200w`}
       alt={recipe.coverImage.alt}
       priority
       maxWidth="var(--max-w-site)"

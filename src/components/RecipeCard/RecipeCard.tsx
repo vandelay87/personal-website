@@ -1,6 +1,6 @@
 import Image from '@components/Image'
 import Typography from '@components/Typography'
-import { RECIPE_IMAGE_BASE, type RecipeIndex } from '@models/recipe'
+import { recipeImageUrl, type RecipeIndex } from '@models/recipe'
 import type { FC } from 'react'
 import { Link } from 'react-router-dom'
 import styles from './RecipeCard.module.css'
@@ -14,7 +14,7 @@ export interface RecipeCardProps {
 
 
 const RecipeCard: FC<RecipeCardProps> = ({ recipe, eager = false, hideTags = false, hideMeta = false }) => {
-  const thumbnailSrc = `${RECIPE_IMAGE_BASE}/${recipe.coverImage.key}-thumb.webp`
+  const thumbnailSrc = recipeImageUrl(recipe.coverImage.key, 'thumb')
 
   return (
     <article className={styles.card}>

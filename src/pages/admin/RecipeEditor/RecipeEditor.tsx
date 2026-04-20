@@ -432,6 +432,7 @@ const RecipeEditor: FC = () => {
               <ImageUpload
                 onUpload={setCoverImageKey}
                 currentKey={form.coverImageKey || undefined}
+                currentAlt={form.coverImageAlt || undefined}
                 getToken={getAccessToken}
                 recipeId={recipeId}
               />

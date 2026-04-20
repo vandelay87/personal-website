@@ -75,6 +75,7 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken, onAn
                   imageType="step"
                   stepOrder={index + 1}
                   currentKey={step.image?.key}
+                  currentAlt={step.image?.alt}
                   getToken={getToken}
                   onUpload={(key) => updateImage(index, { key })}
                 />
