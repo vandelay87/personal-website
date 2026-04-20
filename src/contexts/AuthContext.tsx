@@ -1,6 +1,6 @@
 import * as authApi from '@api/auth'
 import type { AuthResult, AuthTokens, User } from '@models/auth'
-import { createContext, useCallback, useContext, useMemo, useState, type FC, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type FC, type ReactNode } from 'react'
 
 export interface AuthContextValue {
   user: User | null
@@ -48,23 +48,25 @@ export const AuthContext = createContext<AuthContextValue>({
 export const useAuth = () => useContext(AuthContext)
 
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const initSession = (): { user: User | null; isAuthenticated: boolean } => {
-    const session = authApi.getCurrentSession()
-    if (!session) {
-      return { user: null, isAuthenticated: false }
-    }
-    const user = decodeIdToken(session.idToken)
-    if (!user) {
-      authApi.logout()
-      return { user: null, isAuthenticated: false }
-    }
-    return { user, isAuthenticated: true }
-  }
+  // Start loading so server and client first render match (server can't access
+  // localStorage). A post-mount effect resolves the real session.
+  const [user, setUser] = useState<User | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  const initial = initSession()
-  const [user, setUser] = useState<User | null>(initial.user)
-  const [isAuthenticated, setIsAuthenticated] = useState(initial.isAuthenticated)
-  const [loading] = useState(false)
+  useEffect(() => {
+    const session = authApi.getCurrentSession()
+    if (session) {
+      const decoded = decodeIdToken(session.idToken)
+      if (decoded) {
+        setUser(decoded)
+        setIsAuthenticated(true)
+      } else {
+        authApi.logout()
+      }
+    }
+    setLoading(false)
+  }, [])
 
   const isAdmin = user?.groups.includes('admin') ?? false
 
