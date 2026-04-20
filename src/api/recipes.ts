@@ -63,7 +63,8 @@ export const fetchAllRecipes = async (token: string): Promise<Recipe[]> => {
 export const updateRecipe = async (
   token: string,
   id: string,
-  data: Partial<Recipe>
+  data: Partial<Recipe>,
+  signal?: AbortSignal
 ): Promise<Recipe> => {
   const response = await fetch(`${API_BASE}/recipes/${id}`, {
     method: 'PATCH',
@@ -72,6 +73,7 @@ export const updateRecipe = async (
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(data),
+    signal,
   })
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`)
