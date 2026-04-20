@@ -36,14 +36,23 @@ export const fetchMyRecipes = async (token: string): Promise<Recipe[]> => {
   return response.json()
 }
 
-export const createRecipe = async (token: string, data: Partial<Recipe>): Promise<Recipe> => {
-  const response = await fetch(`${API_BASE}/recipes`, {
+export const createDraft = async (token: string): Promise<{ id: string; slug: string }> => {
+  const response = await fetch(`${API_BASE}/recipes/drafts`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(data),
+  })
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`)
+  }
+  return response.json()
+}
+
+export const fetchAllRecipes = async (token: string): Promise<Recipe[]> => {
+  const response = await fetch(`${API_BASE}/recipes/admin`, {
+    headers: { Authorization: `Bearer ${token}` },
   })
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`)
@@ -54,15 +63,17 @@ export const createRecipe = async (token: string, data: Partial<Recipe>): Promis
 export const updateRecipe = async (
   token: string,
   id: string,
-  data: Partial<Recipe>
+  data: Partial<Recipe>,
+  signal?: AbortSignal
 ): Promise<Recipe> => {
   const response = await fetch(`${API_BASE}/recipes/${id}`, {
-    method: 'PUT',
+    method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(data),
+    signal,
   })
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`)
@@ -70,7 +81,7 @@ export const updateRecipe = async (
   return response.json()
 }
 
-export const publishRecipe = async (token: string, id: string): Promise<void> => {
+export const publishRecipe = async (token: string, id: string): Promise<Recipe> => {
   const response = await fetch(`${API_BASE}/recipes/${id}/publish`, {
     method: 'PATCH',
     headers: { Authorization: `Bearer ${token}` },
@@ -78,9 +89,10 @@ export const publishRecipe = async (token: string, id: string): Promise<void> =>
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`)
   }
+  return response.json()
 }
 
-export const unpublishRecipe = async (token: string, id: string): Promise<void> => {
+export const unpublishRecipe = async (token: string, id: string): Promise<Recipe> => {
   const response = await fetch(`${API_BASE}/recipes/${id}/unpublish`, {
     method: 'PATCH',
     headers: { Authorization: `Bearer ${token}` },
@@ -88,6 +100,7 @@ export const unpublishRecipe = async (token: string, id: string): Promise<void> 
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`)
   }
+  return response.json()
 }
 
 export const deleteRecipe = async (token: string, id: string): Promise<void> => {

@@ -89,6 +89,23 @@
   padding: var(--space-6) 0;
 }
 
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.backLink {
+  font-size: var(--font-size-sm);
+}
+
+.missingFieldsList {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-6);
+}
+
 .sessionBanner {
   display: flex;
   align-items: center;

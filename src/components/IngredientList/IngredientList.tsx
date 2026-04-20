@@ -47,6 +47,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
             <input
               type="text"
               aria-label={`Ingredient ${index + 1} quantity`}
+              placeholder="Qty"
               value={ingredient.quantity}
               onChange={(e) => handleFieldChange(index, 'quantity', e.target.value)}
               className={[styles.input, styles.quantityInput].join(' ')}
@@ -57,6 +58,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
             <input
               type="text"
               aria-label={`Ingredient ${index + 1} unit`}
+              placeholder="Unit"
               value={ingredient.unit}
               onChange={(e) => handleFieldChange(index, 'unit', e.target.value)}
               className={[styles.input, styles.unitInput].join(' ')}
@@ -67,6 +69,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
             <input
               type="text"
               aria-label={`Ingredient ${index + 1} item`}
+              placeholder="Ingredient"
               value={ingredient.item}
               onChange={(e) => handleFieldChange(index, 'item', e.target.value)}
               className={[styles.input, styles.itemInput].join(' ')}

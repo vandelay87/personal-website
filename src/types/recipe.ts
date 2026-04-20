@@ -41,5 +41,6 @@ export interface Recipe extends RecipeIndex {
   authorId: string
   authorName: string
   updatedAt: string
-  status: string
+  status: 'draft' | 'published'
+  ttl?: number
 }
