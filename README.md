@@ -62,7 +62,7 @@ tests/
 - `/recipes/:slug` — Recipe detail with SSR for SEO and Open Graph
 - `/admin/login` — Cognito-backed login with new-password challenge
 - `/admin/recipes` — Recipe management list (protected)
-- `/admin/recipes/new` and `/admin/recipes/:slug/edit` — Recipe editor form (protected)
+- `/admin/recipes/new` and `/admin/recipes/:id/edit` — Drafts-first recipe editor with autosave (protected)
 - `/admin/recipes/:slug/preview` — Recipe preview (protected)
 - `/admin/users` — User management (protected)
 
