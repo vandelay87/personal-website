@@ -1,7 +1,7 @@
 
 import { getUploadUrl } from '@api/recipes'
 import Button from '@components/Button'
-import { RECIPE_IMAGE_BASE } from '@models/recipe'
+import { recipeImageUrl } from '@models/recipe'
 import { useEffect, useId, useRef, useState, type ChangeEvent, type FC } from 'react'
 
 import styles from './ImageUpload.module.css'
@@ -9,6 +9,7 @@ import styles from './ImageUpload.module.css'
 export interface ImageUploadProps {
   onUpload: (key: string) => void
   currentKey?: string
+  currentAlt?: string
   getToken: () => Promise<string>
   recipeId: string
   imageType?: 'cover' | 'step'
@@ -20,6 +21,7 @@ const MAX_SIZE = 10 * 1024 * 1024
 const ImageUpload: FC<ImageUploadProps> = ({
   onUpload,
   currentKey,
+  currentAlt,
   getToken,
   recipeId,
   imageType = 'cover',
@@ -100,8 +102,8 @@ const ImageUpload: FC<ImageUploadProps> = ({
         <img src={preview} alt="Upload preview" className={styles.preview} />
       ) : currentKey ? (
         <img
-          src={`${RECIPE_IMAGE_BASE}/${currentKey}-medium.webp`}
-          alt="Current image"
+          src={recipeImageUrl(currentKey, 'medium')}
+          alt={currentAlt ?? 'Current image'}
           className={styles.preview}
         />
       ) : null}

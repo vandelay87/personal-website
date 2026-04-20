@@ -1,6 +1,6 @@
 import Image from '@components/Image'
 import Typography from '@components/Typography'
-import { RECIPE_IMAGE_BASE, type Step } from '@models/recipe'
+import { recipeImageUrl, type Step } from '@models/recipe'
 import type { FC } from 'react'
 import styles from './RecipeSteps.module.css'
 
@@ -16,7 +16,7 @@ const RecipeSteps: FC<RecipeStepsProps> = ({ steps }) => (
         <Typography variant="body" className={styles.text}>{step.text}</Typography>
         {step.image && (
           <Image
-            src={`${RECIPE_IMAGE_BASE}/${step.image.key}-medium.webp`}
+            src={recipeImageUrl(step.image.key, 'medium')}
             alt={step.image.alt}
             className={styles.image}
           />

@@ -1,5 +1,10 @@
 export const RECIPE_IMAGE_BASE = 'https://akli.dev/images'
 
+export type RecipeImageVariant = 'thumb' | 'medium' | 'full'
+
+export const recipeImageUrl = (key: string, variant: RecipeImageVariant): string =>
+  `${RECIPE_IMAGE_BASE}/${key}-${variant}.webp`
+
 export interface RecipeImage {
   key: string
   alt: string
