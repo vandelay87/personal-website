@@ -150,22 +150,14 @@ const draftFromCreated = (id: string, slug: string): Recipe => ({
   status: 'draft',
 })
 
-const EDIT_PATH_PATTERN = /^\/admin\/recipes\/([^/]+)\/edit\/?$/
 const NEW_PATH = '/admin/recipes/new'
 
-const deriveRouteId = (pathname: string, paramId: string | undefined): string | undefined => {
-  if (paramId) return paramId
-  const match = pathname.match(EDIT_PATH_PATTERN)
-  return match ? match[1] : undefined
-}
-
 const RecipeEditor: FC = () => {
-  const { id: paramId } = useParams<{ id: string }>()
+  const { id: routeId } = useParams<{ id: string }>()
   const { getAccessToken } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
 
-  const routeId = deriveRouteId(location.pathname, paramId)
   const isNewPath = location.pathname === NEW_PATH
 
   const [form, dispatch] = useReducer(formReducer, initialFormState)

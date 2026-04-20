@@ -783,7 +783,7 @@ describe('RecipeEditor page', () => {
 
       const router = createMemoryRouter(
         [
-          { path: '/admin/recipes/rec-001/edit', element: <EditorWithBackLink /> },
+          { path: '/admin/recipes/:id/edit', element: <EditorWithBackLink /> },
           { path: '/admin/recipes', element: <div>Recipe list page</div> },
         ],
         { initialEntries: ['/admin/recipes/rec-001/edit'] }
