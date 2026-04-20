@@ -9,7 +9,7 @@ import Toast, { type ToastState } from '@components/Toast'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import type { Recipe } from '@models/recipe'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import styles from './RecipeList.module.css'
@@ -23,6 +23,11 @@ const RecipeList = () => {
   const [error, setError] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Recipe | null>(null)
   const [toast, setToast] = useState<ToastState | null>(null)
+
+  const sortedRecipes = useMemo(
+    () => [...recipes].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
+    [recipes],
+  )
 
   useEffect(() => {
     const state = location.state as { accessDenied?: boolean } | null
@@ -108,10 +113,6 @@ const RecipeList = () => {
         </>
       )
     }
-
-    const sortedRecipes = [...recipes].sort(
-      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-    )
 
     return (
       <>
