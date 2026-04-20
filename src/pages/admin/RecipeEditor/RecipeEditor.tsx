@@ -2,7 +2,7 @@ import { isSessionError } from '@api/auth'
 import {
   createDraft,
   deleteRecipe,
-  fetchAllRecipes,
+  fetchMyRecipes,
   fetchTags,
   publishRecipe,
   unpublishRecipe,
@@ -254,7 +254,7 @@ const RecipeEditor: FC = () => {
         handleError(err)
       }
       try {
-        const recipes = await fetchAllRecipes(token)
+        const recipes = await fetchMyRecipes(token)
         const recipe = recipes.find((r) => r.id === routeId)
         if (!recipe) throw new Error('Recipe not found')
         dispatch({ type: 'LOAD_RECIPE', recipe })
