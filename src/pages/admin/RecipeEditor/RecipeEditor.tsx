@@ -2,7 +2,7 @@ import { isSessionError } from '@api/auth'
 import {
   createDraft,
   deleteRecipe,
-  fetchAllRecipes,
+  fetchMyRecipes,
   fetchTags,
   publishRecipe,
   unpublishRecipe,
@@ -10,6 +10,7 @@ import {
 } from '@api/recipes'
 import AutosaveStatus from '@components/AutosaveStatus'
 import Button from '@components/Button'
+import Callout from '@components/Callout'
 import ConfirmDialog from '@components/ConfirmDialog'
 import ImageUpload from '@components/ImageUpload'
 import IngredientList from '@components/IngredientList'
@@ -72,22 +73,26 @@ const initialFormState: FormState = {
   dirty: false,
 }
 
-const recipeToFormState = (recipe: Recipe): FormState => ({
-  id: recipe.id,
-  slug: recipe.slug,
-  title: recipe.title,
-  intro: recipe.intro,
-  prepTime: recipe.prepTime,
-  cookTime: recipe.cookTime,
-  servings: recipe.servings,
-  tags: recipe.tags,
-  ingredients: recipe.ingredients.length > 0 ? recipe.ingredients : [{ item: '', quantity: '', unit: '' }],
-  steps: recipe.steps.length > 0 ? recipe.steps : [{ order: 1, text: '' }],
-  coverImageKey: recipe.coverImage.key,
-  coverImageAlt: recipe.coverImage.alt,
-  mode: recipe.status,
-  dirty: false,
-})
+const recipeToFormState = (recipe: Recipe): FormState => {
+  const ingredients = recipe.ingredients ?? []
+  const steps = recipe.steps ?? []
+  return {
+    id: recipe.id,
+    slug: recipe.slug,
+    title: recipe.title ?? '',
+    intro: recipe.intro ?? '',
+    prepTime: recipe.prepTime,
+    cookTime: recipe.cookTime,
+    servings: recipe.servings,
+    tags: recipe.tags ?? [],
+    ingredients: ingredients.length > 0 ? ingredients : [{ item: '', quantity: '', unit: '' }],
+    steps: steps.length > 0 ? steps : [{ order: 1, text: '' }],
+    coverImageKey: recipe.coverImage?.key ?? '',
+    coverImageAlt: recipe.coverImage?.alt ?? '',
+    mode: recipe.status,
+    dirty: false,
+  }
+}
 
 const formReducer = (state: FormState, action: FormAction): FormState => {
   switch (action.type) {
@@ -145,22 +150,14 @@ const draftFromCreated = (id: string, slug: string): Recipe => ({
   status: 'draft',
 })
 
-const EDIT_PATH_PATTERN = /^\/admin\/recipes\/([^/]+)\/edit\/?$/
 const NEW_PATH = '/admin/recipes/new'
 
-const deriveRouteId = (pathname: string, paramId: string | undefined): string | undefined => {
-  if (paramId) return paramId
-  const match = pathname.match(EDIT_PATH_PATTERN)
-  return match ? match[1] : undefined
-}
-
 const RecipeEditor: FC = () => {
-  const { id: paramId } = useParams<{ id: string }>()
+  const { id: routeId } = useParams<{ id: string }>()
   const { getAccessToken } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
 
-  const routeId = deriveRouteId(location.pathname, paramId)
   const isNewPath = location.pathname === NEW_PATH
 
   const [form, dispatch] = useReducer(formReducer, initialFormState)
@@ -250,7 +247,7 @@ const RecipeEditor: FC = () => {
         handleError(err)
       }
       try {
-        const recipes = await fetchAllRecipes(token)
+        const recipes = await fetchMyRecipes(token)
         const recipe = recipes.find((r) => r.id === routeId)
         if (!recipe) throw new Error('Recipe not found')
         dispatch({ type: 'LOAD_RECIPE', recipe })
@@ -390,6 +387,9 @@ const RecipeEditor: FC = () => {
       )}
 
       <div className={styles.header}>
+        <Link to="/admin/recipes" className={styles.backLink}>
+          ← Back to recipes
+        </Link>
         <AutosaveStatus
           status={autosaveStatus}
           lastSavedAt={lastSavedAt}
@@ -556,7 +556,7 @@ const RecipeEditor: FC = () => {
         </div>
 
         {form.mode === 'draft' && !canPublish && (
-          <div className={styles.missingFields}>
+          <Callout type="warning">
             <p id={`${MISSING_FIELDS_ID}-label`}>Add the following before publishing:</p>
             <ul
               id={MISSING_FIELDS_ID}
@@ -567,7 +567,7 @@ const RecipeEditor: FC = () => {
                 <li key={field}>{field}</li>
               ))}
             </ul>
-          </div>
+          </Callout>
         )}
       </form>
 

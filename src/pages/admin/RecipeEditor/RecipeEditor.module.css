@@ -91,15 +91,14 @@
 
 .header {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
   margin-bottom: var(--space-4);
 }
 
-.missingFields {
-  padding: var(--space-4);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background: var(--color-surface);
+.backLink {
+  font-size: var(--font-size-sm);
 }
 
 .missingFieldsList {
