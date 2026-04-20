@@ -72,22 +72,26 @@ const initialFormState: FormState = {
   dirty: false,
 }
 
-const recipeToFormState = (recipe: Recipe): FormState => ({
-  id: recipe.id,
-  slug: recipe.slug,
-  title: recipe.title,
-  intro: recipe.intro,
-  prepTime: recipe.prepTime,
-  cookTime: recipe.cookTime,
-  servings: recipe.servings,
-  tags: recipe.tags,
-  ingredients: recipe.ingredients.length > 0 ? recipe.ingredients : [{ item: '', quantity: '', unit: '' }],
-  steps: recipe.steps.length > 0 ? recipe.steps : [{ order: 1, text: '' }],
-  coverImageKey: recipe.coverImage.key,
-  coverImageAlt: recipe.coverImage.alt,
-  mode: recipe.status,
-  dirty: false,
-})
+const recipeToFormState = (recipe: Recipe): FormState => {
+  const ingredients = recipe.ingredients ?? []
+  const steps = recipe.steps ?? []
+  return {
+    id: recipe.id,
+    slug: recipe.slug,
+    title: recipe.title ?? '',
+    intro: recipe.intro ?? '',
+    prepTime: recipe.prepTime,
+    cookTime: recipe.cookTime,
+    servings: recipe.servings,
+    tags: recipe.tags ?? [],
+    ingredients: ingredients.length > 0 ? ingredients : [{ item: '', quantity: '', unit: '' }],
+    steps: steps.length > 0 ? steps : [{ order: 1, text: '' }],
+    coverImageKey: recipe.coverImage?.key ?? '',
+    coverImageAlt: recipe.coverImage?.alt ?? '',
+    mode: recipe.status,
+    dirty: false,
+  }
+}
 
 const formReducer = (state: FormState, action: FormAction): FormState => {
   switch (action.type) {
