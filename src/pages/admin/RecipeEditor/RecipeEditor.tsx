@@ -394,6 +394,9 @@ const RecipeEditor: FC = () => {
       )}
 
       <div className={styles.header}>
+        <Link to="/admin/recipes" className={styles.backLink}>
+          ← Back to recipes
+        </Link>
         <AutosaveStatus
           status={autosaveStatus}
           lastSavedAt={lastSavedAt}

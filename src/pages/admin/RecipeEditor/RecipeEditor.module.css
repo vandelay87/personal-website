@@ -91,8 +91,14 @@
 
 .header {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
   margin-bottom: var(--space-4);
+}
+
+.backLink {
+  font-size: var(--font-size-sm);
 }
 
 .missingFields {
