@@ -4,6 +4,7 @@ import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
 import Link from '@components/Link'
 import Loading from '@components/Loading'
+import StatusBadge from '@components/StatusBadge'
 import Toast, { type ToastState } from '@components/Toast'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
@@ -133,9 +134,7 @@ const RecipeList = () => {
                 <tr key={recipe.id}>
                   <td>{recipe.title}</td>
                   <td>
-                    <span className={styles.badge} data-status={recipe.status}>
-                      {recipe.status === 'published' ? 'Published' : 'Draft'}
-                    </span>
+                    <StatusBadge status={recipe.status} />
                   </td>
                   <td>{recipe.tags.join(', ')}</td>
                   <td>{new Date(recipe.updatedAt).toLocaleDateString()}</td>

@@ -56,26 +56,6 @@
   background: var(--color-bg);
 }
 
-.badge {
-  display: inline-block;
-  padding: var(--space-1) var(--space-2);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-}
-
-.badge[data-status='published'] {
-  background: var(--color-bg-subtle);
-  color: var(--color-text);
-  border-color: var(--color-primary);
-}
-
-.badge[data-status='draft'] {
-  background: var(--color-bg-subtle);
-  color: var(--color-text-muted);
-}
-
 .actionsInner {
   display: flex;
   gap: var(--space-2);
