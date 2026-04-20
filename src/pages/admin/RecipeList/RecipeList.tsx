@@ -1,5 +1,5 @@
 import { handleSessionError } from '@api/auth'
-import { deleteRecipe, fetchMyRecipes, publishRecipe, unpublishRecipe } from '@api/recipes'
+import { deleteRecipe, fetchAllRecipes, publishRecipe, unpublishRecipe } from '@api/recipes'
 import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
 import Link from '@components/Link'
@@ -38,7 +38,7 @@ const RecipeList = () => {
     setError(false)
     try {
       const token = await getAccessToken()
-      const data = await fetchMyRecipes(token)
+      const data = await fetchAllRecipes(token)
       setRecipes(data)
     } catch (err) {
       if (!handleSessionError(err, logout, navigate)) {
@@ -109,6 +109,10 @@ const RecipeList = () => {
       )
     }
 
+    const sortedRecipes = [...recipes].sort(
+      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    )
+
     return (
       <>
         <div className={styles.header}>
@@ -130,7 +134,7 @@ const RecipeList = () => {
               </tr>
             </thead>
             <tbody>
-              {recipes.map((recipe) => (
+              {sortedRecipes.map((recipe) => (
                 <tr key={recipe.id}>
                   <td>{recipe.title}</td>
                   <td>
