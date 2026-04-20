@@ -33,7 +33,7 @@ describe('ImageUpload', () => {
   })
 
   it('renders an upload area', () => {
-    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} />)
+    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} recipeId="test-recipe-id" />)
 
     expect(
       screen.getByRole('button', { name: /upload/i }) || screen.getByText(/upload/i)
@@ -41,7 +41,7 @@ describe('ImageUpload', () => {
   })
 
   it('rejects files over 10MB', async () => {
-    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} />)
+    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} recipeId="test-recipe-id" />)
 
     const file = new File(['x'], 'large.png', { type: 'image/png' })
     Object.defineProperty(file, 'size', { value: 11 * 1024 * 1024 })
@@ -58,7 +58,7 @@ describe('ImageUpload', () => {
   })
 
   it('rejects non-image MIME types', async () => {
-    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} />)
+    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} recipeId="test-recipe-id" />)
 
     const file = new File(['x'], 'doc.pdf', { type: 'application/pdf' })
 
@@ -77,7 +77,7 @@ describe('ImageUpload', () => {
     mockGetUploadUrl.mockResolvedValue({ uploadUrl: 'https://s3.example.com/upload', key: 'img/123.jpg' })
     vi.mocked(globalThis.fetch).mockResolvedValue(new Response(null, { status: 200 }))
 
-    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} />)
+    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} recipeId="test-recipe-id" />)
 
     const file = new File(['x'], 'photo.png', { type: 'image/png' })
     Object.defineProperty(file, 'size', { value: 1024 })
@@ -97,7 +97,7 @@ describe('ImageUpload', () => {
     mockGetUploadUrl.mockResolvedValue({ uploadUrl: 'https://s3.example.com/upload', key: 'img/123.jpg' })
     vi.mocked(globalThis.fetch).mockResolvedValue(new Response(null, { status: 200 }))
 
-    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} />)
+    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} recipeId="test-recipe-id" />)
 
     const file = new File(['x'], 'photo.png', { type: 'image/png' })
     Object.defineProperty(file, 'size', { value: 1024 })
@@ -117,7 +117,7 @@ describe('ImageUpload', () => {
   it('shows error with retry on upload failure', async () => {
     mockGetUploadUrl.mockRejectedValue(new Error('Network error'))
 
-    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} />)
+    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} recipeId="test-recipe-id" />)
 
     const file = new File(['x'], 'photo.png', { type: 'image/png' })
     Object.defineProperty(file, 'size', { value: 1024 })
@@ -134,7 +134,7 @@ describe('ImageUpload', () => {
   })
 
   it('has "Replace" button when currentKey is set', () => {
-    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} currentKey="img/existing.jpg" />)
+    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} recipeId="test-recipe-id" currentKey="img/existing.jpg" />)
 
     expect(screen.getByRole('button', { name: /replace/i })).toBeInTheDocument()
   })
@@ -142,7 +142,7 @@ describe('ImageUpload', () => {
   it('clicking the Upload button opens the file picker', async () => {
     const clickSpy = vi.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {})
 
-    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} />)
+    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} recipeId="test-recipe-id" />)
 
     const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: /upload/i }))
@@ -154,7 +154,7 @@ describe('ImageUpload', () => {
     const clickSpy = vi.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {})
 
     render(
-      <ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} currentKey="img/existing.jpg" />
+      <ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} recipeId="test-recipe-id" currentKey="img/existing.jpg" />
     )
 
     const user = userEvent.setup()
@@ -166,7 +166,7 @@ describe('ImageUpload', () => {
   it('clicking Retry after a failed upload re-attempts the upload', async () => {
     mockGetUploadUrl.mockRejectedValueOnce(new Error('Network error'))
 
-    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} />)
+    render(<ImageUpload onUpload={mockOnUpload} getToken={mockGetToken} recipeId="test-recipe-id" />)
 
     const file = new File(['x'], 'photo.png', { type: 'image/png' })
     Object.defineProperty(file, 'size', { value: 1024 })
@@ -192,5 +192,13 @@ describe('ImageUpload', () => {
       expect(mockGetUploadUrl).toHaveBeenCalledTimes(2)
     })
     expect(mockOnUpload).toHaveBeenCalledWith('img/123.jpg')
+  })
+
+  it('requires recipeId prop (compile-time check)', () => {
+    // @ts-expect-error — recipeId is required
+    render(<ImageUpload onUpload={vi.fn()} getToken={vi.fn()} />)
+    // The `@ts-expect-error` above is the real assertion — if recipeId ever
+    // becomes optional again, TypeScript will fail this file's compilation.
+    expect(true).toBe(true)
   })
 })

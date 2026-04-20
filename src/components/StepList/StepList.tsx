@@ -9,7 +9,7 @@ import styles from './StepList.module.css'
 export interface StepListProps {
   steps: Step[]
   onChange: (steps: Step[]) => void
-  recipeId?: string
+  recipeId: string
   getToken?: () => Promise<string>
   onAnnounce?: (message: string) => void
 }
@@ -71,7 +71,7 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken, onAn
             {getToken && (
               <div className={styles.imageBlock}>
                 <ImageUpload
-                  id={recipeId}
+                  recipeId={recipeId}
                   imageType="step"
                   stepOrder={index + 1}
                   currentKey={step.image?.key}

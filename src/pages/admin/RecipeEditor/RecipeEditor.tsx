@@ -428,12 +428,14 @@ const RecipeEditor: FC = () => {
 
         <div className={styles.section}>
           <div className={styles.field}>
-            <ImageUpload
-              onUpload={setCoverImageKey}
-              currentKey={form.coverImageKey || undefined}
-              getToken={getAccessToken}
-              id={recipeId}
-            />
+            {recipeId && (
+              <ImageUpload
+                onUpload={setCoverImageKey}
+                currentKey={form.coverImageKey || undefined}
+                getToken={getAccessToken}
+                recipeId={recipeId}
+              />
+            )}
           </div>
 
           <div className={styles.field}>
@@ -505,13 +507,15 @@ const RecipeEditor: FC = () => {
         </div>
 
         <div className={styles.section}>
-          <StepList
-            steps={form.steps}
-            onChange={setSteps}
-            recipeId={recipeId}
-            getToken={getAccessToken}
-            onAnnounce={announce}
-          />
+          {recipeId && (
+            <StepList
+              steps={form.steps}
+              onChange={setSteps}
+              recipeId={recipeId}
+              getToken={getAccessToken}
+              onAnnounce={announce}
+            />
+          )}
         </div>
 
         <div className={styles.actions}>
