@@ -1,5 +1,5 @@
 import { handleSessionError } from '@api/auth'
-import { deleteRecipe, fetchMyRecipes, publishRecipe, unpublishRecipe } from '@api/recipes'
+import { deleteRecipe, fetchAllRecipes, publishRecipe, unpublishRecipe } from '@api/recipes'
 import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
 import Link from '@components/Link'
@@ -9,7 +9,7 @@ import Toast, { type ToastState } from '@components/Toast'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import type { Recipe } from '@models/recipe'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import styles from './RecipeList.module.css'
@@ -23,6 +23,11 @@ const RecipeList = () => {
   const [error, setError] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Recipe | null>(null)
   const [toast, setToast] = useState<ToastState | null>(null)
+
+  const sortedRecipes = useMemo(
+    () => [...recipes].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
+    [recipes],
+  )
 
   useEffect(() => {
     const state = location.state as { accessDenied?: boolean } | null
@@ -38,7 +43,7 @@ const RecipeList = () => {
     setError(false)
     try {
       const token = await getAccessToken()
-      const data = await fetchMyRecipes(token)
+      const data = await fetchAllRecipes(token)
       setRecipes(data)
     } catch (err) {
       if (!handleSessionError(err, logout, navigate)) {
@@ -130,7 +135,7 @@ const RecipeList = () => {
               </tr>
             </thead>
             <tbody>
-              {recipes.map((recipe) => (
+              {sortedRecipes.map((recipe) => (
                 <tr key={recipe.id}>
                   <td>{recipe.title}</td>
                   <td>

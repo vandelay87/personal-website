@@ -1,14 +1,14 @@
-import { deleteRecipe, fetchMyRecipes, publishRecipe, unpublishRecipe } from '@api/recipes'
+import { deleteRecipe, fetchAllRecipes, publishRecipe, unpublishRecipe } from '@api/recipes'
 import { useAuth } from '@contexts/AuthContext'
 import type { Recipe } from '@models/recipe'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import RecipeList from './RecipeList'
 
 vi.mock('@api/recipes', () => ({
-  fetchMyRecipes: vi.fn(),
+  fetchAllRecipes: vi.fn(),
   publishRecipe: vi.fn(),
   unpublishRecipe: vi.fn(),
   deleteRecipe: vi.fn(),
@@ -84,7 +84,7 @@ describe('Admin RecipeList page', () => {
       login: vi.fn(),
       logout: vi.fn(),
     })
-    vi.mocked(fetchMyRecipes).mockResolvedValue([mockDraftRecipe, mockPublishedRecipe])
+    vi.mocked(fetchAllRecipes).mockResolvedValue([mockDraftRecipe, mockPublishedRecipe])
     vi.mocked(publishRecipe).mockResolvedValue(undefined)
     vi.mocked(unpublishRecipe).mockResolvedValue(undefined)
     vi.mocked(deleteRecipe).mockResolvedValue(undefined)
@@ -196,7 +196,7 @@ describe('Admin RecipeList page', () => {
   })
 
   it('shows empty state when no recipes exist', async () => {
-    vi.mocked(fetchMyRecipes).mockResolvedValue([])
+    vi.mocked(fetchAllRecipes).mockResolvedValue([])
     renderRecipeList()
 
     await waitFor(() => {
@@ -207,14 +207,14 @@ describe('Admin RecipeList page', () => {
   })
 
   it('shows loading indicator while fetching', () => {
-    vi.mocked(fetchMyRecipes).mockReturnValue(new Promise(() => {}))
+    vi.mocked(fetchAllRecipes).mockReturnValue(new Promise(() => {}))
     renderRecipeList()
 
     expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument()
   })
 
   it('shows error state with retry button when fetch fails', async () => {
-    vi.mocked(fetchMyRecipes).mockRejectedValue(new Error('500 Internal Server Error'))
+    vi.mocked(fetchAllRecipes).mockRejectedValue(new Error('500 Internal Server Error'))
     renderRecipeList()
 
     await waitFor(() => {
@@ -232,5 +232,69 @@ describe('Admin RecipeList page', () => {
     const statuses = await screen.findAllByRole('status')
     const accessDeniedStatus = statuses.find((el) => /access denied/i.test(el.textContent ?? ''))
     expect(accessDeniedStatus).toBeDefined()
+  })
+
+  it('calls fetchAllRecipes (not fetchMyRecipes) to load both draft and published recipes', async () => {
+    renderRecipeList()
+
+    await waitFor(() => {
+      expect(fetchAllRecipes).toHaveBeenCalledWith('token-123')
+    })
+  })
+
+  it('renders rows sorted by updatedAt descending regardless of input order', async () => {
+    const oldest: Recipe = {
+      ...mockDraftRecipe,
+      id: 'rec-oldest',
+      title: 'Oldest',
+      updatedAt: '2026-01-01T00:00:00Z',
+      status: 'published',
+    }
+    const newest: Recipe = {
+      ...mockDraftRecipe,
+      id: 'rec-newest',
+      title: 'Newest',
+      updatedAt: '2026-04-19T00:00:00Z',
+      status: 'draft',
+    }
+    const middle: Recipe = {
+      ...mockDraftRecipe,
+      id: 'rec-middle',
+      title: 'Middle',
+      updatedAt: '2026-02-15T00:00:00Z',
+      status: 'published',
+    }
+
+    vi.mocked(fetchAllRecipes).mockResolvedValue([oldest, newest, middle])
+    renderRecipeList()
+
+    await waitFor(() => {
+      expect(screen.getByText('Newest')).toBeInTheDocument()
+    })
+
+    const rows = screen.getAllByRole('row').slice(1) // skip header row
+    const titles = rows.map((row) => within(row).getAllByRole('cell')[0].textContent)
+
+    expect(titles).toEqual(['Newest', 'Middle', 'Oldest'])
+  })
+
+  it('renders a StatusBadge with matching data-status for each row in a mixed draft/published list', async () => {
+    renderRecipeList()
+
+    await waitFor(() => {
+      expect(screen.getByText('Spaghetti Bolognese')).toBeInTheDocument()
+    })
+
+    const draftRow = screen.getByText('Spaghetti Bolognese').closest('tr')
+    const publishedRow = screen.getByText('Thai Green Curry').closest('tr')
+
+    expect(draftRow).not.toBeNull()
+    expect(publishedRow).not.toBeNull()
+
+    const draftBadge = within(draftRow as HTMLElement).getByText(/draft/i)
+    const publishedBadge = within(publishedRow as HTMLElement).getByText(/^published$/i)
+
+    expect(draftBadge).toHaveAttribute('data-status', 'draft')
+    expect(publishedBadge).toHaveAttribute('data-status', 'published')
   })
 })
