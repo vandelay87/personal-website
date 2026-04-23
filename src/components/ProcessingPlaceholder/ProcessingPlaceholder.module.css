@@ -1,0 +1,55 @@
+.root {
+  margin: 0;
+}
+
+.inner {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-bg-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-none);
+}
+
+/* ── Pulsing overlay ─────────────────────────────────────── */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-bg-subtle);
+  opacity: 0.4;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* ── Reduced-motion fallbacks ────────────────────────────── */
+/* Class-based path — set by the TSX when matchMedia reports reduce. */
+.root.reducedMotion .overlay {
+  animation: none;
+  opacity: 0.6;
+}
+
+/* Media-query path — covers cases where JS hasn't applied the class yet. */
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+/* ── Caption ─────────────────────────────────────────────── */
+.caption {
+  padding: var(--space-3) 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+  font-style: italic;
+}
