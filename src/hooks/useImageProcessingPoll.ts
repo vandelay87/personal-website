@@ -1,4 +1,4 @@
-import { handleSessionError } from '@api/auth'
+import { handleSessionError, isNotFoundError } from '@api/auth'
 import { fetchRecipeByIdAdmin } from '@api/recipes'
 import { useAuth } from '@contexts/AuthContext'
 import type { Recipe, RecipeImage } from '@models/recipe'
@@ -36,11 +36,6 @@ const unreadyKeysOf = (recipe: Recipe): string[] =>
     .filter((img) => !img.processedAt)
     .map((img) => img.key)
 
-const is404 = (err: unknown): boolean => {
-  const message = err instanceof Error ? err.message : ''
-  return /\b404\b/.test(message)
-}
-
 export const useImageProcessingPoll = (
   recipe: Recipe | null,
   onReady: (updates: ImageReadyUpdate[]) => void,
@@ -60,7 +55,7 @@ export const useImageProcessingPoll = (
   const getAccessTokenRef = useRef(getAccessToken)
   const isMountedRef = useRef(true)
   const abortRef = useRef<AbortController | null>(null)
-  const intervalTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const nextTickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const timeoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const emittedReadyRef = useRef<Set<string>>(new Set())
   const activeRecipeIdRef = useRef<string | null>(null)
@@ -73,11 +68,8 @@ export const useImageProcessingPoll = (
   const recipeId = recipe?.id ?? null
   const unreadyKeysSignature = useMemo(() => {
     if (!recipe) return ''
-    const keys = unreadyKeysOf(recipe)
-    return keys.sort().join('|')
+    return unreadyKeysOf(recipe).sort().join('|')
   }, [recipe])
-
-  const shouldPoll = recipeId !== null && unreadyKeysSignature.length > 0
 
   useEffect(() => {
     isMountedRef.current = true
@@ -87,7 +79,7 @@ export const useImageProcessingPoll = (
   }, [])
 
   useEffect(() => {
-    if (!shouldPoll || recipeId === null) {
+    if (recipeId === null || unreadyKeysSignature.length === 0) {
       return
     }
 
@@ -96,9 +88,9 @@ export const useImageProcessingPoll = (
     setTimedOut(false)
 
     const stopPolling = () => {
-      if (intervalTimerRef.current !== null) {
-        clearInterval(intervalTimerRef.current)
-        intervalTimerRef.current = null
+      if (nextTickTimerRef.current !== null) {
+        clearTimeout(nextTickTimerRef.current)
+        nextTickTimerRef.current = null
       }
       if (timeoutTimerRef.current !== null) {
         clearTimeout(timeoutTimerRef.current)
@@ -108,6 +100,28 @@ export const useImageProcessingPoll = (
         abortRef.current.abort()
         abortRef.current = null
       }
+    }
+
+    const handleTickError = (err: unknown): boolean => {
+      if (isNotFoundError(err)) {
+        stopPolling()
+        return true
+      }
+      if (handleSessionError(err, logoutRef.current, navigateRef.current)) {
+        stopPolling()
+        return true
+      }
+      return false
+    }
+
+    const scheduleNextTick = () => {
+      if (!isMountedRef.current) return
+      if (activeRecipeIdRef.current !== recipeId) return
+      if (nextTickTimerRef.current !== null) return
+      nextTickTimerRef.current = setTimeout(() => {
+        nextTickTimerRef.current = null
+        void runTick()
+      }, intervalMs)
     }
 
     const runTick = async () => {
@@ -124,8 +138,7 @@ export const useImageProcessingPoll = (
       } catch (err) {
         if (controller.signal.aborted) return
         if (activeRecipeIdRef.current !== tickRecipeId) return
-        const redirected = handleSessionError(err, logoutRef.current, navigateRef.current)
-        if (redirected) stopPolling()
+        if (!handleTickError(err)) scheduleNextTick()
         return
       }
 
@@ -136,8 +149,13 @@ export const useImageProcessingPoll = (
         if (activeRecipeIdRef.current !== tickRecipeId) return
 
         const newlyReady: ImageReadyUpdate[] = []
+        let hasUnready = false
         for (const img of collectImages(fresh)) {
-          if (img.processedAt && !emittedReadyRef.current.has(img.key)) {
+          if (!img.processedAt) {
+            hasUnready = true
+            continue
+          }
+          if (!emittedReadyRef.current.has(img.key)) {
             emittedReadyRef.current.add(img.key)
             newlyReady.push({ key: img.key, processedAt: img.processedAt })
           }
@@ -147,28 +165,19 @@ export const useImageProcessingPoll = (
           onReadyRef.current(newlyReady)
         }
 
-        if (unreadyKeysOf(fresh).length === 0) {
+        if (hasUnready) {
+          scheduleNextTick()
+        } else {
           stopPolling()
         }
       } catch (err) {
         if (controller.signal.aborted) return
         if (activeRecipeIdRef.current !== tickRecipeId) return
-
-        if (is404(err)) {
-          stopPolling()
-          return
-        }
-
-        const redirected = handleSessionError(err, logoutRef.current, navigateRef.current)
-        if (redirected) {
-          stopPolling()
-        }
+        if (!handleTickError(err)) scheduleNextTick()
       }
     }
 
-    intervalTimerRef.current = setInterval(() => {
-      void runTick()
-    }, intervalMs)
+    scheduleNextTick()
 
     timeoutTimerRef.current = setTimeout(() => {
       stopPolling()
@@ -180,7 +189,7 @@ export const useImageProcessingPoll = (
     return () => {
       stopPolling()
     }
-  }, [shouldPoll, recipeId, unreadyKeysSignature, intervalMs, timeoutMs])
+  }, [recipeId, unreadyKeysSignature, intervalMs, timeoutMs])
 
   return { timedOut }
 }

@@ -82,3 +82,8 @@ export const handleSessionError = (
   navigate('/admin/login')
   return true
 }
+
+export const isNotFoundError = (err: unknown): boolean => {
+  const message = err instanceof Error ? err.message : ''
+  return /\b404\b/.test(message)
+}
