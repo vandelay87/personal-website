@@ -51,6 +51,11 @@ const _statusOk2: Recipe['status'] = 'published'
 // @ts-expect-error — 'archived' is not a valid status
 const _statusBad: Recipe['status'] = 'archived'
 const _recipeWithTtl: Recipe = { ...mockRecipe, ttl: 123 }
+const _coverWithProcessedAt: Recipe['coverImage'] = {
+  key: 'spaghetti-cover',
+  alt: 'A bowl of spaghetti bolognese',
+  processedAt: 1714000000,
+}
 
 beforeEach(() => {
   vi.restoreAllMocks()
@@ -297,6 +302,59 @@ describe('authenticated recipe endpoints', () => {
 
       const mod = await import('./recipes')
       await expect(mod.fetchAllRecipes('bad-token')).rejects.toThrow('401')
+    })
+  })
+
+  describe('fetchRecipeByIdAdmin', () => {
+    it('GET /recipes/admin/{id} with token and returns the Recipe', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockRecipe),
+        })
+      )
+
+      const mod = await import('./recipes')
+      const result = await mod.fetchRecipeByIdAdmin('token-123', 'r1')
+
+      expect(result).toEqual(mockRecipe)
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/recipes/admin/r1'),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: 'Bearer token-123',
+          }),
+        })
+      )
+    })
+
+    it('throws with 401 on unauthorised', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: false,
+          status: 401,
+          statusText: 'Unauthorized',
+        })
+      )
+
+      const mod = await import('./recipes')
+      await expect(mod.fetchRecipeByIdAdmin('bad-token', 'r1')).rejects.toThrow('401')
+    })
+
+    it('throws with 404 when recipe is missing', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: false,
+          status: 404,
+          statusText: 'Not Found',
+        })
+      )
+
+      const mod = await import('./recipes')
+      await expect(mod.fetchRecipeByIdAdmin('token-123', 'missing')).rejects.toThrow('404')
     })
   })
 

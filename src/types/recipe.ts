@@ -8,6 +8,7 @@ export const recipeImageUrl = (key: string, variant: RecipeImageVariant): string
 export interface RecipeImage {
   key: string
   alt: string
+  processedAt?: number
 }
 
 export interface Ingredient {
