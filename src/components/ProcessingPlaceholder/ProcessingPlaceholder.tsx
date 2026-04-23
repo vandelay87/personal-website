@@ -41,10 +41,7 @@ const ProcessingPlaceholder: FC<ProcessingPlaceholderProps> = ({
     .join(' ')
 
   return (
-    <figure
-      className={rootClassName}
-      style={{ aspectRatio: aspectRatio ?? undefined }}
-    >
+    <figure className={rootClassName}>
       <div
         className={styles.inner}
         style={{ aspectRatio: aspectRatio ?? undefined }}

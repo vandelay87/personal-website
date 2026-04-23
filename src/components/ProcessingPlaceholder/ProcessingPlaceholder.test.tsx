@@ -72,16 +72,16 @@ describe('ProcessingPlaceholder', () => {
     expect(root).toHaveClass('foo')
   })
 
-  it('applies the aspectRatio prop via inline style', () => {
+  it('applies the aspectRatio prop via inline style on the inner container', () => {
     stubMatchMedia(false)
 
     const { container } = render(
       <ProcessingPlaceholder aspectRatio="16/9" />,
     )
 
-    const root = container.firstElementChild as HTMLElement | null
-    expect(root).not.toBeNull()
-    expect(root).toHaveStyle({ aspectRatio: '16/9' })
+    const inner = container.querySelector(`.${styles.inner}`) as HTMLElement | null
+    expect(inner).not.toBeNull()
+    expect(inner).toHaveStyle({ aspectRatio: '16/9' })
   })
 
   it('does not apply the reduced-motion class when prefers-reduced-motion is not set', () => {
