@@ -60,9 +60,14 @@ export const fetchAllRecipes = async (token: string): Promise<Recipe[]> => {
   return response.json()
 }
 
-export const fetchRecipeByIdAdmin = async (token: string, id: string): Promise<Recipe> => {
+export const fetchRecipeByIdAdmin = async (
+  token: string,
+  id: string,
+  signal?: AbortSignal
+): Promise<Recipe> => {
   const response = await fetch(`${API_BASE}/recipes/admin/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
+    signal,
   })
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`)
