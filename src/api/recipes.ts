@@ -60,6 +60,10 @@ export const fetchAllRecipes = async (token: string): Promise<Recipe[]> => {
   return response.json()
 }
 
+export const fetchRecipeByIdAdmin = async (_token: string, _id: string): Promise<Recipe> => {
+  throw new Error('not implemented')
+}
+
 export const updateRecipe = async (
   token: string,
   id: string,
