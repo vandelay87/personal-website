@@ -35,7 +35,9 @@ const RecipeDetailView: FC<RecipeDetailViewProps> = ({ recipe }) => (
         containerClassName={styles.coverImageWrapper}
       />
     ) : (
-      <ProcessingPlaceholder aspectRatio="16/9" className={styles.coverImage} />
+      <div className={styles.coverImageWrapper}>
+        <ProcessingPlaceholder aspectRatio="16/9" />
+      </div>
     )}
 
     <Typography variant="heading1" className={styles.title}>{recipe.title}</Typography>

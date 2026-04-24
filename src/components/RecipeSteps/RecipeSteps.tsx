@@ -22,7 +22,7 @@ const RecipeSteps: FC<RecipeStepsProps> = ({ steps }) => (
             className={styles.image}
           />
         ) : (
-          <ProcessingPlaceholder className={styles.image} />
+          <ProcessingPlaceholder aspectRatio="4/3" className={styles.image} />
         ))}
       </li>
     ))}
