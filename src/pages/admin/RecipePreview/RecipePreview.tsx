@@ -29,10 +29,11 @@ const mergeReadiness = (recipe: Recipe, updates: ImageReadyUpdate[]): Recipe => 
 
   let stepsChanged = false
   const nextSteps = recipe.steps.map((step) => {
-    const stepUpdate = step.image?.key ? byKey.get(step.image.key) : undefined
+    if (!step.image?.key) return step
+    const stepUpdate = byKey.get(step.image.key)
     if (stepUpdate === undefined) return step
     stepsChanged = true
-    return { ...step, image: { ...step.image!, processedAt: stepUpdate } }
+    return { ...step, image: { ...step.image, processedAt: stepUpdate } }
   })
 
   if (nextCover === recipe.coverImage && !stepsChanged) return recipe
@@ -56,7 +57,6 @@ const RecipePreview: FC = () => {
   useEffect(() => {
     if (!id) return
     const controller = new AbortController()
-    let cancelled = false
 
     const load = async () => {
       setLoading(true)
@@ -64,10 +64,9 @@ const RecipePreview: FC = () => {
       try {
         const token = await getAccessToken()
         const found = await fetchRecipeByIdAdmin(token, id, controller.signal)
-        if (cancelled) return
         setRecipe(found)
       } catch (err) {
-        if (cancelled) return
+        if (controller.signal.aborted) return
         if (isSessionError(err)) {
           logout()
           navigate('/admin/login')
@@ -75,14 +74,13 @@ const RecipePreview: FC = () => {
         }
         setNotFound(true)
       } finally {
-        if (!cancelled) setLoading(false)
+        if (!controller.signal.aborted) setLoading(false)
       }
     }
 
     load()
 
     return () => {
-      cancelled = true
       controller.abort()
     }
   }, [id, getAccessToken, logout, navigate])
