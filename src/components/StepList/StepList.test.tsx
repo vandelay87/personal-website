@@ -105,6 +105,45 @@ describe('StepList', () => {
       expect(screen.queryByLabelText('Step 1 image alt text')).not.toBeInTheDocument()
     })
 
+    it('passes processedAt through to per-step ImageUpload so the correct render branch shows', () => {
+      const onChange = vi.fn()
+      const unreadyStep: Step = {
+        order: 1,
+        text: 'Stir',
+        image: { key: 'img/step.jpg', alt: 'x' },
+      }
+      const { rerender } = render(
+        <StepList
+          steps={[unreadyStep]}
+          onChange={onChange}
+          getToken={mockGetToken}
+          recipeId="test-recipe-id"
+        />
+      )
+
+      // Unready step: processing placeholder shown, no rendered <img>.
+      expect(screen.getByText(/processing image/i)).toBeInTheDocument()
+      expect(screen.queryByRole('img')).not.toBeInTheDocument()
+
+      const readyStep: Step = {
+        order: 1,
+        text: 'Stir',
+        image: { key: 'img/step.jpg', alt: 'x', processedAt: 12345 },
+      }
+      rerender(
+        <StepList
+          steps={[readyStep]}
+          onChange={onChange}
+          getToken={mockGetToken}
+          recipeId="test-recipe-id"
+        />
+      )
+
+      // Ready step: the <img> renders, placeholder gone.
+      expect(screen.getByRole('img')).toBeInTheDocument()
+      expect(screen.queryByText(/processing image/i)).not.toBeInTheDocument()
+    })
+
     it('typing in the alt-text input calls onChange with the updated step', async () => {
       const user = userEvent.setup()
       const onChange = vi.fn()
