@@ -1,4 +1,5 @@
 import Image from '@components/Image'
+import ProcessingPlaceholder from '@components/ProcessingPlaceholder'
 import Typography from '@components/Typography'
 import { recipeImageUrl, type RecipeIndex } from '@models/recipe'
 import type { FC } from 'react'
@@ -19,13 +20,17 @@ const RecipeCard: FC<RecipeCardProps> = ({ recipe, eager = false, hideTags = fal
   return (
     <article className={styles.card}>
       <div className={styles.imageWrapper}>
-        <Image
-          src={thumbnailSrc}
-          alt={recipe.coverImage.alt}
-          aspectRatio="16/9"
-          className={styles.image}
-          lazy={!eager}
-        />
+        {recipe.coverImage.processedAt ? (
+          <Image
+            src={thumbnailSrc}
+            alt={recipe.coverImage.alt}
+            aspectRatio="16/9"
+            className={styles.image}
+            lazy={!eager}
+          />
+        ) : (
+          <ProcessingPlaceholder aspectRatio="16/9" className={styles.image} />
+        )}
       </div>
 
       <div className={styles.body}>
