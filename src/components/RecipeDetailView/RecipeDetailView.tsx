@@ -1,4 +1,5 @@
 import Image from '@components/Image'
+import ProcessingPlaceholder from '@components/ProcessingPlaceholder'
 import RecipeIngredients from '@components/RecipeIngredients'
 import RecipeSteps from '@components/RecipeSteps'
 import Typography from '@components/Typography'
@@ -23,15 +24,21 @@ const formatDate = (dateString: string): string => {
 
 const RecipeDetailView: FC<RecipeDetailViewProps> = ({ recipe }) => (
   <article className={styles.page}>
-    <Image
-      src={recipeImageUrl(recipe.coverImage.key, 'medium')}
-      srcSet={`${recipeImageUrl(recipe.coverImage.key, 'medium')} 800w, ${recipeImageUrl(recipe.coverImage.key, 'full')} 1200w`}
-      alt={recipe.coverImage.alt}
-      priority
-      maxWidth="var(--max-w-site)"
-      className={styles.coverImage}
-      containerClassName={styles.coverImageWrapper}
-    />
+    {recipe.coverImage.processedAt ? (
+      <Image
+        src={recipeImageUrl(recipe.coverImage.key, 'medium')}
+        srcSet={`${recipeImageUrl(recipe.coverImage.key, 'medium')} 800w, ${recipeImageUrl(recipe.coverImage.key, 'full')} 1200w`}
+        alt={recipe.coverImage.alt}
+        priority
+        maxWidth="var(--max-w-site)"
+        className={styles.coverImage}
+        containerClassName={styles.coverImageWrapper}
+      />
+    ) : (
+      <div className={styles.coverImageWrapper}>
+        <ProcessingPlaceholder aspectRatio="16/9" />
+      </div>
+    )}
 
     <Typography variant="heading1" className={styles.title}>{recipe.title}</Typography>
 

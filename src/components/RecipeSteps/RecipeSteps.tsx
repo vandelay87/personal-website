@@ -1,4 +1,5 @@
 import Image from '@components/Image'
+import ProcessingPlaceholder from '@components/ProcessingPlaceholder'
 import Typography from '@components/Typography'
 import { recipeImageUrl, type Step } from '@models/recipe'
 import type { FC } from 'react'
@@ -14,13 +15,15 @@ const RecipeSteps: FC<RecipeStepsProps> = ({ steps }) => (
     {steps.map((step) => (
       <li key={step.order} className={styles.item}>
         <Typography variant="body" className={styles.text}>{step.text}</Typography>
-        {step.image && (
+        {step.image && (step.image.processedAt ? (
           <Image
             src={recipeImageUrl(step.image.key, 'medium')}
             alt={step.image.alt}
             className={styles.image}
           />
-        )}
+        ) : (
+          <ProcessingPlaceholder aspectRatio="4/3" className={styles.image} />
+        ))}
       </li>
     ))}
   </ol>

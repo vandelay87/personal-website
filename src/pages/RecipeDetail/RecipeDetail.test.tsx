@@ -15,7 +15,11 @@ const mockRecipe: Recipe = {
   title: 'Test Recipe',
   slug: 'test-recipe',
   intro: 'A delicious test recipe',
-  coverImage: { key: 'processed/recipes/recipe-1/cover', alt: 'Test cover' },
+  coverImage: {
+    key: 'processed/recipes/recipe-1/cover',
+    alt: 'Test cover',
+    processedAt: 1_700_000_000_000,
+  },
   ingredients: [
     { item: 'flour', quantity: '200', unit: 'g' },
     { item: 'sugar', quantity: '100', unit: 'g' },
@@ -24,7 +28,11 @@ const mockRecipe: Recipe = {
     {
       order: 1,
       text: 'Mix ingredients',
-      image: { key: 'processed/recipes/recipe-1/step-1', alt: 'Mixing' },
+      image: {
+        key: 'processed/recipes/recipe-1/step-1',
+        alt: 'Mixing',
+        processedAt: 1_700_000_000_000,
+      },
     },
     { order: 2, text: 'Bake for 30 minutes' },
   ],

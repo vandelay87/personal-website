@@ -7,13 +7,21 @@ const mockSteps: Step[] = [
   {
     order: 1,
     text: 'Mix ingredients together',
-    image: { key: 'processed/recipes/recipe-1/step-1', alt: 'Mixing bowl' },
+    image: {
+      key: 'processed/recipes/recipe-1/step-1',
+      alt: 'Mixing bowl',
+      processedAt: 1_700_000_000_000,
+    },
   },
   { order: 2, text: 'Bake for 30 minutes' },
   {
     order: 3,
     text: 'Let it cool',
-    image: { key: 'processed/recipes/recipe-1/step-3', alt: 'Cooling rack' },
+    image: {
+      key: 'processed/recipes/recipe-1/step-3',
+      alt: 'Cooling rack',
+      processedAt: 1_700_000_000_000,
+    },
   },
 ]
 
@@ -55,5 +63,51 @@ describe('RecipeSteps', () => {
     render(<RecipeSteps steps={[{ order: 1, text: 'Bake for 30 minutes' }]} />)
 
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
+  })
+
+  it('renders a ProcessingPlaceholder in place of the image when step.image.processedAt is absent', () => {
+    const processingSteps: Step[] = [
+      {
+        order: 1,
+        text: 'Mix ingredients together',
+        image: {
+          key: 'processed/recipes/recipe-1/step-1',
+          alt: 'Mixing bowl',
+        },
+      },
+    ]
+
+    render(<RecipeSteps steps={processingSteps} />)
+
+    expect(screen.getByText(/processing image/i)).toBeInTheDocument()
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+  })
+
+  it('renders the ready image and no placeholder when only some step images are processed', () => {
+    const mixedSteps: Step[] = [
+      {
+        order: 1,
+        text: 'Mix ingredients together',
+        image: {
+          key: 'processed/recipes/recipe-1/step-1',
+          alt: 'Mixing bowl',
+          processedAt: 1_700_000_000_000,
+        },
+      },
+      {
+        order: 2,
+        text: 'Let it cool',
+        image: {
+          key: 'processed/recipes/recipe-1/step-2',
+          alt: 'Cooling rack',
+        },
+      },
+    ]
+
+    render(<RecipeSteps steps={mixedSteps} />)
+
+    expect(screen.getByRole('img', { name: 'Mixing bowl' })).toBeInTheDocument()
+    expect(screen.queryByRole('img', { name: 'Cooling rack' })).not.toBeInTheDocument()
+    expect(screen.getByText(/processing image/i)).toBeInTheDocument()
   })
 })
