@@ -8,7 +8,11 @@ const mockRecipe: RecipeIndex = {
   id: 'rec-001',
   title: 'Classic Margherita Pizza',
   slug: 'classic-margherita-pizza',
-  coverImage: { key: 'recipes/rec-001/cover', alt: 'Margherita pizza on a wooden board' },
+  coverImage: {
+    key: 'recipes/rec-001/cover',
+    alt: 'Margherita pizza on a wooden board',
+    processedAt: 1_700_000_000_000,
+  },
   tags: ['Italian', 'Quick'],
   prepTime: 15,
   cookTime: 12,
@@ -51,5 +55,22 @@ describe('RecipeCard', () => {
     expect(screen.getByText(/15/)).toBeInTheDocument()
     expect(screen.getByText(/12/)).toBeInTheDocument()
     expect(screen.getByText(/4/)).toBeInTheDocument()
+  })
+
+  it('renders a ProcessingPlaceholder in place of the thumbnail when coverImage.processedAt is absent', () => {
+    const processingRecipe: RecipeIndex = {
+      ...mockRecipe,
+      coverImage: {
+        key: 'recipes/rec-001/cover',
+        alt: 'Margherita pizza on a wooden board',
+      },
+    }
+
+    renderRecipeCard(processingRecipe)
+
+    expect(screen.getByText(/processing image/i)).toBeInTheDocument()
+    expect(
+      screen.queryByRole('img', { name: 'Margherita pizza on a wooden board' })
+    ).not.toBeInTheDocument()
   })
 })
