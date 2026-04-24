@@ -90,6 +90,32 @@ const ImageUpload: FC<ImageUploadProps> = ({
     if (lastFile) upload(lastFile)
   }
 
+  const renderPreview = () => {
+    if (preview) {
+      return (
+        <Image
+          key="preview"
+          src={preview}
+          alt="Upload preview"
+          className={styles.preview}
+          lazy={false}
+        />
+      )
+    }
+    if (!currentKey) return null
+    if (processedAt) {
+      return (
+        <Image
+          key="processed"
+          src={recipeImageUrl(currentKey, 'medium')}
+          alt={currentAlt ?? 'Current image'}
+          className={styles.preview}
+        />
+      )
+    }
+    return <ProcessingPlaceholder />
+  }
+
   return (
     <div className={styles.container}>
       <input
@@ -102,24 +128,7 @@ const ImageUpload: FC<ImageUploadProps> = ({
         aria-label="Upload image"
       />
 
-      {preview ? (
-        <Image
-          key="preview"
-          src={preview}
-          alt="Upload preview"
-          className={styles.preview}
-          lazy={false}
-        />
-      ) : currentKey && processedAt ? (
-        <Image
-          key="processed"
-          src={recipeImageUrl(currentKey, 'medium')}
-          alt={currentAlt ?? 'Current image'}
-          className={styles.preview}
-        />
-      ) : currentKey ? (
-        <ProcessingPlaceholder />
-      ) : null}
+      {renderPreview()}
 
       {error && (
         <div className={styles.error} role="alert">

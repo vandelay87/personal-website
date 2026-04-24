@@ -121,7 +121,6 @@ describe('StepList', () => {
         />
       )
 
-      // Unready step: processing placeholder shown, no rendered <img>.
       expect(screen.getByText(/processing image/i)).toBeInTheDocument()
       expect(screen.queryByRole('img')).not.toBeInTheDocument()
 
@@ -139,7 +138,6 @@ describe('StepList', () => {
         />
       )
 
-      // Ready step: the <img> renders, placeholder gone.
       expect(screen.getByRole('img')).toBeInTheDocument()
       expect(screen.queryByText(/processing image/i)).not.toBeInTheDocument()
     })

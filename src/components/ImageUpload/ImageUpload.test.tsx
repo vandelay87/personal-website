@@ -213,10 +213,7 @@ describe('ImageUpload', () => {
         />
       )
 
-      // The ProcessingPlaceholder renders its caption text.
       expect(screen.getByText(/processing image/i)).toBeInTheDocument()
-
-      // The processed <img> should NOT be in the document — we're still processing.
       expect(screen.queryByRole('img')).not.toBeInTheDocument()
     })
 
@@ -235,8 +232,6 @@ describe('ImageUpload', () => {
       const image = screen.getByRole('img')
       expect(image).toBeInTheDocument()
       expect(image).toHaveAttribute('alt', 'A tasty dish')
-
-      // Processing placeholder is not shown once processedAt is set.
       expect(screen.queryByText(/processing image/i)).not.toBeInTheDocument()
     })
 
@@ -265,7 +260,6 @@ describe('ImageUpload', () => {
         expect(preview).toHaveAttribute('src', 'blob:http://localhost/fake-preview')
       })
 
-      // Processing placeholder must not render when a blob preview is active.
       expect(screen.queryByText(/processing image/i)).not.toBeInTheDocument()
     })
   })
