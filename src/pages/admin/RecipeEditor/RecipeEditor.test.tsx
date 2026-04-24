@@ -18,7 +18,7 @@ import type { Recipe } from '@models/recipe'
 import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { createMemoryRouter, Link, RouterProvider } from 'react-router-dom'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
 
 import RecipeEditor from './RecipeEditor'
 
@@ -50,8 +50,8 @@ interface AutosaveMockControls {
   triggerSuccess: () => Promise<void>
   reset: () => void
   hookResult: UseAutosaveResult
-  retryMock: ReturnType<typeof vi.fn>
-  flushMock: ReturnType<typeof vi.fn>
+  retryMock: Mock<() => void>
+  flushMock: Mock<() => Promise<void>>
   callCount: number
 }
 
