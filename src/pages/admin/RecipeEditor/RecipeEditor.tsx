@@ -106,29 +106,25 @@ const applyImageStatusUpdates = (
   state: FormState,
   updates: { key: string; processedAt: number }[]
 ): FormState => {
-  let coverImageProcessedAt = state.coverImageProcessedAt
-  let steps = state.steps
-  let stepsChanged = false
+  const byKey = new Map(updates.filter((u) => u.key).map((u) => [u.key, u.processedAt]))
+  if (byKey.size === 0) return state
 
-  for (const { key, processedAt } of updates) {
-    if (key && key === state.coverImageKey) {
-      coverImageProcessedAt = processedAt
-    }
-    const nextSteps = steps.map((step) => {
-      if (step.image?.key && step.image.key === key) {
-        stepsChanged = true
-        return { ...step, image: { ...step.image, processedAt } }
-      }
-      return step
-    })
-    steps = nextSteps
-  }
+  const coverUpdate = byKey.get(state.coverImageKey)
+  const coverImageProcessedAt = coverUpdate ?? state.coverImageProcessedAt
+
+  let stepsChanged = false
+  const steps = state.steps.map((step) => {
+    const stepUpdate = step.image?.key ? byKey.get(step.image.key) : undefined
+    if (stepUpdate === undefined) return step
+    stepsChanged = true
+    return { ...step, image: { ...step.image!, processedAt: stepUpdate } }
+  })
 
   if (coverImageProcessedAt === state.coverImageProcessedAt && !stepsChanged) {
     return state
   }
 
-  return { ...state, coverImageProcessedAt, steps }
+  return { ...state, coverImageProcessedAt, steps: stepsChanged ? steps : state.steps }
 }
 
 const formReducer = (state: FormState, action: FormAction): FormState => {
