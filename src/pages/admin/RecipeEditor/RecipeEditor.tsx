@@ -21,8 +21,9 @@ import TagInput from '@components/TagInput'
 import Toast from '@components/Toast'
 import { useAuth } from '@contexts/AuthContext'
 import { useAutosave } from '@hooks/useAutosave'
+import { useImageProcessingPoll } from '@hooks/useImageProcessingPoll'
 import type { Ingredient, Recipe, Step, Tag } from '@models/recipe'
-import { useCallback, useEffect, useReducer, useRef, useState, type FC } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type FC } from 'react'
 import { useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import styles from './RecipeEditor.module.css'
@@ -42,17 +43,22 @@ interface FormState {
   steps: Step[]
   coverImageKey: string
   coverImageAlt: string
+  coverImageProcessedAt?: number
   mode: EditorMode
   dirty: boolean
 }
 
-type SettableField = Exclude<keyof FormState, 'dirty' | 'mode' | 'id' | 'slug'>
+type SettableField = Exclude<
+  keyof FormState,
+  'dirty' | 'mode' | 'id' | 'slug' | 'coverImageProcessedAt'
+>
 
 type FormAction =
   | { type: 'SET_FIELD'; field: SettableField; value: FormState[SettableField] }
   | { type: 'LOAD_RECIPE'; recipe: Recipe }
   | { type: 'MARK_PRISTINE' }
   | { type: 'SET_MODE'; mode: EditorMode }
+  | { type: 'IMAGE_STATUS_UPDATE'; updates: { key: string; processedAt: number }[] }
 
 const MISSING_FIELDS_ID = 'publish-missing-fields'
 
@@ -69,6 +75,7 @@ const initialFormState: FormState = {
   steps: [{ order: 1, text: '' }],
   coverImageKey: '',
   coverImageAlt: '',
+  coverImageProcessedAt: undefined,
   mode: 'draft',
   dirty: false,
 }
@@ -89,9 +96,39 @@ const recipeToFormState = (recipe: Recipe): FormState => {
     steps: steps.length > 0 ? steps : [{ order: 1, text: '' }],
     coverImageKey: recipe.coverImage?.key ?? '',
     coverImageAlt: recipe.coverImage?.alt ?? '',
+    coverImageProcessedAt: recipe.coverImage?.processedAt,
     mode: recipe.status,
     dirty: false,
   }
+}
+
+const applyImageStatusUpdates = (
+  state: FormState,
+  updates: { key: string; processedAt: number }[]
+): FormState => {
+  let coverImageProcessedAt = state.coverImageProcessedAt
+  let steps = state.steps
+  let stepsChanged = false
+
+  for (const { key, processedAt } of updates) {
+    if (key && key === state.coverImageKey) {
+      coverImageProcessedAt = processedAt
+    }
+    const nextSteps = steps.map((step) => {
+      if (step.image?.key && step.image.key === key) {
+        stepsChanged = true
+        return { ...step, image: { ...step.image, processedAt } }
+      }
+      return step
+    })
+    steps = nextSteps
+  }
+
+  if (coverImageProcessedAt === state.coverImageProcessedAt && !stepsChanged) {
+    return state
+  }
+
+  return { ...state, coverImageProcessedAt, steps }
 }
 
 const formReducer = (state: FormState, action: FormAction): FormState => {
@@ -104,6 +141,8 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
       return { ...state, dirty: false }
     case 'SET_MODE':
       return { ...state, mode: action.mode }
+    case 'IMAGE_STATUS_UPDATE':
+      return applyImageStatusUpdates(state, action.updates)
   }
 }
 
@@ -128,6 +167,14 @@ const computeMissingFields = (form: FormState): string[] => {
   if (!form.coverImageAlt.trim()) missing.push('Cover image alt text')
   if (!form.ingredients.some((ing) => ing.item.trim())) missing.push('At least one ingredient')
   if (!form.steps.some((s) => s.text.trim())) missing.push('At least one step')
+  if (form.coverImageKey && !form.coverImageProcessedAt) {
+    missing.push('Cover image still processing')
+  }
+  form.steps.forEach((step, index) => {
+    if (step.image?.key && !step.image.processedAt) {
+      missing.push(`Step ${index + 1} image still processing`)
+    }
+  })
   return missing
 }
 
@@ -279,6 +326,48 @@ const RecipeEditor: FC = () => {
     }
   }, [autosaveStatus, lastSavedAt])
 
+  const announce = useCallback((message: string) => {
+    setAnnouncement((prev) => ({ message, toggle: !prev.toggle }))
+  }, [])
+
+  // `useImageProcessingPoll` only reads `id`, `coverImage`, and `steps` off the
+  // recipe it receives. Memoising over those fields keeps polling stable across
+  // unrelated form edits (title, ingredients, etc.) — which would otherwise
+  // rebuild the object on every keystroke and churn the hook's effect.
+  const loadedRecipe = useMemo<Recipe | null>(() => {
+    if (!form.id) return null
+    return {
+      id: form.id,
+      slug: form.slug,
+      title: form.title,
+      intro: form.intro,
+      prepTime: form.prepTime,
+      cookTime: form.cookTime,
+      servings: form.servings,
+      tags: form.tags,
+      ingredients: form.ingredients,
+      steps: form.steps,
+      coverImage: form.coverImageKey
+        ? {
+            key: form.coverImageKey,
+            alt: form.coverImageAlt,
+            processedAt: form.coverImageProcessedAt,
+          }
+        : { key: '', alt: '' },
+      authorId: '',
+      authorName: '',
+      createdAt: '',
+      updatedAt: '',
+      status: form.mode,
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.id, form.coverImageKey, form.coverImageAlt, form.coverImageProcessedAt, form.steps])
+
+  const { timedOut } = useImageProcessingPoll(loadedRecipe, (updates) => {
+    dispatch({ type: 'IMAGE_STATUS_UPDATE', updates })
+    announce('Image ready')
+  })
+
   const missingFields = computeMissingFields(form)
   const canPublish = missingFields.length === 0
 
@@ -355,10 +444,6 @@ const RecipeEditor: FC = () => {
     setToast(null)
   }, [])
 
-  const announce = useCallback((message: string) => {
-    setAnnouncement((prev) => ({ message, toggle: !prev.toggle }))
-  }, [])
-
   const setIngredients = useCallback((next: Ingredient[]) => setField('ingredients', next), [setField])
   const setSteps = useCallback((next: Step[]) => setField('steps', next), [setField])
   const setTags = useCallback((next: string[]) => setField('tags', next), [setField])
@@ -383,6 +468,12 @@ const RecipeEditor: FC = () => {
         <div className={styles.sessionBanner} role="alert">
           <span>Session expired — please log in again</span>
           <Link to={loginHref}>Log in again</Link>
+        </div>
+      )}
+
+      {timedOut && (
+        <div role="status" aria-live="polite" className={styles.timeoutBanner}>
+          Processing is taking longer than expected — try refreshing the page.
         </div>
       )}
 
@@ -433,6 +524,7 @@ const RecipeEditor: FC = () => {
                 onUpload={setCoverImageKey}
                 currentKey={form.coverImageKey || undefined}
                 currentAlt={form.coverImageAlt || undefined}
+                processedAt={form.coverImageProcessedAt}
                 getToken={getAccessToken}
                 recipeId={recipeId}
               />
