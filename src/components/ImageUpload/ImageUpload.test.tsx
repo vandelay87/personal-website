@@ -201,4 +201,66 @@ describe('ImageUpload', () => {
     // becomes optional again, TypeScript will fail this file's compilation.
     expect(true).toBe(true)
   })
+
+  describe('render branches (preview / processing / ready)', () => {
+    it('renders the processing placeholder when currentKey is set but processedAt is not', () => {
+      render(
+        <ImageUpload
+          onUpload={mockOnUpload}
+          getToken={mockGetToken}
+          recipeId="test-recipe-id"
+          currentKey="img/x.jpg"
+        />
+      )
+
+      expect(screen.getByText(/processing image/i)).toBeInTheDocument()
+      expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    })
+
+    it('renders the ready image when currentKey and processedAt are both set', () => {
+      render(
+        <ImageUpload
+          onUpload={mockOnUpload}
+          getToken={mockGetToken}
+          recipeId="test-recipe-id"
+          currentKey="img/x.jpg"
+          currentAlt="A tasty dish"
+          processedAt={1234567890}
+        />
+      )
+
+      const image = screen.getByRole('img')
+      expect(image).toBeInTheDocument()
+      expect(image).toHaveAttribute('alt', 'A tasty dish')
+      expect(screen.queryByText(/processing image/i)).not.toBeInTheDocument()
+    })
+
+    it('shows the blob preview even when processedAt is set (blob preview wins)', async () => {
+      mockGetUploadUrl.mockResolvedValue({ uploadUrl: 'https://s3.example.com/upload', key: 'img/123.jpg' })
+      vi.mocked(globalThis.fetch).mockResolvedValue(new Response(null, { status: 200 }))
+
+      render(
+        <ImageUpload
+          onUpload={mockOnUpload}
+          getToken={mockGetToken}
+          recipeId="test-recipe-id"
+          currentKey="img/existing.jpg"
+          processedAt={1234567890}
+        />
+      )
+
+      const file = new File(['x'], 'photo.png', { type: 'image/png' })
+      Object.defineProperty(file, 'size', { value: 1024 })
+
+      const input = screen.getByLabelText(/upload/i)
+      fireEvent.change(input, { target: { files: [file] } })
+
+      await waitFor(() => {
+        const preview = screen.getByRole('img')
+        expect(preview).toHaveAttribute('src', 'blob:http://localhost/fake-preview')
+      })
+
+      expect(screen.queryByText(/processing image/i)).not.toBeInTheDocument()
+    })
+  })
 })
