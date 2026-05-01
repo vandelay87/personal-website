@@ -98,6 +98,8 @@ const ImageUpload: FC<ImageUploadProps> = ({
           src={preview}
           alt="Upload preview"
           className={styles.preview}
+          aspectRatio="1 / 1"
+          maxWidth="200px"
           lazy={false}
         />
       )
@@ -110,10 +112,12 @@ const ImageUpload: FC<ImageUploadProps> = ({
           src={recipeImageUrl(currentKey, 'medium')}
           alt={currentAlt ?? 'Current image'}
           className={styles.preview}
+          aspectRatio="1 / 1"
+          maxWidth="200px"
         />
       )
     }
-    return <ProcessingPlaceholder />
+    return <ProcessingPlaceholder aspectRatio="1 / 1" />
   }
 
   return (
