@@ -128,6 +128,14 @@ export const deleteRecipe = async (token: string, id: string): Promise<void> => 
   }
 }
 
+// Dev-only: route the S3 PUT through the vite proxy so the browser sees a
+// same-origin request. The prod bucket's CORS only allows https://akli.dev.
+const applyDevS3Proxy = (uploadUrl: string): string => {
+  const bucketHost = import.meta.env.VITE_S3_BUCKET_HOST
+  if (!import.meta.env.DEV || !bucketHost) return uploadUrl
+  return uploadUrl.replace(`https://${bucketHost}`, '/s3-upload')
+}
+
 export const getUploadUrl = async (
   token: string,
   params: { recipeId: string; imageType: string; stepOrder?: number }
@@ -143,5 +151,6 @@ export const getUploadUrl = async (
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`)
   }
-  return response.json()
+  const { uploadUrl, key }: { uploadUrl: string; key: string } = await response.json()
+  return { uploadUrl: applyDevS3Proxy(uploadUrl), key }
 }
