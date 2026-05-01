@@ -18,8 +18,6 @@
 }
 
 .preview {
-  max-width: 200px;
-  max-height: 200px;
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-none);
   object-fit: cover;

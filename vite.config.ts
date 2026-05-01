@@ -7,6 +7,7 @@ import react from '@vitejs/plugin-react'
 import rehypeMermaid from 'rehype-mermaid'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
+import { loadEnv } from 'vite'
 import { imagetools } from 'vite-imagetools'
 import { defineConfig } from 'vitest/config'
 import remarkReadingTime from './plugins/remark-reading-time'
@@ -29,7 +30,9 @@ const getBlogRoutes = (): Array<{ route: string; priority: number; changefreq: '
   }
 }
 
-export default defineConfig(({ isSsrBuild }) => ({
+export default defineConfig(({ isSsrBuild, mode }) => {
+  const env = loadEnv(mode, dirname(fileURLToPath(import.meta.url)), '')
+  return {
   plugins: [
     react(),
     mdx({
@@ -108,6 +111,13 @@ export default defineConfig(({ isSsrBuild }) => ({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
+      ...(env.VITE_S3_BUCKET_HOST && {
+        '/s3-upload': {
+          target: `https://${env.VITE_S3_BUCKET_HOST}`,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/s3-upload/, ''),
+        },
+      }),
     },
   },
   ssr: {
@@ -133,4 +143,5 @@ export default defineConfig(({ isSsrBuild }) => ({
       reporter: ['text', 'json', 'html'],
     },
   },
-}))
+  }
+})
