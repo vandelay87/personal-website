@@ -43,7 +43,7 @@ The frontend is the only consumer of this contract. There is **no backwards-comp
 - **`recipeImageUrl` signature change** to `(recipeId, imageType, variant)` — keeping `(key, variant)` is the smaller-blast-radius choice (see Technical Considerations).
 - **Image optimization, format conversion, signed URLs, watermarking, CDN-side resize** — future work.
 - **Restructuring `imageStatus` map keys in DynamoDB** is out of scope for this repo (handled in the infra PRD's migration step).
-- **Standardising test fixtures** across `src/api/recipes.test.ts` and `src/entry-server.test.tsx` (which currently use simple keys like `'spaghetti-cover'` rather than the realistic `recipes/<id>/cover` shape) — these tests don't assert on URLs, so they pass either way. Worth doing as a follow-up cleanup but not in scope here.
+(Fixture standardisation across `src/api/recipes.test.ts` and `src/entry-server.test.tsx` is in scope — see the corresponding AC.)
 
 ## User Stories
 
@@ -188,6 +188,9 @@ ACs split into Automated (TDD-able with `pnpm test` / `pnpm lint` before deploy)
 - [ ] The line-47 URL assertion in `RecipeSteps.test.tsx` updated to use `expect.stringContaining('recipes/recipe-1/step-1-medium')` (matching house style) — not full-string equality, so the assertion stays loosely coupled to host changes.
 - [ ] `src/pages/RecipeDetail/RecipeDetail.test.tsx` `mockRecipe.coverImage.key` and `mockRecipe.steps[0].image.key` updated from `processed/recipes/recipe-1/...` to `recipes/recipe-1/...`. **No assertion text changes needed in this file** — it asserts on rendered alt text and structural elements, not on URLs.
 - [ ] Both updated test files pass `pnpm exec vitest run`.
+- [ ] `src/api/recipes.test.ts` fixtures with `coverImage.key` or `step.image.key` set to non-realistic values (e.g. `'spaghetti-cover'`) are updated to the realistic shape (e.g. `'recipes/spaghetti-bolognese/cover'` and `'recipes/spaghetti-bolognese/step-N'`). Tests continue to pass.
+- [ ] `src/entry-server.test.tsx` fixtures are updated to the same realistic shape. Tests continue to pass.
+- [ ] `grep -rn 'spaghetti-cover\|spaghetti-step' src/` returns zero matches (post-standardisation).
 
 ### Automated — Quality gates
 
@@ -228,5 +231,7 @@ These are not committed CI checks — they are guards the reviewer should run du
 
 ## Open Questions
 
-- **Branch ordering with `issue-174-manual-qa`.** That branch carries (a) the dev S3 upload proxy (`d1b1adc`) and (b) the ImageUpload preview-sizing fix (`58d5bbb`). This PRD references both as if landed. If they don't merge before this PRD ships, two follow-ups: dev uploads on localhost will still hit S3 directly (broken on dev only, prod works fine), and the error-state overlay in the editor will be visually cramped (rare path; only triggers if an image URL fails). Recommend merging the QA branch first; raise if there's a reason not to.
-- **`src/api/recipes.test.ts` and `src/entry-server.test.tsx` fixture standardisation.** These use simple non-realistic keys (`'spaghetti-cover'`). They don't assert on URLs so they pass either way. The `meta.test.ts` fixtures are pulled into scope by this PRD because the ACs assert on the full URL (which catches the `buildMetaTags` double-prefix bug); the others stay deferred as a separate cleanup.
+All open questions resolved during PRD review:
+
+- **Branch ordering with `issue-174-manual-qa`** → resolved to **merge the QA branch first**, before this PRD's PR ships. Guarantees the dev S3 upload proxy and ImageUpload preview-sizing fix are in place when this PRD lands. (No new AC — this is sequencing guidance for the PR review window, not a code change in this PRD.)
+- **Fixture standardisation across `src/api/recipes.test.ts` and `src/entry-server.test.tsx`** → resolved to **include in this PRD**. ACs added under "Test fixture updates" to update non-realistic keys (`'spaghetti-cover'`) to the production-shape `'recipes/<id>/cover'` while we're already touching the area.
