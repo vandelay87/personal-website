@@ -10,11 +10,15 @@ import {
 } from '@api/recipes'
 import { useAuth } from '@contexts/AuthContext'
 import { useAutosave, type AutosaveStatus, type UseAutosaveResult } from '@hooks/useAutosave'
+import type {
+  ImageReadyUpdate,
+  UseImageProcessingPollResult,
+} from '@hooks/useImageProcessingPoll'
 import type { Recipe } from '@models/recipe'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { createMemoryRouter, Link, RouterProvider } from 'react-router-dom'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
 
 import RecipeEditor from './RecipeEditor'
 
@@ -46,8 +50,8 @@ interface AutosaveMockControls {
   triggerSuccess: () => Promise<void>
   reset: () => void
   hookResult: UseAutosaveResult
-  retryMock: ReturnType<typeof vi.fn>
-  flushMock: ReturnType<typeof vi.fn>
+  retryMock: Mock<() => void>
+  flushMock: Mock<() => Promise<void>>
   callCount: number
 }
 
@@ -96,6 +100,65 @@ vi.mock('@hooks/useAutosave', async (importOriginal) => {
   }
 })
 
+// Spy on useImageProcessingPoll so tests can:
+// - capture the onReady callback and invoke it to simulate a ready image
+// - toggle `timedOut` to assert the timeout banner
+// The real hook talks to the network and to auth/navigation — a mock is the
+// only boundary that keeps the editor tests pure DOM + reducer assertions.
+interface PollMockControls {
+  lastArgs: {
+    recipe: Recipe | null
+    onReady: ((updates: ImageReadyUpdate[]) => void) | null
+  }
+  callCount: number
+  setTimedOut: (next: boolean) => void
+  triggerReady: (updates: ImageReadyUpdate[]) => void
+  reset: () => void
+}
+
+const pollControls: PollMockControls = {
+  lastArgs: { recipe: null, onReady: null },
+  callCount: 0,
+  setTimedOut: () => {},
+  triggerReady: () => {},
+  reset: () => {},
+}
+
+vi.mock('@hooks/useImageProcessingPoll', async () => {
+  const { useState, useRef } = await import('react')
+
+  const useImageProcessingPollMock = (
+    recipe: Recipe | null,
+    onReady: (updates: ImageReadyUpdate[]) => void
+  ): UseImageProcessingPollResult => {
+    pollControls.callCount += 1
+    pollControls.lastArgs = { recipe, onReady }
+
+    const [timedOut, setTimedOut] = useState(false)
+    const setTimedOutRef = useRef(setTimedOut)
+    setTimedOutRef.current = setTimedOut
+    const onReadyRef = useRef(onReady)
+    onReadyRef.current = onReady
+
+    pollControls.setTimedOut = (next: boolean) => {
+      act(() => {
+        setTimedOutRef.current(next)
+      })
+    }
+    pollControls.triggerReady = (updates: ImageReadyUpdate[]) => {
+      act(() => {
+        onReadyRef.current(updates)
+      })
+    }
+
+    return { timedOut }
+  }
+
+  return {
+    useImageProcessingPoll: useImageProcessingPollMock,
+  }
+})
+
 // ImageUpload is replaced with a stub so we can assert on the prop passed
 // (and trigger onUpload without a real file input).
 interface ImageUploadStubProps {
@@ -124,6 +187,12 @@ vi.mock('@components/ImageUpload', () => ({
 const fillValidCoverImage = async (user: UserEvent) => {
   await user.click(screen.getByRole('button', { name: /simulate upload cover image/i }))
   await user.type(screen.getByLabelText(/cover image alt text/i), 'Cover alt text')
+  // Simulate the image processing poll detecting the uploaded cover as ready.
+  // Without this, the publish gate would consider the cover image "still
+  // processing" (key set, processedAt absent) and Publish stays disabled.
+  pollControls.triggerReady([
+    { key: 'recipes/test/cover-stub', processedAt: 1_700_000_000_000 },
+  ])
 }
 
 const fillAllRequired = async (user: UserEvent) => {
@@ -138,7 +207,14 @@ const draftRecipe: Recipe = {
   id: 'rec-001',
   title: 'Spaghetti Bolognese',
   slug: 'spaghetti-bolognese',
-  coverImage: { key: 'recipes/rec-001/cover', alt: 'Spaghetti bolognese' },
+  coverImage: {
+    key: 'recipes/rec-001/cover',
+    alt: 'Spaghetti bolognese',
+    // Readiness is defaulted to "already processed" for the shared fixture so
+    // existing tests continue to exercise the ready-branch of the publish
+    // gate. Tests that need the unready branch override coverImage explicitly.
+    processedAt: 1_700_000_000_000,
+  },
   tags: ['Italian', 'Pasta'],
   prepTime: 15,
   cookTime: 45,
@@ -180,6 +256,10 @@ describe('RecipeEditor page', () => {
       retry: autosaveControls.retryMock,
       flush: autosaveControls.flushMock,
     }
+    pollControls.lastArgs = { recipe: null, onReady: null }
+    pollControls.callCount = 0
+    pollControls.setTimedOut = () => {}
+    pollControls.triggerReady = () => {}
 
     vi.mocked(useAuth).mockReturnValue({
       getAccessToken: vi.fn().mockResolvedValue('token-123'),
@@ -899,6 +979,237 @@ describe('RecipeEditor page', () => {
       })
 
       expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+    })
+  })
+
+  describe('image processing readiness', () => {
+    // A recipe whose cover image has been uploaded (key present) but not yet
+    // processed by the resizer Lambda (processedAt absent). All other fields
+    // are valid so only the readiness gate keeps Publish disabled.
+    const recipeWithUnreadyCover: Recipe = {
+      ...draftRecipe,
+      coverImage: { key: 'recipes/rec-001/cover', alt: 'Spaghetti bolognese' },
+    }
+
+    // A recipe where the cover is ready but a step image is still processing.
+    const recipeWithUnreadyStepImage: Recipe = {
+      ...draftRecipe,
+      steps: [
+        {
+          order: 1,
+          text: 'Boil pasta',
+          image: { key: 'recipes/rec-001/step-1', alt: 'Boiling pasta' },
+        },
+      ],
+    }
+
+    // A recipe where every image is ready — cover and step.
+    const recipeFullyReady: Recipe = {
+      ...draftRecipe,
+      steps: [
+        {
+          order: 1,
+          text: 'Boil pasta',
+          image: {
+            key: 'recipes/rec-001/step-1',
+            alt: 'Boiling pasta',
+            processedAt: 1_700_000_000_000,
+          },
+        },
+      ],
+    }
+
+    it('disables Publish when the cover image has a key but no processedAt (AC 6, 7)', async () => {
+      vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithUnreadyCover])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([recipeWithUnreadyCover])
+
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      const publishButton = screen.getByRole('button', { name: /^publish$/i })
+      expect(publishButton).toBeDisabled()
+
+      const describedBy = publishButton.getAttribute('aria-describedby')
+      expect(describedBy).toBeTruthy()
+      const missingList = document.getElementById(describedBy as string)
+      expect(missingList).not.toBeNull()
+      expect(missingList?.textContent ?? '').toMatch(/cover image still processing/i)
+    })
+
+    it('disables Publish when a step image has a key but no processedAt (AC 6, 7)', async () => {
+      vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithUnreadyStepImage])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([recipeWithUnreadyStepImage])
+
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      const publishButton = screen.getByRole('button', { name: /^publish$/i })
+      expect(publishButton).toBeDisabled()
+
+      const describedBy = publishButton.getAttribute('aria-describedby')
+      const missingList = document.getElementById(describedBy as string)
+      expect(missingList?.textContent ?? '').toMatch(/step 1 image still processing/i)
+    })
+
+    it('enables Publish once every image on the loaded recipe has processedAt (AC 1, 3)', async () => {
+      // Recipe loaded with cover + step image both carrying processedAt.
+      // If recipeToFormState does not hydrate processedAt, the gate will
+      // misidentify the images as unready and Publish will stay disabled.
+      vi.mocked(fetchMyRecipes).mockResolvedValue([recipeFullyReady])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([recipeFullyReady])
+
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /^publish$/i })).not.toBeDisabled()
+      })
+    })
+
+    it('flips the publish gate when onReady reports the matching key is ready (AC 4, 1, 5)', async () => {
+      vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithUnreadyCover])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([recipeWithUnreadyCover])
+
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      const publishButton = screen.getByRole('button', { name: /^publish$/i })
+      expect(publishButton).toBeDisabled()
+
+      // Simulate the poll hook finding the cover image is ready.
+      pollControls.triggerReady([
+        { key: 'recipes/rec-001/cover', processedAt: 1_700_000_500_000 },
+      ])
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /^publish$/i })).not.toBeDisabled()
+      })
+
+      // The missing-fields list should no longer mention the cover image.
+      const describedBy = screen
+        .getByRole('button', { name: /^publish$/i })
+        .getAttribute('aria-describedby')
+      if (describedBy) {
+        const missingList = document.getElementById(describedBy)
+        expect(missingList?.textContent ?? '').not.toMatch(/cover image still processing/i)
+      }
+
+      // The editor should have announced "Image ready" via the page-level
+      // aria-live="polite" region.
+      await waitFor(() => {
+        const statusRegions = screen.getAllByRole('status')
+        const match = statusRegions.find(
+          (region) =>
+            region.getAttribute('aria-live') === 'polite' &&
+            /image ready/i.test(region.textContent ?? '')
+        )
+        expect(match).toBeDefined()
+      })
+    })
+
+    it('ignores IMAGE_STATUS_UPDATE entries whose keys do not match any image on the form (AC 1)', async () => {
+      vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithUnreadyCover])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([recipeWithUnreadyCover])
+
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      expect(screen.getByRole('button', { name: /^publish$/i })).toBeDisabled()
+
+      // Readiness update for a key that does not exist on the form.
+      pollControls.triggerReady([
+        { key: 'recipes/rec-001/some-other-key', processedAt: 1_700_000_500_000 },
+      ])
+
+      // A micro-task flush to let any reducer dispatch settle.
+      await Promise.resolve()
+
+      // Cover image still has no processedAt → Publish must remain disabled,
+      // and the missing-fields list must still include the cover reason.
+      const publishButton = screen.getByRole('button', { name: /^publish$/i })
+      expect(publishButton).toBeDisabled()
+      const describedBy = publishButton.getAttribute('aria-describedby')
+      const missingList = document.getElementById(describedBy as string)
+      expect(missingList?.textContent ?? '').toMatch(/cover image still processing/i)
+    })
+
+    it('does not mark the form dirty on IMAGE_STATUS_UPDATE (AC 2)', async () => {
+      vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithUnreadyCover])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([recipeWithUnreadyCover])
+
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      // After the recipe has loaded, the form is pristine.
+      await waitFor(() => {
+        expect(autosaveControls.lastArgs.state?.dirty).toBe(false)
+      })
+
+      // Fire a readiness update.
+      pollControls.triggerReady([
+        { key: 'recipes/rec-001/cover', processedAt: 1_700_000_500_000 },
+      ])
+
+      // The most recent autosave snapshot must still have dirty === false —
+      // otherwise useAutosave's dirty-gate would fire a PATCH for a
+      // server-originated readiness change, which is wrong.
+      await waitFor(() => {
+        expect(autosaveControls.lastArgs.state?.dirty).toBe(false)
+      })
+    })
+
+    it('renders the timeout banner when the poll hook reports timedOut: true (AC 8)', async () => {
+      vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithUnreadyCover])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([recipeWithUnreadyCover])
+
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      // Banner must not be present yet.
+      expect(
+        screen.queryByText(/processing is taking longer than expected/i)
+      ).not.toBeInTheDocument()
+
+      // Flip the hook into the timed-out state.
+      pollControls.setTimedOut(true)
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            /processing is taking longer than expected — try refreshing the page\./i
+          )
+        ).toBeInTheDocument()
+      })
+
+      // The banner must be exposed via role="status" + aria-live="polite".
+      const statusRegions = screen.getAllByRole('status')
+      const banner = statusRegions.find(
+        (region) =>
+          region.getAttribute('aria-live') === 'polite' &&
+          /processing is taking longer than expected/i.test(region.textContent ?? '')
+      )
+      expect(banner).toBeDefined()
     })
   })
 })

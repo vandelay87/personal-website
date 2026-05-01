@@ -60,6 +60,21 @@ export const fetchAllRecipes = async (token: string): Promise<Recipe[]> => {
   return response.json()
 }
 
+export const fetchRecipeByIdAdmin = async (
+  token: string,
+  id: string,
+  signal?: AbortSignal
+): Promise<Recipe> => {
+  const response = await fetch(`${API_BASE}/recipes/admin/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    signal,
+  })
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`)
+  }
+  return response.json()
+}
+
 export const updateRecipe = async (
   token: string,
   id: string,
@@ -113,6 +128,14 @@ export const deleteRecipe = async (token: string, id: string): Promise<void> => 
   }
 }
 
+// Dev-only: route the S3 PUT through the vite proxy so the browser sees a
+// same-origin request. The prod bucket's CORS only allows https://akli.dev.
+const applyDevS3Proxy = (uploadUrl: string): string => {
+  const bucketHost = import.meta.env.VITE_S3_BUCKET_HOST
+  if (!import.meta.env.DEV || !bucketHost) return uploadUrl
+  return uploadUrl.replace(`https://${bucketHost}`, '/s3-upload')
+}
+
 export const getUploadUrl = async (
   token: string,
   params: { recipeId: string; imageType: string; stepOrder?: number }
@@ -128,5 +151,6 @@ export const getUploadUrl = async (
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`)
   }
-  return response.json()
+  const { uploadUrl, key }: { uploadUrl: string; key: string } = await response.json()
+  return { uploadUrl: applyDevS3Proxy(uploadUrl), key }
 }

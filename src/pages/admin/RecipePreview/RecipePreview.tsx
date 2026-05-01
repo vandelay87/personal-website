@@ -1,15 +1,48 @@
 import { isSessionError } from '@api/auth'
-import { fetchMyRecipes, publishRecipe } from '@api/recipes'
+import { fetchRecipeByIdAdmin, publishRecipe } from '@api/recipes'
 import Link from '@components/Link'
 import Loading from '@components/Loading'
 import RecipeDetailView from '@components/RecipeDetailView'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
+import {
+  useImageProcessingPoll,
+  type ImageReadyUpdate,
+} from '@hooks/useImageProcessingPoll'
 import type { Recipe } from '@models/recipe'
 import { useCallback, useEffect, useState, type FC } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import styles from './RecipePreview.module.css'
+
+const mergeReadiness = (recipe: Recipe, updates: ImageReadyUpdate[]): Recipe => {
+  const byKey = new Map(
+    updates.filter((u) => u.key).map((u) => [u.key, u.processedAt])
+  )
+  if (byKey.size === 0) return recipe
+
+  const coverUpdate = byKey.get(recipe.coverImage.key)
+  const nextCover =
+    coverUpdate !== undefined
+      ? { ...recipe.coverImage, processedAt: coverUpdate }
+      : recipe.coverImage
+
+  let stepsChanged = false
+  const nextSteps = recipe.steps.map((step) => {
+    if (!step.image?.key) return step
+    const stepUpdate = byKey.get(step.image.key)
+    if (stepUpdate === undefined) return step
+    stepsChanged = true
+    return { ...step, image: { ...step.image, processedAt: stepUpdate } }
+  })
+
+  if (nextCover === recipe.coverImage && !stepsChanged) return recipe
+  return {
+    ...recipe,
+    coverImage: nextCover,
+    steps: stepsChanged ? nextSteps : recipe.steps,
+  }
+}
 
 const RecipePreview: FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -23,23 +56,17 @@ const RecipePreview: FC = () => {
 
   useEffect(() => {
     if (!id) return
-    let cancelled = false
+    const controller = new AbortController()
 
     const load = async () => {
       setLoading(true)
       setNotFound(false)
       try {
         const token = await getAccessToken()
-        const recipes = await fetchMyRecipes(token)
-        if (cancelled) return
-        const found = recipes.find((r) => r.id === id)
-        if (!found) {
-          setNotFound(true)
-        } else {
-          setRecipe(found)
-        }
+        const found = await fetchRecipeByIdAdmin(token, id, controller.signal)
+        setRecipe(found)
       } catch (err) {
-        if (cancelled) return
+        if (controller.signal.aborted) return
         if (isSessionError(err)) {
           logout()
           navigate('/admin/login')
@@ -47,16 +74,20 @@ const RecipePreview: FC = () => {
         }
         setNotFound(true)
       } finally {
-        if (!cancelled) setLoading(false)
+        if (!controller.signal.aborted) setLoading(false)
       }
     }
 
     load()
 
     return () => {
-      cancelled = true
+      controller.abort()
     }
   }, [id, getAccessToken, logout, navigate])
+
+  useImageProcessingPoll(recipe ?? null, (updates) => {
+    setRecipe((prev) => (prev ? mergeReadiness(prev, updates) : prev))
+  })
 
   const handlePublish = useCallback(async () => {
     if (!recipe) return
