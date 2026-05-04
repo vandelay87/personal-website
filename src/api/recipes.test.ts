@@ -16,7 +16,7 @@ const mockRecipeIndex: RecipeIndex = {
   id: 'r1',
   title: 'Spaghetti Bolognese',
   slug: 'spaghetti-bolognese',
-  coverImage: { key: 'spaghetti-cover', alt: 'A bowl of spaghetti bolognese' },
+  coverImage: { key: 'recipes/spaghetti-bolognese/cover', alt: 'A bowl of spaghetti bolognese' },
   tags: ['Italian', 'Pasta'],
   prepTime: 15,
   cookTime: 45,
@@ -52,7 +52,7 @@ const _statusOk2: Recipe['status'] = 'published'
 const _statusBad: Recipe['status'] = 'archived'
 const _recipeWithTtl: Recipe = { ...mockRecipe, ttl: 123 }
 const _coverWithProcessedAt: Recipe['coverImage'] = {
-  key: 'spaghetti-cover',
+  key: 'recipes/spaghetti-bolognese/cover',
   alt: 'A bowl of spaghetti bolognese',
   processedAt: 1714000000,
 }

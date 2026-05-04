@@ -16,7 +16,7 @@ const mockRecipe: Recipe = {
   slug: 'test-recipe',
   intro: 'A delicious test recipe',
   coverImage: {
-    key: 'processed/recipes/recipe-1/cover',
+    key: 'recipes/recipe-1/cover',
     alt: 'Test cover',
     processedAt: 1_700_000_000_000,
   },
@@ -29,7 +29,7 @@ const mockRecipe: Recipe = {
       order: 1,
       text: 'Mix ingredients',
       image: {
-        key: 'processed/recipes/recipe-1/step-1',
+        key: 'recipes/recipe-1/step-1',
         alt: 'Mixing',
         processedAt: 1_700_000_000_000,
       },
