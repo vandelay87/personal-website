@@ -1,4 +1,4 @@
-export const RECIPE_IMAGE_BASE = 'https://akli.dev/images'
+export const RECIPE_IMAGE_BASE = 'https://images.akli.dev'
 
 export type RecipeImageVariant = 'thumb' | 'medium' | 'full'
 
