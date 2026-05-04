@@ -10,7 +10,7 @@ const baseRecipe: Recipe = {
   slug: 'test-recipe',
   intro: 'A delicious test recipe',
   coverImage: {
-    key: 'processed/recipes/recipe-1/cover',
+    key: 'recipes/recipe-1/cover',
     alt: 'Test cover',
     processedAt: 1_700_000_000_000,
   },
@@ -42,7 +42,7 @@ describe('RecipeDetailView', () => {
     expect(coverImg).toBeInTheDocument()
     expect(coverImg).toHaveAttribute(
       'src',
-      expect.stringContaining('processed/recipes/recipe-1/cover-medium')
+      expect.stringContaining('recipes/recipe-1/cover-medium')
     )
     expect(screen.queryByText(/processing image/i)).not.toBeInTheDocument()
   })
@@ -51,7 +51,7 @@ describe('RecipeDetailView', () => {
     const processingRecipe: Recipe = {
       ...baseRecipe,
       coverImage: {
-        key: 'processed/recipes/recipe-1/cover',
+        key: 'recipes/recipe-1/cover',
         alt: 'Test cover',
       },
     }

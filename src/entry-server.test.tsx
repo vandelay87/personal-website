@@ -132,7 +132,7 @@ describe('entry-server render', () => {
       id: 'r1',
       title: 'Spaghetti Bolognese',
       slug: 'spaghetti-bolognese',
-      coverImage: { key: 'spaghetti-cover', alt: 'A bowl of spaghetti bolognese' },
+      coverImage: { key: 'recipes/spaghetti-bolognese/cover', alt: 'A bowl of spaghetti bolognese' },
       tags: ['Italian', 'Pasta'],
       prepTime: 15,
       cookTime: 45,
