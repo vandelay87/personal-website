@@ -31,7 +31,7 @@ const RecipeDetailView: FC<RecipeDetailViewProps> = ({ recipe }) => (
         alt={recipe.coverImage.alt}
         priority
         maxWidth="var(--max-w-site)"
-        className={styles.coverImage}
+        aspectRatio="16/9"
         containerClassName={styles.coverImageWrapper}
       />
     ) : (
