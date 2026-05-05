@@ -363,13 +363,3 @@ Per `CLAUDE.md` and Phase 1 precedent:
 - [ ] `/simplify` is run on the PR diff before opening (per `CLAUDE.md`).
 - [ ] Lockstep deploy with sibling backend PRD.
 
-## Open Questions
-
-All resolved during design discussion:
-
-- **Slug input position** → directly below title in `RecipeEditor`.
-- **Auto-fill semantics** → opt-out: auto-fills until user types in slug, then stops (manual override sticks).
-- **"Reset to title slug" button** → included; useful affordance, low cost.
-- **Lock signal source** → `processedAt !== undefined` on cover or any step image; pessimistic `isUploading` overlay covers the upload race window.
-- **Slug-collision UX** → inline error on the slug field, server returns `409 slug_taken`.
-- **Live debounced uniqueness check** → out of scope; saves are validated server-side. Open as a polish follow-up if UX feedback warrants.
