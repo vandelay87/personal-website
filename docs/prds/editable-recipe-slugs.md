@@ -17,7 +17,8 @@ Combined with the current image URL shape — `https://images.akli.dev/recipes/<
 The sibling backend PRD changes the API contract so:
 - Draft creation accepts an optional slug (or returns a `draft-<8chars>` placeholder).
 - PATCH accepts slug; server returns `409` if it's taken or if the recipe already has uploaded images.
-- The upload-URL endpoint stops returning `key` — image keys are now derived from `(recipe.slug, imageType[, stepOrder])` on the frontend.
+- The upload-URL endpoint stops returning `key` — image keys are now derived from `(recipe.slug, imageType[, stepId])` on the frontend.
+- **Each step gains a stable `stepId`** (UUID, generated client-side) so step image URLs survive reordering: `recipes/<slug>/step-<stepId>-medium.webp` is anchored to the step's identity, not its position.
 
 This PRD wires that contract change into the admin UI and the rendering call sites.
 
@@ -28,8 +29,9 @@ This PRD wires that contract change into the admin UI and the rendering call sit
 - Live URL preview below the field: **"Public URL: `akli.dev/recipes/<current-slug-value>`"**.
 - Slug-lock UI: read-only with a hint when any recipe image is present.
 - `recipeImageUrl(slug, imageType, variant)` signature: derive the URL from primitives instead of consuming a pre-built `key`.
+- **Each step has a stable `stepId` UUID** (generated client-side via `crypto.randomUUID()` when the step is added). Step image URLs use `recipes/<slug>/step-<stepId>-<variant>.webp`, so reordering steps after upload doesn't break image references.
 - Drop reads of `coverImage.key` and `step.image.key` from every call site (RecipeCard, RecipeSteps, RecipeDetailView, ImageUpload, `meta.ts`, fixtures, tests).
-- Tests cover: slug input behaviour, lock state, validation, the new URL builder, and the meta-tag flow.
+- Tests cover: slug input behaviour, lock state, validation, the new URL builder, the meta-tag flow, **and step-reorder-with-images** (no broken images after drag-and-drop).
 
 ## Non-Goals
 
@@ -37,6 +39,8 @@ This PRD wires that contract change into the admin UI and the rendering call sit
 - **Custom URL slugs for blog posts.** Phase 2 sibling PRD; blog posts already use slugs in their route, but image migration is separate.
 - **Slug-history / redirects.** If a user changes a draft slug repeatedly before publish, only the final value is persisted. We do not maintain a redirect table for old slugs after publish (that's a different feature: changing the slug after publish requires unpublishing → no images → edit slug → re-publish, same flow).
 - **i18n / non-ASCII slugs.** Validation rejects (lowercase ASCII + digits + hyphens only).
+- **Pretty step image URLs.** Step image URLs include a UUID (`recipes/<slug>/step-<uuid>-medium.webp`) rather than a sequential index, deliberately trading URL aesthetics for reorder-stability. Cover images keep their pretty `cover` token because there's only one per recipe.
+- **`stepId` as user-visible identity.** The UUID is internal — the editor still shows "Step 1, Step 2…" to the user; only the URL contains the UUID.
 - **Backwards compatibility** with the UUID-based image URLs. Phase 1.5 deploys in lockstep with the sibling PRD; clean cutover.
 
 ## User Stories
@@ -46,6 +50,7 @@ This PRD wires that contract change into the admin UI and the rendering call sit
 - As an admin who has uploaded a cover image, I want the slug field to be read-only with a clear hint about why, so I don't accidentally break my image URLs.
 - As an admin who picks a slug another recipe has, I want an inline error on the slug field telling me which slug is taken so I can pick a different one.
 - As an admin re-typing the title after manually editing the slug, I want my custom slug to **stay put** rather than being overwritten — the auto-fill is opt-in until I touch the field.
+- As an admin who has uploaded images for steps 1, 2, and 3 and then drags step 3 to first position, I want all three images to **stay attached to their original steps** — step 3's image remains "step 3's image" even though it's now displayed first.
 
 ## Design & UX
 
@@ -118,7 +123,7 @@ When validation error from server:
 -   `${RECIPE_IMAGE_BASE}/${key}-${variant}.webp`
 + export const recipeImageUrl = (
 +   slug: string,
-+   imageType: 'cover' | `step-${number}`,
++   imageType: 'cover' | `step-${string}`,
 +   variant: RecipeImageVariant,
 + ): string => `${RECIPE_IMAGE_BASE}/recipes/${slug}/${imageType}-${variant}.webp`
 ```
@@ -130,10 +135,10 @@ Call sites change:
 + recipeImageUrl(recipe.slug, 'cover', 'medium')
 
 - recipeImageUrl(step.image.key, 'thumb')
-+ recipeImageUrl(recipe.slug, `step-${step.order}`, 'thumb')
++ recipeImageUrl(recipe.slug, `step-${step.stepId}`, 'thumb')
 ```
 
-The `imageType` parameter uses a template literal type for steps (`step-1`, `step-2`, ...) so a typo like `'step1'` fails at compile time.
+The `imageType` parameter uses a template literal type — `'cover' | \`step-${string}\`` — so a typo like `'cover2'` or `'step_1'` fails at compile time. The `string` template parameter accepts the UUID shape (`step-9d904a59-e83f-43b8-9f40-fbdb3008974c`) at runtime; we trust callers to pass a valid stepId since UUID-shape validation belongs to the runtime layer (server-side or `crypto.randomUUID()` output).
 
 ### Recipe data model
 
@@ -142,22 +147,36 @@ The `imageType` parameter uses a template literal type for steps (`step-1`, `ste
 | `coverImage.key` | `string` | **dropped** — derive from `(recipe.slug, 'cover')` |
 | `coverImage.alt` | `string` | unchanged |
 | `coverImage.processedAt` | `number?` | unchanged (composed server-side) |
-| `step.image.key` | `string` | **dropped** — derive from `(recipe.slug, \`step-${step.order}\`)` |
+| `step.stepId` | (did not exist) | `string` (UUID) — **new, required** |
+| `step.order` | `number` | unchanged — sort metadata only; does NOT participate in image keys |
+| `step.image.key` | `string` | **dropped** — derive from `(recipe.slug, \`step-${step.stepId}\`)` |
 | `step.image.alt` | `string` | unchanged |
 | `step.image.processedAt` | `number?` | unchanged |
 
-`src/types/recipe.ts` interfaces `RecipeImage` and `Step` lose the `key` field.
+`src/types/recipe.ts` interfaces:
+- `RecipeImage` loses the `key` field.
+- `Step` loses the `image.key` field and **gains a required `stepId: string` field**.
+
+### `stepId` lifecycle
+
+- **Created**: when the user clicks "Add step" in `RecipeEditor`, the frontend assigns `stepId: crypto.randomUUID()` immediately. The new step is `{ stepId, order, text: '' }` in form state.
+- **Persisted**: PATCH /recipes/{id} sends the steps array with stepIds. Server validates each `stepId` is a UUID and that they're unique within the recipe.
+- **Loaded**: `recipeToFormState` reads `recipe.steps` as-is — every step is expected to carry a `stepId` from the server.
+- **Reordered**: drag-and-drop changes only `step.order`; stepIds stay put. Image URLs are unchanged.
+- **Deleted**: dropping a step from the array → server detects the missing `stepId` on the next PATCH and runs the image-cleanup flow (see sibling PRD).
 
 ### Image upload flow
 
 `POST /recipes/images/upload-url` no longer returns `key`. The frontend now:
 
-1. Sends `{ recipeId, imageType, stepOrder? }` as before.
+1. Sends `{ recipeId, imageType, stepId? }`. For step uploads, `stepId` is the target step's UUID (already in form state). Cover uploads omit `stepId`.
 2. Receives `{ uploadUrl }`.
 3. Uploads to S3 via the presigned URL.
-4. Updates form state to mark the image as "uploading" (no `key` to store — derive from slug + imageType when needed).
-5. Polls the recipe via `GET /recipes/{id}` until `coverImage.processedAt` (or `step.image.processedAt`) is populated.
-6. Renders the image via `recipeImageUrl(recipe.slug, imageType, variant)`.
+4. Updates form state to mark the image as "uploading" (no `key` to store — derive from `(slug, 'cover')` or `(slug, \`step-${stepId}\`)` when needed).
+5. Polls the recipe via `GET /recipes/{id}` until `coverImage.processedAt` (or the matching `step.image.processedAt`) is populated.
+6. Renders the image via `recipeImageUrl(recipe.slug, imageType, variant)` where `imageType` is `'cover'` or `\`step-${step.stepId}\``.
+
+**Pre-upload constraint**: a step image upload requires that the step has been saved (or at minimum, the step exists with a stepId in the recipe document on the server). The autosave debounce ensures any newly-added step has been PATCHed within ~2 s; the upload UI disables the per-step "Choose file" button until the step's stepId is present in the last-saved server state to prevent a 404.
 
 ### `meta.ts` (OG tag builder)
 
@@ -185,27 +204,39 @@ Today `RecipeDetailView` renders `<ProcessingPlaceholder />` when `coverImage.pr
 The reducer (`RecipeEditor.tsx`) uses a single `SET_FIELD` action keyed by field name (not per-field action types). This PRD:
 
 - **Removes `slug` from the `SettableField` exclusion** at line 53 so `SET_FIELD` can set it.
-- **Drops the `coverImageKey` field** from `FormState` entirely. Image identity is now derived from `(form.slug, 'cover')` and `(form.slug, \`step-${order}\`)`. Step images lose their `image.key` field for the same reason.
+- **Drops the `coverImageKey` field** from `FormState` entirely. Image identity is now derived from `(form.slug, 'cover')` and `(form.slug, \`step-${stepId}\`)`. Step images lose their `image.key` field for the same reason.
 - **Adds `form.slugManuallyEdited: boolean`** to `FormState`, defaulting to `false`.
+- **Steps in form state always carry a `stepId`** (UUID). The "Add step" handler in `RecipeEditor` (currently appends `{ order: N+1, text: '' }`) is updated to also assign `stepId: crypto.randomUUID()`.
 - **Reducer logic** for `SET_FIELD`:
   - If `field === 'slug'` → set `slug` value AND flip `slugManuallyEdited` to true. Mark dirty.
   - If `field === 'title'` AND `slugManuallyEdited === false` → set title AND auto-derive slug as `sluggify(value)`. Mark dirty (single dirty flag, not two).
+  - If `field === 'steps'` → set the new array. New steps (those without a stepId in the input) get a fresh `crypto.randomUUID()` assigned in the reducer (defensive — the UI should always pass stepIds, but the reducer enforces).
   - Otherwise → existing behaviour (set field, mark dirty).
-- **`recipeToFormState`** drops the `coverImageKey` line and adds `slugManuallyEdited: true` (loaded recipes are assumed to have a manually-set slug — auto-fill should not overwrite it).
-- **`buildPatchPayload`** sends `coverImage: { alt: form.coverImageAlt }` (no `key` field).
-- **`applyImageStatusUpdates`** changes input shape: `IMAGE_STATUS_UPDATE` action carries `imageStatus` keys directly (e.g. `recipes/<slug>/cover`) and the reducer derives the per-image processedAt by comparing those keys against the slug-derived expected keys.
-- **Server validation errors**: on `409 slug_taken` from PATCH, set `form.errors.slug = response.message`. On `409 slug_locked` (should be unreachable given the UI lock), surface as a generic recipe-level error.
+- **`recipeToFormState`** drops the `coverImageKey` line and adds `slugManuallyEdited: true` (loaded recipes are assumed to have a manually-set slug). Loaded steps are assumed to carry stepIds from the server; if any are missing (defence in depth), the reducer assigns one and the next autosave PATCH writes it back.
+- **`buildPatchPayload`** sends `coverImage: { alt: form.coverImageAlt }` (no `key` field) and `steps: form.steps` with each step's `stepId` and `order` preserved.
+- **`applyImageStatusUpdates`** changes input shape: `IMAGE_STATUS_UPDATE` action carries `imageStatus` keys directly (e.g. `recipes/<slug>/cover`, `recipes/<slug>/step-<stepId>`) and the reducer derives the per-image processedAt by comparing those keys against the slug+stepId-derived expected keys.
+- **Server validation errors**: on `409 slug_taken` from PATCH, set `form.errors.slug = response.message`. On `409 slug_locked` (should be unreachable given the UI lock), surface as a generic recipe-level error. On `400 invalid_stepId` or `400 duplicate_stepId` (also unreachable in practice — frontend always generates valid UUIDs), surface as a generic recipe-level error so the bug is visible.
 
 The settable-field exclusion list shrinks from `'dirty' | 'mode' | 'id' | 'slug' | 'coverImageProcessedAt'` to `'dirty' | 'mode' | 'id' | 'coverImageProcessedAt' | 'slugManuallyEdited'` — `slugManuallyEdited` is set by the reducer's slug-handling branch, not via `SET_FIELD`.
 
 **Slug derivation does not PATCH until the user types into a field.** The autosave is gated on `form.dirty`. Initial mount `LOAD_RECIPE` resets `dirty` to false, so the auto-derived slug from a server-supplied placeholder is never PATCHed unless the user actually edits something.
 
+### Step reordering UX
+
+The editor currently lets users reorder steps via drag-and-drop / arrow buttons. With the stepId-keyed image scheme, reorder is a free operation:
+
+- Drag step 3 to position 1 → form state mutates: each step's `order` field is renumbered, but every `stepId` stays put.
+- Autosave PATCH fires with the new array.
+- Server diff: same set of `stepId`s, different `order` values → no S3 / `imageStatus` changes (this is asserted in the sibling backend PRD).
+- Image URLs remain stable because they're keyed off `stepId`, not `order`.
+
 ### `useImageProcessingPoll` hook (existing — must change)
 
 The hook (`src/hooks/useImageProcessingPoll.ts`) reads `coverImage.key` and `step.image.key` to identify in-flight images. Once those fields are dropped from the data model, the hook **must** change:
 
-- `collectImages` and `unreadyKeysOf` switch from "extract `image.key`" to "compute the expected key from `(recipe.slug, imageType[, stepOrder])`".
-- The hook's emitted `ImageReadyUpdate` shape changes from `{ key, processedAt }` to `{ imageType: 'cover' | \`step-${number}\`, processedAt }`. The editor's `IMAGE_STATUS_UPDATE` reducer action must then match by `imageType` (and `stepOrder` for steps), not by `key`.
+- `collectImages` and `unreadyKeysOf` switch from "extract `image.key`" to "compute the expected key from `(recipe.slug, imageType[, step.stepId])`".
+- The hook's emitted `ImageReadyUpdate` shape changes from `{ key, processedAt }` to `{ imageType: 'cover' | \`step-${string}\`, processedAt }`. The editor's `IMAGE_STATUS_UPDATE` reducer action then matches by `imageType` (which embeds the stepId for step images), not by raw key.
+- The reducer's match-by-imageType MUST use the stepId from the recipe, not the step's order — order changes on reorder; stepId doesn't.
 - All hook tests update accordingly.
 
 ### Slug input lock signal
@@ -221,9 +252,10 @@ const slugLocked =
 
 `isAnyImageUploading` is **new local component state** in `RecipeEditor` — it does not exist today. The current `ImageUpload` component manages upload-in-flight state internally (`ImageUpload.tsx` line ~50) and exposes only an `onUpload(key)` callback. This PRD changes the contract:
 
+- `ImageUpload` accepts `slug` and `imageType` (`'cover'` or `\`step-${stepId}\``) as props, plus the existing `recipeId` and other props.
 - `ImageUpload`'s callbacks become `onUploadStarted()` and `onUploadCompleted()` (no `key` — the parent already knows `slug + imageType`).
-- `RecipeEditor` tracks `isCoverUploading: boolean` and `uploadingStepOrders: Set<number>` as local React state via `useState` — not the reducer (transient UI-only state, not persisted).
-- `isAnyImageUploading = isCoverUploading || uploadingStepOrders.size > 0`.
+- `RecipeEditor` tracks `isCoverUploading: boolean` and `uploadingStepIds: Set<string>` (set of stepIds whose uploads are in flight) as local React state via `useState` — not the reducer (transient UI-only state, not persisted).
+- `isAnyImageUploading = isCoverUploading || uploadingStepIds.size > 0`.
 
 This catches the race window between "user clicks upload" and "server's `imageStatus` map gets populated, then poll fires, then `processedAt` is set".
 
@@ -289,10 +321,11 @@ Per `CLAUDE.md` and Phase 1 precedent:
 
 - [ ] `RecipeImage` interface no longer has a `key` field.
 - [ ] `Step.image` (when present) no longer has a `key` field.
-- [ ] `recipeImageUrl(slug, imageType, variant)` takes three arguments and returns `https://images.akli.dev/recipes/${slug}/${imageType}-${variant}.webp`.
+- [ ] `Step` interface gains a required `stepId: string` field.
+- [ ] `recipeImageUrl(slug, imageType, variant)` takes three arguments and returns `https://images.akli.dev/recipes/${slug}/${imageType}-${variant}.webp`. The `imageType` parameter type is `'cover' | \`step-${string}\``.
 - [ ] `recipeImageUrl('beans-on-toast', 'cover', 'medium')` returns exactly `'https://images.akli.dev/recipes/beans-on-toast/cover-medium.webp'`.
-- [ ] `recipeImageUrl('beans-on-toast', 'step-3', 'thumb')` returns exactly `'https://images.akli.dev/recipes/beans-on-toast/step-3-thumb.webp'`.
-- [ ] Type-level guard: `// @ts-expect-error` on `recipeImageUrl('s', 'step-bad', 'thumb')` (without `as never` — the cast would widen through the constraint). Mirrors the existing pattern at `src/types/recipe.test.ts`.
+- [ ] `recipeImageUrl('beans-on-toast', 'step-9d904a59-e83f-43b8-9f40-fbdb3008974c', 'thumb')` returns exactly `'https://images.akli.dev/recipes/beans-on-toast/step-9d904a59-e83f-43b8-9f40-fbdb3008974c-thumb.webp'`.
+- [ ] Type-level guard: `// @ts-expect-error` on `recipeImageUrl('s', 'cover2', 'thumb')` and `recipeImageUrl('s', 'stepX', 'thumb')` — both fail the template literal type. Mirrors the existing pattern at `src/types/recipe.test.ts`.
 - [ ] `sluggify('Beans on Toast')` returns `'beans-on-toast'`.
 - [ ] `sluggify('  Café Crème  ')` returns `'cafe-creme'` (diacritic stripping).
 - [ ] `sluggify('Crème Brûlée!')` returns `'creme-brulee'` (combined diacritic + special-char path).
@@ -322,23 +355,28 @@ Per `CLAUDE.md` and Phase 1 precedent:
 ### Automated — call-site sweep
 
 - [ ] `src/components/RecipeCard/RecipeCard.tsx` calls `recipeImageUrl(recipe.slug, 'cover', variant)` and does not read `coverImage.key`.
-- [ ] `src/components/RecipeSteps/RecipeSteps.tsx` calls `recipeImageUrl(recipe.slug, \`step-${step.order}\`, variant)` for each step image.
+- [ ] `src/components/RecipeSteps/RecipeSteps.tsx` calls `recipeImageUrl(recipe.slug, \`step-${step.stepId}\`, variant)` for each step image.
 - [ ] `src/components/RecipeDetailView/RecipeDetailView.tsx` calls `recipeImageUrl(recipe.slug, 'cover', variant)`.
-- [ ] `src/components/ImageUpload/ImageUpload.tsx` accepts `slug` + `imageType` (+ `stepOrder?`) as props; its callback contract is `onUploadStarted()` and `onUploadCompleted()` (no `key` argument). It no longer reads `coverImage.key`.
+- [ ] `src/components/ImageUpload/ImageUpload.tsx` accepts `slug` + `imageType` (cover or `step-${stepId}`) as props; its callback contract is `onUploadStarted()` and `onUploadCompleted()` (no `key` argument). It no longer reads `coverImage.key`.
 - [ ] `src/meta.ts` calls `recipeImageUrl(recipe.slug, 'cover', 'medium')`.
-- [ ] `RecipeEditor.buildPatchPayload` sends `coverImage: { alt: form.coverImageAlt }` (no `key` field).
+- [ ] `RecipeEditor.buildPatchPayload` sends `coverImage: { alt: form.coverImageAlt }` (no `key` field) and includes `stepId` on every step in the steps array.
 - [ ] `RecipeEditor.draftFromCreated` no longer initialises `coverImage.key`.
 - [ ] `RecipeEditor.computeMissingFields` no longer references `coverImageKey`; "cover image present" is signalled by `coverImageProcessedAt !== undefined` (or `isCoverUploading` for the in-flight window).
+- [ ] `RecipeEditor` "Add step" handler assigns `stepId: crypto.randomUUID()` to every newly-added step.
+- [ ] `RecipeEditor` reordering steps (drag/arrow buttons) preserves each step's `stepId` and only mutates `step.order` values.
 - [ ] `grep -rn 'coverImage.key\|coverImage\\.key' src/` returns zero matches in production code (test scaffolding asserting absence is allowed).
 - [ ] `grep -rn 'image.key\|\\.image\\.key' src/components/RecipeSteps/ src/components/ImageUpload/ src/pages/admin/RecipeEditor/` returns zero matches.
+- [ ] `grep -rn 'step-\${.*order}\|step-\${order}' src/` returns zero matches (no order-based step image keys remain in production code).
 
 ### Automated — fixture sweep
 
 - [ ] All component / page test fixtures drop `coverImage.key` and `step.image.key`.
+- [ ] All step fixtures across the codebase carry a `stepId` (UUID-shaped) — sample known UUIDs in fixtures (e.g. `'9d904a59-e83f-43b8-9f40-fbdb3008974c'`) so URL assertions are deterministic.
 - [ ] Fixtures use realistic slug values (e.g. `'beans-on-toast'`, `'spaghetti-bolognese'`) — not placeholders.
 - [ ] `meta.test.ts` recipe-branch full-URL assertions still pass against the new builder signature.
 - [ ] The `loadedRecipe` fixture inside `RecipeEditor.tsx` is updated.
 - [ ] Test-utility recipe factories (e.g. anything under `src/test-utils/`, if present) are updated.
+- [ ] Component test for `RecipeSteps`: full-URL assertion uses the fixture's stepId, e.g. `https://images.akli.dev/recipes/spaghetti-bolognese/step-<known-uuid>-medium.webp`.
 
 ### Automated — quality gates
 
@@ -356,6 +394,7 @@ Per `CLAUDE.md` and Phase 1 precedent:
 - [ ] After upload, the slug field is read-only and shows the lock hint.
 - [ ] Attempting to use a slug already taken by another recipe shows the inline `slug_taken` error.
 - [ ] Deleting the cover image unlocks the slug field; re-editing + re-uploading produces images at the new slug.
+- [ ] **Step reorder smoke test**: add 3 steps, upload images to all 3, drag step 3 to first position. After save and refresh, each step still displays its original image (the image originally uploaded for "step 3 in the array" is still attached to that step, now displayed at position 1). Network panel confirms image URLs are unchanged.
 
 ### Process
 
