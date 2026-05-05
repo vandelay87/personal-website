@@ -20,6 +20,7 @@ export interface MetaTags {
 
 import type { RecipeData } from './contexts/RecipeDataContext'
 import * as postsModule from './pages/Blog/posts/index'
+import { recipeImageUrl } from './types/recipe'
 
 const BASE_URL = 'https://akli.dev'
 
@@ -87,7 +88,9 @@ const buildMetaTags = (
   ogType: string = 'website',
   image?: string,
 ): MetaTags => {
-  const fullImage = image ? `${BASE_URL}${image}` : undefined
+  const fullImage = image
+    ? (image.startsWith('http') ? image : `${BASE_URL}${image}`)
+    : undefined
   return {
     title,
     description,
@@ -140,14 +143,13 @@ export const getMetaTags = (path: string, data?: RecipeData): MetaTags => {
     const description = recipe.intro.length > 160
       ? recipe.intro.slice(0, 157) + '...'
       : recipe.intro
-    const coverMediumPath = `/images/${recipe.coverImage.key}-medium.webp`
     return buildMetaTags(
       `${recipe.title} | Akli Aissat`,
       description,
       canonical,
       undefined,
       'article',
-      coverMediumPath,
+      recipeImageUrl(recipe.coverImage.key, 'medium'),
     )
   }
 

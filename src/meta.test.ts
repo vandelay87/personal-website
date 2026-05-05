@@ -361,7 +361,7 @@ describe('getMetaTags', () => {
       id: 'r1',
       title: 'Spaghetti Bolognese',
       slug: 'spaghetti-bolognese',
-      coverImage: { key: 'spaghetti-cover', alt: 'A bowl of spaghetti bolognese' },
+      coverImage: { key: 'recipes/spaghetti-bolognese/cover', alt: 'A bowl of spaghetti bolognese' },
       tags: ['Italian', 'Pasta'],
       prepTime: 15,
       cookTime: 45,
@@ -404,11 +404,9 @@ describe('getMetaTags', () => {
       expect(meta.og.description.length).toBeLessThanOrEqual(160)
     })
 
-    it('returns og:image with cover medium URL', () => {
+    it('returns og:image as the absolute images.akli.dev URL for the cover medium variant', () => {
       const meta = getMetaTags('/recipes/spaghetti-bolognese', { recipe: mockRecipe })
-      expect(meta.og.image).toBeDefined()
-      expect(meta.og.image).toContain('spaghetti-cover')
-      expect(meta.og.image).toContain('-medium')
+      expect(meta.og.image).toBe('https://images.akli.dev/recipes/spaghetti-bolognese/cover-medium.webp')
     })
 
     it('returns og:type as article', () => {
@@ -431,11 +429,9 @@ describe('getMetaTags', () => {
       expect(meta.twitter.description).toBe('A classic Italian pasta dish with rich meat sauce.')
     })
 
-    it('returns twitter:image with cover medium URL', () => {
+    it('returns twitter:image as the absolute images.akli.dev URL for the cover medium variant', () => {
       const meta = getMetaTags('/recipes/spaghetti-bolognese', { recipe: mockRecipe })
-      expect(meta.twitter.image).toBeDefined()
-      expect(meta.twitter.image).toContain('spaghetti-cover')
-      expect(meta.twitter.image).toContain('-medium')
+      expect(meta.twitter.image).toBe('https://images.akli.dev/recipes/spaghetti-bolognese/cover-medium.webp')
     })
   })
 })

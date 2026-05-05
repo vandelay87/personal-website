@@ -8,7 +8,7 @@ const mockSteps: Step[] = [
     order: 1,
     text: 'Mix ingredients together',
     image: {
-      key: 'processed/recipes/recipe-1/step-1',
+      key: 'recipes/recipe-1/step-1',
       alt: 'Mixing bowl',
       processedAt: 1_700_000_000_000,
     },
@@ -18,7 +18,7 @@ const mockSteps: Step[] = [
     order: 3,
     text: 'Let it cool',
     image: {
-      key: 'processed/recipes/recipe-1/step-3',
+      key: 'recipes/recipe-1/step-3',
       alt: 'Cooling rack',
       processedAt: 1_700_000_000_000,
     },
@@ -52,7 +52,7 @@ describe('RecipeSteps', () => {
     expect(mixingImg).toHaveAttribute('loading', 'lazy')
     expect(mixingImg).toHaveAttribute(
       'src',
-      expect.stringContaining('processed/recipes/recipe-1/step-1-medium')
+      expect.stringContaining('recipes/recipe-1/step-1-medium')
     )
 
     const coolingImg = screen.getByRole('img', { name: 'Cooling rack' })
@@ -71,7 +71,7 @@ describe('RecipeSteps', () => {
         order: 1,
         text: 'Mix ingredients together',
         image: {
-          key: 'processed/recipes/recipe-1/step-1',
+          key: 'recipes/recipe-1/step-1',
           alt: 'Mixing bowl',
         },
       },
@@ -89,7 +89,7 @@ describe('RecipeSteps', () => {
         order: 1,
         text: 'Mix ingredients together',
         image: {
-          key: 'processed/recipes/recipe-1/step-1',
+          key: 'recipes/recipe-1/step-1',
           alt: 'Mixing bowl',
           processedAt: 1_700_000_000_000,
         },
@@ -98,7 +98,7 @@ describe('RecipeSteps', () => {
         order: 2,
         text: 'Let it cool',
         image: {
-          key: 'processed/recipes/recipe-1/step-2',
+          key: 'recipes/recipe-1/step-2',
           alt: 'Cooling rack',
         },
       },
