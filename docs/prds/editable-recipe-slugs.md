@@ -182,32 +182,50 @@ Today `RecipeDetailView` renders `<ProcessingPlaceholder />` when `coverImage.pr
 
 ### Form state in `RecipeEditor`
 
-The reducer (`RecipeEditor.tsx`) gains:
+The reducer (`RecipeEditor.tsx`) uses a single `SET_FIELD` action keyed by field name (not per-field action types). This PRD:
 
-- `form.slug: string`
-- `form.slugManuallyEdited: boolean`
-- New action: `EDIT_SLUG` — sets `slug` and flips `slugManuallyEdited` to true.
-- Existing `EDIT_TITLE` action: when `slugManuallyEdited === false`, also derive a new slug from the new title.
-- Server validation errors: handled in the existing PATCH error path. On `409 slug_taken`, set `form.errors.slug = '...'`; on `409 slug_locked`, set a generic recipe-level error (this should never happen given the frontend lock).
+- **Removes `slug` from the `SettableField` exclusion** at line 53 so `SET_FIELD` can set it.
+- **Drops the `coverImageKey` field** from `FormState` entirely. Image identity is now derived from `(form.slug, 'cover')` and `(form.slug, \`step-${order}\`)`. Step images lose their `image.key` field for the same reason.
+- **Adds `form.slugManuallyEdited: boolean`** to `FormState`, defaulting to `false`.
+- **Reducer logic** for `SET_FIELD`:
+  - If `field === 'slug'` → set `slug` value AND flip `slugManuallyEdited` to true. Mark dirty.
+  - If `field === 'title'` AND `slugManuallyEdited === false` → set title AND auto-derive slug as `sluggify(value)`. Mark dirty (single dirty flag, not two).
+  - Otherwise → existing behaviour (set field, mark dirty).
+- **`recipeToFormState`** drops the `coverImageKey` line and adds `slugManuallyEdited: true` (loaded recipes are assumed to have a manually-set slug — auto-fill should not overwrite it).
+- **`buildPatchPayload`** sends `coverImage: { alt: form.coverImageAlt }` (no `key` field).
+- **`applyImageStatusUpdates`** changes input shape: `IMAGE_STATUS_UPDATE` action carries `imageStatus` keys directly (e.g. `recipes/<slug>/cover`) and the reducer derives the per-image processedAt by comparing those keys against the slug-derived expected keys.
+- **Server validation errors**: on `409 slug_taken` from PATCH, set `form.errors.slug = response.message`. On `409 slug_locked` (should be unreachable given the UI lock), surface as a generic recipe-level error.
 
-### `useImageProcessingPoll` hook (existing)
+The settable-field exclusion list shrinks from `'dirty' | 'mode' | 'id' | 'slug' | 'coverImageProcessedAt'` to `'dirty' | 'mode' | 'id' | 'coverImageProcessedAt' | 'slugManuallyEdited'` — `slugManuallyEdited` is set by the reducer's slug-handling branch, not via `SET_FIELD`.
 
-The hook polls the recipe endpoint until `processedAt` is set. It currently keys off `coverImage.key` to identify which image to wait for. After this PRD, it derives the expected `imageStatus` key from `(recipe.slug, imageType)`.
+**Slug derivation does not PATCH until the user types into a field.** The autosave is gated on `form.dirty`. Initial mount `LOAD_RECIPE` resets `dirty` to false, so the auto-derived slug from a server-supplied placeholder is never PATCHed unless the user actually edits something.
 
-Since `imageStatus` is stripped server-side and the hook only consumes `coverImage.processedAt` / `step.image.processedAt` (which are composed by the server), the hook signature might not need changes — verify during implementation.
+### `useImageProcessingPoll` hook (existing — must change)
+
+The hook (`src/hooks/useImageProcessingPoll.ts`) reads `coverImage.key` and `step.image.key` to identify in-flight images. Once those fields are dropped from the data model, the hook **must** change:
+
+- `collectImages` and `unreadyKeysOf` switch from "extract `image.key`" to "compute the expected key from `(recipe.slug, imageType[, stepOrder])`".
+- The hook's emitted `ImageReadyUpdate` shape changes from `{ key, processedAt }` to `{ imageType: 'cover' | \`step-${number}\`, processedAt }`. The editor's `IMAGE_STATUS_UPDATE` reducer action must then match by `imageType` (and `stepOrder` for steps), not by `key`.
+- All hook tests update accordingly.
 
 ### Slug input lock signal
 
-The frontend computes `slugLocked` from the recipe state:
+The frontend computes `slugLocked` from the editor state:
 
 ```ts
 const slugLocked =
-  recipe.coverImage?.processedAt !== undefined
-  || recipe.steps?.some((s) => s.image?.processedAt !== undefined)
-  || isUploading  // pessimistic — lock as soon as user clicks "upload"
+  form.coverImageProcessedAt !== undefined
+  || form.steps.some((s) => s.image?.processedAt !== undefined)
+  || isAnyImageUploading  // pessimistic — lock as soon as user clicks "Choose file"
 ```
 
-`isUploading` is local upload-in-flight state. This catches the race window between "user clicks upload" and "server's `imageStatus` map gets populated".
+`isAnyImageUploading` is **new local component state** in `RecipeEditor` — it does not exist today. The current `ImageUpload` component manages upload-in-flight state internally (`ImageUpload.tsx` line ~50) and exposes only an `onUpload(key)` callback. This PRD changes the contract:
+
+- `ImageUpload`'s callbacks become `onUploadStarted()` and `onUploadCompleted()` (no `key` — the parent already knows `slug + imageType`).
+- `RecipeEditor` tracks `isCoverUploading: boolean` and `uploadingStepOrders: Set<number>` as local React state via `useState` — not the reducer (transient UI-only state, not persisted).
+- `isAnyImageUploading = isCoverUploading || uploadingStepOrders.size > 0`.
+
+This catches the race window between "user clicks upload" and "server's `imageStatus` map gets populated, then poll fires, then `processedAt` is set".
 
 ### `sluggify` helper
 
@@ -215,13 +233,15 @@ const slugLocked =
 export const sluggify = (input: string): string =>
   input
     .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')           // strip accents
+    .replace(/[̀-ͯ]/g, '')   // strip combining diacritic marks (U+0300–U+036F)
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')                // non-alphanumeric → '-'
-    .replace(/-+/g, '-')                        // collapse runs of '-'
-    .replace(/^-+|-+$/g, '')                    // trim leading/trailing '-'
-    .slice(0, 100)                              // length cap
+    .replace(/[^a-z0-9]+/g, '-')       // non-alphanumeric → '-'
+    .replace(/-+/g, '-')               // collapse runs of '-'
+    .replace(/^-+|-+$/g, '')           // trim leading/trailing '-'
+    .slice(0, 100)                     // length cap
 ```
+
+The diacritic regex uses an **explicit Unicode escape (`̀-ͯ`)** rather than embedded literal combining marks. Embedded combining marks render as invisible characters in the source file and are fragile under copy/paste, prettier reformatting, or editor encoding mismatches. Implementers must use the escaped form.
 
 Lives in `src/types/recipe.ts` (alongside `recipeImageUrl`) and is exported.
 
@@ -272,41 +292,53 @@ Per `CLAUDE.md` and Phase 1 precedent:
 - [ ] `recipeImageUrl(slug, imageType, variant)` takes three arguments and returns `https://images.akli.dev/recipes/${slug}/${imageType}-${variant}.webp`.
 - [ ] `recipeImageUrl('beans-on-toast', 'cover', 'medium')` returns exactly `'https://images.akli.dev/recipes/beans-on-toast/cover-medium.webp'`.
 - [ ] `recipeImageUrl('beans-on-toast', 'step-3', 'thumb')` returns exactly `'https://images.akli.dev/recipes/beans-on-toast/step-3-thumb.webp'`.
-- [ ] Type-level guard: `recipeImageUrl('s', 'step-bad' as never, 'thumb')` is rejected by TS via `// @ts-expect-error`. (Mirrors the existing pattern at `src/types/recipe.test.ts`.)
+- [ ] Type-level guard: `// @ts-expect-error` on `recipeImageUrl('s', 'step-bad', 'thumb')` (without `as never` — the cast would widen through the constraint). Mirrors the existing pattern at `src/types/recipe.test.ts`.
 - [ ] `sluggify('Beans on Toast')` returns `'beans-on-toast'`.
 - [ ] `sluggify('  Café Crème  ')` returns `'cafe-creme'` (diacritic stripping).
+- [ ] `sluggify('Crème Brûlée!')` returns `'creme-brulee'` (combined diacritic + special-char path).
 - [ ] `sluggify('A!@#B')` returns `'a-b'` (non-alphanumeric runs collapse to single `-`).
 - [ ] `sluggify('---a---')` returns `'a'` (leading/trailing trim).
 - [ ] `sluggify('a'.repeat(150))` returns a string of length 100 (cap).
+- [ ] `sluggify('123')` returns `'123'` (numeric-only).
+- [ ] `sluggify('Ñ')` returns `'n'` (pure-diacritic).
 - [ ] `sluggify('')` returns `''`.
+- [ ] The `sluggify` source uses the explicit Unicode escape `̀-ͯ` for the diacritic range — assertable via `String(sluggify).includes('\\u0300-\\u036f')` (or simply by reading the source).
 
 ### Automated — `RecipeEditor` slug input
 
-- [ ] Slug `<input>` is rendered with an associated `<label>`.
+- [ ] Slug `<input>` is rendered with an associated `<label htmlFor>` (testable via `getByLabelText('Slug')`).
 - [ ] On title input change, slug auto-fills as `sluggify(title)` until the user has typed in the slug field.
 - [ ] After the user types in the slug field, subsequent title changes do **not** modify the slug.
 - [ ] A "Reset to title slug" button is rendered; clicking it re-derives slug from the current title and re-enables auto-fill on subsequent title edits.
-- [ ] URL preview text contains the literal `akli.dev/recipes/${currentSlug}` and updates on slug change.
-- [ ] When `coverImage.processedAt !== undefined`, the slug input has the `readonly` attribute and the lock hint is rendered.
-- [ ] When at least one step has `image.processedAt !== undefined`, the slug input is also locked.
-- [ ] When the API responds `409 slug_taken`, the inline error renders below the slug field with the server's `message`.
+- [ ] The "Reset to title slug" button is **hidden or disabled** when `slugLocked === true` (clicking it after lock would otherwise mutate the slug and trigger an autosave PATCH that the server rejects with `slug_locked`).
+- [ ] URL preview text contains `akli.dev/recipes/<slug>`, where `<slug>` is the current `form.slug` value, and updates on slug change.
+- [ ] When `form.coverImageProcessedAt !== undefined`, the slug input has `readOnly` set and `aria-disabled="true"` (preserves focusability + screen-reader announcement) and the lock hint is rendered as visible text.
+- [ ] When at least one step has `image.processedAt !== undefined`, the slug input is also locked (same UI shape).
+- [ ] When `isAnyImageUploading === true` (an upload is in flight, before processedAt arrives), the slug input is also locked.
+- [ ] When the API responds `409 slug_taken`, the inline error renders below the slug field with the server's `message` (testable via `findByText`).
 - [ ] Save / publish button is disabled when the slug fails the validation regex.
+- [ ] Auto-derived slug on initial mount (after `LOAD_RECIPE` from a fresh draft) does **not** trigger an autosave PATCH until the user types into a field — `form.dirty` remains `false` until the first user action.
 
 ### Automated — call-site sweep
 
 - [ ] `src/components/RecipeCard/RecipeCard.tsx` calls `recipeImageUrl(recipe.slug, 'cover', variant)` and does not read `coverImage.key`.
 - [ ] `src/components/RecipeSteps/RecipeSteps.tsx` calls `recipeImageUrl(recipe.slug, \`step-${step.order}\`, variant)` for each step image.
 - [ ] `src/components/RecipeDetailView/RecipeDetailView.tsx` calls `recipeImageUrl(recipe.slug, 'cover', variant)`.
-- [ ] `src/components/ImageUpload/ImageUpload.tsx` no longer reads `coverImage.key` for preview rendering — derives from props (`slug`, `imageType`).
+- [ ] `src/components/ImageUpload/ImageUpload.tsx` accepts `slug` + `imageType` (+ `stepOrder?`) as props; its callback contract is `onUploadStarted()` and `onUploadCompleted()` (no `key` argument). It no longer reads `coverImage.key`.
 - [ ] `src/meta.ts` calls `recipeImageUrl(recipe.slug, 'cover', 'medium')`.
+- [ ] `RecipeEditor.buildPatchPayload` sends `coverImage: { alt: form.coverImageAlt }` (no `key` field).
+- [ ] `RecipeEditor.draftFromCreated` no longer initialises `coverImage.key`.
+- [ ] `RecipeEditor.computeMissingFields` no longer references `coverImageKey`; "cover image present" is signalled by `coverImageProcessedAt !== undefined` (or `isCoverUploading` for the in-flight window).
 - [ ] `grep -rn 'coverImage.key\|coverImage\\.key' src/` returns zero matches in production code (test scaffolding asserting absence is allowed).
-- [ ] `grep -rn 'image.key\|\\.image\\.key' src/components/RecipeSteps/ src/components/ImageUpload/` returns zero matches.
+- [ ] `grep -rn 'image.key\|\\.image\\.key' src/components/RecipeSteps/ src/components/ImageUpload/ src/pages/admin/RecipeEditor/` returns zero matches.
 
 ### Automated — fixture sweep
 
 - [ ] All component / page test fixtures drop `coverImage.key` and `step.image.key`.
 - [ ] Fixtures use realistic slug values (e.g. `'beans-on-toast'`, `'spaghetti-bolognese'`) — not placeholders.
 - [ ] `meta.test.ts` recipe-branch full-URL assertions still pass against the new builder signature.
+- [ ] The `loadedRecipe` fixture inside `RecipeEditor.tsx` is updated.
+- [ ] Test-utility recipe factories (e.g. anything under `src/test-utils/`, if present) are updated.
 
 ### Automated — quality gates
 
