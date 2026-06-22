@@ -2,11 +2,19 @@ export const RECIPE_IMAGE_BASE = 'https://images.akli.dev'
 
 export type RecipeImageVariant = 'thumb' | 'medium' | 'full'
 
-export const recipeImageUrl = (key: string, variant: RecipeImageVariant): string =>
-  `${RECIPE_IMAGE_BASE}/${key}-${variant}.webp`
+export const recipeImageUrl = (
+  _slug: string,
+  _imageType: 'cover' | `step-${string}`,
+  _variant: RecipeImageVariant,
+): string => {
+  throw new Error('not implemented')
+}
+
+export const sluggify = (_input: string): string => {
+  throw new Error('not implemented')
+}
 
 export interface RecipeImage {
-  key: string
   alt: string
   processedAt?: number
 }
@@ -18,6 +26,7 @@ export interface Ingredient {
 }
 
 export interface Step {
+  stepId: string
   order: number
   text: string
   image?: RecipeImage
