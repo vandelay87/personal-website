@@ -56,18 +56,5 @@
     "vite": "^7.3.1",
     "vite-imagetools": "^10.0.0",
     "vitest": "^4.1.2"
-  },
-  "pnpm": {
-    "supportedArchitectures": {
-      "os": [
-        "current",
-        "linux"
-      ],
-      "cpu": [
-        "current",
-        "x64",
-        "arm64"
-      ]
-    }
   }
 }
