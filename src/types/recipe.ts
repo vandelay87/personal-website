@@ -3,16 +3,20 @@ export const RECIPE_IMAGE_BASE = 'https://images.akli.dev'
 export type RecipeImageVariant = 'thumb' | 'medium' | 'full'
 
 export const recipeImageUrl = (
-  _slug: string,
-  _imageType: 'cover' | `step-${string}`,
-  _variant: RecipeImageVariant,
-): string => {
-  throw new Error('not implemented')
-}
+  slug: string,
+  imageType: 'cover' | `step-${string}`,
+  variant: RecipeImageVariant,
+): string => `${RECIPE_IMAGE_BASE}/recipes/${slug}/${imageType}-${variant}.webp`
 
-export const sluggify = (_input: string): string => {
-  throw new Error('not implemented')
-}
+export const sluggify = (input: string): string =>
+  input
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 100)
 
 export interface RecipeImage {
   alt: string
