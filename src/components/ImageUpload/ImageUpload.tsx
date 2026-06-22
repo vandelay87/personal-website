@@ -37,12 +37,6 @@ const ImageUpload: FC<ImageUploadProps> = ({
   const [lastFile, setLastFile] = useState<File | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // STUB (#198): the upload-started/completed callbacks are part of the new
-  // contract but not yet fired here — the react-engineer wires them around the
-  // PUT. Referenced as no-ops so the unused-var lint passes meanwhile.
-  void onUploadStarted
-  void onUploadCompleted
-
   useEffect(() => {
     return () => {
       if (preview) URL.revokeObjectURL(preview)
@@ -53,9 +47,11 @@ const ImageUpload: FC<ImageUploadProps> = ({
     inputRef.current?.click()
   }
 
-  // STUB (#198): minimal implementation so tests compile but fail at runtime.
-  // The react-engineer wires onUploadStarted/onUploadCompleted, the derived
-  // getUploadUrl params, and the slug-based current image URL.
+  const uploadParams = () =>
+    imageType === 'cover'
+      ? { recipeId, imageType: 'cover' as const }
+      : { recipeId, imageType: 'step' as const, stepId: imageType.slice('step-'.length) }
+
   const upload = async (file: File) => {
     setError(null)
     setLastFile(file)
@@ -74,15 +70,14 @@ const ImageUpload: FC<ImageUploadProps> = ({
 
     try {
       const token = await getToken()
-      const { uploadUrl } = await getUploadUrl(token, {
-        recipeId,
-        imageType: 'cover',
-      })
+      const { uploadUrl } = await getUploadUrl(token, uploadParams())
+      onUploadStarted?.()
       await fetch(uploadUrl, {
         method: 'PUT',
         body: file,
         headers: { 'Content-Type': file.type },
       })
+      onUploadCompleted?.()
     } catch {
       setError('Upload error. Please try again.')
     }

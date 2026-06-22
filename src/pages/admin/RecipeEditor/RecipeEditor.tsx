@@ -48,20 +48,26 @@ interface FormState {
   steps: Step[]
   coverImageAlt: string
   coverImageProcessedAt?: number
+  // True when the recipe was loaded with at least one already-processed image.
+  // Locks the slug because uploaded image objects are keyed by slug. Captured at
+  // load time only — images that become ready mid-session do not retroactively
+  // lock a slug the user is still choosing.
+  hasPersistedImages: boolean
   mode: EditorMode
   dirty: boolean
 }
 
 type SettableField = Exclude<
   keyof FormState,
-  'dirty' | 'mode' | 'id' | 'coverImageProcessedAt' | 'slugManuallyEdited'
+  'dirty' | 'mode' | 'id' | 'coverImageProcessedAt' | 'slugManuallyEdited' | 'hasPersistedImages'
 >
 
 type FormAction =
   | { type: 'SET_FIELD'; field: SettableField; value: FormState[SettableField] }
-  | { type: 'LOAD_RECIPE'; recipe: Recipe }
+  | { type: 'LOAD_RECIPE'; recipe: Recipe; freshDraft?: boolean }
   | { type: 'MARK_PRISTINE' }
   | { type: 'SET_MODE'; mode: EditorMode }
+  | { type: 'RESET_SLUG_TO_TITLE' }
   | { type: 'IMAGE_STATUS_UPDATE'; updates: ImageReadyUpdate[] }
 
 const MISSING_FIELDS_ID = 'publish-missing-fields'
@@ -80,17 +86,21 @@ const initialFormState: FormState = {
   steps: [{ stepId: '', order: 1, text: '' }],
   coverImageAlt: '',
   coverImageProcessedAt: undefined,
+  hasPersistedImages: false,
   mode: 'draft',
   dirty: false,
 }
 
-const recipeToFormState = (recipe: Recipe): FormState => {
+const recipeToFormState = (recipe: Recipe, freshDraft = false): FormState => {
   const ingredients = recipe.ingredients ?? []
   const steps = recipe.steps ?? []
   return {
     id: recipe.id,
     slug: recipe.slug,
-    slugManuallyEdited: true,
+    // A freshly-created placeholder draft keeps auto-fill on (the user hasn't
+    // chosen a slug yet); a genuinely-loaded existing recipe carries a
+    // deliberate slug that typing the title must not clobber.
+    slugManuallyEdited: !freshDraft,
     title: recipe.title ?? '',
     intro: recipe.intro ?? '',
     prepTime: recipe.prepTime,
@@ -101,31 +111,65 @@ const recipeToFormState = (recipe: Recipe): FormState => {
     steps: steps.length > 0 ? steps : [{ stepId: crypto.randomUUID(), order: 1, text: '' }],
     coverImageAlt: recipe.coverImage?.alt ?? '',
     coverImageProcessedAt: recipe.coverImage?.processedAt,
+    hasPersistedImages:
+      recipe.coverImage?.processedAt !== undefined ||
+      steps.some((s) => s.image?.processedAt !== undefined),
     mode: recipe.status,
     dirty: false,
   }
 }
 
-// STUB (#198): no-op so the IMAGE_STATUS_UPDATE path fails at runtime.
-// The react-engineer matches updates by imageType against the slug-derived
-// cover/step image types and merges processedAt.
 const applyImageStatusUpdates = (
   state: FormState,
-  _updates: ImageReadyUpdate[]
+  updates: ImageReadyUpdate[]
 ): FormState => {
-  return state
+  if (updates.length === 0) return state
+
+  const coverUpdate = updates.find((u) => u.imageType === 'cover')
+  const nextSteps = state.steps.map((step) => {
+    const stepUpdate = updates.find((u) => u.imageType === `step-${step.stepId}`)
+    if (!stepUpdate || !step.image) return step
+    return { ...step, image: { ...step.image, processedAt: stepUpdate.processedAt } }
+  })
+
+  const stepsChanged = nextSteps.some((step, i) => step !== state.steps[i])
+  if (!coverUpdate && !stepsChanged) return state
+
+  return {
+    ...state,
+    coverImageProcessedAt: coverUpdate?.processedAt ?? state.coverImageProcessedAt,
+    steps: nextSteps,
+    // Server-originated readiness must not mark the form dirty.
+    dirty: state.dirty,
+  }
 }
+
+const withStepIds = (steps: Step[]): Step[] =>
+  steps.map((step) => (step.stepId ? step : { ...step, stepId: crypto.randomUUID() }))
 
 const formReducer = (state: FormState, action: FormAction): FormState => {
   switch (action.type) {
-    case 'SET_FIELD':
+    case 'SET_FIELD': {
+      if (action.field === 'slug') {
+        return { ...state, slug: action.value as string, slugManuallyEdited: true, dirty: true }
+      }
+      if (action.field === 'title' && !state.slugManuallyEdited) {
+        const title = action.value as string
+        return { ...state, title, slug: sluggify(title), dirty: true }
+      }
+      if (action.field === 'steps') {
+        return { ...state, steps: withStepIds(action.value as Step[]), dirty: true }
+      }
       return { ...state, [action.field]: action.value, dirty: true }
+    }
     case 'LOAD_RECIPE':
-      return recipeToFormState(action.recipe)
+      return recipeToFormState(action.recipe, action.freshDraft)
     case 'MARK_PRISTINE':
       return { ...state, dirty: false }
     case 'SET_MODE':
       return { ...state, mode: action.mode }
+    case 'RESET_SLUG_TO_TITLE':
+      return { ...state, slug: sluggify(state.title), slugManuallyEdited: false, dirty: true }
     case 'IMAGE_STATUS_UPDATE':
       return applyImageStatusUpdates(state, action.updates)
   }
@@ -219,6 +263,9 @@ const RecipeEditor: FC = () => {
       return
     }
     const message = err instanceof Error ? err.message : 'An error occurred'
+    if (err instanceof Error && /^409\b/.test(message)) {
+      setSlugError(message.replace(/^409\s*/, ''))
+    }
     setToast({ message: fallback ?? `Error: ${message}`, type: 'error' })
   }, [])
 
@@ -257,7 +304,7 @@ const RecipeEditor: FC = () => {
         const token = await getAccessToken()
         const { id, slug } = await createDraft(token)
         recentlyCreatedIdRef.current = id
-        dispatch({ type: 'LOAD_RECIPE', recipe: draftFromCreated(id, slug) })
+        dispatch({ type: 'LOAD_RECIPE', recipe: draftFromCreated(id, slug), freshDraft: true })
         navigate(`/admin/recipes/${id}/edit`, { replace: true })
       } catch (err) {
         handleError(err, 'Error creating draft')
@@ -353,12 +400,9 @@ const RecipeEditor: FC = () => {
   })
 
   const isAnyImageUploading = isCoverUploading || uploadingStepIds.size > 0
-  const slugLocked =
-    form.coverImageProcessedAt !== undefined ||
-    form.steps.some((s) => s.image?.processedAt !== undefined) ||
-    isAnyImageUploading
+  const slugLocked = form.hasPersistedImages || isAnyImageUploading
 
-  const slugValid = SLUG_REGEX.test(form.slug)
+  const slugValid = form.slug.length <= 100 && SLUG_REGEX.test(form.slug)
 
   const missingFields = computeMissingFields(form)
   const canPublish = missingFields.length === 0 && slugValid
@@ -440,9 +484,6 @@ const RecipeEditor: FC = () => {
   const setSteps = useCallback((next: Step[]) => setField('steps', next), [setField])
   const setTags = useCallback((next: string[]) => setField('tags', next), [setField])
 
-  // STUB (#198): transient upload-in-flight state used to lock the slug field
-  // and (eventually) gate publish. The react-engineer wires these into the
-  // cover ImageUpload and StepList callbacks and the slugLocked signal.
   const handleCoverUploadStarted = useCallback(() => {
     setIsCoverUploading(true)
   }, [])
@@ -525,19 +566,21 @@ const RecipeEditor: FC = () => {
               value={form.slug}
               readOnly={slugLocked}
               aria-disabled={slugLocked || undefined}
-              aria-describedby="recipe-slug-preview"
+              aria-describedby={
+                slugError ? 'recipe-slug-preview recipe-slug-error' : 'recipe-slug-preview'
+              }
               onChange={(e) => {
                 setSlugError(null)
                 setField('slug', e.target.value)
               }}
               className={styles.input}
             />
-            <p id="recipe-slug-preview">
+            <p id="recipe-slug-preview" className={styles.slugPreview}>
               Public URL: akli.dev/recipes/{form.slug}
             </p>
             {!slugLocked && (
               <Button
-                onClick={() => setField('slug', sluggify(form.title))}
+                onClick={() => dispatch({ type: 'RESET_SLUG_TO_TITLE' })}
                 type="button"
                 variant="secondary"
               >
@@ -545,10 +588,14 @@ const RecipeEditor: FC = () => {
               </Button>
             )}
             {slugLocked && (
-              <p>Slug is locked — uploaded images are tied to it. Delete uploaded images to unlock.</p>
+              <p className={styles.slugLockHint}>
+                Slug is locked — uploaded images are tied to it. Delete uploaded images to unlock.
+              </p>
             )}
             {slugError && (
-              <p role="alert">{slugError}</p>
+              <p id="recipe-slug-error" role="alert" className={styles.slugError}>
+                {slugError}
+              </p>
             )}
           </div>
 
