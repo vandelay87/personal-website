@@ -29,10 +29,14 @@ export interface UseImageProcessingPollResult {
 const DEFAULT_INTERVAL_MS = 1500
 const DEFAULT_TIMEOUT_MS = 60_000
 
-// STUB (issue #197): not yet reimplemented for the (slug, imageType) identity.
-// Returns nothing so the new contract tests fail at runtime, not compile time.
-const collectImages = (_recipe: Recipe): IdentifiedImage[] => {
-  return []
+const collectImages = (recipe: Recipe): IdentifiedImage[] => {
+  const images: IdentifiedImage[] = [{ imageType: 'cover', image: recipe.coverImage }]
+  for (const step of recipe.steps) {
+    if (step.image) {
+      images.push({ imageType: `step-${step.stepId}`, image: step.image })
+    }
+  }
+  return images
 }
 
 const unreadyKeysOf = (recipe: Recipe): string[] =>
@@ -57,6 +61,7 @@ export const useImageProcessingPoll = (
   const logoutRef = useRef(logout)
   const navigateRef = useRef(navigate)
   const getAccessTokenRef = useRef(getAccessToken)
+  const recipeRef = useRef(recipe)
   const isMountedRef = useRef(true)
   const abortRef = useRef<AbortController | null>(null)
   const nextTickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -68,6 +73,7 @@ export const useImageProcessingPoll = (
   logoutRef.current = logout
   navigateRef.current = navigate
   getAccessTokenRef.current = getAccessToken
+  recipeRef.current = recipe
 
   const recipeId = recipe?.id ?? null
   const unreadyKeysSignature = useMemo(() => {
@@ -88,7 +94,14 @@ export const useImageProcessingPoll = (
     }
 
     activeRecipeIdRef.current = recipeId
-    emittedReadyRef.current = new Set()
+    const currentRecipe = recipeRef.current
+    emittedReadyRef.current = new Set(
+      currentRecipe === null
+        ? []
+        : collectImages(currentRecipe)
+            .filter(({ image }) => image.processedAt)
+            .map(({ imageType }) => imageType)
+    )
     setTimedOut(false)
 
     const stopPolling = () => {
