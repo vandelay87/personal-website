@@ -46,7 +46,7 @@ const makeRecipe = (overrides: Partial<Recipe> = {}): Recipe => ({
   id: 'r1',
   title: 'Test Recipe',
   slug: 'test-recipe',
-  coverImage: { key: 'recipes/r1/cover', alt: 'cover' },
+  coverImage: { alt: 'cover' },
   tags: [],
   prepTime: 10,
   cookTime: 20,
@@ -108,9 +108,9 @@ describe('useImageProcessingPoll — state machine', () => {
   it('does not fetch when all images already have processedAt', async () => {
     const onReady = vi.fn()
     const recipe = makeRecipe({
-      coverImage: { key: 'recipes/r1/cover', alt: 'cover', processedAt: 1000 },
+      coverImage: { alt: 'cover', processedAt: 1000 },
       steps: [
-        { order: 1, text: 'Step 1', image: { key: 'recipes/r1/step-1', alt: 'step', processedAt: 1000 } },
+        { stepId: 's1', order: 1, text: 'Step 1', image: { alt: 'step', processedAt: 1000 } },
       ],
     })
 
@@ -123,10 +123,10 @@ describe('useImageProcessingPoll — state machine', () => {
     expect(onReady).not.toHaveBeenCalled()
   })
 
-  it('fetches when recipe has at least one image with a key but no processedAt', async () => {
+  it('fetches when recipe has at least one image without a processedAt', async () => {
     const onReady = vi.fn()
     const recipe = makeRecipe({
-      coverImage: { key: 'recipes/r1/cover', alt: 'cover' },
+      coverImage: { alt: 'cover' },
     })
 
     // Never-resolving response so we only observe the first fetch kickoff.
@@ -141,21 +141,21 @@ describe('useImageProcessingPoll — state machine', () => {
     expect(fetchMock.mock.calls[0][1]).toBe('r1')
   })
 
-  it('invokes onReady with { key, processedAt } for newly-ready images only', async () => {
+  it("invokes onReady with { imageType: 'cover', processedAt } for the cover image", async () => {
     const onReady = vi.fn()
     const recipe = makeRecipe({
-      coverImage: { key: 'recipes/r1/cover', alt: 'cover' },
+      coverImage: { alt: 'cover' },
       steps: [
-        { order: 1, text: 'Step 1', image: { key: 'recipes/r1/step-1', alt: 'step' } },
+        { stepId: 's1', order: 1, text: 'Step 1', image: { alt: 'step' } },
       ],
     })
 
-    // Server response: cover is ready, step-1 still processing.
+    // Server response: cover is ready, step image still processing.
     fetchMock.mockResolvedValueOnce(
       makeRecipe({
-        coverImage: { key: 'recipes/r1/cover', alt: 'cover', processedAt: 5000 },
+        coverImage: { alt: 'cover', processedAt: 5000 },
         steps: [
-          { order: 1, text: 'Step 1', image: { key: 'recipes/r1/step-1', alt: 'step' } },
+          { stepId: 's1', order: 1, text: 'Step 1', image: { alt: 'step' } },
         ],
       })
     )
@@ -169,33 +169,64 @@ describe('useImageProcessingPoll — state machine', () => {
     })
 
     const [updates] = onReady.mock.calls[0]
-    expect(updates).toEqual([{ key: 'recipes/r1/cover', processedAt: 5000 }])
+    expect(updates).toEqual([{ imageType: 'cover', processedAt: 5000 }])
+  })
+
+  it('invokes onReady with imageType `step-${stepId}` for a ready step image', async () => {
+    const onReady = vi.fn()
+    const recipe = makeRecipe({
+      coverImage: { alt: 'cover', processedAt: 5000 },
+      steps: [
+        { stepId: 'abc', order: 1, text: 'Step 1', image: { alt: 'step' } },
+      ],
+    })
+
+    // Server response: the step image is now ready.
+    fetchMock.mockResolvedValueOnce(
+      makeRecipe({
+        coverImage: { alt: 'cover', processedAt: 5000 },
+        steps: [
+          { stepId: 'abc', order: 1, text: 'Step 1', image: { alt: 'step', processedAt: 7000 } },
+        ],
+      })
+    )
+    fetchMock.mockImplementation(() => new Promise(() => {}))
+
+    renderHook(() => useImageProcessingPoll(recipe, onReady))
+
+    await waitFor(() => {
+      expect(onReady).toHaveBeenCalled()
+    })
+
+    const [updates] = onReady.mock.calls[0]
+    // Identity is derived from stepId, NOT order/array position.
+    expect(updates).toEqual([{ imageType: 'step-abc', processedAt: 7000 }])
   })
 
   it('does not duplicate onReady entries across ticks', async () => {
     const onReady = vi.fn()
     const recipe = makeRecipe({
-      coverImage: { key: 'recipes/r1/cover', alt: 'cover' },
+      coverImage: { alt: 'cover' },
       steps: [
-        { order: 1, text: 'Step 1', image: { key: 'recipes/r1/step-1', alt: 'step' } },
+        { stepId: 's1', order: 1, text: 'Step 1', image: { alt: 'step' } },
       ],
     })
 
-    // Tick 1: cover flips to ready, step-1 still processing.
+    // Tick 1: cover flips to ready, step still processing.
     fetchMock.mockResolvedValueOnce(
       makeRecipe({
-        coverImage: { key: 'recipes/r1/cover', alt: 'cover', processedAt: 5000 },
+        coverImage: { alt: 'cover', processedAt: 5000 },
         steps: [
-          { order: 1, text: 'Step 1', image: { key: 'recipes/r1/step-1', alt: 'step' } },
+          { stepId: 's1', order: 1, text: 'Step 1', image: { alt: 'step' } },
         ],
       })
     )
-    // Tick 2: step-1 flips to ready too; cover is unchanged.
+    // Tick 2: step flips to ready too; cover is unchanged.
     fetchMock.mockResolvedValueOnce(
       makeRecipe({
-        coverImage: { key: 'recipes/r1/cover', alt: 'cover', processedAt: 5000 },
+        coverImage: { alt: 'cover', processedAt: 5000 },
         steps: [
-          { order: 1, text: 'Step 1', image: { key: 'recipes/r1/step-1', alt: 'step', processedAt: 6000 } },
+          { stepId: 's1', order: 1, text: 'Step 1', image: { alt: 'step', processedAt: 6000 } },
         ],
       })
     )
@@ -223,17 +254,55 @@ describe('useImageProcessingPoll — state machine', () => {
 
     // Each call should only carry the entries that flipped on that tick.
     expect(onReady.mock.calls[0][0]).toEqual([
-      { key: 'recipes/r1/cover', processedAt: 5000 },
+      { imageType: 'cover', processedAt: 5000 },
     ])
     expect(onReady.mock.calls[1][0]).toEqual([
-      { key: 'recipes/r1/step-1', processedAt: 6000 },
+      { imageType: 'step-s1', processedAt: 6000 },
     ])
+  })
+
+  it('attributes a newly-ready step image by stepId even when steps are reordered between polls', async () => {
+    const onReady = vi.fn()
+    // Initial: two steps, both images processing. step-a is at order 1, step-b at order 2.
+    const recipe = makeRecipe({
+      coverImage: { alt: 'cover', processedAt: 5000 },
+      steps: [
+        { stepId: 'step-a', order: 1, text: 'First', image: { alt: 'a' } },
+        { stepId: 'step-b', order: 2, text: 'Second', image: { alt: 'b' } },
+      ],
+    })
+
+    // Tick 1: steps are REORDERED (step-b now first, step-a now second) and
+    // the image belonging to step-b has become ready. The image at the SAME
+    // array index / order that step-a previously occupied is now step-b's.
+    // A correct implementation keys off stepId and emits 'step-b'.
+    fetchMock.mockResolvedValueOnce(
+      makeRecipe({
+        coverImage: { alt: 'cover', processedAt: 5000 },
+        steps: [
+          { stepId: 'step-b', order: 1, text: 'Second', image: { alt: 'b', processedAt: 8000 } },
+          { stepId: 'step-a', order: 2, text: 'First', image: { alt: 'a' } },
+        ],
+      })
+    )
+    fetchMock.mockImplementation(() => new Promise(() => {}))
+
+    renderHook(() => useImageProcessingPoll(recipe, onReady))
+
+    await waitFor(() => {
+      expect(onReady).toHaveBeenCalled()
+    })
+
+    const [updates] = onReady.mock.calls[0]
+    // Must be attributed to step-b by its stepId — never to step-a just
+    // because step-a previously sat at order 1 / index 0.
+    expect(updates).toEqual([{ imageType: 'step-step-b', processedAt: 8000 }])
   })
 
   it('delegates 401 responses to handleSessionError and stops polling', async () => {
     const onReady = vi.fn()
     const recipe = makeRecipe({
-      coverImage: { key: 'recipes/r1/cover', alt: 'cover' },
+      coverImage: { alt: 'cover' },
     })
 
     const authErr = new Error('401 Unauthorized')
@@ -272,7 +341,7 @@ describe('useImageProcessingPoll — state machine', () => {
   it('stops polling silently on 404 (recipe deleted)', async () => {
     const onReady = vi.fn()
     const recipe = makeRecipe({
-      coverImage: { key: 'recipes/r1/cover', alt: 'cover' },
+      coverImage: { alt: 'cover' },
     })
 
     fetchMock.mockRejectedValueOnce(new Error('404 Not Found'))
@@ -303,7 +372,7 @@ describe('useImageProcessingPoll — state machine', () => {
   it('aborts the in-flight request and suppresses state updates on unmount', async () => {
     const onReady = vi.fn()
     const recipe = makeRecipe({
-      coverImage: { key: 'recipes/r1/cover', alt: 'cover' },
+      coverImage: { alt: 'cover' },
     })
 
     const seenSignals: AbortSignal[] = []
@@ -330,7 +399,7 @@ describe('useImageProcessingPoll — state machine', () => {
     await act(async () => {
       resolveFirst?.(
         makeRecipe({
-          coverImage: { key: 'recipes/r1/cover', alt: 'cover', processedAt: 9999 },
+          coverImage: { alt: 'cover', processedAt: 9999 },
         })
       )
     })
@@ -342,11 +411,11 @@ describe('useImageProcessingPoll — state machine', () => {
     const onReady = vi.fn()
     const recipeA = makeRecipe({
       id: 'recipe-a',
-      coverImage: { key: 'recipes/a/cover', alt: 'cover' },
+      coverImage: { alt: 'cover' },
     })
     const recipeB = makeRecipe({
       id: 'recipe-b',
-      coverImage: { key: 'recipes/b/cover', alt: 'cover' },
+      coverImage: { alt: 'cover' },
     })
 
     const seenSignals: AbortSignal[] = []
@@ -386,7 +455,7 @@ describe('useImageProcessingPoll — state machine', () => {
       resolveRecipeA?.(
         makeRecipe({
           id: 'recipe-a',
-          coverImage: { key: 'recipes/a/cover', alt: 'cover', processedAt: 1111 },
+          coverImage: { alt: 'cover', processedAt: 1111 },
         })
       )
     })
@@ -407,13 +476,13 @@ describe('useImageProcessingPoll — timing', () => {
   it('fires exactly N fetches after N × 1500ms have elapsed', async () => {
     const onReady = vi.fn()
     const recipe = makeRecipe({
-      coverImage: { key: 'recipes/r1/cover', alt: 'cover' },
+      coverImage: { alt: 'cover' },
     })
 
     // Always respond with the same unready recipe so polling keeps running.
     fetchMock.mockResolvedValue(
       makeRecipe({
-        coverImage: { key: 'recipes/r1/cover', alt: 'cover' },
+        coverImage: { alt: 'cover' },
       })
     )
 
@@ -453,12 +522,12 @@ describe('useImageProcessingPoll — timing', () => {
   it('stops polling after 60s timeout and reports timedOut: true', async () => {
     const onReady = vi.fn()
     const recipe = makeRecipe({
-      coverImage: { key: 'recipes/r1/cover', alt: 'cover' },
+      coverImage: { alt: 'cover' },
     })
 
     fetchMock.mockResolvedValue(
       makeRecipe({
-        coverImage: { key: 'recipes/r1/cover', alt: 'cover' },
+        coverImage: { alt: 'cover' },
       })
     )
 
@@ -489,12 +558,12 @@ describe('useImageProcessingPoll — timing', () => {
   it('honours custom intervalMs and timeoutMs overrides', async () => {
     const onReady = vi.fn()
     const recipe = makeRecipe({
-      coverImage: { key: 'recipes/r1/cover', alt: 'cover' },
+      coverImage: { alt: 'cover' },
     })
 
     fetchMock.mockResolvedValue(
       makeRecipe({
-        coverImage: { key: 'recipes/r1/cover', alt: 'cover' },
+        coverImage: { alt: 'cover' },
       })
     )
 

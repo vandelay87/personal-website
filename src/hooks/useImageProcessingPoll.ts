@@ -5,9 +5,16 @@ import type { Recipe, RecipeImage } from '@models/recipe'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+export type ImageType = 'cover' | `step-${string}`
+
 export interface ImageReadyUpdate {
-  key: string
+  imageType: ImageType
   processedAt: number
+}
+
+interface IdentifiedImage {
+  imageType: ImageType
+  image: RecipeImage
 }
 
 export interface UseImageProcessingPollOptions {
@@ -22,19 +29,16 @@ export interface UseImageProcessingPollResult {
 const DEFAULT_INTERVAL_MS = 1500
 const DEFAULT_TIMEOUT_MS = 60_000
 
-const collectImages = (recipe: Recipe): RecipeImage[] => {
-  const images: RecipeImage[] = []
-  if (recipe.coverImage?.key) images.push(recipe.coverImage)
-  for (const step of recipe.steps) {
-    if (step.image?.key) images.push(step.image)
-  }
-  return images
+// STUB (issue #197): not yet reimplemented for the (slug, imageType) identity.
+// Returns nothing so the new contract tests fail at runtime, not compile time.
+const collectImages = (_recipe: Recipe): IdentifiedImage[] => {
+  return []
 }
 
 const unreadyKeysOf = (recipe: Recipe): string[] =>
   collectImages(recipe)
-    .filter((img) => !img.processedAt)
-    .map((img) => img.key)
+    .filter(({ image }) => !image.processedAt)
+    .map(({ imageType }) => imageType)
 
 export const useImageProcessingPoll = (
   recipe: Recipe | null,
@@ -150,14 +154,14 @@ export const useImageProcessingPoll = (
 
         const newlyReady: ImageReadyUpdate[] = []
         let hasUnready = false
-        for (const img of collectImages(fresh)) {
-          if (!img.processedAt) {
+        for (const { imageType, image } of collectImages(fresh)) {
+          if (!image.processedAt) {
             hasUnready = true
             continue
           }
-          if (!emittedReadyRef.current.has(img.key)) {
-            emittedReadyRef.current.add(img.key)
-            newlyReady.push({ key: img.key, processedAt: img.processedAt })
+          if (!emittedReadyRef.current.has(imageType)) {
+            emittedReadyRef.current.add(imageType)
+            newlyReady.push({ imageType, processedAt: image.processedAt })
           }
         }
 
