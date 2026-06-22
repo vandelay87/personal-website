@@ -10,14 +10,26 @@ export interface StepListProps {
   steps: Step[]
   onChange: (steps: Step[]) => void
   recipeId: string
+  slug: string
   getToken?: () => Promise<string>
   onAnnounce?: (message: string) => void
+  onStepUploadStarted?: (stepId: string) => void
+  onStepUploadCompleted?: (stepId: string) => void
 }
 
 const renumber = (steps: Step[]): Step[] =>
   steps.map((step, i) => ({ ...step, order: i + 1 }))
 
-const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken, onAnnounce }) => {
+const StepList: FC<StepListProps> = ({
+  steps,
+  onChange,
+  recipeId,
+  slug,
+  getToken,
+  onAnnounce,
+  onStepUploadStarted,
+  onStepUploadCompleted,
+}) => {
   const onChangeRenumbered = useCallback(
     (next: Step[]) => onChange(renumber(next)),
     [onChange]
@@ -32,12 +44,12 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken, onAn
     const existing = steps[index].image
     update(index, {
       ...steps[index],
-      image: { key: existing?.key ?? '', alt: existing?.alt ?? '', ...patch },
+      image: { alt: existing?.alt ?? '', ...patch },
     })
   }
 
   const handleAdd = () => {
-    add({ order: steps.length + 1, text: '' })
+    add({ stepId: crypto.randomUUID(), order: steps.length + 1, text: '' })
     onAnnounce?.('Step added')
   }
 
@@ -72,13 +84,13 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken, onAn
               <div className={styles.imageBlock}>
                 <ImageUpload
                   recipeId={recipeId}
-                  imageType="step"
-                  stepOrder={index + 1}
-                  currentKey={step.image?.key}
+                  slug={slug}
+                  imageType={`step-${step.stepId}`}
                   currentAlt={step.image?.alt}
                   processedAt={step.image?.processedAt}
                   getToken={getToken}
-                  onUpload={(key) => updateImage(index, { key })}
+                  onUploadStarted={() => onStepUploadStarted?.(step.stepId)}
+                  onUploadCompleted={() => onStepUploadCompleted?.(step.stepId)}
                 />
                 <input
                   type="text"

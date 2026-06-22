@@ -9,33 +9,39 @@ import { useEffect, useId, useRef, useState, type ChangeEvent, type FC } from 'r
 import styles from './ImageUpload.module.css'
 
 export interface ImageUploadProps {
-  onUpload: (key: string) => void
-  currentKey?: string
+  slug: string
+  imageType: 'cover' | `step-${string}`
   currentAlt?: string
   processedAt?: number
   getToken: () => Promise<string>
   recipeId: string
-  imageType?: 'cover' | 'step'
-  stepOrder?: number
+  onUploadStarted?: () => void
+  onUploadCompleted?: () => void
 }
 
 const MAX_SIZE = 10 * 1024 * 1024
 
 const ImageUpload: FC<ImageUploadProps> = ({
-  onUpload,
-  currentKey,
+  slug,
+  imageType,
   currentAlt,
   processedAt,
   getToken,
   recipeId,
-  imageType = 'cover',
-  stepOrder,
+  onUploadStarted,
+  onUploadCompleted,
 }) => {
   const inputId = useId()
   const [preview, setPreview] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [lastFile, setLastFile] = useState<File | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // STUB (#198): the upload-started/completed callbacks are part of the new
+  // contract but not yet fired here — the react-engineer wires them around the
+  // PUT. Referenced as no-ops so the unused-var lint passes meanwhile.
+  void onUploadStarted
+  void onUploadCompleted
 
   useEffect(() => {
     return () => {
@@ -47,6 +53,9 @@ const ImageUpload: FC<ImageUploadProps> = ({
     inputRef.current?.click()
   }
 
+  // STUB (#198): minimal implementation so tests compile but fail at runtime.
+  // The react-engineer wires onUploadStarted/onUploadCompleted, the derived
+  // getUploadUrl params, and the slug-based current image URL.
   const upload = async (file: File) => {
     setError(null)
     setLastFile(file)
@@ -65,17 +74,15 @@ const ImageUpload: FC<ImageUploadProps> = ({
 
     try {
       const token = await getToken()
-      const { uploadUrl, key } = await getUploadUrl(token, {
+      const { uploadUrl } = await getUploadUrl(token, {
         recipeId,
-        imageType,
-        ...(imageType === 'step' && stepOrder !== undefined ? { stepOrder } : {}),
+        imageType: 'cover',
       })
       await fetch(uploadUrl, {
         method: 'PUT',
         body: file,
         headers: { 'Content-Type': file.type },
       })
-      onUpload(key)
     } catch {
       setError('Upload error. Please try again.')
     }
@@ -104,21 +111,20 @@ const ImageUpload: FC<ImageUploadProps> = ({
         />
       )
     }
-    if (!currentKey) return null
-    if (processedAt) {
-      return (
-        <Image
-          key="processed"
-          src={recipeImageUrl(currentKey, 'medium')}
-          alt={currentAlt ?? 'Current image'}
-          className={styles.preview}
-          aspectRatio="1 / 1"
-          maxWidth="200px"
-        />
-      )
-    }
-    return <ProcessingPlaceholder aspectRatio="1 / 1" />
+    if (!processedAt) return null
+    return (
+      <Image
+        key="processed"
+        src={recipeImageUrl(slug, imageType, 'medium')}
+        alt={currentAlt ?? 'Current image'}
+        className={styles.preview}
+        aspectRatio="1 / 1"
+        maxWidth="200px"
+      />
+    )
   }
+
+  const hasCurrentImage = processedAt !== undefined
 
   return (
     <div className={styles.container}>
@@ -132,7 +138,11 @@ const ImageUpload: FC<ImageUploadProps> = ({
         aria-label="Upload image"
       />
 
-      {renderPreview()}
+      {!preview && !hasCurrentImage && processedAt === undefined ? (
+        <ProcessingPlaceholder aspectRatio="1 / 1" />
+      ) : (
+        renderPreview()
+      )}
 
       {error && (
         <div className={styles.error} role="alert">
@@ -143,7 +153,7 @@ const ImageUpload: FC<ImageUploadProps> = ({
         </div>
       )}
 
-      {currentKey && !preview ? (
+      {hasCurrentImage && !preview ? (
         <Button onClick={handleClick} ariaLabel="Replace image" variant="secondary">
           Replace
         </Button>

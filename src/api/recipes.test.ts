@@ -16,7 +16,7 @@ const mockRecipeIndex: RecipeIndex = {
   id: 'r1',
   title: 'Spaghetti Bolognese',
   slug: 'spaghetti-bolognese',
-  coverImage: { key: 'recipes/spaghetti-bolognese/cover', alt: 'A bowl of spaghetti bolognese' },
+  coverImage: { alt: 'A bowl of spaghetti bolognese' },
   tags: ['Italian', 'Pasta'],
   prepTime: 15,
   cookTime: 45,
@@ -32,8 +32,13 @@ const mockRecipe: Recipe = {
     { item: 'minced beef', quantity: '500', unit: 'g' },
   ],
   steps: [
-    { order: 1, text: 'Boil the pasta.' },
-    { order: 2, text: 'Brown the mince.', image: { key: 'step-2', alt: 'Browning mince in a pan' } },
+    { stepId: '11111111-1111-4111-8111-111111111111', order: 1, text: 'Boil the pasta.' },
+    {
+      stepId: '22222222-2222-4222-8222-222222222222',
+      order: 2,
+      text: 'Brown the mince.',
+      image: { alt: 'Browning mince in a pan' },
+    },
   ],
   authorId: 'a1',
   authorName: 'Akli Aissat',
@@ -52,7 +57,6 @@ const _statusOk2: Recipe['status'] = 'published'
 const _statusBad: Recipe['status'] = 'archived'
 const _recipeWithTtl: Recipe = { ...mockRecipe, ttl: 123 }
 const _coverWithProcessedAt: Recipe['coverImage'] = {
-  key: 'recipes/spaghetti-bolognese/cover',
   alt: 'A bowl of spaghetti bolognese',
   processedAt: 1714000000,
 }
@@ -479,19 +483,21 @@ describe('authenticated recipe endpoints', () => {
   })
 
   describe('getUploadUrl', () => {
-    it('POST with token and params', async () => {
+    it('POST with token and a cover params body, returning only { uploadUrl }', async () => {
       vi.stubGlobal(
         'fetch',
         vi.fn().mockResolvedValue({
           ok: true,
-          json: () => Promise.resolve({ uploadUrl: 'https://s3.example.com/upload', key: 'img-key' }),
+          json: () => Promise.resolve({ uploadUrl: 'https://s3.example.com/upload' }),
         })
       )
 
-      const params = { recipeId: 'r1', imageType: 'cover' }
+      const params = { recipeId: 'r1', imageType: 'cover' as const }
       const result = await getUploadUrl('token-123', params)
 
-      expect(result).toEqual({ uploadUrl: 'https://s3.example.com/upload', key: 'img-key' })
+      // Response no longer carries `key` — only the presigned URL.
+      expect(result).toEqual({ uploadUrl: 'https://s3.example.com/upload' })
+      expect('key' in result).toBe(false)
       expect(fetch).toHaveBeenCalledWith(
         expect.stringContaining('/recipes/images/upload-url'),
         expect.objectContaining({
@@ -502,6 +508,32 @@ describe('authenticated recipe endpoints', () => {
           body: JSON.stringify(params),
         })
       )
+    })
+
+    it('sends stepId (not stepOrder) for a step upload', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ uploadUrl: 'https://s3.example.com/upload' }),
+        })
+      )
+
+      const params = {
+        recipeId: 'r1',
+        imageType: 'step' as const,
+        stepId: '9d904a59-e83f-43b8-9f40-fbdb3008974c',
+      }
+      await getUploadUrl('token-123', params)
+
+      const body = vi.mocked(fetch).mock.calls[0][1]?.body as string
+      const parsed = JSON.parse(body)
+      expect(parsed).toEqual({
+        recipeId: 'r1',
+        imageType: 'step',
+        stepId: '9d904a59-e83f-43b8-9f40-fbdb3008974c',
+      })
+      expect(parsed).not.toHaveProperty('stepOrder')
     })
   })
 })

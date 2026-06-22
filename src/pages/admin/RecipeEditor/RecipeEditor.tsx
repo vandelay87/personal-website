@@ -21,7 +21,11 @@ import TagInput from '@components/TagInput'
 import Toast from '@components/Toast'
 import { useAuth } from '@contexts/AuthContext'
 import { useAutosave } from '@hooks/useAutosave'
-import { useImageProcessingPoll } from '@hooks/useImageProcessingPoll'
+import {
+  useImageProcessingPoll,
+  type ImageReadyUpdate,
+} from '@hooks/useImageProcessingPoll'
+import { sluggify } from '@models/recipe'
 import type { Ingredient, Recipe, Step, Tag } from '@models/recipe'
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type FC } from 'react'
 import { useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom'
@@ -33,6 +37,7 @@ type EditorMode = Recipe['status']
 interface FormState {
   id: string
   slug: string
+  slugManuallyEdited: boolean
   title: string
   intro: string
   prepTime: number
@@ -41,7 +46,6 @@ interface FormState {
   tags: string[]
   ingredients: Ingredient[]
   steps: Step[]
-  coverImageKey: string
   coverImageAlt: string
   coverImageProcessedAt?: number
   mode: EditorMode
@@ -50,7 +54,7 @@ interface FormState {
 
 type SettableField = Exclude<
   keyof FormState,
-  'dirty' | 'mode' | 'id' | 'slug' | 'coverImageProcessedAt'
+  'dirty' | 'mode' | 'id' | 'coverImageProcessedAt' | 'slugManuallyEdited'
 >
 
 type FormAction =
@@ -58,13 +62,14 @@ type FormAction =
   | { type: 'LOAD_RECIPE'; recipe: Recipe }
   | { type: 'MARK_PRISTINE' }
   | { type: 'SET_MODE'; mode: EditorMode }
-  | { type: 'IMAGE_STATUS_UPDATE'; updates: { key: string; processedAt: number }[] }
+  | { type: 'IMAGE_STATUS_UPDATE'; updates: ImageReadyUpdate[] }
 
 const MISSING_FIELDS_ID = 'publish-missing-fields'
 
 const initialFormState: FormState = {
   id: '',
   slug: '',
+  slugManuallyEdited: false,
   title: '',
   intro: '',
   prepTime: 0,
@@ -72,8 +77,7 @@ const initialFormState: FormState = {
   servings: 0,
   tags: [],
   ingredients: [{ item: '', quantity: '', unit: '' }],
-  steps: [{ order: 1, text: '' }],
-  coverImageKey: '',
+  steps: [{ stepId: '', order: 1, text: '' }],
   coverImageAlt: '',
   coverImageProcessedAt: undefined,
   mode: 'draft',
@@ -86,6 +90,7 @@ const recipeToFormState = (recipe: Recipe): FormState => {
   return {
     id: recipe.id,
     slug: recipe.slug,
+    slugManuallyEdited: true,
     title: recipe.title ?? '',
     intro: recipe.intro ?? '',
     prepTime: recipe.prepTime,
@@ -93,8 +98,7 @@ const recipeToFormState = (recipe: Recipe): FormState => {
     servings: recipe.servings,
     tags: recipe.tags ?? [],
     ingredients: ingredients.length > 0 ? ingredients : [{ item: '', quantity: '', unit: '' }],
-    steps: steps.length > 0 ? steps : [{ order: 1, text: '' }],
-    coverImageKey: recipe.coverImage?.key ?? '',
+    steps: steps.length > 0 ? steps : [{ stepId: crypto.randomUUID(), order: 1, text: '' }],
     coverImageAlt: recipe.coverImage?.alt ?? '',
     coverImageProcessedAt: recipe.coverImage?.processedAt,
     mode: recipe.status,
@@ -102,29 +106,14 @@ const recipeToFormState = (recipe: Recipe): FormState => {
   }
 }
 
+// STUB (#198): no-op so the IMAGE_STATUS_UPDATE path fails at runtime.
+// The react-engineer matches updates by imageType against the slug-derived
+// cover/step image types and merges processedAt.
 const applyImageStatusUpdates = (
   state: FormState,
-  updates: { key: string; processedAt: number }[]
+  _updates: ImageReadyUpdate[]
 ): FormState => {
-  const byKey = new Map(updates.filter((u) => u.key).map((u) => [u.key, u.processedAt]))
-  if (byKey.size === 0) return state
-
-  const coverUpdate = byKey.get(state.coverImageKey)
-  const coverImageProcessedAt = coverUpdate ?? state.coverImageProcessedAt
-
-  let stepsChanged = false
-  const steps = state.steps.map((step) => {
-    const stepUpdate = step.image?.key ? byKey.get(step.image.key) : undefined
-    if (stepUpdate === undefined) return step
-    stepsChanged = true
-    return { ...step, image: { ...step.image!, processedAt: stepUpdate } }
-  })
-
-  if (coverImageProcessedAt === state.coverImageProcessedAt && !stepsChanged) {
-    return state
-  }
-
-  return { ...state, coverImageProcessedAt, steps: stepsChanged ? steps : state.steps }
+  return state
 }
 
 const formReducer = (state: FormState, action: FormAction): FormState => {
@@ -151,7 +140,7 @@ const buildPatchPayload = (form: FormState): Partial<Recipe> => ({
   tags: form.tags,
   ingredients: form.ingredients,
   steps: form.steps,
-  coverImage: { key: form.coverImageKey, alt: form.coverImageAlt },
+  coverImage: { alt: form.coverImageAlt },
   status: form.mode,
 })
 
@@ -159,15 +148,12 @@ const computeMissingFields = (form: FormState): string[] => {
   const missing: string[] = []
   if (!form.title.trim()) missing.push('Title')
   if (!form.intro.trim()) missing.push('Intro')
-  if (!form.coverImageKey.trim()) missing.push('Cover image')
+  if (form.coverImageProcessedAt === undefined) missing.push('Cover image')
   if (!form.coverImageAlt.trim()) missing.push('Cover image alt text')
   if (!form.ingredients.some((ing) => ing.item.trim())) missing.push('At least one ingredient')
   if (!form.steps.some((s) => s.text.trim())) missing.push('At least one step')
-  if (form.coverImageKey && !form.coverImageProcessedAt) {
-    missing.push('Cover image still processing')
-  }
   form.steps.forEach((step, index) => {
-    if (step.image?.key && !step.image.processedAt) {
+    if (step.image && step.image.processedAt === undefined) {
       missing.push(`Step ${index + 1} image still processing`)
     }
   })
@@ -179,7 +165,7 @@ const draftFromCreated = (id: string, slug: string): Recipe => ({
   slug,
   title: '',
   intro: '',
-  coverImage: { key: '', alt: '' },
+  coverImage: { alt: '' },
   tags: [],
   prepTime: 0,
   cookTime: 0,
@@ -194,6 +180,8 @@ const draftFromCreated = (id: string, slug: string): Recipe => ({
 })
 
 const NEW_PATH = '/admin/recipes/new'
+
+const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/
 
 const RecipeEditor: FC = () => {
   const { id: routeId } = useParams<{ id: string }>()
@@ -211,6 +199,9 @@ const RecipeEditor: FC = () => {
   const [announcement, setAnnouncement] = useState({ message: '', toggle: false })
   const [sessionExpired, setSessionExpired] = useState(false)
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false)
+  const [isCoverUploading, setIsCoverUploading] = useState(false)
+  const [uploadingStepIds, setUploadingStepIds] = useState<Set<string>>(new Set())
+  const [slugError, setSlugError] = useState<string | null>(null)
 
   const recentlyCreatedIdRef = useRef<string | null>(null)
   const creatingDraftRef = useRef(false)
@@ -343,13 +334,10 @@ const RecipeEditor: FC = () => {
       tags: form.tags,
       ingredients: form.ingredients,
       steps: form.steps,
-      coverImage: form.coverImageKey
-        ? {
-            key: form.coverImageKey,
-            alt: form.coverImageAlt,
-            processedAt: form.coverImageProcessedAt,
-          }
-        : { key: '', alt: '' },
+      coverImage: {
+        alt: form.coverImageAlt,
+        processedAt: form.coverImageProcessedAt,
+      },
       authorId: '',
       authorName: '',
       createdAt: '',
@@ -357,15 +345,23 @@ const RecipeEditor: FC = () => {
       status: form.mode,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.id, form.coverImageKey, form.coverImageAlt, form.coverImageProcessedAt, form.steps])
+  }, [form.id, form.slug, form.coverImageAlt, form.coverImageProcessedAt, form.steps])
 
   const { timedOut } = useImageProcessingPoll(loadedRecipe, (updates) => {
     dispatch({ type: 'IMAGE_STATUS_UPDATE', updates })
     announce('Image ready')
   })
 
+  const isAnyImageUploading = isCoverUploading || uploadingStepIds.size > 0
+  const slugLocked =
+    form.coverImageProcessedAt !== undefined ||
+    form.steps.some((s) => s.image?.processedAt !== undefined) ||
+    isAnyImageUploading
+
+  const slugValid = SLUG_REGEX.test(form.slug)
+
   const missingFields = computeMissingFields(form)
-  const canPublish = missingFields.length === 0
+  const canPublish = missingFields.length === 0 && slugValid
 
   const handlePublish = async () => {
     if (!form.id) return
@@ -443,7 +439,26 @@ const RecipeEditor: FC = () => {
   const setIngredients = useCallback((next: Ingredient[]) => setField('ingredients', next), [setField])
   const setSteps = useCallback((next: Step[]) => setField('steps', next), [setField])
   const setTags = useCallback((next: string[]) => setField('tags', next), [setField])
-  const setCoverImageKey = useCallback((key: string) => setField('coverImageKey', key), [setField])
+
+  // STUB (#198): transient upload-in-flight state used to lock the slug field
+  // and (eventually) gate publish. The react-engineer wires these into the
+  // cover ImageUpload and StepList callbacks and the slugLocked signal.
+  const handleCoverUploadStarted = useCallback(() => {
+    setIsCoverUploading(true)
+  }, [])
+  const handleCoverUploadCompleted = useCallback(() => {
+    setIsCoverUploading(false)
+  }, [])
+  const handleStepUploadStarted = useCallback((stepId: string) => {
+    setUploadingStepIds((prev) => new Set(prev).add(stepId))
+  }, [])
+  const handleStepUploadCompleted = useCallback((stepId: string) => {
+    setUploadingStepIds((prev) => {
+      const next = new Set(prev)
+      next.delete(stepId)
+      return next
+    })
+  }, [])
 
   // Block form render while createDraft is in-flight — prevents the user
   // typing into a form whose autosave cannot yet PATCH (no id).
@@ -503,6 +518,41 @@ const RecipeEditor: FC = () => {
           </div>
 
           <div className={styles.field}>
+            <label htmlFor="recipe-slug">Slug</label>
+            <input
+              id="recipe-slug"
+              type="text"
+              value={form.slug}
+              readOnly={slugLocked}
+              aria-disabled={slugLocked || undefined}
+              aria-describedby="recipe-slug-preview"
+              onChange={(e) => {
+                setSlugError(null)
+                setField('slug', e.target.value)
+              }}
+              className={styles.input}
+            />
+            <p id="recipe-slug-preview">
+              Public URL: akli.dev/recipes/{form.slug}
+            </p>
+            {!slugLocked && (
+              <Button
+                onClick={() => setField('slug', sluggify(form.title))}
+                type="button"
+                variant="secondary"
+              >
+                Reset to title slug
+              </Button>
+            )}
+            {slugLocked && (
+              <p>Slug is locked — uploaded images are tied to it. Delete uploaded images to unlock.</p>
+            )}
+            {slugError && (
+              <p role="alert">{slugError}</p>
+            )}
+          </div>
+
+          <div className={styles.field}>
             <label htmlFor="recipe-intro">Intro</label>
             <textarea
               id="recipe-intro"
@@ -517,12 +567,14 @@ const RecipeEditor: FC = () => {
           <div className={styles.field}>
             {recipeId && (
               <ImageUpload
-                onUpload={setCoverImageKey}
-                currentKey={form.coverImageKey || undefined}
+                slug={form.slug}
+                imageType="cover"
                 currentAlt={form.coverImageAlt || undefined}
                 processedAt={form.coverImageProcessedAt}
                 getToken={getAccessToken}
                 recipeId={recipeId}
+                onUploadStarted={handleCoverUploadStarted}
+                onUploadCompleted={handleCoverUploadCompleted}
               />
             )}
           </div>
@@ -601,8 +653,11 @@ const RecipeEditor: FC = () => {
               steps={form.steps}
               onChange={setSteps}
               recipeId={recipeId}
+              slug={form.slug}
               getToken={getAccessToken}
               onAnnounce={announce}
+              onStepUploadStarted={handleStepUploadStarted}
+              onStepUploadCompleted={handleStepUploadCompleted}
             />
           )}
         </div>
