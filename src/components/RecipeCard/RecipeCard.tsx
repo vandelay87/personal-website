@@ -15,7 +15,7 @@ export interface RecipeCardProps {
 
 
 const RecipeCard: FC<RecipeCardProps> = ({ recipe, eager = false, hideTags = false, hideMeta = false }) => {
-  const thumbnailSrc = recipeImageUrl(recipe.coverImage.key, 'thumb')
+  const thumbnailSrc = recipeImageUrl(recipe.slug, 'cover', 'thumb')
 
   return (
     <article className={styles.card}>

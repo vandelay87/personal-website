@@ -7,17 +7,18 @@ import styles from './RecipeSteps.module.css'
 
 export interface RecipeStepsProps {
   steps: Step[]
+  slug: string
 }
 
 
-const RecipeSteps: FC<RecipeStepsProps> = ({ steps }) => (
+const RecipeSteps: FC<RecipeStepsProps> = ({ steps, slug }) => (
   <ol className={styles.list}>
     {steps.map((step) => (
-      <li key={step.order} className={styles.item}>
+      <li key={step.stepId} className={styles.item}>
         <Typography variant="body" className={styles.text}>{step.text}</Typography>
         {step.image && (step.image.processedAt ? (
           <Image
-            src={recipeImageUrl(step.image.key, 'medium')}
+            src={recipeImageUrl(slug, `step-${step.stepId}`, 'medium')}
             alt={step.image.alt}
             className={styles.image}
           />

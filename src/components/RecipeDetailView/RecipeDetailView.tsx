@@ -26,8 +26,8 @@ const RecipeDetailView: FC<RecipeDetailViewProps> = ({ recipe }) => (
   <article className={styles.page}>
     {recipe.coverImage.processedAt ? (
       <Image
-        src={recipeImageUrl(recipe.coverImage.key, 'medium')}
-        srcSet={`${recipeImageUrl(recipe.coverImage.key, 'medium')} 800w, ${recipeImageUrl(recipe.coverImage.key, 'full')} 1200w`}
+        src={recipeImageUrl(recipe.slug, 'cover', 'medium')}
+        srcSet={`${recipeImageUrl(recipe.slug, 'cover', 'medium')} 800w, ${recipeImageUrl(recipe.slug, 'cover', 'full')} 1200w`}
         alt={recipe.coverImage.alt}
         priority
         maxWidth="var(--max-w-site)"
@@ -63,7 +63,7 @@ const RecipeDetailView: FC<RecipeDetailViewProps> = ({ recipe }) => (
 
     <section className={styles.section}>
       <Typography variant="heading2" className={styles.sectionHeading}>Method</Typography>
-      <RecipeSteps steps={recipe.steps} />
+      <RecipeSteps steps={recipe.steps} slug={recipe.slug} />
     </section>
   </article>
 )

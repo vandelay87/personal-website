@@ -149,7 +149,7 @@ export const getMetaTags = (path: string, data?: RecipeData): MetaTags => {
       canonical,
       undefined,
       'article',
-      recipeImageUrl(recipe.coverImage.key, 'medium'),
+      recipeImageUrl(recipe.slug, 'cover', 'medium'),
     )
   }
 

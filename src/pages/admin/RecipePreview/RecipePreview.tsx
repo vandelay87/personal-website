@@ -16,12 +16,10 @@ import { useNavigate, useParams } from 'react-router-dom'
 import styles from './RecipePreview.module.css'
 
 const mergeReadiness = (recipe: Recipe, updates: ImageReadyUpdate[]): Recipe => {
-  const byKey = new Map(
-    updates.filter((u) => u.key).map((u) => [u.key, u.processedAt])
-  )
-  if (byKey.size === 0) return recipe
+  const byImageType = new Map(updates.map((u) => [u.imageType, u.processedAt]))
+  if (byImageType.size === 0) return recipe
 
-  const coverUpdate = byKey.get(recipe.coverImage.key)
+  const coverUpdate = byImageType.get('cover')
   const nextCover =
     coverUpdate !== undefined
       ? { ...recipe.coverImage, processedAt: coverUpdate }
@@ -29,8 +27,8 @@ const mergeReadiness = (recipe: Recipe, updates: ImageReadyUpdate[]): Recipe => 
 
   let stepsChanged = false
   const nextSteps = recipe.steps.map((step) => {
-    if (!step.image?.key) return step
-    const stepUpdate = byKey.get(step.image.key)
+    if (!step.image) return step
+    const stepUpdate = byImageType.get(`step-${step.stepId}`)
     if (stepUpdate === undefined) return step
     stepsChanged = true
     return { ...step, image: { ...step.image, processedAt: stepUpdate } }
