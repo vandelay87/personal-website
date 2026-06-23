@@ -2,11 +2,27 @@ export const RECIPE_IMAGE_BASE = 'https://images.akli.dev'
 
 export type RecipeImageVariant = 'thumb' | 'medium' | 'full'
 
+export type ImageType = 'cover' | `step-${string}`
+
 export const recipeImageUrl = (
   slug: string,
-  imageType: 'cover' | `step-${string}`,
+  imageType: ImageType,
   variant: RecipeImageVariant,
 ): string => `${RECIPE_IMAGE_BASE}/recipes/${slug}/${imageType}-${variant}.webp`
+
+export const stepImageType = (stepId: string): ImageType => `step-${stepId}`
+
+export const parseImageType = (
+  imageType: ImageType,
+): { kind: 'cover' } | { kind: 'step'; stepId: string } =>
+  imageType === 'cover'
+    ? { kind: 'cover' }
+    : { kind: 'step', stepId: imageType.slice('step-'.length) }
+
+export interface ImageReadyUpdate {
+  imageType: ImageType
+  processedAt: number
+}
 
 export const sluggify = (input: string): string =>
   input
@@ -62,4 +78,17 @@ export interface Recipe extends RecipeIndex {
   updatedAt: string
   status: 'draft' | 'published'
   ttl?: number
+}
+
+export const applyStepReadiness = (steps: Step[], updates: ImageReadyUpdate[]): Step[] => {
+  const byImageType = new Map(updates.map((u) => [u.imageType, u.processedAt]))
+  let changed = false
+  const nextSteps = steps.map((step) => {
+    if (!step.image) return step
+    const processedAt = byImageType.get(stepImageType(step.stepId))
+    if (processedAt === undefined) return step
+    changed = true
+    return { ...step, image: { ...step.image, processedAt } }
+  })
+  return changed ? nextSteps : steps
 }

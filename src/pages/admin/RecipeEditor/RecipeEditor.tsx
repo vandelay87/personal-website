@@ -25,7 +25,7 @@ import {
   useImageProcessingPoll,
   type ImageReadyUpdate,
 } from '@hooks/useImageProcessingPoll'
-import { sluggify } from '@models/recipe'
+import { applyStepReadiness, sluggify } from '@models/recipe'
 import type { Ingredient, Recipe, Step, Tag } from '@models/recipe'
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type FC } from 'react'
 import { useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom'
@@ -126,21 +126,17 @@ const applyImageStatusUpdates = (
   if (updates.length === 0) return state
 
   const coverUpdate = updates.find((u) => u.imageType === 'cover')
-  const nextSteps = state.steps.map((step) => {
-    const stepUpdate = updates.find((u) => u.imageType === `step-${step.stepId}`)
-    if (!stepUpdate || !step.image) return step
-    return { ...step, image: { ...step.image, processedAt: stepUpdate.processedAt } }
-  })
+  const nextSteps = applyStepReadiness(state.steps, updates)
+  const stepsChanged = nextSteps !== state.steps
 
-  const stepsChanged = nextSteps.some((step, i) => step !== state.steps[i])
   if (!coverUpdate && !stepsChanged) return state
 
+  // Server-originated readiness must not mark the form dirty — the `...state`
+  // spread carries the existing `dirty` value unchanged.
   return {
     ...state,
     coverImageProcessedAt: coverUpdate?.processedAt ?? state.coverImageProcessedAt,
     steps: nextSteps,
-    // Server-originated readiness must not mark the form dirty.
-    dirty: state.dirty,
   }
 }
 
@@ -392,7 +388,7 @@ const RecipeEditor: FC = () => {
       status: form.mode,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.id, form.slug, form.coverImageAlt, form.coverImageProcessedAt, form.steps])
+  }, [form.id, form.coverImageAlt, form.coverImageProcessedAt, form.steps])
 
   const { timedOut } = useImageProcessingPoll(loadedRecipe, (updates) => {
     dispatch({ type: 'IMAGE_STATUS_UPDATE', updates })

@@ -9,7 +9,7 @@ import {
   useImageProcessingPoll,
   type ImageReadyUpdate,
 } from '@hooks/useImageProcessingPoll'
-import type { Recipe } from '@models/recipe'
+import { applyStepReadiness, type Recipe } from '@models/recipe'
 import { useCallback, useEffect, useState, type FC } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -25,20 +25,14 @@ const mergeReadiness = (recipe: Recipe, updates: ImageReadyUpdate[]): Recipe => 
       ? { ...recipe.coverImage, processedAt: coverUpdate }
       : recipe.coverImage
 
-  let stepsChanged = false
-  const nextSteps = recipe.steps.map((step) => {
-    if (!step.image) return step
-    const stepUpdate = byImageType.get(`step-${step.stepId}`)
-    if (stepUpdate === undefined) return step
-    stepsChanged = true
-    return { ...step, image: { ...step.image, processedAt: stepUpdate } }
-  })
+  const nextSteps = applyStepReadiness(recipe.steps, updates)
+  const stepsChanged = nextSteps !== recipe.steps
 
   if (nextCover === recipe.coverImage && !stepsChanged) return recipe
   return {
     ...recipe,
     coverImage: nextCover,
-    steps: stepsChanged ? nextSteps : recipe.steps,
+    steps: nextSteps,
   }
 }
 

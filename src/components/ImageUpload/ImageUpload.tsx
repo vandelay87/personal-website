@@ -3,14 +3,14 @@ import { getUploadUrl } from '@api/recipes'
 import Button from '@components/Button'
 import Image from '@components/Image'
 import ProcessingPlaceholder from '@components/ProcessingPlaceholder'
-import { recipeImageUrl } from '@models/recipe'
+import { parseImageType, recipeImageUrl, type ImageType } from '@models/recipe'
 import { useEffect, useId, useRef, useState, type ChangeEvent, type FC } from 'react'
 
 import styles from './ImageUpload.module.css'
 
 export interface ImageUploadProps {
   slug: string
-  imageType: 'cover' | `step-${string}`
+  imageType: ImageType
   currentAlt?: string
   processedAt?: number
   getToken: () => Promise<string>
@@ -47,10 +47,12 @@ const ImageUpload: FC<ImageUploadProps> = ({
     inputRef.current?.click()
   }
 
-  const uploadParams = () =>
-    imageType === 'cover'
+  const uploadParams = () => {
+    const parsed = parseImageType(imageType)
+    return parsed.kind === 'cover'
       ? { recipeId, imageType: 'cover' as const }
-      : { recipeId, imageType: 'step' as const, stepId: imageType.slice('step-'.length) }
+      : { recipeId, imageType: 'step' as const, stepId: parsed.stepId }
+  }
 
   const upload = async (file: File) => {
     setError(null)
@@ -106,7 +108,7 @@ const ImageUpload: FC<ImageUploadProps> = ({
         />
       )
     }
-    if (!processedAt) return null
+    if (!processedAt) return <ProcessingPlaceholder aspectRatio="1 / 1" />
     return (
       <Image
         key="processed"
@@ -133,11 +135,7 @@ const ImageUpload: FC<ImageUploadProps> = ({
         aria-label="Upload image"
       />
 
-      {!preview && !hasCurrentImage && processedAt === undefined ? (
-        <ProcessingPlaceholder aspectRatio="1 / 1" />
-      ) : (
-        renderPreview()
-      )}
+      {renderPreview()}
 
       {error && (
         <div className={styles.error} role="alert">

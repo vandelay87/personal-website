@@ -1,16 +1,12 @@
 import { handleSessionError, isNotFoundError } from '@api/auth'
 import { fetchRecipeByIdAdmin } from '@api/recipes'
 import { useAuth } from '@contexts/AuthContext'
-import type { Recipe, RecipeImage } from '@models/recipe'
+import type { ImageReadyUpdate, ImageType, Recipe, RecipeImage } from '@models/recipe'
+import { stepImageType } from '@models/recipe'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-export type ImageType = 'cover' | `step-${string}`
-
-export interface ImageReadyUpdate {
-  imageType: ImageType
-  processedAt: number
-}
+export type { ImageReadyUpdate } from '@models/recipe'
 
 interface IdentifiedImage {
   imageType: ImageType
@@ -33,13 +29,13 @@ const collectImages = (recipe: Recipe): IdentifiedImage[] => {
   const images: IdentifiedImage[] = [{ imageType: 'cover', image: recipe.coverImage }]
   for (const step of recipe.steps) {
     if (step.image) {
-      images.push({ imageType: `step-${step.stepId}`, image: step.image })
+      images.push({ imageType: stepImageType(step.stepId), image: step.image })
     }
   }
   return images
 }
 
-const unreadyKeysOf = (recipe: Recipe): string[] =>
+const unreadyImageTypesOf = (recipe: Recipe): string[] =>
   collectImages(recipe)
     .filter(({ image }) => !image.processedAt)
     .map(({ imageType }) => imageType)
@@ -76,9 +72,9 @@ export const useImageProcessingPoll = (
   recipeRef.current = recipe
 
   const recipeId = recipe?.id ?? null
-  const unreadyKeysSignature = useMemo(() => {
+  const unreadyImageTypesSignature = useMemo(() => {
     if (!recipe) return ''
-    return unreadyKeysOf(recipe).sort().join('|')
+    return unreadyImageTypesOf(recipe).sort().join('|')
   }, [recipe])
 
   useEffect(() => {
@@ -89,7 +85,7 @@ export const useImageProcessingPoll = (
   }, [])
 
   useEffect(() => {
-    if (recipeId === null || unreadyKeysSignature.length === 0) {
+    if (recipeId === null || unreadyImageTypesSignature.length === 0) {
       return
     }
 
@@ -206,7 +202,7 @@ export const useImageProcessingPoll = (
     return () => {
       stopPolling()
     }
-  }, [recipeId, unreadyKeysSignature, intervalMs, timeoutMs])
+  }, [recipeId, unreadyImageTypesSignature, intervalMs, timeoutMs])
 
   return { timedOut }
 }

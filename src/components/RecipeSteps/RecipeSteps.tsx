@@ -1,7 +1,7 @@
 import Image from '@components/Image'
 import ProcessingPlaceholder from '@components/ProcessingPlaceholder'
 import Typography from '@components/Typography'
-import { recipeImageUrl, type Step } from '@models/recipe'
+import { recipeImageUrl, stepImageType, type Step } from '@models/recipe'
 import type { FC } from 'react'
 import styles from './RecipeSteps.module.css'
 
@@ -18,7 +18,7 @@ const RecipeSteps: FC<RecipeStepsProps> = ({ steps, slug }) => (
         <Typography variant="body" className={styles.text}>{step.text}</Typography>
         {step.image && (step.image.processedAt ? (
           <Image
-            src={recipeImageUrl(slug, `step-${step.stepId}`, 'medium')}
+            src={recipeImageUrl(slug, stepImageType(step.stepId), 'medium')}
             alt={step.image.alt}
             className={styles.image}
           />

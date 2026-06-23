@@ -1,7 +1,7 @@
 import Button from '@components/Button'
 import ImageUpload from '@components/ImageUpload'
 import { useReorderableList } from '@hooks/useReorderableList'
-import type { RecipeImage, Step } from '@models/recipe'
+import { stepImageType, type RecipeImage, type Step } from '@models/recipe'
 import { useCallback, type FC } from 'react'
 
 import styles from './StepList.module.css'
@@ -85,7 +85,7 @@ const StepList: FC<StepListProps> = ({
                 <ImageUpload
                   recipeId={recipeId}
                   slug={slug}
-                  imageType={`step-${step.stepId}`}
+                  imageType={stepImageType(step.stepId)}
                   currentAlt={step.image?.alt}
                   processedAt={step.image?.processedAt}
                   getToken={getToken}
