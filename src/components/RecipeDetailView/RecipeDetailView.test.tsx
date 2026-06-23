@@ -10,12 +10,11 @@ const baseRecipe: Recipe = {
   slug: 'test-recipe',
   intro: 'A delicious test recipe',
   coverImage: {
-    key: 'recipes/recipe-1/cover',
     alt: 'Test cover',
     processedAt: 1_700_000_000_000,
   },
   ingredients: [{ item: 'flour', quantity: '200', unit: 'g' }],
-  steps: [{ order: 1, text: 'Mix ingredients' }],
+  steps: [{ stepId: '9d904a59-e83f-43b8-9f40-fbdb3008974c', order: 1, text: 'Mix ingredients' }],
   tags: ['Baking'],
   prepTime: 15,
   cookTime: 30,
@@ -42,7 +41,7 @@ describe('RecipeDetailView', () => {
     expect(coverImg).toBeInTheDocument()
     expect(coverImg).toHaveAttribute(
       'src',
-      expect.stringContaining('recipes/recipe-1/cover-medium')
+      expect.stringContaining('recipes/test-recipe/cover-medium')
     )
     expect(screen.queryByText(/processing image/i)).not.toBeInTheDocument()
   })
@@ -51,7 +50,6 @@ describe('RecipeDetailView', () => {
     const processingRecipe: Recipe = {
       ...baseRecipe,
       coverImage: {
-        key: 'recipes/recipe-1/cover',
         alt: 'Test cover',
       },
     }

@@ -9,7 +9,6 @@ const mockRecipe: RecipeIndex = {
   title: 'Classic Margherita Pizza',
   slug: 'classic-margherita-pizza',
   coverImage: {
-    key: 'recipes/rec-001/cover',
     alt: 'Margherita pizza on a wooden board',
     processedAt: 1_700_000_000_000,
   },
@@ -61,7 +60,6 @@ describe('RecipeCard', () => {
     const processingRecipe: RecipeIndex = {
       ...mockRecipe,
       coverImage: {
-        key: 'recipes/rec-001/cover',
         alt: 'Margherita pizza on a wooden board',
       },
     }

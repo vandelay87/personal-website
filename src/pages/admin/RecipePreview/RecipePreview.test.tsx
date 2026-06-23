@@ -78,12 +78,14 @@ vi.mock('@hooks/useImageProcessingPoll', async () => {
   }
 })
 
+const STEP_1_ID = '9d904a59-e83f-43b8-9f40-fbdb3008974c'
+const STEP_2_ID = '1b2c3d4e-5f60-4a1b-8c2d-3e4f5a6b7c8d'
+
 const mockDraftRecipe: Recipe = {
   id: 'rec-draft',
   title: 'Draft Lemon Tart',
   slug: 'draft-lemon-tart',
   coverImage: {
-    key: 'recipes/rec-draft/cover',
     alt: 'Lemon tart cover',
     // Default the shared fixture to "already processed" so the existing
     // banner / publish-flow tests render the ready branch. Tests that need
@@ -102,8 +104,8 @@ const mockDraftRecipe: Recipe = {
     { item: 'unsalted butter', quantity: '100', unit: 'g' },
   ],
   steps: [
-    { order: 1, text: 'Rub butter into the flour' },
-    { order: 2, text: 'Bake the shell blind for 15 minutes' },
+    { stepId: STEP_1_ID, order: 1, text: 'Rub butter into the flour' },
+    { stepId: STEP_2_ID, order: 2, text: 'Bake the shell blind for 15 minutes' },
   ],
   authorId: 'user-1',
   authorName: 'Akli',
@@ -306,8 +308,8 @@ describe('RecipePreview page', () => {
       })
 
       expect(pollControls.lastArgs.recipe?.id).toBe('rec-draft')
-      expect(pollControls.lastArgs.recipe?.coverImage.key).toBe(
-        'recipes/rec-draft/cover'
+      expect(pollControls.lastArgs.recipe?.coverImage.alt).toBe(
+        'Lemon tart cover'
       )
       expect(typeof pollControls.lastArgs.onReady).toBe('function')
     })
@@ -316,7 +318,6 @@ describe('RecipePreview page', () => {
       const recipeWithUnreadyCover: Recipe = {
         ...mockDraftRecipe,
         coverImage: {
-          key: 'recipes/rec-draft/cover',
           alt: 'Lemon tart cover',
           // processedAt absent — cover is still processing.
         },
@@ -339,11 +340,10 @@ describe('RecipePreview page', () => {
       ).not.toBeInTheDocument()
     })
 
-    it('auto-updates the preview when onReady fires with the matching cover key (processing → ready)', async () => {
+    it('auto-updates the preview when onReady fires with the matching cover imageType (processing → ready)', async () => {
       const recipeWithUnreadyCover: Recipe = {
         ...mockDraftRecipe,
         coverImage: {
-          key: 'recipes/rec-draft/cover',
           alt: 'Lemon tart cover',
         },
       }
@@ -362,7 +362,7 @@ describe('RecipePreview page', () => {
 
       // Poll hook reports the cover is ready.
       pollControls.triggerReady([
-        { key: 'recipes/rec-draft/cover', processedAt: 1_700_000_500_000 },
+        { imageType: 'cover', processedAt: 1_700_000_500_000 },
       ])
 
       // Placeholder gone, cover <img> now rendered.
@@ -374,11 +374,10 @@ describe('RecipePreview page', () => {
       expect(screen.queryByText(/processing image…/i)).not.toBeInTheDocument()
     })
 
-    it('ignores readiness updates whose keys do not match any image on the recipe', async () => {
+    it('ignores readiness updates whose imageType does not match any image on the recipe', async () => {
       const recipeWithUnreadyCover: Recipe = {
         ...mockDraftRecipe,
         coverImage: {
-          key: 'recipes/rec-draft/cover',
           alt: 'Lemon tart cover',
         },
       }
@@ -390,9 +389,9 @@ describe('RecipePreview page', () => {
         expect(screen.getByText(/processing image…/i)).toBeInTheDocument()
       })
 
-      // Fire a readiness update for a key that does not exist on the recipe.
+      // Fire a readiness update for an imageType that does not exist on the recipe.
       pollControls.triggerReady([
-        { key: 'recipes/rec-draft/some-other-key', processedAt: 1_700_000_500_000 },
+        { imageType: 'step-00000000-0000-0000-0000-000000000000', processedAt: 1_700_000_500_000 },
       ])
 
       // Let any state updates flush.
@@ -406,21 +405,20 @@ describe('RecipePreview page', () => {
       ).not.toBeInTheDocument()
     })
 
-    it('auto-updates a step image placeholder when onReady fires with the step image key', async () => {
+    it('auto-updates a step image placeholder when onReady fires with the step imageType', async () => {
       const recipeWithUnreadyStep: Recipe = {
         ...mockDraftRecipe,
         // Cover image ready so we isolate the step placeholder.
         coverImage: {
-          key: 'recipes/rec-draft/cover',
           alt: 'Lemon tart cover',
           processedAt: 1_700_000_000_000,
         },
         steps: [
           {
+            stepId: STEP_1_ID,
             order: 1,
             text: 'Rub butter into the flour',
             image: {
-              key: 'recipes/rec-draft/step-1',
               alt: 'Rubbed butter into flour',
             },
           },
@@ -441,7 +439,7 @@ describe('RecipePreview page', () => {
 
       // Poll hook reports the step image is ready.
       pollControls.triggerReady([
-        { key: 'recipes/rec-draft/step-1', processedAt: 1_700_000_600_000 },
+        { imageType: `step-${STEP_1_ID}`, processedAt: 1_700_000_600_000 },
       ])
 
       await waitFor(() => {
