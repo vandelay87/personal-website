@@ -3,33 +3,33 @@ import { getUploadUrl } from '@api/recipes'
 import Button from '@components/Button'
 import Image from '@components/Image'
 import ProcessingPlaceholder from '@components/ProcessingPlaceholder'
-import { recipeImageUrl } from '@models/recipe'
+import { parseImageType, recipeImageUrl, type ImageType } from '@models/recipe'
 import { useEffect, useId, useRef, useState, type ChangeEvent, type FC } from 'react'
 
 import styles from './ImageUpload.module.css'
 
 export interface ImageUploadProps {
-  onUpload: (key: string) => void
-  currentKey?: string
+  slug: string
+  imageType: ImageType
   currentAlt?: string
   processedAt?: number
   getToken: () => Promise<string>
   recipeId: string
-  imageType?: 'cover' | 'step'
-  stepOrder?: number
+  onUploadStarted?: () => void
+  onUploadCompleted?: () => void
 }
 
 const MAX_SIZE = 10 * 1024 * 1024
 
 const ImageUpload: FC<ImageUploadProps> = ({
-  onUpload,
-  currentKey,
+  slug,
+  imageType,
   currentAlt,
   processedAt,
   getToken,
   recipeId,
-  imageType = 'cover',
-  stepOrder,
+  onUploadStarted,
+  onUploadCompleted,
 }) => {
   const inputId = useId()
   const [preview, setPreview] = useState<string | null>(null)
@@ -45,6 +45,13 @@ const ImageUpload: FC<ImageUploadProps> = ({
 
   const handleClick = () => {
     inputRef.current?.click()
+  }
+
+  const uploadParams = () => {
+    const parsed = parseImageType(imageType)
+    return parsed.kind === 'cover'
+      ? { recipeId, imageType: 'cover' as const }
+      : { recipeId, imageType: 'step' as const, stepId: parsed.stepId }
   }
 
   const upload = async (file: File) => {
@@ -65,17 +72,14 @@ const ImageUpload: FC<ImageUploadProps> = ({
 
     try {
       const token = await getToken()
-      const { uploadUrl, key } = await getUploadUrl(token, {
-        recipeId,
-        imageType,
-        ...(imageType === 'step' && stepOrder !== undefined ? { stepOrder } : {}),
-      })
+      const { uploadUrl } = await getUploadUrl(token, uploadParams())
+      onUploadStarted?.()
       await fetch(uploadUrl, {
         method: 'PUT',
         body: file,
         headers: { 'Content-Type': file.type },
       })
-      onUpload(key)
+      onUploadCompleted?.()
     } catch {
       setError('Upload error. Please try again.')
     }
@@ -104,21 +108,20 @@ const ImageUpload: FC<ImageUploadProps> = ({
         />
       )
     }
-    if (!currentKey) return null
-    if (processedAt) {
-      return (
-        <Image
-          key="processed"
-          src={recipeImageUrl(currentKey, 'medium')}
-          alt={currentAlt ?? 'Current image'}
-          className={styles.preview}
-          aspectRatio="1 / 1"
-          maxWidth="200px"
-        />
-      )
-    }
-    return <ProcessingPlaceholder aspectRatio="1 / 1" />
+    if (!processedAt) return <ProcessingPlaceholder aspectRatio="1 / 1" />
+    return (
+      <Image
+        key="processed"
+        src={recipeImageUrl(slug, imageType, 'medium')}
+        alt={currentAlt ?? 'Current image'}
+        className={styles.preview}
+        aspectRatio="1 / 1"
+        maxWidth="200px"
+      />
+    )
   }
+
+  const hasCurrentImage = processedAt !== undefined
 
   return (
     <div className={styles.container}>
@@ -143,7 +146,7 @@ const ImageUpload: FC<ImageUploadProps> = ({
         </div>
       )}
 
-      {currentKey && !preview ? (
+      {hasCurrentImage && !preview ? (
         <Button onClick={handleClick} ariaLabel="Replace image" variant="secondary">
           Replace
         </Button>

@@ -9,38 +9,30 @@ import {
   useImageProcessingPoll,
   type ImageReadyUpdate,
 } from '@hooks/useImageProcessingPoll'
-import type { Recipe } from '@models/recipe'
-import { useCallback, useEffect, useState, type FC } from 'react'
+import { applyStepReadiness, type Recipe } from '@models/recipe'
+import { useCallback, useEffect, useMemo, useState, type FC } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import styles from './RecipePreview.module.css'
 
 const mergeReadiness = (recipe: Recipe, updates: ImageReadyUpdate[]): Recipe => {
-  const byKey = new Map(
-    updates.filter((u) => u.key).map((u) => [u.key, u.processedAt])
-  )
-  if (byKey.size === 0) return recipe
+  const byImageType = new Map(updates.map((u) => [u.imageType, u.processedAt]))
+  if (byImageType.size === 0) return recipe
 
-  const coverUpdate = byKey.get(recipe.coverImage.key)
+  const coverUpdate = byImageType.get('cover')
   const nextCover =
     coverUpdate !== undefined
       ? { ...recipe.coverImage, processedAt: coverUpdate }
       : recipe.coverImage
 
-  let stepsChanged = false
-  const nextSteps = recipe.steps.map((step) => {
-    if (!step.image?.key) return step
-    const stepUpdate = byKey.get(step.image.key)
-    if (stepUpdate === undefined) return step
-    stepsChanged = true
-    return { ...step, image: { ...step.image, processedAt: stepUpdate } }
-  })
+  const nextSteps = applyStepReadiness(recipe.steps, updates)
+  const stepsChanged = nextSteps !== recipe.steps
 
   if (nextCover === recipe.coverImage && !stepsChanged) return recipe
   return {
     ...recipe,
     coverImage: nextCover,
-    steps: stepsChanged ? nextSteps : recipe.steps,
+    steps: nextSteps,
   }
 }
 
@@ -85,7 +77,18 @@ const RecipePreview: FC = () => {
     }
   }, [id, getAccessToken, logout, navigate])
 
-  useImageProcessingPoll(recipe ?? null, (updates) => {
+  // The preview only has fetched recipe data — it cannot tell a coverless
+  // recipe from one whose cover is still processing (both lack processedAt).
+  // With no presence signal, an unprocessed cover is marked absent so the hook
+  // does not phantom-poll/time out a recipe that has no cover at all. A cover
+  // that is already processed stays a (settled) image and never polls anyway.
+  const pollRecipe = useMemo<Recipe | null>(() => {
+    if (!recipe) return null
+    if (recipe.coverImage.processedAt !== undefined) return recipe
+    return { ...recipe, coverImage: { ...recipe.coverImage, absent: true } }
+  }, [recipe])
+
+  useImageProcessingPoll(pollRecipe, (updates) => {
     setRecipe((prev) => (prev ? mergeReadiness(prev, updates) : prev))
   })
 

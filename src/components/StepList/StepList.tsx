@@ -1,7 +1,7 @@
 import Button from '@components/Button'
 import ImageUpload from '@components/ImageUpload'
 import { useReorderableList } from '@hooks/useReorderableList'
-import type { RecipeImage, Step } from '@models/recipe'
+import { stepImageType, type RecipeImage, type Step } from '@models/recipe'
 import { useCallback, type FC } from 'react'
 
 import styles from './StepList.module.css'
@@ -10,14 +10,26 @@ export interface StepListProps {
   steps: Step[]
   onChange: (steps: Step[]) => void
   recipeId: string
+  slug: string
   getToken?: () => Promise<string>
   onAnnounce?: (message: string) => void
+  onStepUploadStarted?: (stepId: string) => void
+  onStepUploadCompleted?: (stepId: string) => void
 }
 
 const renumber = (steps: Step[]): Step[] =>
   steps.map((step, i) => ({ ...step, order: i + 1 }))
 
-const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken, onAnnounce }) => {
+const StepList: FC<StepListProps> = ({
+  steps,
+  onChange,
+  recipeId,
+  slug,
+  getToken,
+  onAnnounce,
+  onStepUploadStarted,
+  onStepUploadCompleted,
+}) => {
   const onChangeRenumbered = useCallback(
     (next: Step[]) => onChange(renumber(next)),
     [onChange]
@@ -32,12 +44,21 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken, onAn
     const existing = steps[index].image
     update(index, {
       ...steps[index],
-      image: { key: existing?.key ?? '', alt: existing?.alt ?? '', ...patch },
+      image: { alt: existing?.alt ?? '', ...patch },
     })
   }
 
+  const handleStepImageUploaded = (index: number) => {
+    const step = steps[index]
+    onStepUploadCompleted?.(step.stepId)
+    // Record that this step now has an image so it is persisted by buildPatchPayload
+    // and polled for processing, even if the user never types alt text. Mirrors the
+    // always-present coverImage; any alt the user already typed is preserved.
+    update(index, { ...step, image: { alt: step.image?.alt ?? '' } })
+  }
+
   const handleAdd = () => {
-    add({ order: steps.length + 1, text: '' })
+    add({ stepId: crypto.randomUUID(), order: steps.length + 1, text: '' })
     onAnnounce?.('Step added')
   }
 
@@ -59,7 +80,7 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken, onAn
   return (
     <div className={styles.container}>
       {steps.map((step, index) => (
-        <div key={index} className={styles.row}>
+        <div key={step.stepId} className={styles.row}>
           <span className={styles.stepNumber}>{index + 1}</span>
           <div className={styles.body}>
             <textarea
@@ -72,13 +93,13 @@ const StepList: FC<StepListProps> = ({ steps, onChange, recipeId, getToken, onAn
               <div className={styles.imageBlock}>
                 <ImageUpload
                   recipeId={recipeId}
-                  imageType="step"
-                  stepOrder={index + 1}
-                  currentKey={step.image?.key}
+                  slug={slug}
+                  imageType={stepImageType(step.stepId)}
                   currentAlt={step.image?.alt}
                   processedAt={step.image?.processedAt}
                   getToken={getToken}
-                  onUpload={(key) => updateImage(index, { key })}
+                  onUploadStarted={() => onStepUploadStarted?.(step.stepId)}
+                  onUploadCompleted={() => handleStepImageUploaded(index)}
                 />
                 <input
                   type="text"

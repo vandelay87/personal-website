@@ -1,13 +1,16 @@
 import { handleSessionError, isNotFoundError } from '@api/auth'
 import { fetchRecipeByIdAdmin } from '@api/recipes'
 import { useAuth } from '@contexts/AuthContext'
-import type { Recipe, RecipeImage } from '@models/recipe'
+import type { ImageReadyUpdate, ImageType, Recipe, RecipeImage } from '@models/recipe'
+import { stepImageType } from '@models/recipe'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-export interface ImageReadyUpdate {
-  key: string
-  processedAt: number
+export type { ImageReadyUpdate } from '@models/recipe'
+
+interface IdentifiedImage {
+  imageType: ImageType
+  image: RecipeImage
 }
 
 export interface UseImageProcessingPollOptions {
@@ -22,19 +25,32 @@ export interface UseImageProcessingPollResult {
 const DEFAULT_INTERVAL_MS = 1500
 const DEFAULT_TIMEOUT_MS = 60_000
 
-const collectImages = (recipe: Recipe): RecipeImage[] => {
-  const images: RecipeImage[] = []
-  if (recipe.coverImage?.key) images.push(recipe.coverImage)
+// A cover is a poll target when it actually exists. The recipe shape cannot
+// distinguish "no cover" from "cover uploaded, still processing" (both lack
+// processedAt), so the editor marks a known-absent cover with `absent: true`.
+// An already-processed cover is always present; anything not explicitly marked
+// absent is treated as present (mirrors how a step is polled when `step.image`
+// is set).
+const coverIsPresent = (cover: RecipeImage): boolean =>
+  cover.processedAt !== undefined || cover.absent !== true
+
+const collectImages = (recipe: Recipe): IdentifiedImage[] => {
+  const images: IdentifiedImage[] = []
+  if (coverIsPresent(recipe.coverImage)) {
+    images.push({ imageType: 'cover', image: recipe.coverImage })
+  }
   for (const step of recipe.steps) {
-    if (step.image?.key) images.push(step.image)
+    if (step.image) {
+      images.push({ imageType: stepImageType(step.stepId), image: step.image })
+    }
   }
   return images
 }
 
-const unreadyKeysOf = (recipe: Recipe): string[] =>
+const unreadyImageTypesOf = (recipe: Recipe): string[] =>
   collectImages(recipe)
-    .filter((img) => !img.processedAt)
-    .map((img) => img.key)
+    .filter(({ image }) => !image.processedAt)
+    .map(({ imageType }) => imageType)
 
 export const useImageProcessingPoll = (
   recipe: Recipe | null,
@@ -53,6 +69,7 @@ export const useImageProcessingPoll = (
   const logoutRef = useRef(logout)
   const navigateRef = useRef(navigate)
   const getAccessTokenRef = useRef(getAccessToken)
+  const recipeRef = useRef(recipe)
   const isMountedRef = useRef(true)
   const abortRef = useRef<AbortController | null>(null)
   const nextTickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -64,11 +81,12 @@ export const useImageProcessingPoll = (
   logoutRef.current = logout
   navigateRef.current = navigate
   getAccessTokenRef.current = getAccessToken
+  recipeRef.current = recipe
 
   const recipeId = recipe?.id ?? null
-  const unreadyKeysSignature = useMemo(() => {
+  const unreadyImageTypesSignature = useMemo(() => {
     if (!recipe) return ''
-    return unreadyKeysOf(recipe).sort().join('|')
+    return unreadyImageTypesOf(recipe).sort().join('|')
   }, [recipe])
 
   useEffect(() => {
@@ -79,12 +97,19 @@ export const useImageProcessingPoll = (
   }, [])
 
   useEffect(() => {
-    if (recipeId === null || unreadyKeysSignature.length === 0) {
+    if (recipeId === null || unreadyImageTypesSignature.length === 0) {
       return
     }
 
     activeRecipeIdRef.current = recipeId
-    emittedReadyRef.current = new Set()
+    const currentRecipe = recipeRef.current
+    emittedReadyRef.current = new Set(
+      currentRecipe === null
+        ? []
+        : collectImages(currentRecipe)
+            .filter(({ image }) => image.processedAt)
+            .map(({ imageType }) => imageType)
+    )
     setTimedOut(false)
 
     const stopPolling = () => {
@@ -150,14 +175,14 @@ export const useImageProcessingPoll = (
 
         const newlyReady: ImageReadyUpdate[] = []
         let hasUnready = false
-        for (const img of collectImages(fresh)) {
-          if (!img.processedAt) {
+        for (const { imageType, image } of collectImages(fresh)) {
+          if (!image.processedAt) {
             hasUnready = true
             continue
           }
-          if (!emittedReadyRef.current.has(img.key)) {
-            emittedReadyRef.current.add(img.key)
-            newlyReady.push({ key: img.key, processedAt: img.processedAt })
+          if (!emittedReadyRef.current.has(imageType)) {
+            emittedReadyRef.current.add(imageType)
+            newlyReady.push({ imageType, processedAt: image.processedAt })
           }
         }
 
@@ -189,7 +214,7 @@ export const useImageProcessingPoll = (
     return () => {
       stopPolling()
     }
-  }, [recipeId, unreadyKeysSignature, intervalMs, timeoutMs])
+  }, [recipeId, unreadyImageTypesSignature, intervalMs, timeoutMs])
 
   return { timedOut }
 }

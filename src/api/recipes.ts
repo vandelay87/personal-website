@@ -138,8 +138,8 @@ const applyDevS3Proxy = (uploadUrl: string): string => {
 
 export const getUploadUrl = async (
   token: string,
-  params: { recipeId: string; imageType: string; stepOrder?: number }
-): Promise<{ uploadUrl: string; key: string }> => {
+  params: { recipeId: string; imageType: 'cover' | 'step'; stepId?: string }
+): Promise<{ uploadUrl: string }> => {
   const response = await fetch(`${API_BASE}/recipes/images/upload-url`, {
     method: 'POST',
     headers: {
@@ -151,6 +151,6 @@ export const getUploadUrl = async (
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`)
   }
-  const { uploadUrl, key }: { uploadUrl: string; key: string } = await response.json()
-  return { uploadUrl: applyDevS3Proxy(uploadUrl), key }
+  const { uploadUrl }: { uploadUrl: string } = await response.json()
+  return { uploadUrl: applyDevS3Proxy(uploadUrl) }
 }

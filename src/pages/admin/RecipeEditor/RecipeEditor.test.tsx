@@ -159,25 +159,39 @@ vi.mock('@hooks/useImageProcessingPoll', async () => {
   }
 })
 
-// ImageUpload is replaced with a stub so we can assert on the prop passed
-// (and trigger onUpload without a real file input).
+// ImageUpload is replaced with a stub so we can assert on the props passed
+// (and trigger the upload-started/completed callbacks without a real file input).
+// The new (#198) contract: ImageUpload takes `slug` + `imageType` and exposes
+// `onUploadStarted` / `onUploadCompleted` — there is no `onUpload(key)`.
 interface ImageUploadStubProps {
-  onUpload: (key: string) => void
   recipeId: string
-  imageType?: 'cover' | 'step'
+  slug: string
+  imageType: 'cover' | `step-${string}`
+  onUploadStarted?: () => void
+  onUploadCompleted?: () => void
 }
 
 vi.mock('@components/ImageUpload', () => ({
   default: ({
-    onUpload,
     recipeId,
-    imageType = 'cover',
+    slug,
+    imageType,
+    onUploadStarted,
+    onUploadCompleted,
   }: ImageUploadStubProps) => {
+    // Use 'cover' vs 'step' as a stable testid suffix so multiple step uploads
+    // don't collide on the per-uuid imageType string.
+    const kind = imageType === 'cover' ? 'cover' : 'step'
     return (
       <div>
-        <span data-testid={`image-upload-recipe-id-${imageType}`}>{recipeId}</span>
-        <button type="button" onClick={() => onUpload(`recipes/test/${imageType}-stub`)}>
-          Simulate upload {imageType} image
+        <span data-testid={`image-upload-recipe-id-${kind}`}>{recipeId}</span>
+        <span data-testid={`image-upload-slug-${kind}`}>{slug}</span>
+        <span data-testid={`image-upload-imagetype-${kind}`}>{imageType}</span>
+        <button type="button" onClick={() => onUploadStarted?.()}>
+          Start upload {kind} image
+        </button>
+        <button type="button" onClick={() => onUploadCompleted?.()}>
+          Complete upload {kind} image
         </button>
       </div>
     )
@@ -185,13 +199,12 @@ vi.mock('@components/ImageUpload', () => ({
 }))
 
 const fillValidCoverImage = async (user: UserEvent) => {
-  await user.click(screen.getByRole('button', { name: /simulate upload cover image/i }))
   await user.type(screen.getByLabelText(/cover image alt text/i), 'Cover alt text')
   // Simulate the image processing poll detecting the uploaded cover as ready.
-  // Without this, the publish gate would consider the cover image "still
-  // processing" (key set, processedAt absent) and Publish stays disabled.
+  // Without this, the publish gate would consider the cover image absent
+  // (no processedAt) and Publish stays disabled.
   pollControls.triggerReady([
-    { key: 'recipes/test/cover-stub', processedAt: 1_700_000_000_000 },
+    { imageType: 'cover', processedAt: 1_700_000_000_000 },
   ])
 }
 
@@ -208,7 +221,6 @@ const draftRecipe: Recipe = {
   title: 'Spaghetti Bolognese',
   slug: 'spaghetti-bolognese',
   coverImage: {
-    key: 'recipes/rec-001/cover',
     alt: 'Spaghetti bolognese',
     // Readiness is defaulted to "already processed" for the shared fixture so
     // existing tests continue to exercise the ready-branch of the publish
@@ -223,7 +235,7 @@ const draftRecipe: Recipe = {
   updatedAt: '2026-03-22T10:00:00Z',
   intro: 'A classic Italian dish.',
   ingredients: [{ item: 'Spaghetti', quantity: '400', unit: 'g' }],
-  steps: [{ order: 1, text: 'Boil pasta' }],
+  steps: [{ stepId: '11111111-1111-4111-8111-111111111111', order: 1, text: 'Boil pasta' }],
   authorId: 'user-1',
   authorName: 'Akli',
   status: 'draft',
@@ -983,12 +995,14 @@ describe('RecipeEditor page', () => {
   })
 
   describe('image processing readiness', () => {
-    // A recipe whose cover image has been uploaded (key present) but not yet
-    // processed by the resizer Lambda (processedAt absent). All other fields
-    // are valid so only the readiness gate keeps Publish disabled.
+    const STEP_ID = '11111111-1111-4111-8111-111111111111'
+
+    // A recipe whose cover image has been uploaded but not yet processed by the
+    // resizer Lambda (processedAt absent). All other fields are valid so only
+    // the readiness gate keeps Publish disabled.
     const recipeWithUnreadyCover: Recipe = {
       ...draftRecipe,
-      coverImage: { key: 'recipes/rec-001/cover', alt: 'Spaghetti bolognese' },
+      coverImage: { alt: 'Spaghetti bolognese' },
     }
 
     // A recipe where the cover is ready but a step image is still processing.
@@ -996,9 +1010,10 @@ describe('RecipeEditor page', () => {
       ...draftRecipe,
       steps: [
         {
+          stepId: STEP_ID,
           order: 1,
           text: 'Boil pasta',
-          image: { key: 'recipes/rec-001/step-1', alt: 'Boiling pasta' },
+          image: { alt: 'Boiling pasta' },
         },
       ],
     }
@@ -1008,10 +1023,10 @@ describe('RecipeEditor page', () => {
       ...draftRecipe,
       steps: [
         {
+          stepId: STEP_ID,
           order: 1,
           text: 'Boil pasta',
           image: {
-            key: 'recipes/rec-001/step-1',
             alt: 'Boiling pasta',
             processedAt: 1_700_000_000_000,
           },
@@ -1019,7 +1034,7 @@ describe('RecipeEditor page', () => {
       ],
     }
 
-    it('disables Publish when the cover image has a key but no processedAt (AC 6, 7)', async () => {
+    it('disables Publish when the cover image is not yet processed (no processedAt) (AC 6, 7)', async () => {
       vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithUnreadyCover])
       vi.mocked(fetchAllRecipes).mockResolvedValue([recipeWithUnreadyCover])
 
@@ -1036,7 +1051,8 @@ describe('RecipeEditor page', () => {
       expect(describedBy).toBeTruthy()
       const missingList = document.getElementById(describedBy as string)
       expect(missingList).not.toBeNull()
-      expect(missingList?.textContent ?? '').toMatch(/cover image still processing/i)
+      // Cover presence is now signalled by coverImageProcessedAt — absent → "Cover image".
+      expect(missingList?.textContent ?? '').toMatch(/cover image/i)
     })
 
     it('disables Publish when a step image has a key but no processedAt (AC 6, 7)', async () => {
@@ -1090,7 +1106,7 @@ describe('RecipeEditor page', () => {
 
       // Simulate the poll hook finding the cover image is ready.
       pollControls.triggerReady([
-        { key: 'recipes/rec-001/cover', processedAt: 1_700_000_500_000 },
+        { imageType: 'cover', processedAt: 1_700_000_500_000 },
       ])
 
       await waitFor(() => {
@@ -1119,7 +1135,7 @@ describe('RecipeEditor page', () => {
       })
     })
 
-    it('ignores IMAGE_STATUS_UPDATE entries whose keys do not match any image on the form (AC 1)', async () => {
+    it('ignores IMAGE_STATUS_UPDATE entries whose imageType does not match any image on the form (AC 1)', async () => {
       vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithUnreadyCover])
       vi.mocked(fetchAllRecipes).mockResolvedValue([recipeWithUnreadyCover])
 
@@ -1131,9 +1147,12 @@ describe('RecipeEditor page', () => {
 
       expect(screen.getByRole('button', { name: /^publish$/i })).toBeDisabled()
 
-      // Readiness update for a key that does not exist on the form.
+      // Readiness update for a step imageType that does not exist on the form.
       pollControls.triggerReady([
-        { key: 'recipes/rec-001/some-other-key', processedAt: 1_700_000_500_000 },
+        {
+          imageType: 'step-99999999-9999-4999-8999-999999999999',
+          processedAt: 1_700_000_500_000,
+        },
       ])
 
       // A micro-task flush to let any reducer dispatch settle.
@@ -1145,7 +1164,7 @@ describe('RecipeEditor page', () => {
       expect(publishButton).toBeDisabled()
       const describedBy = publishButton.getAttribute('aria-describedby')
       const missingList = document.getElementById(describedBy as string)
-      expect(missingList?.textContent ?? '').toMatch(/cover image still processing/i)
+      expect(missingList?.textContent ?? '').toMatch(/cover image/i)
     })
 
     it('does not mark the form dirty on IMAGE_STATUS_UPDATE (AC 2)', async () => {
@@ -1165,7 +1184,7 @@ describe('RecipeEditor page', () => {
 
       // Fire a readiness update.
       pollControls.triggerReady([
-        { key: 'recipes/rec-001/cover', processedAt: 1_700_000_500_000 },
+        { imageType: 'cover', processedAt: 1_700_000_500_000 },
       ])
 
       // The most recent autosave snapshot must still have dirty === false —
@@ -1174,6 +1193,61 @@ describe('RecipeEditor page', () => {
       await waitFor(() => {
         expect(autosaveControls.lastArgs.state?.dirty).toBe(false)
       })
+    })
+
+    // Regression (#201): a recipe with no cover image must NOT be handed to the
+    // poll hook as an unready cover. The editor marks the cover absent so the
+    // hook never phantom-polls it and the "taking longer than expected" banner
+    // never appears for a coverless draft.
+    it('marks the cover absent for a recipe with no processed cover and no in-session upload', async () => {
+      vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithUnreadyCover])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([recipeWithUnreadyCover])
+
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      await waitFor(() => {
+        expect(pollControls.lastArgs.recipe?.coverImage.processedAt).toBeUndefined()
+      })
+      // The cover is encoded as absent → the real hook would skip it entirely.
+      expect(pollControls.lastArgs.recipe?.coverImage.absent).toBe(true)
+      // And no false timeout banner is shown.
+      expect(
+        screen.queryByText(/processing is taking longer than expected/i)
+      ).not.toBeInTheDocument()
+    })
+
+    // Regression (#201): once a cover upload starts this session, the cover IS a
+    // real poll target even before processedAt arrives — so it must NOT be marked
+    // absent, otherwise an uploaded-but-processing cover would never be polled.
+    it('keeps the cover pollable (not absent) once a cover upload starts this session', async () => {
+      vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithUnreadyCover])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([recipeWithUnreadyCover])
+
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      // Initially absent (no processed cover, no upload yet).
+      await waitFor(() => {
+        expect(pollControls.lastArgs.recipe?.coverImage.absent).toBe(true)
+      })
+
+      // Fire the cover upload-started callback through the ImageUpload stub.
+      await user.click(screen.getByRole('button', { name: /start upload cover image/i }))
+
+      // Now the cover is a live poll target — no longer marked absent, still no
+      // processedAt (it is processing). The real hook polls it until ready.
+      await waitFor(() => {
+        expect(pollControls.lastArgs.recipe?.coverImage.absent).not.toBe(true)
+      })
+      expect(pollControls.lastArgs.recipe?.coverImage.processedAt).toBeUndefined()
     })
 
     it('renders the timeout banner when the poll hook reports timedOut: true (AC 8)', async () => {
@@ -1210,6 +1284,337 @@ describe('RecipeEditor page', () => {
           /processing is taking longer than expected/i.test(region.textContent ?? '')
       )
       expect(banner).toBeDefined()
+    })
+  })
+
+  describe('slug input (#198)', () => {
+    it('renders a Slug input reachable via its label', async () => {
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(createDraft).toHaveBeenCalled()
+      })
+
+      expect(screen.getByLabelText('Slug')).toBeInTheDocument()
+    })
+
+    it('auto-fills the slug as sluggify(title) while typing the title', async () => {
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(createDraft).toHaveBeenCalled()
+      })
+
+      await user.type(screen.getByRole('textbox', { name: /title/i }), 'Beans on Toast')
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Slug')).toHaveValue('beans-on-toast')
+      })
+    })
+
+    it('stops auto-filling after the user edits the slug directly', async () => {
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(createDraft).toHaveBeenCalled()
+      })
+
+      await user.type(screen.getByRole('textbox', { name: /title/i }), 'Beans on Toast')
+      await waitFor(() => {
+        expect(screen.getByLabelText('Slug')).toHaveValue('beans-on-toast')
+      })
+
+      // User overrides the slug.
+      const slugInput = screen.getByLabelText('Slug')
+      await user.clear(slugInput)
+      await user.type(slugInput, 'bot')
+
+      // Further title edits must NOT touch the slug.
+      await user.type(screen.getByRole('textbox', { name: /title/i }), ' Deluxe')
+
+      expect(screen.getByLabelText('Slug')).toHaveValue('bot')
+    })
+
+    it('"Reset to title slug" re-derives the slug from the title and re-enables auto-fill', async () => {
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(createDraft).toHaveBeenCalled()
+      })
+
+      await user.type(screen.getByRole('textbox', { name: /title/i }), 'Beans on Toast')
+      const slugInput = screen.getByLabelText('Slug')
+      await user.clear(slugInput)
+      await user.type(slugInput, 'bot')
+
+      await user.click(screen.getByRole('button', { name: /reset to title slug/i }))
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Slug')).toHaveValue('beans-on-toast')
+      })
+
+      // Auto-fill is re-enabled: a further title edit updates the slug again.
+      await user.type(screen.getByRole('textbox', { name: /title/i }), ' Deluxe')
+      await waitFor(() => {
+        expect(screen.getByLabelText('Slug')).toHaveValue('beans-on-toast-deluxe')
+      })
+    })
+
+    it('renders a live URL preview containing akli.dev/recipes/<slug>', async () => {
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(createDraft).toHaveBeenCalled()
+      })
+
+      await user.type(screen.getByRole('textbox', { name: /title/i }), 'Beans on Toast')
+
+      await waitFor(() => {
+        expect(screen.getByText(/akli\.dev\/recipes\/beans-on-toast/i)).toBeInTheDocument()
+      })
+    })
+
+    it('locks the slug input (readOnly + aria-disabled) with a hint when the cover image is processed', async () => {
+      vi.mocked(fetchMyRecipes).mockResolvedValue([draftRecipe])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([draftRecipe])
+
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      const slugInput = screen.getByLabelText('Slug')
+      // draftRecipe's cover has processedAt → slug is locked.
+      expect(slugInput).toHaveAttribute('readonly')
+      expect(slugInput).toHaveAttribute('aria-disabled', 'true')
+
+      // A visible lock hint is shown, and the reset button is hidden.
+      expect(screen.getByText(/slug is locked/i)).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /reset to title slug/i })).not.toBeInTheDocument()
+    })
+
+    it('locks the slug input while an image upload is in flight (uploadingStepIds / cover)', async () => {
+      const user = userEvent.setup()
+      // Use a fresh draft whose cover is NOT yet processed so the only lock
+      // source is the in-flight upload signal.
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(createDraft).toHaveBeenCalled()
+      })
+
+      // Not locked initially.
+      expect(screen.getByLabelText('Slug')).not.toHaveAttribute('readonly')
+
+      // Fire the cover upload-started callback through the ImageUpload stub.
+      await user.click(screen.getByRole('button', { name: /start upload cover image/i }))
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Slug')).toHaveAttribute('aria-disabled', 'true')
+      })
+      expect(screen.getByLabelText('Slug')).toHaveAttribute('readonly')
+
+      // Completing the upload clears the in-flight lock.
+      await user.click(screen.getByRole('button', { name: /complete upload cover image/i }))
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Slug')).not.toHaveAttribute('readonly')
+      })
+    })
+
+    it('disables Publish when the slug fails the validation regex', async () => {
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(createDraft).toHaveBeenCalled()
+      })
+
+      await fillAllRequired(user)
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /publish/i })).not.toBeDisabled()
+      })
+
+      // Type an invalid slug (leading hyphen fails ^[a-z0-9]...).
+      const slugInput = screen.getByLabelText('Slug')
+      await user.clear(slugInput)
+      await user.type(slugInput, '-bad-slug')
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /publish/i })).toBeDisabled()
+      })
+    })
+
+    it('renders an inline error with the server message on 409 slug_taken', async () => {
+      vi.mocked(fetchMyRecipes).mockResolvedValue([publishedRecipe])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([publishedRecipe])
+      vi.mocked(updateRecipe).mockRejectedValue(
+        new Error('409 Slug "spaghetti-bolognese" is already in use')
+      )
+
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /update/i })).toBeInTheDocument()
+      })
+
+      await user.click(screen.getByRole('button', { name: /update/i }))
+
+      // The server's slug_taken message is surfaced INLINE, associated with the
+      // slug field via aria-describedby (not merely as a transient toast).
+      await waitFor(() => {
+        const slugInput = screen.getByLabelText('Slug')
+        const describedBy = slugInput.getAttribute('aria-describedby') ?? ''
+        const describerText = describedBy
+          .split(/\s+/)
+          .filter(Boolean)
+          .map((id) => document.getElementById(id)?.textContent ?? '')
+          .join(' ')
+        expect(describerText).toMatch(/already in use/i)
+      })
+    })
+
+    it('a fresh draft stays pristine (no autosave PATCH) until the user types', async () => {
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(createDraft).toHaveBeenCalled()
+      })
+
+      // After LOAD_RECIPE from the created draft, the auto-derived slug must not
+      // mark the form dirty.
+      await waitFor(() => {
+        expect(autosaveControls.lastArgs.state).not.toBeNull()
+      })
+      expect(autosaveControls.lastArgs.state?.dirty).toBe(false)
+    })
+
+    it('persists the edited slug — Update PATCH payload includes the edited valid slug', async () => {
+      // Use a published recipe whose slug is unlocked (no processed cover) so
+      // the slug input is editable and the Update button drives buildPatchPayload.
+      const unlockedPublished: Recipe = {
+        ...publishedRecipe,
+        coverImage: { alt: 'Spaghetti bolognese' },
+      }
+      vi.mocked(fetchMyRecipes).mockResolvedValue([unlockedPublished])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([unlockedPublished])
+
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      const slugInput = screen.getByLabelText('Slug')
+      await user.clear(slugInput)
+      await user.type(slugInput, 'spaghetti-supreme')
+
+      await user.click(screen.getByRole('button', { name: /update/i }))
+
+      await waitFor(() => {
+        expect(updateRecipe).toHaveBeenCalledWith(
+          'token-123',
+          'rec-001',
+          expect.objectContaining({ slug: 'spaghetti-supreme' })
+        )
+      })
+    })
+
+    it('omits slug from the Update PATCH payload when the slug is invalid (rest still saves)', async () => {
+      const unlockedPublished: Recipe = {
+        ...publishedRecipe,
+        coverImage: { alt: 'Spaghetti bolognese' },
+      }
+      vi.mocked(fetchMyRecipes).mockResolvedValue([unlockedPublished])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([unlockedPublished])
+
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      const slugInput = screen.getByLabelText('Slug')
+      await user.clear(slugInput)
+      await user.type(slugInput, 'Bad Slug!')
+
+      await user.click(screen.getByRole('button', { name: /update/i }))
+
+      await waitFor(() => {
+        expect(updateRecipe).toHaveBeenCalled()
+      })
+
+      const payload = vi.mocked(updateRecipe).mock.calls.at(-1)?.[2] ?? {}
+      expect(payload).not.toHaveProperty('slug')
+      // The rest of the form still saves.
+      expect(payload).toEqual(expect.objectContaining({ title: 'Spaghetti Bolognese' }))
+    })
+  })
+
+  describe('step lifecycle stepId (#198)', () => {
+    it('assigns a crypto.randomUUID stepId to a newly added step', async () => {
+      const uuid = '33333333-3333-4333-8333-333333333333'
+      vi.spyOn(crypto, 'randomUUID').mockReturnValue(uuid)
+
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      await user.click(screen.getByRole('button', { name: /add step/i }))
+
+      // The newly added step's stepId is surfaced through the step ImageUpload stub.
+      await waitFor(() => {
+        const imageTypes = screen
+          .getAllByTestId('image-upload-imagetype-step')
+          .map((el) => el.textContent)
+        expect(imageTypes).toContain(`step-${uuid}`)
+      })
+    })
+
+    it('reordering steps preserves each step stepId (only order changes)', async () => {
+      const stepA = '11111111-1111-4111-8111-111111111111'
+      const stepB = '22222222-2222-4222-8222-222222222222'
+      const twoStepRecipe: Recipe = {
+        ...draftRecipe,
+        steps: [
+          { stepId: stepA, order: 1, text: 'First step' },
+          { stepId: stepB, order: 2, text: 'Second step' },
+        ],
+      }
+      vi.mocked(fetchMyRecipes).mockResolvedValue([twoStepRecipe])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([twoStepRecipe])
+
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Step 1 text')).toHaveValue('First step')
+      })
+
+      await user.click(screen.getAllByRole('button', { name: /move down step 1/i })[0])
+
+      // The text order flipped, but the stepIds travelled with their content:
+      // the step-1 imageType now reflects stepB (originally second).
+      await waitFor(() => {
+        expect(screen.getByLabelText('Step 1 text')).toHaveValue('Second step')
+      })
+
+      const stepImageTypes = screen
+        .getAllByTestId('image-upload-imagetype-step')
+        .map((el) => el.textContent)
+      expect(stepImageTypes).toEqual([`step-${stepB}`, `step-${stepA}`])
     })
   })
 })

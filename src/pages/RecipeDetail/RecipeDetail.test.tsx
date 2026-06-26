@@ -16,7 +16,6 @@ const mockRecipe: Recipe = {
   slug: 'test-recipe',
   intro: 'A delicious test recipe',
   coverImage: {
-    key: 'recipes/recipe-1/cover',
     alt: 'Test cover',
     processedAt: 1_700_000_000_000,
   },
@@ -26,15 +25,15 @@ const mockRecipe: Recipe = {
   ],
   steps: [
     {
+      stepId: '9d904a59-e83f-43b8-9f40-fbdb3008974c',
       order: 1,
       text: 'Mix ingredients',
       image: {
-        key: 'recipes/recipe-1/step-1',
         alt: 'Mixing',
         processedAt: 1_700_000_000_000,
       },
     },
-    { order: 2, text: 'Bake for 30 minutes' },
+    { stepId: '1b2c3d4e-5f60-4a1b-8c2d-3e4f5a6b7c8d', order: 2, text: 'Bake for 30 minutes' },
   ],
   tags: ['Baking', 'Dessert'],
   prepTime: 15,
