@@ -42,7 +42,7 @@ const RecipesCta: FC = () => {
     <section className={styles.section} aria-labelledby="recipes-section-title">
       <div className={styles.inner}>
         <Typography variant="heading2" id="recipes-section-title" className={styles.heading}>
-          Favourite Recipes
+          Favourite recipes
         </Typography>
         <Grid columns={3}>
           {recipes.map((recipe) => (
