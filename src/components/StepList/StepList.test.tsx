@@ -1,11 +1,18 @@
+import { getUploadUrl } from '@api/recipes'
 import type { Step } from '@models/recipe'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import StepList from './StepList'
 import styles from './StepList.module.css'
+
+vi.mock('@api/recipes', () => ({
+  getUploadUrl: vi.fn(),
+}))
+
+const mockGetUploadUrl = vi.mocked(getUploadUrl)
 
 const STEP_ID_1 = '11111111-1111-4111-8111-111111111111'
 const STEP_ID_2 = '22222222-2222-4222-8222-222222222222'
@@ -269,6 +276,92 @@ describe('StepList', () => {
       expect(onChange).toHaveBeenCalledWith([
         { stepId: STEP_ID_1, order: 1, text: 'Preheat oven', image: { alt: 'A' } },
       ])
+    })
+  })
+
+  // Regression (#201): a step's just-selected image preview lives in ImageUpload's
+  // local component state (setPreview from URL.createObjectURL, set synchronously on
+  // file-select, before any network). Rows were keyed by array index, so on reorder
+  // React reused the position-1 ImageUpload instance and the preview stayed stuck at
+  // the original slot while the step text moved. Keying by step.stepId moves each
+  // ImageUpload instance (and its preview state) with its step. This test fails with
+  // key={index} and passes with key={step.stepId}.
+  describe('reorder keeps each step\'s selected image preview attached to its step', () => {
+    const PREVIEW_BLOB = 'blob:preview-mock'
+
+    beforeEach(() => {
+      mockGetUploadUrl.mockResolvedValue({ uploadUrl: 'https://upload.example/put' })
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true }))
+      vi.stubGlobal(
+        'URL',
+        Object.assign({}, URL, {
+          createObjectURL: vi.fn(() => PREVIEW_BLOB),
+          revokeObjectURL: vi.fn(),
+        })
+      )
+    })
+
+    afterEach(() => {
+      vi.unstubAllGlobals()
+      vi.restoreAllMocks()
+    })
+
+    // The row containing the given step text; both the textarea and that step's
+    // ImageUpload preview share the step's row body, so scope queries to it.
+    const rowFor = (text: string): HTMLElement => {
+      const textarea = screen.getByDisplayValue(text)
+      const row = textarea.closest(`.${styles.row}`)
+      if (!row) throw new Error(`No row found for step text "${text}"`)
+      return row as HTMLElement
+    }
+
+    it('moves the uploaded preview into the row of the step it belongs to after reorder', async () => {
+      const user = userEvent.setup()
+      const Wrapper = () => {
+        const [steps, setSteps] = useState<Step[]>([
+          makeStep(STEP_ID_1, 1, 'First step text'),
+          makeStep(STEP_ID_2, 2, 'Second step text'),
+        ])
+        return (
+          <StepList
+            steps={steps}
+            onChange={setSteps}
+            getToken={mockGetToken}
+            recipeId="test-recipe-id"
+            slug="beans-on-toast"
+          />
+        )
+      }
+      render(<Wrapper />)
+
+      // Select a file on the FIRST step's file upload input.
+      const file = new File(['x'], 'photo.png', { type: 'image/png' })
+      const firstRowFileInput = within(rowFor('First step text')).getByLabelText(
+        'Upload image'
+      )
+      fireEvent.change(firstRowFileInput, { target: { files: [file] } })
+
+      // The preview appears synchronously in the first step's row.
+      await waitFor(() => {
+        expect(
+          within(rowFor('First step text')).getByAltText('Upload preview')
+        ).toBeInTheDocument()
+      })
+      expect(
+        within(rowFor('Second step text')).queryByAltText('Upload preview')
+      ).not.toBeInTheDocument()
+
+      // Reorder: move the first step down to the second position.
+      await user.click(screen.getByRole('button', { name: 'Move down step 1' }))
+
+      // The preview must travel WITH "First step text", now in the second slot.
+      expect(
+        within(rowFor('First step text')).getByAltText('Upload preview')
+      ).toBeInTheDocument()
+      // The step that moved up ("Second step text") never had a preview.
+      expect(
+        within(rowFor('Second step text')).queryByAltText('Upload preview')
+      ).not.toBeInTheDocument()
     })
   })
 

@@ -71,7 +71,7 @@ const StepList: FC<StepListProps> = ({
   return (
     <div className={styles.container}>
       {steps.map((step, index) => (
-        <div key={index} className={styles.row}>
+        <div key={step.stepId} className={styles.row}>
           <span className={styles.stepNumber}>{index + 1}</span>
           <div className={styles.body}>
             <textarea
