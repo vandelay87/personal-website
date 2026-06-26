@@ -48,6 +48,14 @@ const StepList: FC<StepListProps> = ({
     })
   }
 
+  const handleStepImageUploaded = (index: number) => {
+    onStepUploadCompleted?.(steps[index].stepId)
+    // Record that this step now has an image so it is persisted by buildPatchPayload
+    // and polled for processing, even if the user never types alt text. Mirrors the
+    // always-present coverImage. updateImage(index, {}) keeps any existing alt.
+    updateImage(index, {})
+  }
+
   const handleAdd = () => {
     add({ stepId: crypto.randomUUID(), order: steps.length + 1, text: '' })
     onAnnounce?.('Step added')
@@ -90,7 +98,7 @@ const StepList: FC<StepListProps> = ({
                   processedAt={step.image?.processedAt}
                   getToken={getToken}
                   onUploadStarted={() => onStepUploadStarted?.(step.stepId)}
-                  onUploadCompleted={() => onStepUploadCompleted?.(step.stepId)}
+                  onUploadCompleted={() => handleStepImageUploaded(index)}
                 />
                 <input
                   type="text"

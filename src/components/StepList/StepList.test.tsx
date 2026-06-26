@@ -365,6 +365,64 @@ describe('StepList', () => {
     })
   })
 
+  // Regression (#201): uploading an image to a step must record the image in form
+  // state (mirroring the always-present coverImage), so it is persisted by
+  // buildPatchPayload and polled by useImageProcessingPoll — even if the user never
+  // types alt text. Before the fix, only typing alt text set step.image, so an
+  // upload-only step had image === undefined and was silently dropped on reload.
+  describe('uploading an image records it in form state', () => {
+    beforeEach(() => {
+      mockGetUploadUrl.mockResolvedValue({ uploadUrl: 'https://upload.example/put' })
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true }))
+      vi.stubGlobal(
+        'URL',
+        Object.assign({}, URL, {
+          createObjectURL: vi.fn(() => 'blob:preview-mock'),
+          revokeObjectURL: vi.fn(),
+        })
+      )
+    })
+
+    afterEach(() => {
+      vi.unstubAllGlobals()
+      vi.restoreAllMocks()
+    })
+
+    it('marks the step as carrying an image once the upload completes', async () => {
+      const onChange = vi.fn()
+      const Wrapper = () => {
+        const [steps, setSteps] = useState<Step[]>([makeStep(STEP_ID_1, 1, 'Stir')])
+        return (
+          <StepList
+            steps={steps}
+            onChange={(next) => {
+              onChange(next)
+              setSteps(next)
+            }}
+            getToken={mockGetToken}
+            recipeId="test-recipe-id"
+            slug="beans-on-toast"
+          />
+        )
+      }
+      render(<Wrapper />)
+
+      const file = new File(['x'], 'photo.png', { type: 'image/png' })
+      fireEvent.change(screen.getByLabelText('Upload image'), {
+        target: { files: [file] },
+      })
+
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalledWith([
+          expect.objectContaining({
+            stepId: STEP_ID_1,
+            image: expect.objectContaining({ alt: expect.any(String) }),
+          }),
+        ])
+      })
+    })
+  })
+
   describe('accessibility — touch targets', () => {
     it('move up buttons carry the action-button class (44x44px min)', () => {
       const onChange = vi.fn()
