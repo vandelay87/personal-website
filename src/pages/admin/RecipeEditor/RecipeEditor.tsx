@@ -171,6 +171,10 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
   }
 }
 
+const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/
+
+const isValidSlug = (slug: string): boolean => slug.length <= 100 && SLUG_REGEX.test(slug)
+
 const buildPatchPayload = (form: FormState): Partial<Recipe> => ({
   title: form.title,
   intro: form.intro,
@@ -182,6 +186,10 @@ const buildPatchPayload = (form: FormState): Partial<Recipe> => ({
   steps: form.steps,
   coverImage: { alt: form.coverImageAlt },
   status: form.mode,
+  // Autosave fires mid-typing — only persist a slug the backend will accept,
+  // otherwise it returns 400 invalid_slug. An invalid value is omitted so the
+  // rest of the form still saves and the server keeps the last valid slug.
+  ...(isValidSlug(form.slug) ? { slug: form.slug } : {}),
 })
 
 const computeMissingFields = (form: FormState): string[] => {
@@ -220,8 +228,6 @@ const draftFromCreated = (id: string, slug: string): Recipe => ({
 })
 
 const NEW_PATH = '/admin/recipes/new'
-
-const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/
 
 const RecipeEditor: FC = () => {
   const { id: routeId } = useParams<{ id: string }>()
@@ -398,7 +404,7 @@ const RecipeEditor: FC = () => {
   const isAnyImageUploading = isCoverUploading || uploadingStepIds.size > 0
   const slugLocked = form.hasPersistedImages || isAnyImageUploading
 
-  const slugValid = form.slug.length <= 100 && SLUG_REGEX.test(form.slug)
+  const slugValid = isValidSlug(form.slug)
 
   const missingFields = computeMissingFields(form)
   const canPublish = missingFields.length === 0 && slugValid

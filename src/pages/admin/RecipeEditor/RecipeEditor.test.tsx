@@ -1440,6 +1440,69 @@ describe('RecipeEditor page', () => {
       })
       expect(autosaveControls.lastArgs.state?.dirty).toBe(false)
     })
+
+    it('persists the edited slug — Update PATCH payload includes the edited valid slug', async () => {
+      // Use a published recipe whose slug is unlocked (no processed cover) so
+      // the slug input is editable and the Update button drives buildPatchPayload.
+      const unlockedPublished: Recipe = {
+        ...publishedRecipe,
+        coverImage: { alt: 'Spaghetti bolognese' },
+      }
+      vi.mocked(fetchMyRecipes).mockResolvedValue([unlockedPublished])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([unlockedPublished])
+
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      const slugInput = screen.getByLabelText('Slug')
+      await user.clear(slugInput)
+      await user.type(slugInput, 'spaghetti-supreme')
+
+      await user.click(screen.getByRole('button', { name: /update/i }))
+
+      await waitFor(() => {
+        expect(updateRecipe).toHaveBeenCalledWith(
+          'token-123',
+          'rec-001',
+          expect.objectContaining({ slug: 'spaghetti-supreme' })
+        )
+      })
+    })
+
+    it('omits slug from the Update PATCH payload when the slug is invalid (rest still saves)', async () => {
+      const unlockedPublished: Recipe = {
+        ...publishedRecipe,
+        coverImage: { alt: 'Spaghetti bolognese' },
+      }
+      vi.mocked(fetchMyRecipes).mockResolvedValue([unlockedPublished])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([unlockedPublished])
+
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      const slugInput = screen.getByLabelText('Slug')
+      await user.clear(slugInput)
+      await user.type(slugInput, 'Bad Slug!')
+
+      await user.click(screen.getByRole('button', { name: /update/i }))
+
+      await waitFor(() => {
+        expect(updateRecipe).toHaveBeenCalled()
+      })
+
+      const payload = vi.mocked(updateRecipe).mock.calls.at(-1)?.[2] ?? {}
+      expect(payload).not.toHaveProperty('slug')
+      // The rest of the form still saves.
+      expect(payload).toEqual(expect.objectContaining({ title: 'Spaghetti Bolognese' }))
+    })
   })
 
   describe('step lifecycle stepId (#198)', () => {
