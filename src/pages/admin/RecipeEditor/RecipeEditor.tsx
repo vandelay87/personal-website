@@ -608,7 +608,8 @@ const RecipeEditor: FC = () => {
             )}
             {slugLocked && (
               <p className={styles.slugLockHint}>
-                Slug is locked — uploaded images are tied to it. Delete uploaded images to unlock.
+                Slug is locked because images are stored under it. To use a different slug,
+                recreate the recipe and set the slug before uploading images.
               </p>
             )}
             {slugError && (
