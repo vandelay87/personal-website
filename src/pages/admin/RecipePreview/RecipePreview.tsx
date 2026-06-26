@@ -10,7 +10,7 @@ import {
   type ImageReadyUpdate,
 } from '@hooks/useImageProcessingPoll'
 import { applyStepReadiness, type Recipe } from '@models/recipe'
-import { useCallback, useEffect, useState, type FC } from 'react'
+import { useCallback, useEffect, useMemo, useState, type FC } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import styles from './RecipePreview.module.css'
@@ -77,7 +77,18 @@ const RecipePreview: FC = () => {
     }
   }, [id, getAccessToken, logout, navigate])
 
-  useImageProcessingPoll(recipe ?? null, (updates) => {
+  // The preview only has fetched recipe data — it cannot tell a coverless
+  // recipe from one whose cover is still processing (both lack processedAt).
+  // With no presence signal, an unprocessed cover is marked absent so the hook
+  // does not phantom-poll/time out a recipe that has no cover at all. A cover
+  // that is already processed stays a (settled) image and never polls anyway.
+  const pollRecipe = useMemo<Recipe | null>(() => {
+    if (!recipe) return null
+    if (recipe.coverImage.processedAt !== undefined) return recipe
+    return { ...recipe, coverImage: { ...recipe.coverImage, absent: true } }
+  }, [recipe])
+
+  useImageProcessingPoll(pollRecipe, (updates) => {
     setRecipe((prev) => (prev ? mergeReadiness(prev, updates) : prev))
   })
 

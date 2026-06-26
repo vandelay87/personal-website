@@ -37,6 +37,12 @@ export const sluggify = (input: string): string =>
 export interface RecipeImage {
   alt: string
   processedAt?: number
+  // Editor-only signal: true when the editor knows there is no image to poll
+  // for (e.g. a coverless recipe with no upload in flight). The recipe shape
+  // alone cannot distinguish "no cover" from "cover uploaded, still processing"
+  // (both lack processedAt), so the editor encodes absence explicitly. Never
+  // persisted — it exists only to gate image-processing polling.
+  absent?: boolean
 }
 
 export interface Ingredient {

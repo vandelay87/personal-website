@@ -248,6 +248,11 @@ const RecipeEditor: FC = () => {
   const [isCoverUploading, setIsCoverUploading] = useState(false)
   const [uploadingStepIds, setUploadingStepIds] = useState<Set<string>>(new Set())
   const [slugError, setSlugError] = useState<string | null>(null)
+  // True once a cover upload starts this session. A loaded recipe with no
+  // processed cover is indistinguishable from one whose cover is still
+  // processing, so only the in-session upload signal tells us a cover exists
+  // and should be polled. Reset whenever a different recipe loads.
+  const [coverUploadedThisSession, setCoverUploadedThisSession] = useState(false)
 
   const recentlyCreatedIdRef = useRef<string | null>(null)
   const creatingDraftRef = useRef(false)
@@ -362,6 +367,12 @@ const RecipeEditor: FC = () => {
     }
   }, [autosaveStatus, lastSavedAt])
 
+  // A freshly-loaded recipe brings its own cover-presence truth (processedAt),
+  // so drop any in-session upload signal carried over from a previous recipe.
+  useEffect(() => {
+    setCoverUploadedThisSession(false)
+  }, [form.id])
+
   const announce = useCallback((message: string) => {
     setAnnouncement((prev) => ({ message, toggle: !prev.toggle }))
   }, [])
@@ -372,6 +383,8 @@ const RecipeEditor: FC = () => {
   // rebuild the object on every keystroke and churn the hook's effect.
   const loadedRecipe = useMemo<Recipe | null>(() => {
     if (!form.id) return null
+    const coverImagePresent =
+      form.coverImageProcessedAt !== undefined || coverUploadedThisSession
     return {
       id: form.id,
       slug: form.slug,
@@ -386,6 +399,9 @@ const RecipeEditor: FC = () => {
       coverImage: {
         alt: form.coverImageAlt,
         processedAt: form.coverImageProcessedAt,
+        // No cover this session → not a poll target, so the hook never treats a
+        // never-uploaded cover as "still processing" and never falsely times out.
+        absent: !coverImagePresent,
       },
       authorId: '',
       authorName: '',
@@ -394,7 +410,7 @@ const RecipeEditor: FC = () => {
       status: form.mode,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.id, form.coverImageAlt, form.coverImageProcessedAt, form.steps])
+  }, [form.id, form.coverImageAlt, form.coverImageProcessedAt, form.steps, coverUploadedThisSession])
 
   const { timedOut } = useImageProcessingPoll(loadedRecipe, (updates) => {
     dispatch({ type: 'IMAGE_STATUS_UPDATE', updates })
@@ -488,6 +504,7 @@ const RecipeEditor: FC = () => {
 
   const handleCoverUploadStarted = useCallback(() => {
     setIsCoverUploading(true)
+    setCoverUploadedThisSession(true)
   }, [])
   const handleCoverUploadCompleted = useCallback(() => {
     setIsCoverUploading(false)

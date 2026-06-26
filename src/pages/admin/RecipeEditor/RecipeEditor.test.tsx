@@ -1195,6 +1195,61 @@ describe('RecipeEditor page', () => {
       })
     })
 
+    // Regression (#201): a recipe with no cover image must NOT be handed to the
+    // poll hook as an unready cover. The editor marks the cover absent so the
+    // hook never phantom-polls it and the "taking longer than expected" banner
+    // never appears for a coverless draft.
+    it('marks the cover absent for a recipe with no processed cover and no in-session upload', async () => {
+      vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithUnreadyCover])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([recipeWithUnreadyCover])
+
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      await waitFor(() => {
+        expect(pollControls.lastArgs.recipe?.coverImage.processedAt).toBeUndefined()
+      })
+      // The cover is encoded as absent → the real hook would skip it entirely.
+      expect(pollControls.lastArgs.recipe?.coverImage.absent).toBe(true)
+      // And no false timeout banner is shown.
+      expect(
+        screen.queryByText(/processing is taking longer than expected/i)
+      ).not.toBeInTheDocument()
+    })
+
+    // Regression (#201): once a cover upload starts this session, the cover IS a
+    // real poll target even before processedAt arrives — so it must NOT be marked
+    // absent, otherwise an uploaded-but-processing cover would never be polled.
+    it('keeps the cover pollable (not absent) once a cover upload starts this session', async () => {
+      vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithUnreadyCover])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([recipeWithUnreadyCover])
+
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      // Initially absent (no processed cover, no upload yet).
+      await waitFor(() => {
+        expect(pollControls.lastArgs.recipe?.coverImage.absent).toBe(true)
+      })
+
+      // Fire the cover upload-started callback through the ImageUpload stub.
+      await user.click(screen.getByRole('button', { name: /start upload cover image/i }))
+
+      // Now the cover is a live poll target — no longer marked absent, still no
+      // processedAt (it is processing). The real hook polls it until ready.
+      await waitFor(() => {
+        expect(pollControls.lastArgs.recipe?.coverImage.absent).not.toBe(true)
+      })
+      expect(pollControls.lastArgs.recipe?.coverImage.processedAt).toBeUndefined()
+    })
+
     it('renders the timeout banner when the poll hook reports timedOut: true (AC 8)', async () => {
       vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithUnreadyCover])
       vi.mocked(fetchAllRecipes).mockResolvedValue([recipeWithUnreadyCover])

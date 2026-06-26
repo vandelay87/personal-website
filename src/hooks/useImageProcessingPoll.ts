@@ -25,8 +25,20 @@ export interface UseImageProcessingPollResult {
 const DEFAULT_INTERVAL_MS = 1500
 const DEFAULT_TIMEOUT_MS = 60_000
 
+// A cover is a poll target when it actually exists. The recipe shape cannot
+// distinguish "no cover" from "cover uploaded, still processing" (both lack
+// processedAt), so the editor marks a known-absent cover with `absent: true`.
+// An already-processed cover is always present; anything not explicitly marked
+// absent is treated as present (mirrors how a step is polled when `step.image`
+// is set).
+const coverIsPresent = (cover: RecipeImage): boolean =>
+  cover.processedAt !== undefined || cover.absent !== true
+
 const collectImages = (recipe: Recipe): IdentifiedImage[] => {
-  const images: IdentifiedImage[] = [{ imageType: 'cover', image: recipe.coverImage }]
+  const images: IdentifiedImage[] = []
+  if (coverIsPresent(recipe.coverImage)) {
+    images.push({ imageType: 'cover', image: recipe.coverImage })
+  }
   for (const step of recipe.steps) {
     if (step.image) {
       images.push({ imageType: stepImageType(step.stepId), image: step.image })

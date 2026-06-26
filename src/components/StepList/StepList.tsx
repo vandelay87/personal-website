@@ -49,11 +49,12 @@ const StepList: FC<StepListProps> = ({
   }
 
   const handleStepImageUploaded = (index: number) => {
-    onStepUploadCompleted?.(steps[index].stepId)
+    const step = steps[index]
+    onStepUploadCompleted?.(step.stepId)
     // Record that this step now has an image so it is persisted by buildPatchPayload
     // and polled for processing, even if the user never types alt text. Mirrors the
-    // always-present coverImage. updateImage(index, {}) keeps any existing alt.
-    updateImage(index, {})
+    // always-present coverImage; any alt the user already typed is preserved.
+    update(index, { ...step, image: { alt: step.image?.alt ?? '' } })
   }
 
   const handleAdd = () => {

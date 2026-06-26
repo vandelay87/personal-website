@@ -105,6 +105,36 @@ describe('useImageProcessingPoll — state machine', () => {
     expect(onReady).not.toHaveBeenCalled()
   })
 
+  // Regression (#201): a recipe with no cover image (cover marked absent — no
+  // processedAt) and no step images must NOT start polling. Before the fix,
+  // collectImages always included the cover, so a coverless recipe looked
+  // "unready" and the hook polled every interval and eventually timed out.
+  it('does not fetch or time out when the cover is absent and no step has an image', async () => {
+    const onReady = vi.fn()
+    const recipe = makeRecipe({
+      coverImage: { alt: '', absent: true },
+      steps: [{ stepId: 's1', order: 1, text: 'Step 1' }],
+    })
+
+    fetchMock.mockImplementation(() => new Promise(() => {}))
+
+    vi.useFakeTimers()
+    try {
+      const { result } = renderHook(() => useImageProcessingPoll(recipe, onReady))
+
+      // Advance well past the 60s timeout — nothing should poll or time out.
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(60_000 + 1500 * 5)
+      })
+
+      expect(fetchMock).not.toHaveBeenCalled()
+      expect(onReady).not.toHaveBeenCalled()
+      expect(result.current.timedOut).toBe(false)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it('does not fetch when all images already have processedAt', async () => {
     const onReady = vi.fn()
     const recipe = makeRecipe({

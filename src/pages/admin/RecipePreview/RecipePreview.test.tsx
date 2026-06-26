@@ -300,6 +300,27 @@ describe('RecipePreview page', () => {
   // AC2 — Uses useImageProcessingPoll on the loaded recipe with an onReady
   // callback that merges readiness into local state by key.
   describe('useImageProcessingPoll wiring (issue #173)', () => {
+    // Regression (#201): previewing a recipe whose cover is not processed must
+    // not phantom-poll. With no in-session presence signal the preview marks the
+    // cover absent, so the real hook skips it and never times out a coverless
+    // recipe. (A processed cover never polls regardless.)
+    it('marks the cover absent in the recipe handed to the poll hook when the cover is unprocessed', async () => {
+      const recipeWithUnreadyCover: Recipe = {
+        ...mockDraftRecipe,
+        coverImage: { alt: 'Lemon tart cover' },
+      }
+      vi.mocked(fetchRecipeByIdAdmin).mockResolvedValue(recipeWithUnreadyCover)
+
+      renderPreview('rec-draft')
+
+      await waitFor(() => {
+        expect(pollControls.lastArgs.recipe).not.toBeNull()
+      })
+
+      expect(pollControls.lastArgs.recipe?.coverImage.processedAt).toBeUndefined()
+      expect(pollControls.lastArgs.recipe?.coverImage.absent).toBe(true)
+    })
+
     it('invokes useImageProcessingPoll with the loaded recipe once fetch resolves', async () => {
       renderPreview('rec-draft')
 
