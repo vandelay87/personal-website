@@ -1,51 +1,37 @@
 import * as authApi from '@api/auth'
 import type { AuthResult, AuthTokens, User } from '@models/auth'
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type FC, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type FC, type ReactNode } from 'react'
+import { AuthContext } from './context'
 
-export interface AuthContextValue {
-  user: User | null
-  isAuthenticated: boolean
-  isAdmin: boolean
-  loading: boolean
-  login: (email: string, password: string) => Promise<AuthResult>
-  logout: () => void
-  getAccessToken: () => Promise<string>
-}
-
-const decodeIdToken = (idToken: string): User => {
+const decodeJwtPayload = (token: string): Record<string, unknown> | null => {
   try {
-    const parts = idToken.split('.')
+    const parts = token.split('.')
     if (parts.length !== 3) return null
     const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
     const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4)
-    const payload = JSON.parse(atob(padded))
-    return {
-      email: payload.email ?? '',
-      groups: payload['cognito:groups'] ?? [],
-    }
+    return JSON.parse(atob(padded))
   } catch {
     return null
+  }
+}
+
+const decodeIdToken = (idToken: string): User | null => {
+  const payload = decodeJwtPayload(idToken)
+  if (!payload) return null
+  return {
+    email: (payload.email as string) ?? '',
+    groups: (payload['cognito:groups'] as string[]) ?? [],
   }
 }
 
 const isTokenResult = (result: AuthResult): result is AuthTokens =>
   'accessToken' in result
 
-export const AuthContext = createContext<AuthContextValue>({
-  user: null,
-  isAuthenticated: false,
-  isAdmin: false,
-  loading: true,
-  login: async () => {
-    throw new Error('Not implemented')
-  },
-  logout: () => {},
-  getAccessToken: async () => {
-    throw new Error('Not implemented')
-  },
-})
-
-export const useAuth = () => useContext(AuthContext)
+const isTokenExpired = (token: string): boolean => {
+  const payload = decodeJwtPayload(token)
+  const exp = payload?.exp as number | undefined
+  return !exp || exp * 1000 < Date.now()
+}
 
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   // Start loading so server and client first render match (server can't access
@@ -126,17 +112,4 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-}
-
-const isTokenExpired = (token: string): boolean => {
-  try {
-    const parts = token.split('.')
-    if (parts.length !== 3) return true
-    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
-    const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4)
-    const payload = JSON.parse(atob(padded))
-    return !payload.exp || payload.exp * 1000 < Date.now()
-  } catch {
-    return true
-  }
 }
