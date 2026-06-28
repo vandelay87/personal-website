@@ -3,6 +3,7 @@ import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import mdx from '@mdx-js/rollup'
 import rehypeShiki from '@shikijs/rehype'
+import type { ShikiTransformer } from '@shikijs/types'
 import react from '@vitejs/plugin-react'
 import rehypeMermaid from 'rehype-mermaid'
 import remarkFrontmatter from 'remark-frontmatter'
@@ -59,7 +60,7 @@ export default defineConfig(({ isSsrBuild, mode }) => {
                 node.properties['data-meta'] = this.options.meta.__raw
               }
             },
-          }],
+          } satisfies ShikiTransformer],
         }],
       ],
     }),

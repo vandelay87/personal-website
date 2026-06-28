@@ -1,4 +1,5 @@
 // @vitest-environment node
+import type { Recipe } from '@models/recipe'
 import { describe, it, expect, vi } from 'vitest'
 import { render } from './entry-server'
 
@@ -128,7 +129,7 @@ describe('entry-server render', () => {
   })
 
   describe('recipe detail page /recipes/:slug with prefetched data', () => {
-    const mockRecipe = {
+    const mockRecipe: Recipe = {
       id: 'r1',
       title: 'Spaghetti Bolognese',
       slug: 'spaghetti-bolognese',

@@ -1,4 +1,5 @@
 // @vitest-environment node
+import type { Recipe } from '@models/recipe'
 import { describe, it, expect, vi } from 'vitest'
 
 const mockPostData = vi.hoisted(() => ({
@@ -357,7 +358,7 @@ describe('getMetaTags', () => {
   })
 
   describe('recipe detail route /recipes/<slug> with recipe data', () => {
-    const mockRecipe = {
+    const mockRecipe: Recipe = {
       id: 'r1',
       title: 'Spaghetti Bolognese',
       slug: 'spaghetti-bolognese',
@@ -382,7 +383,7 @@ describe('getMetaTags', () => {
       status: 'published',
     }
 
-    const longIntroRecipe = {
+    const longIntroRecipe: Recipe = {
       ...mockRecipe,
       slug: 'long-intro-recipe',
       intro:

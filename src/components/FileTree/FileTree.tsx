@@ -13,7 +13,7 @@ interface TreeNode {
   children: TreeNode[]
 }
 
-export const parseTree = (text: string): TreeNode[] => {
+const parseTree = (text: string): TreeNode[] => {
   const lines = text.split('\n').filter((line) => line.trim() !== '')
   const root: TreeNode[] = []
   const stack: { indent: number; children: TreeNode[] }[] = [{ indent: -1, children: root }]
