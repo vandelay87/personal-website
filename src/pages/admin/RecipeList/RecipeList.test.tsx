@@ -85,8 +85,8 @@ describe('Admin RecipeList page', () => {
       logout: vi.fn(),
     })
     vi.mocked(fetchAllRecipes).mockResolvedValue([mockDraftRecipe, mockPublishedRecipe])
-    vi.mocked(publishRecipe).mockResolvedValue(undefined)
-    vi.mocked(unpublishRecipe).mockResolvedValue(undefined)
+    vi.mocked(publishRecipe).mockResolvedValue(mockPublishedRecipe)
+    vi.mocked(unpublishRecipe).mockResolvedValue(mockDraftRecipe)
     vi.mocked(deleteRecipe).mockResolvedValue(undefined)
   })
 
