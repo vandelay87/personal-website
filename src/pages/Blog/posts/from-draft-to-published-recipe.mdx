@@ -110,9 +110,9 @@ When I hit publish, the server runs a validation pass before flipping anything. 
 UpdateExpression: 'SET #status = :published, updatedAt = :now REMOVE #ttl'
 ```
 
-Publishing is admin-only too. A contributor can write and edit their own drafts, but putting something on the public site is a separate, higher bar. Unpublishing runs the same machinery in reverse and puts the expiry back.
+Publishing is admin-only too. A contributor can write and edit their own drafts, but putting something on the public site requires admin privileges. Unpublishing runs the same machinery in reverse and puts the expiry back.
 
-## Now a stranger can read it
+## Now anyone can read it
 
 The moment the status flips, the recipe shows up in the public list. That page pulls every published recipe once, then handles the search box and tag filters on the client, since there aren't enough recipes yet to justify doing it on the server.
 
@@ -124,7 +124,7 @@ const [recipe, setRecipe] = useState<Recipe | undefined>(ssrRecipe)
 const [loading, setLoading] = useState(!ssrRecipe)
 ```
 
-From there it's the small, satisfying stuff: ingredients in a list, steps in order, each step's photo loaded from that same slug-based URL. The visitor never sees the draft, the autosave, the three-hop upload, or the thirty-day timer. They just see a recipe.
+From there it's straightforward: ingredients in a list, steps in order, each step's photo loaded from that same slug-based URL. The visitor never sees the draft, the autosave, the three-hop upload, or the thirty-day timer. They just see a recipe.
 
 ## Where it's still rough
 
