@@ -1,0 +1,6 @@
+/* Webfonts.
+   The redesign uses Geist (UI/display) and JetBrains Mono (mono / eyebrows / meta).
+   Loaded from Google Fonts. If you need fully self-hosted binaries for production,
+   swap these @imports for local @font-face rules pointing at woff2 files. */
+
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");

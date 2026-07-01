@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; }
+  :root {
+    --bg:#FBFAF7; --text:#1C1A16; --subtle:#3a3631; --muted:#6F6961; --faint:#9a938a;
+    --line:#ECE6DA; --surf:#F4F1EA; --hover:rgba(0,0,0,0.022);
+    --btn-bg:#1C1A16; --btn-fg:#FBFAF7; --btn-border:#E0DACE;
+    --ring:rgba(0,0,0,0.06); --accent:#1F66E0;
+    --code-bg:#F7F4ED; --code-head:#EFEADF; --code-fg:#33302A;
+  }
+  [data-theme="dark"] {
+    --bg:#141310; --text:#F3F0E8; --subtle:#CFC9BD; --muted:#A6A093; --faint:#6E685E;
+    --line:#2A2823; --surf:#1C1A15; --hover:rgba(255,255,255,0.04);
+    --btn-bg:#F3F0E8; --btn-fg:#141310; --btn-border:#36342C;
+    --ring:rgba(255,255,255,0.08); --accent:#6BA0FF;
+    --code-bg:#1A1813; --code-head:#221F18; --code-fg:#D7D1C5;
+  }
+  .lnk { transition: color .25s ease, opacity .25s ease; text-decoration:none; color:inherit; }
+  .lnk:hover { color: var(--accent); }
+  .toggle-btn { transition: background .2s ease, border-color .2s ease, color .2s ease; cursor:pointer; background:transparent; }
+  .toggle-btn:hover { border-color: var(--btn-border); background: color-mix(in srgb, var(--text) 6%, transparent); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius:6px; }
+  [data-sticky="true"] .site-header {
+    position: sticky; top:0; z-index:20;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: saturate(140%) blur(10px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+  }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--btn-bg); color:var(--btn-fg); padding:10px 16px; border-radius:8px; z-index:50; }
+  .skip:focus { left:16px; top:16px; }
+  .arrowx { display:inline-block; transition: transform .25s ease; }
+  .back-link:hover .arrowx { transform: translateX(-3px); }
+  .tag-chip { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.04em; color:var(--muted); border:1px solid var(--line); background:var(--surf); padding:5px 10px; border-radius:7px; text-decoration:none; transition: color .2s ease, border-color .2s ease; }
+  .tag-chip:hover { border-color: var(--accent); color: var(--accent); }
+  .prose p { font-size:18px; line-height:1.75; color:var(--subtle); margin:0 0 22px; }
+  .prose h2 { font-size:clamp(23px,3.2vw,27px); font-weight:600; letter-spacing:-0.02em; line-height:1.25; color:var(--text); margin:54px 0 18px; }
+  .prose strong { color:var(--text); font-weight:600; }
+  .prose a { color:var(--accent); text-decoration:none; }
+  .prose a:hover { text-decoration:underline; }
+  .code { margin:28px 0; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--code-bg); }
+  .code-head { font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.02em; color:var(--muted); padding:8px 10px 8px 16px; border-bottom:1px solid var(--line); background:var(--code-head); display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .code-copy { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.04em; color:var(--muted); background:transparent; border:1px solid var(--line); padding:3px 9px; border-radius:6px; cursor:pointer; flex-shrink:0; transition: color .2s ease, border-color .2s ease, background .2s ease; }
+  .code-copy:hover { color:var(--accent); border-color:var(--accent); background:var(--hover); }
+  .code-copy.copied { color:var(--accent); border-color:var(--accent); }
+  .code pre { margin:0; padding:18px 16px; overflow-x:auto; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.7; color:var(--code-fg); white-space:pre; -webkit-font-smoothing:auto; }
+  .callout { margin:30px 0; border:1px solid var(--line); background:var(--surf); border-radius:12px; padding:18px 20px; display:flex; gap:14px; align-items:flex-start; }
+  .callout-emoji { font-size:17px; line-height:1.5; flex-shrink:0; }
+  .callout-label { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; margin-bottom:7px; }
+  .callout[data-type="tip"] { background: color-mix(in srgb, #1F8A5B 6%, var(--surf)); border-color: color-mix(in srgb, #1F8A5B 24%, var(--line)); }
+  .callout[data-type="tip"] .callout-label { color:#1F8A5B; }
+  [data-theme="dark"] .callout[data-type="tip"] .callout-label { color:#62C08D; }
+  .callout[data-type="warning"] { background: color-mix(in srgb, #C2810C 7%, var(--surf)); border-color: color-mix(in srgb, #C2810C 26%, var(--line)); }
+  .callout[data-type="warning"] .callout-label { color:#A66E0A; }
+  [data-theme="dark"] .callout[data-type="warning"] .callout-label { color:#E0A93B; }
+  .callout[data-type="info"] { background: color-mix(in srgb, var(--accent) 6%, var(--surf)); border-color: color-mix(in srgb, var(--accent) 24%, var(--line)); }
+  .callout[data-type="info"] .callout-label { color:var(--accent); }
+  .share-btn { display:inline-flex; align-items:center; gap:8px; font-size:13.5px; font-weight:500; color:var(--text); text-decoration:none; border:1px solid var(--btn-border); padding:9px 16px; border-radius:999px; transition: border-color .2s ease, color .2s ease, background .2s ease; }
+  .share-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--hover); }
+  .rel:hover .rel-title { color: var(--accent); }
+  .rel-title { transition: color .25s ease; }
+  @media (prefers-reduced-motion: reduce) { html{scroll-behavior:auto;} *{transition:none !important;} }
+</style>
+</helmet>
+
+<div data-theme="{{ theme }}" data-sticky="{{ sticky }}" style="background:var(--bg); color:var(--text); min-height:100vh; font-family:'Geist',system-ui,sans-serif; -webkit-font-smoothing:antialiased;">
+  <a class="skip" href="#main">Skip to content</a>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header">
+    <div style="max-width:1080px; margin:0 auto; padding:22px clamp(20px,5vw,28px); display:flex; align-items:center; justify-content:space-between;">
+      <a class="lnk" href="/" style="font-size:15px; font-weight:600; letter-spacing:-0.01em;">Akli Aissat</a>
+      <nav aria-label="Primary" style="display:flex; align-items:center; gap:clamp(18px,4vw,28px); font-size:14px; color:var(--muted);">
+        <a class="lnk" href="https://akli.dev/apps">Apps</a>
+        <a class="lnk" href="https://akli.dev/recipes">Recipes</a>
+        <a class="lnk" href="https://akli.dev/blog" style="color:var(--text); font-weight:500;">Blog</a>
+        <button class="toggle-btn" onClick="{{ toggle }}" aria-label="{{ toggleLabel }}" title="{{ toggleLabel }}" style="display:inline-flex; width:32px; height:32px; align-items:center; justify-content:center; font-size:13px; color:var(--text); border:1px solid var(--btn-border); border-radius:50%;">{{ toggleIcon }}</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <article style="max-width:680px; margin:0 auto; padding:clamp(40px,7vw,72px) 24px clamp(64px,9vw,96px);">
+
+      <!-- back -->
+      <a class="lnk back-link" href="https://akli.dev/blog" style="display:inline-flex; align-items:center; gap:7px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.04em; color:var(--muted); margin-bottom:36px;"><span class="arrowx">←</span> All posts</a>
+
+      <!-- header -->
+      <header>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.04em; color:var(--faint); margin-bottom:18px;">7 April 2026 · 4 min read</div>
+        <h1 style="font-size:clamp(32px,5.6vw,46px); font-weight:600; line-height:1.08; letter-spacing:-0.03em; margin:0 0 24px;">Building a Pokédex with React and AWS</h1>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          <a class="tag-chip" href="https://akli.dev/blog?tag=react">react</a>
+          <a class="tag-chip" href="https://akli.dev/blog?tag=aws">aws</a>
+          <a class="tag-chip" href="https://akli.dev/blog?tag=cdk">cdk</a>
+          <a class="tag-chip" href="https://akli.dev/blog?tag=dynamodb">dynamodb</a>
+          <a class="tag-chip" href="https://akli.dev/blog?tag=lambda">lambda</a>
+          <a class="tag-chip" href="https://akli.dev/blog?tag=typescript">typescript</a>
+        </div>
+      </header>
+
+      <!-- hero image -->
+      <figure style="margin:40px 0 8px;">
+        <img src="https://akli.dev/images/blog/pokedex-desktop.webp" alt="Pokédex app showing the Pokémon list and detail panel" loading="eager" style="display:block; width:100%; height:auto; border-radius:14px; border:1px solid var(--line);">
+        <figcaption style="text-align:center; font-size:14px; font-style:italic; color:var(--faint); margin-top:14px;">The finished Pokédex, running on akli.dev</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>I built a full-stack Pokédex as a portfolio project. It runs on AWS, costs almost nothing to host, and looks like a Game Boy Color screen. The frontend is React 19 with TypeScript. The backend is API Gateway, Lambda, and DynamoDB, all defined in CDK.</p>
+        <p>You can try it at <a href="https://akli.dev/apps/pokedex">akli.dev/apps/pokedex</a>.</p>
+
+        <h2>The CDK stacks</h2>
+        <p>The infrastructure lives in a separate repo from the frontend. The Pokédex spans three of the four stacks because each has different deployment constraints.</p>
+
+        <!-- file tree -->
+        <div class="code">
+          <div class="code-head">akli-infrastructure/</div>
+          <pre>bin/
+  akli-infrastructure.ts
+lib/
+  certificate-stack.ts
+  pokedex-stack.ts
+  api-stack.ts
+lambda/
+  pokedex-handler.ts
+  seed-pokemon.ts
+data/
+  pokemon.json</pre>
+        </div>
+
+        <!-- architecture diagram -->
+        <div data-om-raster="1" style="margin:32px 0; display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:14px;">
+          <div style="border:1px solid var(--line); border-radius:12px; background:var(--surf); padding:16px; display:flex; flex-direction:column; gap:12px;">
+            <div>
+              <div style="font-size:14px; font-weight:600; letter-spacing:-0.01em;">CertificateStack</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--accent); margin-top:3px;">us-east-1</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div style="font-size:12.5px; color:var(--muted); line-height:1.4;">Route 53 hosted zone</div>
+              <div style="font-size:12.5px; color:var(--muted); line-height:1.4;">ACM cert · akli.dev</div>
+              <div style="font-size:12.5px; color:var(--muted); line-height:1.4;">ACM cert · api.akli.dev</div>
+            </div>
+          </div>
+          <div style="border:1px solid var(--line); border-radius:12px; background:var(--surf); padding:16px; display:flex; flex-direction:column; gap:12px;">
+            <div>
+              <div style="font-size:14px; font-weight:600; letter-spacing:-0.01em;">PokedexStack</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--accent); margin-top:3px;">eu-west-2</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div style="font-size:12.5px; color:var(--muted); line-height:1.4;">DynamoDB · pokedex-pokemon</div>
+              <div style="font-size:12.5px; color:var(--muted); line-height:1.4;">Lambda handler · Node 22</div>
+              <div style="font-size:12.5px; color:var(--muted); line-height:1.4;">Seeder Lambda · custom resource</div>
+              <div style="font-size:12.5px; color:var(--muted); line-height:1.4;">HTTP API Gateway v2</div>
+            </div>
+          </div>
+          <div style="border:1px solid var(--line); border-radius:12px; background:var(--surf); padding:16px; display:flex; flex-direction:column; gap:12px;">
+            <div>
+              <div style="font-size:14px; font-weight:600; letter-spacing:-0.01em;">ApiStack</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--accent); margin-top:3px;">eu-west-2</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div style="font-size:12.5px; color:var(--muted); line-height:1.4;">CloudFront · api.akli.dev</div>
+              <div style="font-size:12.5px; color:var(--muted); line-height:1.4;">Route 53 record · api.akli.dev</div>
+            </div>
+          </div>
+        </div>
+
+        <p><strong>CertificateStack</strong> deploys to <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">us-east-1</code>. CloudFront requires certificates in that region, so this stack owns the Route 53 hosted zone and ACM certificates. The other stacks consume its outputs through CDK's cross-region references.</p>
+        <p><strong>PokedexStack</strong> deploys to <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">eu-west-2</code>. It creates the DynamoDB table, the Lambda handler, and the HTTP API Gateway. It also seeds the database automatically on every deploy.</p>
+        <p><strong>ApiStack</strong>, also in <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">eu-west-2</code>, puts a CloudFront distribution in front of the API Gateway, with a custom domain at <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">api.akli.dev</code>. This stack exists so I can add future APIs as additional cache behaviours on the same distribution.</p>
+        <p>The stacks reference each other through props. The CDK app wires them together:</p>
+
+        <div class="code">
+          <div class="code-head"><span>bin/akli-infrastructure.ts</span><button class="code-copy" type="button" aria-label="Copy code">Copy</button></div>
+          <pre>const pokedexStack = new PokedexStack(app, 'PokedexStack', {
+  env: { account, region: 'eu-west-2' },
+})
+
+new ApiStack(app, 'ApiStack', {
+  env: { account, region: 'eu-west-2' },
+  crossRegionReferences: true,
+  apiCertificate: certStack.apiCertificate,
+  hostedZone: certStack.hostedZone,
+  pokedexApiUrl: pokedexStack.httpApi.apiEndpoint,
+})</pre>
+        </div>
+
+        <p>CDK stack dependencies are just TypeScript props. No SSM parameter lookups, no hardcoded ARNs.</p>
+
+        <h2>One Lambda, two routes</h2>
+        <p>The API uses HTTP API Gateway v2, which is cheaper and simpler for a read-only service like this. A single Lambda function handles both routes. API Gateway v2 passes a <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">routeKey</code> string, so the handler just matches against it:</p>
+
+        <div class="code">
+          <div class="code-head"><span>lambda/pokedex-handler.ts</span><button class="code-copy" type="button" aria-label="Copy code">Copy</button></div>
+          <pre>const ROUTE_LIST = 'GET /pokedex/pokemon'
+const ROUTE_DETAIL = 'GET /pokedex/pokemon/{id}'
+
+export const handler = async (
+  event: APIGatewayProxyEventV2,
+): Promise&lt;APIGatewayProxyStructuredResultV2&gt; =&gt; {
+  const routeKey = event.routeKey
+
+  if (routeKey === ROUTE_LIST) {
+    const result = await client.send(new ScanCommand({
+      TableName: TABLE_NAME,
+      ProjectionExpression: 'id, #n, types, sprite',
+      ExpressionAttributeNames: { '#n': 'name' },
+    }))
+    const items = (result.Items || []).map(item =&gt; unmarshall(item))
+    return jsonResponse(200, { pokemon: items, count: items.length, nextToken: null })
+  }
+
+  if (routeKey === ROUTE_DETAIL) {
+    const id = Number(event.pathParameters?.id)
+    if (isNaN(id)) {
+      return jsonResponse(404, { error: 'Pokemon not found' })
+    }
+
+    const result = await client.send(new GetItemCommand({
+      TableName: TABLE_NAME,
+      Key: { id: { N: String(id) } },
+    }))
+
+    if (!result.Item) {
+      return jsonResponse(404, { error: 'Pokemon not found' })
+    }
+
+    return jsonResponse(200, unmarshall(result.Item))
+  }
+}</pre>
+        </div>
+
+        <p>The list endpoint uses a <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">ProjectionExpression</code> to return only the fields the list view needs: id, name, types, and sprite URL. The detail endpoint returns the full item. This keeps the list payload small.</p>
+
+        <h2>Automated data seeding</h2>
+        <p>The Pokédex data comes from a static JSON file checked into the infrastructure repo. I didn't want a manual “run this script after deploying” step, so I used a CDK Custom Resource to seed DynamoDB automatically.</p>
+        <p>The interesting part is change detection. CDK computes an MD5 hash of <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">pokemon.json</code> at synth time and passes it as a property on the Custom Resource:</p>
+
+        <div class="code">
+          <div class="code-head"><span>lib/pokedex-stack.ts</span><button class="code-copy" type="button" aria-label="Copy code">Copy</button></div>
+          <pre>const pokemonDataHash = crypto
+  .createHash('md5')
+  .update(fs.readFileSync(pokemonDataPath, 'utf-8'))
+  .digest('hex')
+
+new CustomResource(this, 'SeedPokemonResource', {
+  serviceToken: seedProvider.serviceToken,
+  properties: {
+    DataHash: pokemonDataHash,
+  },
+})</pre>
+        </div>
+
+        <p>When the hash changes, CloudFormation treats it as a resource update and invokes the seeder Lambda. When the hash stays the same, nothing happens. The seeder uses <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">BatchWriteItem</code> with exponential backoff, splitting the data into batches of 25 — DynamoDB's limit per request.</p>
+
+        <!-- callout — type can be tip | warning | info -->
+        <div class="callout" data-type="tip">
+          <span class="callout-emoji" aria-hidden="true">💡</span>
+          <div>
+            <div class="callout-label">Tip</div>
+            <p style="font-size:15.5px; line-height:1.65; color:var(--subtle); margin:0;">CDK Custom Resources are great for one-time setup tasks. The <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--bg); padding:2px 6px; border-radius:5px;">properties</code> trick gives you free change detection.</p>
+          </div>
+        </div>
+
+        <h2>Frontend caching with useRef</h2>
+        <p>The frontend uses two hooks for data fetching. <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">usePokemonList</code> fetches all summaries on mount. <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">usePokemonDetail</code> fetches a single Pokémon's full data when the user selects one.</p>
+        <p>The detail hook caches responses in a <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">useRef</code> so clicking a previously viewed Pokémon is instant:</p>
+
+        <div class="code">
+          <div class="code-head"><span>src/hooks/usePokemonDetail.ts</span><button class="code-copy" type="button" aria-label="Copy code">Copy</button></div>
+          <pre>export const usePokemonDetail = (id: number | null) =&gt; {
+  const [detail, setDetail] = useState&lt;PokemonDetail | null&gt;(null)
+  const [loading, setLoading] = useState(false)
+  const cache = useRef&lt;Record&lt;number, PokemonDetail&gt;&gt;({})
+
+  useEffect(() =&gt; {
+    if (id === null) return
+
+    if (cache.current[id]) {
+      setDetail(cache.current[id])
+      return
+    }
+
+    let cancelled = false
+    setLoading(true)
+
+    const load = async () =&gt; {
+      const data = await fetchPokemonDetail(id)
+      if (!cancelled) {
+        cache.current[id] = data
+        setDetail(data)
+        setLoading(false)
+      }
+    }
+
+    load()
+    return () =&gt; { cancelled = true }
+  }, [id])
+
+  return { detail, loading }
+}</pre>
+        </div>
+
+        <p><code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">useRef</code> survives re-renders without triggering them. The <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">cancelled</code> flag prevents state updates on unmounted components.</p>
+
+        <h2>The Game Boy Color look</h2>
+        <p>I wanted the app to feel like a handheld console, not a typical web app. A few CSS decisions carry most of the weight.</p>
+        <p>The pixel font is <strong>Press Start 2P</strong>, loaded as a local woff2 file. Every label, stat name, and Pokémon name uses it. The body text falls back to <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">Courier New</code> for readability.</p>
+        <p>Pokémon sprites use <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">image-rendering: pixelated</code> so they stay crisp at any size instead of getting blurry from bilinear filtering. Each Pokémon type gets its own colour token, with text colours precomputed to meet WCAG AA contrast against their backgrounds.</p>
+        <p>Stat bars animate in with a staggered delay. Each bar receives its index as a CSS custom property, and the animation delay is computed from it:</p>
+
+        <div class="code">
+          <div class="code-head"><span>src/components/StatBar/StatBar.module.css</span><button class="code-copy" type="button" aria-label="Copy code">Copy</button></div>
+          <pre>.fill {
+  width: var(--stat-width);
+  animation: fillBar 300ms ease-out forwards;
+  animation-delay: calc(var(--stat-index, 0) * 75ms);
+}</pre>
+        </div>
+
+        <p>The result: HP fills first, then Attack, then Defense, cascading down the list. The animation also respects <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">prefers-reduced-motion</code>.</p>
+
+        <h2>What I'd do differently</h2>
+        <p><strong>Pagination.</strong> The list endpoint does a full table scan. With 151 Pokémon that's fine. With 1000+ it wouldn't be. The response already includes a <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">nextToken</code> field (always <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">null</code> for now), so adding cursor-based pagination with DynamoDB's <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">LastEvaluatedKey</code> would be backwards-compatible.</p>
+        <p><strong>Shared types.</strong> The frontend and infrastructure repos define the same <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">Pokemon</code> interface independently. A shared package or a generated OpenAPI spec would keep them in sync.</p>
+        <p><strong>End-to-end CDK tests.</strong> I unit-tested the Lambda handlers and the stack synthesis, but I didn't test the Custom Resource seeder against a real DynamoDB table. A CDK integration test using <code style="font-family:'JetBrains Mono',monospace; font-size:0.88em; background:var(--surf); padding:2px 6px; border-radius:5px;">integ-runner</code> would catch issues that unit tests miss.</p>
+        <p>You can try the Pokédex at <a href="https://akli.dev/apps/pokedex">akli.dev/apps/pokedex</a>.</p>
+      </div>
+
+      <!-- share -->
+      <div style="margin-top:56px; padding-top:32px; border-top:1px solid var(--line);">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.06em; color:var(--faint); margin-bottom:16px;">Share this post</div>
+        <div style="display:flex; flex-wrap:wrap; gap:10px;">
+          <a class="share-btn" href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fakli.dev%2Fblog%2Fbuilding-a-pokedex&text=Building%20a%20Pokedex%20with%20React%20and%20AWS" target="_blank" rel="noopener">Share on X</a>
+          <a class="share-btn" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fakli.dev%2Fblog%2Fbuilding-a-pokedex" target="_blank" rel="noopener">Share on LinkedIn</a>
+        </div>
+      </div>
+
+      <!-- related -->
+      <div style="margin-top:48px;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.06em; color:var(--faint); margin-bottom:16px;">Related posts</div>
+        <a class="rel lnk" href="https://akli.dev/blog/from-draft-to-published-recipe" style="display:block; border:1px solid var(--line); border-radius:14px; padding:22px 24px;">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--faint); margin-bottom:8px;">27 June 2026 · 7 min read</div>
+          <div class="rel-title" style="font-size:19px; font-weight:600; letter-spacing:-0.02em; color:var(--text);">From an Empty Draft to a Published Recipe</div>
+        </a>
+      </div>
+
+    </article>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer style="border-top:1px solid var(--line);">
+    <div style="max-width:1080px; margin:0 auto; padding:clamp(34px,5vw,44px) clamp(20px,5vw,28px); display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;">
+      <nav aria-label="Elsewhere" style="display:flex; flex-direction:column; gap:12px;">
+        <span style="font-size:15px; font-weight:600; color:var(--text);">Elsewhere</span>
+        <div style="display:flex; flex-wrap:wrap; gap:20px; font-size:14px; color:var(--muted);">
+          <a class="lnk" href="https://github.com/vandelay87">GitHub</a>
+          <a class="lnk" href="https://www.linkedin.com/in/akli-aissat-b08119115/">LinkedIn</a>
+          <a class="lnk" href="mailto:akliaissat@outlook.com?subject=Hello">Email</a>
+        </div>
+      </nav>
+      <span style="font-size:13px; font-weight:500; color:var(--muted);">akli.dev</span>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;stickyNav&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Layout&quot; }
+}">
+class Component extends DCLogic {
+  state = { theme: 'light' };
+
+  componentDidMount() {
+    try {
+      const saved = localStorage.getItem('akli-theme');
+      if (saved === 'light' || saved === 'dark') {
+        this.setState({ theme: saved });
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        this.setState({ theme: 'dark' });
+      }
+    } catch (e) {}
+
+    this._onCopy = (e) => {
+      const btn = e.target.closest && e.target.closest('.code-copy');
+      if (!btn) return;
+      const block = btn.closest('.code');
+      const pre = block && block.querySelector('pre');
+      if (!pre) return;
+      const text = pre.innerText;
+      const done = () => {
+        btn.textContent = 'Copied';
+        btn.classList.add('copied');
+        clearTimeout(btn._t);
+        btn._t = setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1600);
+      };
+      const fallback = () => {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = text; ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+          document.body.appendChild(ta); ta.focus(); ta.select(); document.execCommand('copy');
+          document.body.removeChild(ta); done();
+        } catch (err) {}
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(fallback);
+      } else {
+        fallback();
+      }
+    };
+    document.addEventListener('click', this._onCopy);
+  }
+
+  componentWillUnmount() {
+    if (this._onCopy) document.removeEventListener('click', this._onCopy);
+  }
+
+  toggle = () => {
+    this.setState(s => {
+      const theme = s.theme === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('akli-theme', theme); } catch (e) {}
+      return { theme };
+    });
+  };
+
+  renderVals() {
+    const isDark = this.state.theme === 'dark';
+    return {
+      theme: this.state.theme,
+      sticky: String(this.props.stickyNav ?? true),
+      toggle: this.toggle,
+      toggleIcon: isDark ? '☀' : '☾',
+      toggleLabel: isDark ? 'Switch to light mode' : 'Switch to dark mode'
+    };
+  }
+}
+</script>
+</body>
+</html>

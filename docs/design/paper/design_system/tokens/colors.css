@@ -1,0 +1,100 @@
+/* ── Colors ───────────────────────────────────────────────────
+   The redesign's "warm paper" palette. Light is the default;
+   [data-theme="dark"] overrides. Every value below is the new
+   direction — it supersedes the old neo-brutalist black/white set.
+
+   Two naming layers are provided:
+     • Semantic --color-* names (mirror the app's existing convention)
+     • Short working aliases (--bg, --text, --surf …) used verbatim
+       across the redesigned pages and the UI kits.
+   They resolve to the same values; use whichever your context prefers.
+   ──────────────────────────────────────────────────────────── */
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --color-bg:            #FBFAF7;   /* page background — warm off-white paper */
+  --color-surface:       #F4F1EA;   /* cards, chips, inset panels */
+  --color-field:         #FFFFFF;   /* form inputs */
+  --color-hover:         rgba(0,0,0,0.022); /* subtle row/cell hover wash */
+
+  /* Text — a 4-step hierarchy (strong → faint) */
+  --color-text-strong:   #1C1A16;   /* headings, primary text */
+  --color-text:          #3A3631;   /* long-form body */
+  --color-text-muted:    #6F6961;   /* secondary text, nav, meta */
+  --color-text-faint:    #9A938A;   /* eyebrows, captions, placeholders */
+
+  /* Borders */
+  --color-border:        #ECE6DA;   /* hairlines, dividers, card edges */
+  --color-border-strong: #E0DACE;   /* button outlines, interactive borders */
+
+  /* Brand / accent */
+  --color-primary:       #1F66E0;   /* links, focus, active filter, accents */
+  --color-on-primary:    #FFFFFF;
+  --color-link:          #1F66E0;
+
+  /* Inverted button (primary CTA) */
+  --color-btn-bg:        #1C1A16;
+  --color-btn-fg:        #FBFAF7;
+
+  /* Semantic status */
+  --color-success:       #1F8A5B;
+  --color-success-bg:    rgba(31,138,91,0.10);
+  --color-warning:       #A66E0A;
+  --color-warning-bg:    rgba(194,129,12,0.12);
+  --color-error:         #C0392B;
+  --color-error-bg:      rgba(192,57,43,0.07);
+
+  /* ── Short working aliases (used across pages + UI kits) ── */
+  --bg:        var(--color-bg);
+  --surf:      var(--color-surface);
+  --field:     var(--color-field);
+  --hover:     var(--color-hover);
+  --text:      var(--color-text-strong);
+  --subtle:    var(--color-text);
+  --muted:     var(--color-text-muted);
+  --faint:     var(--color-text-faint);
+  --line:      var(--color-border);
+  --btn-border: var(--color-border-strong);
+  --accent:    var(--color-primary);
+  --btn-bg:    var(--color-btn-bg);
+  --btn-fg:    var(--color-btn-fg);
+  --green:     var(--color-success);
+  --green-bg:  var(--color-success-bg);
+  --amber:     var(--color-warning);
+  --amber-bg:  var(--color-warning-bg);
+  --danger:    var(--color-error);
+  --danger-bg: var(--color-error-bg);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg:            #141310;
+  --color-surface:       #1C1A15;
+  --color-field:         #1B1914;
+  --color-hover:         rgba(255,255,255,0.04);
+
+  --color-text-strong:   #F3F0E8;
+  --color-text:          #CFC9BD;
+  --color-text-muted:    #A6A093;
+  --color-text-faint:    #6E685E;
+
+  --color-border:        #2A2823;
+  --color-border-strong: #36342C;
+
+  --color-primary:       #6BA0FF;
+  --color-on-primary:    #11151F;
+  --color-link:          #6BA0FF;
+
+  --color-btn-bg:        #F3F0E8;
+  --color-btn-fg:        #141310;
+
+  --color-success:       #62C08D;
+  --color-success-bg:    rgba(98,192,141,0.12);
+  --color-warning:       #E0A93B;
+  --color-warning-bg:    rgba(224,169,59,0.14);
+  --color-error:         #E8786B;
+  --color-error-bg:      rgba(232,120,107,0.12);
+}

@@ -1,0 +1,72 @@
+<!-- @dsCard group="Admin" viewport="1080x760" subtitle="Recipe list — admin shell, rows, status, actions" name="Admin" -->
+<!-- @startingPoint section="Admin" subtitle="Recipe management list — authenticated shell" viewport="1080x760" -->
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:var(--font-sans); -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:var(--max-w-site); margin:0 auto; padding:0 28px; }
+  /* shell header */
+  header { border-bottom:1px solid var(--line); }
+  .nav { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:18px 0; }
+  .left { display:flex; align-items:center; gap:30px; }
+  .brand { font-size:15px; font-weight:600; letter-spacing:-0.01em; color:var(--text); text-decoration:none; }
+  .links { display:flex; align-items:center; gap:22px; font-size:14px; color:var(--muted); }
+  .links a { color:inherit; text-decoration:none; }
+  .links a.active { color:var(--text); font-weight:500; }
+  .right { display:flex; align-items:center; gap:14px; }
+  .email { font-size:13px; color:var(--muted); }
+  .ghost { font-size:13px; font-weight:500; color:var(--subtle); background:transparent; border:1px solid var(--btn-border); border-radius:var(--radius-md); padding:7px 13px; cursor:pointer; }
+  .toggle { width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--btn-border); border-radius:50%; color:var(--text); background:transparent; cursor:pointer; }
+  /* page */
+  main { max-width:var(--max-w-site); margin:0 auto; padding:44px 28px 64px; }
+  .head { display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; justify-content:space-between; margin-bottom:30px; }
+  h1 { font-size:var(--font-display-title); font-weight:600; letter-spacing:-0.025em; margin:0 0 6px; }
+  .sub { font-size:14.5px; color:var(--muted); margin:0; }
+  .primary { font-size:14px; font-weight:600; color:var(--btn-fg); background:var(--btn-bg); border:none; border-radius:var(--radius-md); padding:11px 18px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; }
+  .list { border:1px solid var(--line); border-radius:var(--radius-xl); overflow:hidden; background:var(--field); }
+  .row { display:flex; flex-wrap:wrap; gap:14px 18px; align-items:center; justify-content:space-between; padding:18px 22px; border-top:1px solid var(--line); }
+  .row:first-child { border-top:none; }
+  .rtitle { font-size:16px; font-weight:600; letter-spacing:-0.01em; margin:0 0 7px; }
+  .rtags { display:flex; gap:7px; }
+  .tag { font-family:var(--font-mono); font-size:11px; color:var(--muted); border:1px solid var(--line); background:var(--surf); padding:4px 9px; border-radius:var(--radius-sm); }
+  .rmeta { display:flex; align-items:center; gap:14px; }
+  .badge { display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; padding:4px 11px; border-radius:var(--radius-full); }
+  .dot { width:5px; height:5px; border-radius:50%; }
+  .date { font-family:var(--font-mono); font-size:12px; color:var(--faint); }
+  .acts { display:flex; gap:6px; }
+  .act { font-size:13px; color:var(--muted); background:transparent; border:1px solid transparent; border-radius:var(--radius-sm); padding:6px 10px; cursor:pointer; }
+  .act:hover { background:var(--hover); color:var(--text); }
+  footer { border-top:1px solid var(--line); }
+  .foot { display:flex; justify-content:space-between; padding:22px 28px; max-width:var(--max-w-site); margin:0 auto; font-size:12.5px; color:var(--faint); }
+</style></head>
+<body>
+  <header><div class="wrap"><div class="nav">
+    <div class="left"><a class="brand" href="#">Akli Aissat</a><nav class="links"><a class="active" href="#">Recipes</a><a href="#">Users</a></nav></div>
+    <div class="right"><span class="email">akli@akli.dev</span><button class="ghost">Log out</button><button class="toggle">☾</button></div>
+  </div></div></header>
+
+  <main>
+    <div class="head">
+      <div><h1>Recipes</h1><p class="sub">5 recipes · sorted by recently updated</p></div>
+      <button class="primary">+ New recipe</button>
+    </div>
+    <div class="list">
+      <div class="row">
+        <div><h2 class="rtitle">Mild Thai-Style Basa &amp; Coconut Rice</h2><div class="rtags"><span class="tag">Thai</span><span class="tag">Fish</span><span class="tag">One Pot</span></div></div>
+        <div class="rmeta"><span class="badge" style="color:var(--green);background:var(--green-bg);"><span class="dot" style="background:var(--green);"></span>Published</span><span class="date">27 Jun 2026</span><div class="acts"><button class="act">Edit</button><button class="act">Preview</button><button class="act">Unpublish</button></div></div>
+      </div>
+      <div class="row">
+        <div><h2 class="rtitle">Weeknight Beef Ragù</h2><div class="rtags"><span class="tag">Pasta</span><span class="tag">Beef</span></div></div>
+        <div class="rmeta"><span class="badge" style="color:var(--amber);background:var(--amber-bg);"><span class="dot" style="background:var(--amber);"></span>Draft</span><span class="date">24 Jun 2026</span><div class="acts"><button class="act">Edit</button><button class="act">Preview</button><button class="act">Publish</button></div></div>
+      </div>
+      <div class="row">
+        <div><h2 class="rtitle">Rosemary Olive Oil Focaccia</h2><div class="rtags"><span class="tag">Baking</span><span class="tag">Bread</span></div></div>
+        <div class="rmeta"><span class="badge" style="color:var(--green);background:var(--green-bg);"><span class="dot" style="background:var(--green);"></span>Published</span><span class="date">19 Jun 2026</span><div class="acts"><button class="act">Edit</button><button class="act">Preview</button><button class="act">Unpublish</button></div></div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="foot"><span>akli.dev admin</span><span>Signed in as akli@akli.dev</span></div></footer>
+</body></html>

@@ -1,0 +1,19 @@
+<!-- @dsCard group="Spacing" viewport="700x150" subtitle="Soft, rounded corners" name="Radius" -->
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; background:var(--bg); color:var(--text); font-family:var(--font-sans); padding:24px; }
+  .row { display:flex; gap:18px; align-items:flex-end; }
+  .col { display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .box { width:60px; height:48px; background:var(--surf); border:1px solid var(--btn-border); }
+  .lab { font-family:var(--font-mono); font-size:10.5px; color:var(--muted); }
+</style></head>
+<body>
+  <div class="row">
+    <div class="col"><div class="box" style="border-radius:var(--radius-sm);"></div><div class="lab">sm · 6</div></div>
+    <div class="col"><div class="box" style="border-radius:var(--radius-md);"></div><div class="lab">md · 10</div></div>
+    <div class="col"><div class="box" style="border-radius:var(--radius-lg);"></div><div class="lab">lg · 12</div></div>
+    <div class="col"><div class="box" style="border-radius:var(--radius-xl);"></div><div class="lab">xl · 16</div></div>
+    <div class="col"><div class="box" style="border-radius:var(--radius-full); width:48px;"></div><div class="lab">full</div></div>
+  </div>
+</body></html>

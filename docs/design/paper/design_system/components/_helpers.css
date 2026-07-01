@@ -1,0 +1,54 @@
+/* ── Component interaction helpers ─────────────────────────────
+   Hover/focus/animation rules that can't live in inline style objects.
+   Imported by styles.css so they ship with the system. */
+
+/* Fields */
+.ds-field:focus { border-color: var(--color-primary) !important; box-shadow: var(--ring); }
+.ds-field:disabled { background: var(--color-surface); color: var(--color-text-muted); cursor: not-allowed; }
+
+/* Links — hover tint + icon nudge */
+.ds-link:hover { color: var(--color-primary); }
+.ds-link .ds-link-ic { display: inline-flex; transition: transform .25s ease; }
+.ds-link.nudge-right:hover  .ds-link-ic { transform: translateX(3px); }
+.ds-link.nudge-left:hover   .ds-link-ic { transform: translateX(-3px); }
+.ds-link.nudge-up-right:hover .ds-link-ic { transform: translate(3px,-3px); }
+
+/* Cards & tags */
+.ds-card-hover:hover { background: var(--color-hover); }
+
+/* Recipe card — lift + cover zoom (the signature hover) */
+.ds-recipe-card { transition: transform .3s cubic-bezier(.2,.7,.2,1), box-shadow .3s ease; }
+.ds-recipe-card:hover { transform: translateY(-4px); box-shadow: 0 14px 34px rgba(0,0,0,0.10); }
+.ds-recipe-card .ds-recipe-img { transition: transform .5s cubic-bezier(.2,.7,.2,1); }
+.ds-recipe-card:hover .ds-recipe-img { transform: scale(1.04); }
+
+/* Toast — reveal the ✕ on hover */
+.ds-toast:hover { border-color: color-mix(in srgb, var(--color-text-strong) 18%, var(--color-border)); }
+.ds-toast:hover .ds-toast-x { opacity: 1; color: var(--color-text-muted); }
+.ds-tag-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.ds-suggest:hover { color: var(--color-primary); border-color: var(--color-primary); }
+.ds-upload:hover { border-color: var(--color-primary); background: var(--color-hover); }
+.ds-iconbtn-danger:hover { color: var(--color-error); border-color: color-mix(in srgb, var(--color-error) 40%, var(--color-border)); }
+
+/* Theme toggle — subtle theme-aware hover shade (no accent) */
+.ds-toggle:hover { border-color: var(--color-border-strong); background: color-mix(in srgb, var(--color-text-strong) 6%, transparent); }
+
+/* Header — sticky translucent blur */
+.ds-header-sticky { position: sticky; top: 0; z-index: var(--z-header); background: color-mix(in srgb, var(--color-bg) 84%, transparent); backdrop-filter: saturate(140%) blur(10px); -webkit-backdrop-filter: saturate(140%) blur(10px); }
+
+/* Spinner */
+.ds-spinner { width: 24px; height: 24px; border-radius: 50%; border: 3px solid var(--color-border); border-top-color: var(--color-primary); animation: ds-spin .7s linear infinite; }
+.ds-spinner.sm { width: 15px; height: 15px; border-width: 2px; }
+@keyframes ds-spin { to { transform: rotate(360deg); } }
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+
+/* Shimmer (processing placeholders) */
+.ds-shimmer { background: linear-gradient(100deg, var(--color-surface) 30%, var(--color-hover) 50%, var(--color-surface) 70%); background-size: 200% 100%; animation: ds-sh 1.3s linear infinite; }
+@keyframes ds-sh { to { background-position: -200% 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-spinner, .ds-shimmer, .ds-link-ic { animation: none; transition: none; }
+  .ds-recipe-card, .ds-recipe-card .ds-recipe-img { transition: none; }
+  .ds-recipe-card:hover { transform: none; }
+  .ds-recipe-card:hover .ds-recipe-img { transform: none; }
+}

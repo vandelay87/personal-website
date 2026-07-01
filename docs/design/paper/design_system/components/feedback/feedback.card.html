@@ -1,0 +1,39 @@
+<!-- @dsCard group="Components" viewport="700x340" subtitle="Toast · Callout · AutosaveStatus · Loading" name="Feedback" -->
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body { margin:0; background:var(--bg); color:var(--text); font-family:var(--font-sans); padding:24px; }
+  .grid { display:flex; flex-direction:column; gap:18px; max-width:520px; }
+  .lbl { font-family:var(--font-mono); font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--faint); margin-bottom:9px; }
+  .row { display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+  .toast { display:flex; align-items:center; gap:11px; background:var(--bg); border:1px solid var(--line); border-radius:var(--radius-lg); padding:12px 15px; box-shadow:var(--shadow-md); width:280px; }
+  .tdot { width:18px; height:18px; flex-shrink:0; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; }
+  .tmsg { font-size:13.5px; color:var(--subtle); flex:1; }
+  .tx { color:var(--faint); font-size:12px; opacity:.5; }
+  .callout { border:1px solid color-mix(in srgb,#1F8A5B 24%, var(--line)); background:color-mix(in srgb,#1F8A5B 6%, var(--surf)); border-radius:var(--radius-lg); padding:16px 18px; display:flex; gap:13px; }
+  .clabel { font-family:var(--font-mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--green); margin-bottom:6px; }
+  .ctext { font-size:14.5px; line-height:1.6; color:var(--subtle); margin:0; }
+  .save { display:inline-flex; align-items:center; gap:9px; font-size:13px; color:var(--muted); }
+</style></head>
+<body>
+  <div class="grid">
+    <div>
+      <div class="lbl">Toast</div>
+      <div class="row">
+        <div class="toast"><span class="tdot" style="background:var(--green-bg);color:var(--green);">✓</span><span class="tmsg">Recipe published — it's now live.</span><span class="tx">✕</span></div>
+        <div class="toast"><span class="tdot" style="background:var(--danger-bg);color:var(--danger);">✕</span><span class="tmsg">Access denied.</span><span class="tx">✕</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="lbl">Callout</div>
+      <div class="callout"><span style="font-size:17px;">💡</span><div><div class="clabel">Tip</div><p class="ctext">CDK Custom Resources are great for one-time setup tasks.</p></div></div>
+    </div>
+    <div>
+      <div class="lbl">AutosaveStatus</div>
+      <div class="row" style="gap:28px;">
+        <span class="save"><span style="color:var(--green);">✓</span> Saved just now</span>
+        <span class="save"><span style="color:var(--danger);">⚠</span> <span style="color:var(--danger);">Couldn't save</span> · <span style="color:var(--accent);">Retry</span></span>
+      </div>
+    </div>
+  </div>
+</body></html>

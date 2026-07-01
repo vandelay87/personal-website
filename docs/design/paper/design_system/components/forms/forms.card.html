@@ -1,0 +1,42 @@
+<!-- @dsCard group="Components" viewport="700x430" subtitle="Input · Textarea · TagInput · ImageUpload" name="Forms" -->
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body { margin:0; background:var(--bg); color:var(--text); font-family:var(--font-sans); padding:24px; }
+  .grid { display:flex; flex-direction:column; gap:20px; max-width:560px; }
+  .lbl { font-family:var(--font-mono); font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--faint); margin-bottom:9px; }
+  .field { width:100%; box-sizing:border-box; font-family:var(--font-sans); font-size:15px; color:var(--text); background:var(--field); border:1px solid var(--line); border-radius:var(--radius-md); padding:12px 13px; outline:none; }
+  .field.err { border-color:var(--danger); box-shadow:0 0 0 3px var(--danger-bg); }
+  .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .chip { display:inline-flex; align-items:center; gap:7px; font-family:var(--font-mono); font-size:11px; color:var(--text); border:1px solid var(--line); background:var(--surf); padding:5px 7px 5px 11px; border-radius:var(--radius-sm); }
+  .chip span { color:var(--faint); }
+  .suggest { font-family:var(--font-mono); font-size:11.5px; color:var(--muted); border:1px dashed var(--line); background:transparent; padding:5px 10px; border-radius:var(--radius-sm); }
+  .upload { border:1px dashed var(--btn-border); border-radius:var(--radius-lg); background:var(--surf); padding:20px; display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; }
+  .upmain { font-size:14px; font-weight:500; color:var(--subtle); }
+  .uphint { font-size:12.5px; color:var(--faint); }
+</style></head>
+<body>
+  <div class="grid">
+    <div>
+      <div class="lbl">Input — default &amp; invalid</div>
+      <div style="display:flex; gap:12px;">
+        <input class="field" placeholder="name@example.com">
+        <input class="field err" value="not-an-email">
+      </div>
+    </div>
+    <div>
+      <div class="lbl">Textarea</div>
+      <textarea class="field" rows="2" placeholder="A sentence or two on what makes this worth cooking."></textarea>
+    </div>
+    <div>
+      <div class="lbl">TagInput — chips + suggestions</div>
+      <div class="row" style="margin-bottom:10px;"><span class="chip">Thai <span>✕</span></span><span class="chip">Fish <span>✕</span></span></div>
+      <input class="field" placeholder="Type a tag and press Enter" style="margin-bottom:10px;">
+      <div class="row"><span style="font-size:12.5px;color:var(--faint);">Suggestions:</span><span class="suggest">+ Rice</span><span class="suggest">+ Coconut</span><span class="suggest">+ One Pot</span></div>
+    </div>
+    <div>
+      <div class="lbl">ImageUpload — empty state</div>
+      <div class="upload"><span class="upmain">Upload a cover image</span><span class="uphint">JPG, PNG or WebP — landscape works best.</span></div>
+    </div>
+  </div>
+</body></html>

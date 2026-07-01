@@ -1,0 +1,18 @@
+<!-- @dsCard group="Colors" viewport="700x150" subtitle="Success, warning & error (with tints)" name="Semantic" -->
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; background:var(--bg); color:var(--text); font-family:var(--font-sans); padding:22px; }
+  .row { display:flex; gap:14px; flex-wrap:wrap; }
+  .sw { display:flex; flex-direction:column; gap:8px; }
+  .chip { width:150px; height:54px; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:11px; }
+  .name { font-size:12px; font-weight:600; }
+  .hex { font-family:var(--font-mono); font-size:11px; color:var(--muted); }
+</style></head>
+<body>
+  <div class="row">
+    <div class="sw"><div class="chip" style="background:var(--green-bg); color:var(--green);">Confirmed</div><div><div class="name" style="color:var(--green);">success</div><div class="hex">--color-success</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--amber-bg); color:var(--amber);">Pending</div><div><div class="name" style="color:var(--amber);">warning</div><div class="hex">--color-warning</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--danger-bg); color:var(--danger);">Failed</div><div><div class="name" style="color:var(--danger);">error</div><div class="hex">--color-error</div></div></div>
+  </div>
+</body></html>
