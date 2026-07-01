@@ -10,7 +10,7 @@ import vitest from 'eslint-plugin-vitest'
 import globals from 'globals'
 
 export default [
-  { ignores: ['dist', 'coverage/**'] },
+  { ignores: ['dist', 'coverage/**', 'docs/**'] },
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
