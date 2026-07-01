@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  :root {
+    --bg:#FBFAF7; --text:#1C1A16; --subtle:#3a3631; --muted:#6F6961; --faint:#9a938a;
+    --line:#ECE6DA; --surf:#F4F1EA; --hover:rgba(0,0,0,0.022); --field:#FFFFFF;
+    --btn-bg:#1C1A16; --btn-fg:#FBFAF7; --btn-border:#E0DACE;
+    --accent:#1F66E0;
+    --green:#1F8A5B; --green-bg:rgba(31,138,91,0.10);
+    --amber:#A66E0A; --amber-bg:rgba(194,129,12,0.12);
+    --danger:#C0392B; --danger-bg:rgba(192,57,43,0.07);
+  }
+  [data-theme="dark"] {
+    --bg:#141310; --text:#F3F0E8; --subtle:#CFC9BD; --muted:#A6A093; --faint:#6E685E;
+    --line:#2A2823; --surf:#1C1A15; --hover:rgba(255,255,255,0.04); --field:#1B1914;
+    --btn-bg:#F3F0E8; --btn-fg:#141310; --btn-border:#36342C;
+    --accent:#6BA0FF;
+    --green:#62C08D; --green-bg:rgba(98,192,141,0.12);
+    --amber:#E0A93B; --amber-bg:rgba(224,169,59,0.14);
+    --danger:#E8786B; --danger-bg:rgba(232,120,107,0.12);
+  }
+  .lnk { transition: color .25s ease; text-decoration:none; color:inherit; }
+  .lnk:hover { color: var(--accent); }
+  .lnk svg { transition: transform .25s ease; }
+  .lnk:hover .ic-left { transform: translateX(-3px); }
+  .lnk:hover .ic-right { transform: translateX(3px); }
+  .site-header { position: sticky; top:0; z-index:20; background: color-mix(in srgb, var(--bg) 84%, transparent); backdrop-filter: saturate(140%) blur(10px); -webkit-backdrop-filter: saturate(140%) blur(10px); border-bottom:1px solid var(--line); }
+  .toggle-btn { transition: background .2s ease, border-color .2s ease, color .2s ease; cursor:pointer; background:transparent; }
+  .toggle-btn:hover { border-color: var(--btn-border); background: color-mix(in srgb, var(--text) 6%, transparent); }
+  .seclabel { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--faint); }
+  .flabel { font-size:13px; font-weight:500; color:var(--subtle); margin-bottom:7px; display:block; }
+  .fhint { font-size:12.5px; color:var(--faint); line-height:1.5; }
+  .field { width:100%; font-family:'Geist',system-ui,sans-serif; font-size:15px; color:var(--text); background:var(--field); border:1px solid var(--line); border-radius:10px; padding:12px 13px; outline:none; transition: border-color .18s ease, box-shadow .18s ease; }
+  .field::placeholder { color:var(--faint); }
+  .field:focus { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent); }
+  .field:disabled { background:var(--surf); color:var(--muted); cursor:not-allowed; }
+  textarea.field { resize:vertical; line-height:1.6; min-height:84px; }
+  .primary-btn { font-family:'Geist',system-ui,sans-serif; font-size:14px; font-weight:600; color:var(--btn-fg); background:var(--btn-bg); border:none; border-radius:10px; padding:11px 16px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; transition: opacity .2s ease, transform .06s ease; }
+  .primary-btn:hover { opacity:.9; } .primary-btn:active { transform:translateY(1px); }
+  .primary-btn:disabled { opacity:.45; cursor:not-allowed; }
+  .ghost-btn { font-family:'Geist',system-ui,sans-serif; font-size:14px; font-weight:500; color:var(--subtle); background:transparent; border:1px solid var(--btn-border); border-radius:10px; padding:10px 16px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; transition: border-color .2s ease, color .2s ease, background .2s ease; }
+  .ghost-btn:hover { border-color:var(--accent); color:var(--accent); background:var(--hover); }
+  .ghost-btn.danger:hover { border-color:var(--danger); color:var(--danger); background:var(--danger-bg); }
+  .danger-solid { font-family:'Geist',system-ui,sans-serif; font-size:14px; font-weight:600; color:#fff; background:var(--danger); border:none; border-radius:10px; padding:11px 16px; cursor:pointer; transition: opacity .2s ease; }
+  [data-theme="dark"] .danger-solid { color:#1A1410; } .danger-solid:hover { opacity:.9; }
+  .iconbtn { width:30px; height:30px; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--line); background:var(--field); border-radius:8px; color:var(--muted); cursor:pointer; transition: color .18s ease, border-color .18s ease, background .18s ease; }
+  .iconbtn:hover { color:var(--text); border-color:var(--btn-border); background:var(--hover); }
+  .iconbtn.danger:hover { color:var(--danger); border-color:color-mix(in srgb,var(--danger) 40%,var(--line)); background:var(--danger-bg); }
+  .iconbtn:disabled { opacity:.35; cursor:not-allowed; }
+  .iconbtn svg { width:15px; height:15px; }
+  .chip { display:inline-flex; align-items:center; gap:7px; font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:0.02em; color:var(--text); border:1px solid var(--line); background:var(--surf); padding:5px 7px 5px 11px; border-radius:8px; }
+  .chip button { background:transparent; border:none; color:var(--faint); cursor:pointer; font-size:12px; line-height:1; padding:1px; display:inline-flex; transition:color .15s ease; }
+  .chip button:hover { color:var(--danger); }
+  .suggest { font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:0.02em; color:var(--muted); border:1px dashed var(--line); background:transparent; padding:5px 10px; border-radius:8px; cursor:pointer; transition: color .18s ease, border-color .18s ease; }
+  .suggest:hover { color:var(--accent); border-color:var(--accent); }
+  .upload { border:1px dashed var(--btn-border); border-radius:12px; background:var(--surf); padding:22px; display:flex; flex-direction:column; align-items:center; gap:10px; cursor:pointer; transition: border-color .2s ease, background .2s ease; text-align:center; }
+  .upload:hover { border-color:var(--accent); background:var(--hover); }
+  .spinner { width:24px; height:24px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--accent); animation:spin .7s linear infinite; }
+  .spinner.sm { width:15px; height:15px; border-width:2px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .shimmer { background:linear-gradient(100deg, var(--surf) 30%, var(--hover) 50%, var(--surf) 70%); background-size:200% 100%; animation:sh 1.3s linear infinite; }
+  @keyframes sh { to { background-position:-200% 0; } }
+  .seg { display:inline-flex; background:var(--surf); border:1px solid var(--line); border-radius:9px; padding:3px; gap:2px; box-shadow:0 4px 14px rgba(0,0,0,0.08); flex-wrap:wrap; }
+  .seg button { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); background:transparent; border:none; padding:6px 9px; border-radius:6px; cursor:pointer; transition: background .18s ease, color .18s ease; }
+  .seg button[data-on="true"] { background:var(--field); color:var(--text); box-shadow:0 1px 2px rgba(0,0,0,0.05); }
+  .overlay { position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:24px; background:color-mix(in srgb, #000 38%, transparent); animation:fade .15s ease; }
+  @keyframes fade { from { opacity:0; } }
+  @keyframes pop { from { opacity:0; transform:translateY(8px) scale(.98); } }
+  @keyframes toastIn { from { opacity:0; transform:translateX(16px); } }
+  .toast:hover { border-color: color-mix(in srgb, var(--text) 18%, var(--line)); }
+  .toast:hover .toast-x { opacity:1; color:var(--muted); }
+  a:focus-visible, button:focus-visible, .field:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius:6px; }
+  .editor-grid { display:grid; grid-template-columns:1fr; gap:clamp(28px,4vw,44px); }
+  @media (min-width:880px) { .editor-grid { grid-template-columns:minmax(0,1fr) 296px; align-items:start; } .rail { position:sticky; top:84px; } }
+  @media (prefers-reduced-motion: reduce) { .spinner,.shimmer{animation:none;} .overlay,.toast{animation:none;} }
+</style>
+</helmet>
+
+<div data-theme="{{ theme }}" style="background:var(--bg); color:var(--text); min-height:100vh; font-family:'Geist',system-ui,sans-serif; -webkit-font-smoothing:antialiased; display:flex; flex-direction:column;">
+
+  <!-- ===== SHELL HEADER ===== -->
+  <header class="site-header">
+    <div style="max-width:1080px; margin:0 auto; padding:18px clamp(20px,5vw,28px); display:flex; align-items:center; justify-content:space-between; gap:20px;">
+      <div style="display:flex; align-items:center; gap:clamp(18px,4vw,30px);">
+        <a class="lnk" href="/" style="font-size:15px; font-weight:600; letter-spacing:-0.01em;">Akli Aissat</a>
+        <nav aria-label="Admin" style="display:flex; align-items:center; gap:22px; font-size:14px; color:var(--muted);">
+          <a class="lnk" href="#" aria-current="page" style="color:var(--text); font-weight:500;">Recipes</a>
+          <a class="lnk" href="#">Users</a>
+        </nav>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <span style="font-size:13px; color:var(--muted);">{{ email }}</span>
+        <button class="ghost-btn" style="width:auto; padding:7px 13px; font-size:13px;" onClick="{{ logout }}">Log out</button>
+        <button class="toggle-btn" onClick="{{ toggle }}" aria-label="{{ toggleLabel }}" title="{{ toggleLabel }}" style="display:inline-flex; width:32px; height:32px; align-items:center; justify-content:center; font-size:13px; color:var(--text); border:1px solid var(--btn-border); border-radius:50%;">{{ toggleIcon }}</button>
+      </div>
+    </div>
+  </header>
+
+  <main style="flex:1; max-width:1080px; width:100%; margin:0 auto; padding:clamp(22px,4vw,36px) clamp(20px,5vw,28px) 72px;">
+
+    <!-- ===== LOADING STATE ===== -->
+    <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+      <div style="border:1px solid var(--line); border-radius:16px; padding:clamp(64px,12vw,120px) 24px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="spinner" aria-hidden="true"></div>
+        <p style="font-size:14px; color:var(--muted); margin:0;">Loading recipe…</p>
+      </div>
+    </sc-if>
+
+    <!-- ===== EDITOR ===== -->
+    <sc-if value="{{ isEditor }}" hint-placeholder-val="{{ true }}">
+
+      <!-- back -->
+      <a class="lnk" href="#" onClick="{{ onBack }}" style="display:inline-flex; align-items:center; gap:7px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.04em; color:var(--muted); margin-bottom:20px;">
+        <svg class="ic-left" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+        Back to recipes
+      </a>
+
+      <!-- banners -->
+      <sc-if value="{{ sessionExpired }}" hint-placeholder-val="{{ false }}">
+        <div role="alert" style="display:flex; flex-wrap:wrap; align-items:center; gap:12px; justify-content:space-between; background:var(--danger-bg); border:1px solid color-mix(in srgb, var(--danger) 34%, var(--line)); border-radius:12px; padding:13px 16px; margin-bottom:16px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span style="font-size:13.5px; color:var(--subtle);">Your session has expired. Log in again to keep editing — your latest changes are saved.</span>
+          </div>
+          <button class="ghost-btn" style="width:auto; padding:7px 14px; font-size:13px;" onClick="{{ relogin }}">Log in again</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ imageProcessingNotice }}" hint-placeholder-val="{{ false }}">
+        <div role="status" style="display:flex; align-items:center; gap:10px; background:var(--amber-bg); border:1px solid color-mix(in srgb, var(--amber) 32%, var(--line)); border-radius:12px; padding:13px 16px; margin-bottom:16px;">
+          <span class="spinner sm" aria-hidden="true" style="border-top-color:var(--amber);"></span>
+          <span style="font-size:13.5px; color:var(--subtle);">An image is taking longer than expected to process. You can keep editing — publishing is paused until it's ready.</span>
+        </div>
+      </sc-if>
+
+      <!-- title bar row -->
+      <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; margin-bottom:26px;">
+        <h1 style="font-size:clamp(24px,3.4vw,30px); font-weight:600; letter-spacing:-0.025em; margin:0;">{{ pageHeading }}</h1>
+        <span style="display:inline-flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; padding:4px 11px; border-radius:999px; background:{{ statusBg }}; color:{{ statusFg }};"><span style="width:5px; height:5px; border-radius:50%; background:{{ statusFg }};"></span>{{ statusLabel }}</span>
+      </div>
+
+      <div class="editor-grid">
+        <!-- ========== FORM ========== -->
+        <div style="display:flex; flex-direction:column; gap:30px; min-width:0;">
+
+          <!-- BASICS -->
+          <section style="display:flex; flex-direction:column; gap:18px;">
+            <div>
+              <label class="flabel" for="f-title">Title</label>
+              <input id="f-title" class="field" type="text" placeholder="e.g. Mild Thai-Style Basa & Coconut Rice" value="{{ title }}" onInput="{{ onTitle }}">
+            </div>
+
+            <div>
+              <label class="flabel" for="f-slug">URL slug</label>
+              <input id="f-slug" class="field" type="text" placeholder="recipe-url-slug" value="{{ slug }}" onInput="{{ onSlug }}" disabled="{{ slugLocked }}">
+              <div style="display:flex; flex-wrap:wrap; align-items:center; gap:6px 12px; margin-top:8px;">
+                <span class="fhint">Public URL: <span style="color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:12px;">akli.dev/recipes/{{ slugPreview }}</span></span>
+                <sc-if value="{{ slugResettable }}" hint-placeholder-val="{{ false }}">
+                  <button class="lnk" onClick="{{ resetSlug }}" style="font-size:12.5px; color:var(--accent); background:transparent; border:none; cursor:pointer; padding:0; font-weight:500;">Reset to title</button>
+                </sc-if>
+              </div>
+              <sc-if value="{{ slugLocked }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; align-items:center; gap:7px; margin-top:8px; font-size:12.5px; color:var(--amber);">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                  <span style="color:var(--muted);">Locked — images reference this URL. Remove all images to change it.</span>
+                </div>
+              </sc-if>
+            </div>
+
+            <div>
+              <label class="flabel" for="f-intro">Intro</label>
+              <textarea id="f-intro" class="field" placeholder="A sentence or two on what makes this recipe worth cooking." value="{{ intro }}" onInput="{{ onIntro }}"></textarea>
+            </div>
+          </section>
+
+          <!-- COVER -->
+          <section style="border-top:1px solid var(--line); padding-top:26px; display:flex; flex-direction:column; gap:16px;">
+            <span class="seclabel">Cover image</span>
+            <sc-if value="{{ coverEmpty }}" hint-placeholder-val="{{ true }}">
+              <div class="upload" role="button" tabindex="0" onClick="{{ uploadCover }}">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                <span style="font-size:14px; font-weight:500; color:var(--subtle);">Upload a cover image</span>
+                <span class="fhint">JPG, PNG or WebP — landscape works best.</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ coverProcessing }}" hint-placeholder-val="{{ false }}">
+              <div style="border:1px solid var(--line); border-radius:12px; overflow:hidden;">
+                <div class="shimmer" style="aspect-ratio:16/9; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
+                  <span class="spinner" aria-hidden="true"></span>
+                  <span style="font-size:13px; color:var(--muted);">Processing image…</span>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ coverReady }}" hint-placeholder-val="{{ false }}">
+              <div style="position:relative; border:1px solid var(--line); border-radius:12px; overflow:hidden;">
+                {{ coverImgEl }}
+                <button class="iconbtn danger" onClick="{{ removeCover }}" title="Remove image" style="position:absolute; top:10px; right:10px; background:var(--bg);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path></svg>
+                </button>
+              </div>
+              <div>
+                <label class="flabel" for="f-alt">Alt text</label>
+                <input id="f-alt" class="field" type="text" placeholder="Describe the image for screen readers" value="{{ coverAlt }}" onInput="{{ onAlt }}">
+              </div>
+            </sc-if>
+          </section>
+
+          <!-- TIMING -->
+          <section style="border-top:1px solid var(--line); padding-top:26px; display:flex; flex-direction:column; gap:16px;">
+            <span class="seclabel">Timing &amp; servings</span>
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:14px;">
+              <div>
+                <label class="flabel" for="f-prep">Prep (min)</label>
+                <input id="f-prep" class="field" type="text" inputmode="numeric" placeholder="5" value="{{ prep }}" onInput="{{ onPrep }}">
+              </div>
+              <div>
+                <label class="flabel" for="f-cook">Cook (min)</label>
+                <input id="f-cook" class="field" type="text" inputmode="numeric" placeholder="30" value="{{ cook }}" onInput="{{ onCook }}">
+              </div>
+              <div>
+                <label class="flabel" for="f-serves">Servings</label>
+                <input id="f-serves" class="field" type="text" inputmode="numeric" placeholder="2" value="{{ servings }}" onInput="{{ onServings }}">
+              </div>
+            </div>
+          </section>
+
+          <!-- TAGS -->
+          <section style="border-top:1px solid var(--line); padding-top:26px; display:flex; flex-direction:column; gap:14px;">
+            <span class="seclabel">Tags</span>
+            <sc-if value="{{ hasTags }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                <sc-for list="{{ tags }}" as="tag" hint-placeholder-count="2">
+                  <span class="chip">{{ tag.label }}<button onClick="{{ tag.remove }}" aria-label="Remove tag">✕</button></span>
+                </sc-for>
+              </div>
+            </sc-if>
+            <input class="field" type="text" placeholder="Type a tag and press Enter" value="{{ tagInput }}" onInput="{{ onTagInput }}" onKeyDown="{{ onTagKey }}">
+            <sc-if value="{{ hasSuggestions }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+                <span class="fhint" style="margin-right:2px;">Suggestions:</span>
+                <sc-for list="{{ suggestions }}" as="s" hint-placeholder-count="4">
+                  <button class="suggest" onClick="{{ s.add }}">+ {{ s.label }}</button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </section>
+
+          <!-- INGREDIENTS -->
+          <section style="border-top:1px solid var(--line); padding-top:26px; display:flex; flex-direction:column; gap:14px;">
+            <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+              <span class="seclabel">Ingredients</span>
+              <span class="fhint">{{ ingCountLabel }}</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <sc-for list="{{ ingredients }}" as="ing" hint-placeholder-count="3">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <input class="field" style="width:96px; flex-shrink:0;" type="text" placeholder="Qty" value="{{ ing.qty }}" onInput="{{ ing.onQty }}">
+                  <input class="field" type="text" placeholder="Ingredient" value="{{ ing.name }}" onInput="{{ ing.onName }}">
+                  <button class="iconbtn" onClick="{{ ing.up }}" disabled="{{ ing.isFirst }}" title="Move up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"></path></svg></button>
+                  <button class="iconbtn" onClick="{{ ing.down }}" disabled="{{ ing.isLast }}" title="Move down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></button>
+                  <button class="iconbtn danger" onClick="{{ ing.remove }}" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+                </div>
+              </sc-for>
+            </div>
+            <button class="ghost-btn" style="width:auto; align-self:flex-start; padding:9px 15px; font-size:13.5px;" onClick="{{ addIngredient }}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Add ingredient
+            </button>
+          </section>
+
+          <!-- STEPS -->
+          <section style="border-top:1px solid var(--line); padding-top:26px; display:flex; flex-direction:column; gap:14px;">
+            <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+              <span class="seclabel">Method</span>
+              <span class="fhint">{{ stepCountLabel }}</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:14px;">
+              <sc-for list="{{ steps }}" as="step" hint-placeholder-count="2">
+                <div style="border:1px solid var(--line); border-radius:12px; padding:14px; background:var(--field);">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;">
+                    <span style="display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:var(--surf); border:1px solid var(--line); font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent);">{{ step.num }}</span>
+                    <div style="display:flex; gap:6px;">
+                      <button class="iconbtn" onClick="{{ step.up }}" disabled="{{ step.isFirst }}" title="Move up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"></path></svg></button>
+                      <button class="iconbtn" onClick="{{ step.down }}" disabled="{{ step.isLast }}" title="Move down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></button>
+                      <button class="iconbtn danger" onClick="{{ step.remove }}" title="Remove step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+                    </div>
+                  </div>
+                  <textarea class="field" placeholder="Describe this step…" value="{{ step.text }}" onInput="{{ step.onText }}"></textarea>
+                  <div style="margin-top:10px;">
+                    <sc-if value="{{ step.imgEmpty }}" hint-placeholder-val="{{ true }}">
+                      <button class="ghost-btn" style="width:auto; padding:7px 13px; font-size:13px;" onClick="{{ step.addImg }}">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"></path></svg>
+                        Add step image
+                      </button>
+                    </sc-if>
+                    <sc-if value="{{ step.imgProcessing }}" hint-placeholder-val="{{ false }}">
+                      <div class="shimmer" style="border:1px solid var(--line); border-radius:10px; height:96px; display:flex; align-items:center; justify-content:center; gap:9px;">
+                        <span class="spinner sm" aria-hidden="true"></span>
+                        <span style="font-size:12.5px; color:var(--muted);">Processing…</span>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ step.imgReady }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div style="position:relative; display:inline-block; align-self:flex-start; border:1px solid var(--line); border-radius:10px; overflow:hidden;">
+                          {{ step.imgEl }}
+                          <button class="iconbtn danger" onClick="{{ step.removeImg }}" title="Remove image" style="position:absolute; top:7px; right:7px; background:var(--bg);">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                          </button>
+                        </div>
+                        <input class="field" type="text" placeholder="Alt text for this image" value="{{ step.imgAlt }}" onInput="{{ step.onImgAlt }}">
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <button class="ghost-btn" style="width:auto; align-self:flex-start; padding:9px 15px; font-size:13.5px;" onClick="{{ addStep }}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Add step
+            </button>
+          </section>
+        </div>
+
+        <!-- ========== RAIL ========== -->
+        <aside class="rail">
+          <div style="border:1px solid var(--line); border-radius:16px; background:var(--surf); padding:18px; display:flex; flex-direction:column; gap:16px;">
+
+            <!-- autosave indicator -->
+            <div style="display:flex; align-items:center; gap:9px; min-height:20px;">
+              <sc-if value="{{ saveSaving }}" hint-placeholder-val="{{ false }}"><span class="spinner sm" aria-hidden="true"></span><span style="font-size:13px; color:var(--muted);">Saving…</span></sc-if>
+              <sc-if value="{{ saveSaved }}" hint-placeholder-val="{{ true }}"><span style="color:var(--green); display:inline-flex;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span><span style="font-size:13px; color:var(--muted);">{{ savedLabel }}</span></sc-if>
+              <sc-if value="{{ saveError }}" hint-placeholder-val="{{ false }}">
+                <span style="color:var(--danger); display:inline-flex;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></span>
+                <span style="font-size:13px; color:var(--danger);">Couldn't save</span>
+                <button class="lnk" onClick="{{ retrySave }}" style="font-size:12.5px; color:var(--accent); background:transparent; border:none; cursor:pointer; padding:0; font-weight:500; margin-left:auto;">Retry</button>
+              </sc-if>
+            </div>
+
+            <div style="height:1px; background:var(--line);"></div>
+
+            <!-- actions -->
+            <sc-if value="{{ isDraft }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="primary-btn" onClick="{{ publish }}" disabled="{{ publishDisabled }}">Publish</button>
+                <button class="ghost-btn danger" onClick="{{ askDiscard }}">Discard draft</button>
+              </div>
+              <sc-if value="{{ showChecklist }}" hint-placeholder-val="{{ false }}">
+                <div style="border-top:1px solid var(--line); padding-top:14px;">
+                  <div class="seclabel" style="margin-bottom:10px;">Before publishing</div>
+                  <div style="display:flex; flex-direction:column; gap:9px;">
+                    <sc-for list="{{ checklist }}" as="c" hint-placeholder-count="6">
+                      <div style="display:flex; align-items:flex-start; gap:9px;">
+                        <span aria-hidden="true" style="flex-shrink:0; margin-top:1px; width:16px; height:16px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; border:1.5px solid {{ c.ring }}; background:{{ c.fill }}; color:{{ c.tick }}; font-size:9px;">{{ c.icon }}</span>
+                        <span style="font-size:13px; line-height:1.4; color:{{ c.color }};">{{ c.label }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+            </sc-if>
+
+            <sc-if value="{{ isPublished }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="primary-btn" onClick="{{ update }}">Update</button>
+                <button class="ghost-btn" onClick="{{ unpublish }}">Unpublish</button>
+              </div>
+              <div style="border-top:1px solid var(--line); padding-top:14px;">
+                <a class="lnk" href="#" onClick="{{ preview }}" style="display:inline-flex; align-items:center; gap:7px; font-size:13px; color:var(--muted);">
+                  <svg class="ic-right" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  View live recipe
+                </a>
+              </div>
+            </sc-if>
+          </div>
+        </aside>
+      </div>
+    </sc-if>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer style="border-top:1px solid var(--line);">
+    <div style="max-width:1080px; margin:0 auto; padding:22px clamp(20px,5vw,28px); display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;">
+      <span style="font-size:12.5px; color:var(--faint);">akli.dev admin</span>
+      <span style="font-size:12.5px; color:var(--faint);">Signed in as {{ email }}</span>
+    </div>
+  </footer>
+
+  <!-- ===== DISCARD DIALOG ===== -->
+  <sc-if value="{{ discardOpen }}" hint-placeholder-val="{{ false }}">
+    <div class="overlay" role="dialog" aria-modal="true" aria-labelledby="dc-title" onClick="{{ cancelDiscard }}">
+      <div onClick="{{ stop }}" style="width:100%; max-width:420px; background:var(--bg); border:1px solid var(--line); border-radius:18px; padding:26px; box-shadow:0 24px 60px rgba(0,0,0,0.28); animation:pop .18s ease;">
+        <h2 id="dc-title" style="font-size:18px; font-weight:600; letter-spacing:-0.02em; margin:0 0 10px;">Discard this draft?</h2>
+        <p style="font-size:14.5px; line-height:1.6; color:var(--subtle); margin:0 0 24px;">This draft and everything in it will be permanently deleted. This can't be undone.</p>
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button class="ghost-btn" style="width:auto;" onClick="{{ cancelDiscard }}">Keep editing</button>
+          <button class="danger-solid" onClick="{{ confirmDiscard }}">Discard draft</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===== LEAVE (UNSAVED) DIALOG ===== -->
+  <sc-if value="{{ leaveOpen }}" hint-placeholder-val="{{ false }}">
+    <div class="overlay" role="dialog" aria-modal="true" aria-labelledby="lv-title" onClick="{{ cancelLeave }}">
+      <div onClick="{{ stop }}" style="width:100%; max-width:420px; background:var(--bg); border:1px solid var(--line); border-radius:18px; padding:26px; box-shadow:0 24px 60px rgba(0,0,0,0.28); animation:pop .18s ease;">
+        <h2 id="lv-title" style="font-size:18px; font-weight:600; letter-spacing:-0.02em; margin:0 0 10px;">Leave with unsaved changes?</h2>
+        <p style="font-size:14.5px; line-height:1.6; color:var(--subtle); margin:0 0 24px;">Your changes are still saving. If you leave now they might not be stored.</p>
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button class="ghost-btn" style="width:auto;" onClick="{{ cancelLeave }}">Stay</button>
+          <button class="primary-btn" style="width:auto;" onClick="{{ confirmLeave }}">Leave anyway</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===== TOASTS ===== -->
+  <div style="position:fixed; bottom:18px; right:18px; z-index:80; display:flex; flex-direction:column; gap:10px; max-width:340px;">
+    <sc-for list="{{ toasts }}" as="t" hint-placeholder-count="0">
+      <button class="toast" type="button" aria-label="Dismiss notification" onClick="{{ t.dismiss }}" style="display:flex; align-items:center; gap:11px; width:100%; text-align:left; background:var(--bg); border:1px solid var(--line); border-radius:11px; padding:12px 15px; box-shadow:0 12px 30px rgba(0,0,0,0.16); animation:toastIn .2s ease; cursor:pointer; font-family:inherit;">
+        <span aria-hidden="true" style="width:18px; height:18px; flex-shrink:0; border-radius:50%; background:{{ t.dot }}; color:{{ t.accent }}; display:inline-flex; align-items:center; justify-content:center; font-size:11px; line-height:1;">{{ t.icon }}</span>
+        <span style="font-size:13.5px; line-height:1.45; color:var(--subtle); flex:1;">{{ t.msg }}</span>
+        <span class="toast-x" aria-hidden="true" style="flex-shrink:0; color:var(--faint); font-size:12px; line-height:1; opacity:.5; transition:opacity .18s ease, color .18s ease;">✕</span>
+      </button>
+    </sc-for>
+  </div>
+
+  <!-- preview switcher (design-time only) -->
+  <div style="position:fixed; bottom:18px; left:18px; z-index:30;">
+    <div class="seg" role="group" aria-label="Preview state">
+      <button data-on="{{ isDraftView }}" onClick="{{ vDraft }}">Draft</button>
+      <button data-on="{{ isPublished }}" onClick="{{ vPublished }}">Published</button>
+      <button data-on="{{ isLoading }}" onClick="{{ vLoading }}">Loading</button>
+      <button data-on="{{ sessionExpired }}" onClick="{{ toggleSession }}">Session</button>
+      <button data-on="{{ imageProcessingNotice }}" onClick="{{ toggleProcNotice }}">Img notice</button>
+      <button data-on="{{ saveError }}" onClick="{{ toggleSaveErr }}">Save error</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  state = {
+    theme: 'light',
+    view: 'editor',                 // editor | loading
+    status: 'draft',                // draft | published
+    recipe: {
+      title: 'Mild Thai-Style Basa & Coconut Rice',
+      slug: 'mild-thai-style-basa-coconut-rice',
+      slugEdited: false,
+      intro: 'A comforting Thai-infused rice and fish one pot. Flavour the rice with coconut and fragrant green curry paste, then steam the fish on top for tenderness.',
+      cover: { state: 'empty', url: '', alt: '' },     // empty | processing | ready
+      prep: '5', cook: '30', servings: '2',
+      tags: ['Thai', 'Fish'],
+      ingredients: [
+        { id: 1, qty: '140 g', name: 'White basmati rice' },
+        { id: 2, qty: '2', name: 'Basa fillets' },
+        { id: 3, qty: '40 g', name: 'Thai green curry paste' }
+      ],
+      steps: [
+        { id: 1, text: 'Boil a kettle. Trim and finely slice the spring onions; deseed and chop the pepper.', image: { state: 'empty', url: '', alt: '' } },
+        { id: 2, text: 'Fry the pepper and most of the spring onion with the curry paste for 2–3 min until fragrant.', image: { state: 'empty', url: '', alt: '' } }
+      ]
+    },
+    tagInput: '',
+    save: { state: 'saved', at: Date.now() - 45000 },   // saved | saving | error
+    discardOpen: false,
+    leaveOpen: false,
+    sessionExpired: false,
+    procNoticeForce: false,
+    toasts: []
+  };
+
+  email = 'akli@akli.dev';
+  allTags = ['Thai','Fish','Rice','One Pot','Coconut','Pasta','Beef','Baking','Bread','Mains','Vegetarian','Dessert','Quick','Soup','Spicy'];
+  _seq = 100; _toastSeq = 0; _timers = [];
+
+  componentDidMount() {
+    try {
+      const saved = localStorage.getItem('akli-theme');
+      if (saved === 'light' || saved === 'dark') this.setState({ theme: saved });
+      else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) this.setState({ theme: 'dark' });
+    } catch (e) {}
+  }
+  componentWillUnmount() { this._timers.forEach(clearTimeout); }
+  later(fn, ms) { const t = setTimeout(fn, ms); this._timers.push(t); return t; }
+
+  toggle = () => {
+    this.setState(s => {
+      const theme = s.theme === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('akli-theme', theme); } catch (e) {}
+      return { theme };
+    });
+  };
+
+  // ---- toasts ----
+  toast(type, msg) {
+    const id = ++this._toastSeq;
+    this.setState(s => ({ toasts: s.toasts.concat([{ id, type, msg }]) }));
+    this.later(() => this.dismiss(id), 3600);
+  }
+  dismiss = (id) => this.setState(s => ({ toasts: s.toasts.filter(t => t.id !== id) }));
+
+  // ---- autosave ----
+  scheduleSave() {
+    clearTimeout(this._saveT);
+    this._saveT = this.later(() => this.runSave(), 1500);
+  }
+  runSave() {
+    this.setState({ save: { state: 'saving' } });
+    clearTimeout(this._saveT2);
+    this._saveT2 = this.later(() => {
+      this.setState({ save: { state: 'saved', at: Date.now() } });
+    }, 850);
+  }
+  retrySave = () => this.runSave();
+
+  // ---- recipe mutation ----
+  patch(part) {
+    this.setState(s => ({ recipe: Object.assign({}, s.recipe, part) }));
+    this.scheduleSave();
+  }
+  patchRecipe(fn) {
+    this.setState(s => ({ recipe: fn(Object.assign({}, s.recipe)) }));
+    this.scheduleSave();
+  }
+
+  slugify(t) { return t.toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+
+  onTitle = (e) => {
+    const title = e.target.value;
+    this.setState(s => {
+      const r = Object.assign({}, s.recipe, { title });
+      if (!r.slugEdited && !this.imagesExist(r)) r.slug = this.slugify(title);
+      return { recipe: r };
+    });
+    this.scheduleSave();
+  };
+  onSlug = (e) => { const v = this.slugify(e.target.value); this.patch({ slug: v, slugEdited: true }); };
+  resetSlug = () => this.patch({ slug: this.slugify(this.state.recipe.title), slugEdited: false });
+  onIntro = (e) => this.patch({ intro: e.target.value });
+  onAlt = (e) => this.patchRecipe(r => { r.cover = Object.assign({}, r.cover, { alt: e.target.value }); return r; });
+  onPrep = (e) => this.patch({ prep: e.target.value });
+  onCook = (e) => this.patch({ cook: e.target.value });
+  onServings = (e) => this.patch({ servings: e.target.value });
+
+  imagesExist(r) {
+    if (r.cover.state !== 'empty') return true;
+    return r.steps.some(s => s.image.state !== 'empty');
+  }
+
+  // ---- cover image (async simulated) ----
+  uploadCover = () => {
+    this.patchRecipe(r => { r.cover = { state: 'processing', url: '', alt: r.cover.alt || '' }; return r; });
+    this.later(() => {
+      this.patchRecipe(r => { r.cover = Object.assign({}, r.cover, { state: 'ready', url: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=900&q=70' }); return r; });
+      this.toast('success', 'Cover image ready.');
+    }, 2600);
+  };
+  removeCover = () => { this.patchRecipe(r => { r.cover = { state: 'empty', url: '', alt: '' }; return r; }); };
+
+  // ---- tags ----
+  onTagInput = (e) => this.setState({ tagInput: e.target.value });
+  addTag = (label) => {
+    label = (label || '').trim();
+    if (!label) return;
+    this.setState(s => {
+      if (s.recipe.tags.some(t => t.toLowerCase() === label.toLowerCase())) return { tagInput: '' };
+      return { recipe: Object.assign({}, s.recipe, { tags: s.recipe.tags.concat([label]) }), tagInput: '' };
+    });
+    this.scheduleSave();
+  };
+  onTagKey = (e) => { if (e.key === 'Enter') { e.preventDefault(); this.addTag(this.state.tagInput); } };
+  removeTag = (label) => { this.patchRecipe(r => { r.tags = r.tags.filter(t => t !== label); return r; }); };
+
+  // ---- ingredients ----
+  addIngredient = () => this.patchRecipe(r => { r.ingredients = r.ingredients.concat([{ id: ++this._seq, qty: '', name: '' }]); return r; });
+  updIngredient = (id, part) => this.patchRecipe(r => { r.ingredients = r.ingredients.map(x => x.id === id ? Object.assign({}, x, part) : x); return r; });
+  removeIngredient = (id) => this.patchRecipe(r => { r.ingredients = r.ingredients.filter(x => x.id !== id); return r; });
+  moveIngredient = (id, dir) => this.patchRecipe(r => { r.ingredients = this.move(r.ingredients, id, dir); return r; });
+
+  // ---- steps ----
+  addStep = () => this.patchRecipe(r => { r.steps = r.steps.concat([{ id: ++this._seq, text: '', image: { state: 'empty', url: '', alt: '' } }]); return r; });
+  updStep = (id, part) => this.patchRecipe(r => { r.steps = r.steps.map(x => x.id === id ? Object.assign({}, x, part) : x); return r; });
+  removeStep = (id) => this.patchRecipe(r => { r.steps = r.steps.filter(x => x.id !== id); return r; });
+  moveStep = (id, dir) => this.patchRecipe(r => { r.steps = this.move(r.steps, id, dir); return r; });
+  addStepImg = (id) => {
+    this.patchRecipe(r => { r.steps = r.steps.map(x => x.id === id ? Object.assign({}, x, { image: { state: 'processing', url: '', alt: x.image.alt || '' } }) : x); return r; });
+    this.later(() => {
+      this.patchRecipe(r => { r.steps = r.steps.map(x => x.id === id ? Object.assign({}, x, { image: { state: 'ready', url: 'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=400&q=70', alt: x.image.alt || '' } }) : x); return r; });
+    }, 2400);
+  };
+  removeStepImg = (id) => this.patchRecipe(r => { r.steps = r.steps.map(x => x.id === id ? Object.assign({}, x, { image: { state: 'empty', url: '', alt: '' } }) : x); return r; });
+  updStepImgAlt = (id, alt) => this.patchRecipe(r => { r.steps = r.steps.map(x => x.id === id ? Object.assign({}, x, { image: Object.assign({}, x.image, { alt: alt }) }) : x); return r; });
+
+  move(arr, id, dir) {
+    const i = arr.findIndex(x => x.id === id);
+    const j = dir === 'up' ? i - 1 : i + 1;
+    if (i < 0 || j < 0 || j >= arr.length) return arr;
+    const copy = arr.slice();
+    const tmp = copy[i]; copy[i] = copy[j]; copy[j] = tmp;
+    return copy;
+  }
+
+  // ---- publish flow ----
+  missing() {
+    const r = this.state.recipe;
+    const anyProcessing = r.cover.state === 'processing' || r.steps.some(s => s.image.state === 'processing');
+    const readyStepImgs = r.steps.filter(s => s.image.state === 'ready');
+    const list = [
+      { key: 'title', label: 'Add a title', done: !!r.title.trim() },
+      { key: 'intro', label: 'Write an intro', done: !!r.intro.trim() },
+      { key: 'cover', label: 'Upload a cover image', done: r.cover.state === 'ready' },
+      { key: 'alt', label: 'Add cover alt text', done: r.cover.state === 'ready' && !!r.cover.alt.trim() },
+      { key: 'ing', label: 'Add at least one ingredient', done: r.ingredients.some(x => x.name.trim()) },
+      { key: 'step', label: 'Add at least one step', done: r.steps.some(x => x.text.trim()) },
+      { key: 'proc', label: 'Wait for images to finish processing', done: !anyProcessing }
+    ];
+    if (readyStepImgs.length) {
+      list.push({ key: 'stepalt', label: 'Add alt text to every step image', done: readyStepImgs.every(s => s.image.alt.trim()) });
+    }
+    return list;
+  }
+  publish = () => { this.setState({ status: 'published' }); this.toast('success', 'Recipe published — it\u2019s now live.'); };
+  update = () => { this.runSave(); this.toast('success', 'Changes saved.'); };
+  unpublish = () => { this.setState({ status: 'draft' }); this.toast('info', 'Recipe moved back to drafts.'); };
+  preview = (e) => { if (e) e.preventDefault(); this.toast('info', 'Opening the live recipe in a new tab.'); };
+
+  askDiscard = () => this.setState({ discardOpen: true });
+  cancelDiscard = () => this.setState({ discardOpen: false });
+  confirmDiscard = () => { this.setState({ discardOpen: false }); this.toast('success', 'Draft discarded.'); };
+
+  onBack = (e) => {
+    if (e) e.preventDefault();
+    if (this.state.save.state === 'saving') this.setState({ leaveOpen: true });
+    else this.toast('info', 'Back to recipes.');
+  };
+  cancelLeave = () => this.setState({ leaveOpen: false });
+  confirmLeave = () => { this.setState({ leaveOpen: false }); this.toast('info', 'Back to recipes.'); };
+
+  relogin = () => { this.setState({ sessionExpired: false }); this.toast('info', 'Redirecting to log in…'); };
+  logout = () => this.toast('info', 'Signing out…');
+  stop = (e) => { if (e && e.stopPropagation) e.stopPropagation(); };
+
+  // ---- design-time ----
+  vDraft = () => this.setState({ view: 'editor', status: 'draft' });
+  vPublished = () => this.setState({ view: 'editor', status: 'published' });
+  vLoading = () => this.setState({ view: 'loading' });
+  toggleSession = () => this.setState(s => ({ sessionExpired: !s.sessionExpired }));
+  toggleProcNotice = () => this.setState(s => ({ procNoticeForce: !s.procNoticeForce }));
+  toggleSaveErr = () => this.setState(s => ({ save: s.save.state === 'error' ? { state: 'saved', at: Date.now() } : { state: 'error' } }));
+
+  savedLabel() {
+    const at = this.state.save.at;
+    if (!at) return 'Saved';
+    const secs = Math.floor((Date.now() - at) / 1000);
+    if (secs < 8) return 'Saved just now';
+    if (secs < 60) return 'Saved ' + secs + 's ago';
+    const d = new Date(at);
+    let h = d.getHours(); const m = String(d.getMinutes()).padStart(2, '0');
+    const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+    return 'Saved at ' + h + ':' + m + ' ' + ap;
+  }
+
+  renderVals() {
+    const isDark = this.state.theme === 'dark';
+    const r = this.state.recipe;
+    const status = this.state.status;
+    const locked = this.imagesExist(r);
+    const checklist = this.missing();
+    const canPublish = checklist.every(c => c.done);
+    const anyProcessing = r.cover.state === 'processing' || r.steps.some(s => s.image.state === 'processing');
+
+    const tagsUsed = r.tags.map(label => ({ label, remove: () => this.removeTag(label) }));
+    const q = this.state.tagInput.trim().toLowerCase();
+    const suggestions = this.allTags
+      .filter(t => !r.tags.some(x => x.toLowerCase() === t.toLowerCase()))
+      .filter(t => !q || t.toLowerCase().includes(q))
+      .slice(0, 6)
+      .map(label => ({ label, add: () => this.addTag(label) }));
+
+    const ingredients = r.ingredients.map((x, i) => ({
+      qty: x.qty, name: x.name, isFirst: i === 0, isLast: i === r.ingredients.length - 1,
+      onQty: (e) => this.updIngredient(x.id, { qty: e.target.value }),
+      onName: (e) => this.updIngredient(x.id, { name: e.target.value }),
+      up: () => this.moveIngredient(x.id, 'up'), down: () => this.moveIngredient(x.id, 'down'),
+      remove: () => this.removeIngredient(x.id)
+    }));
+
+    const steps = r.steps.map((x, i) => ({
+      num: i + 1, text: x.text, isFirst: i === 0, isLast: i === r.steps.length - 1,
+      imgEmpty: x.image.state === 'empty', imgProcessing: x.image.state === 'processing', imgReady: x.image.state === 'ready', imgUrl: x.image.url,
+      imgEl: x.image.url ? React.createElement('img', { src: x.image.url, alt: '', style: { display:'block', height:'96px', width:'auto', objectFit:'cover' } }) : null,
+      onText: (e) => this.updStep(x.id, { text: e.target.value }),
+      up: () => this.moveStep(x.id, 'up'), down: () => this.moveStep(x.id, 'down'),
+      remove: () => this.removeStep(x.id),
+      addImg: () => this.addStepImg(x.id), removeImg: () => this.removeStepImg(x.id),
+      imgAlt: x.image.alt || '', onImgAlt: (e) => this.updStepImgAlt(x.id, e.target.value)
+    }));
+
+    const tStyle = { success:{accent:'var(--green)',dot:'var(--green-bg)',icon:'\u2713'}, error:{accent:'var(--danger)',dot:'var(--danger-bg)',icon:'\u2715'}, info:{accent:'var(--accent)',dot:'color-mix(in srgb, var(--accent) 14%, transparent)',icon:'\u203a'} };
+    const toasts = this.state.toasts.map(t => Object.assign({}, tStyle[t.type] || tStyle.info, { msg: t.msg, dismiss: () => this.dismiss(t.id) }));
+
+    const cl = checklist.map(c => ({
+      label: c.label, icon: c.done ? '\u2713' : '',
+      ring: c.done ? 'var(--green)' : 'var(--line)',
+      fill: c.done ? 'var(--green)' : 'transparent',
+      tick: c.done ? '#fff' : 'transparent',
+      color: c.done ? 'var(--faint)' : 'var(--subtle)'
+    }));
+
+    return {
+      theme: this.state.theme, email: this.email,
+      toggle: this.toggle, toggleIcon: isDark ? '\u2600' : '\u263e',
+      toggleLabel: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+      logout: this.logout,
+
+      isLoading: this.state.view === 'loading',
+      isEditor: this.state.view === 'editor',
+      isDraft: status === 'draft', isPublished: status === 'published',
+      isDraftView: this.state.view === 'editor' && status === 'draft',
+
+      pageHeading: status === 'published' ? 'Edit recipe' : 'New recipe',
+      statusLabel: status === 'published' ? 'Published' : 'Draft',
+      statusBg: status === 'published' ? 'var(--green-bg)' : 'var(--amber-bg)',
+      statusFg: status === 'published' ? 'var(--green)' : 'var(--amber)',
+
+      title: r.title, slug: r.slug, slugPreview: r.slug || 'recipe-slug',
+      slugLocked: locked, slugResettable: !locked && r.slugEdited && this.slugify(r.title) !== r.slug,
+      resetSlug: this.resetSlug,
+      intro: r.intro, prep: r.prep, cook: r.cook, servings: r.servings,
+      onTitle: this.onTitle, onSlug: this.onSlug, onIntro: this.onIntro,
+      onPrep: this.onPrep, onCook: this.onCook, onServings: this.onServings,
+
+      coverEmpty: r.cover.state === 'empty', coverProcessing: r.cover.state === 'processing', coverReady: r.cover.state === 'ready',
+      coverUrl: r.cover.url, coverAlt: r.cover.alt,
+      coverImgEl: r.cover.url ? React.createElement('img', { src: r.cover.url, alt: '', style: { display:'block', width:'100%', aspectRatio:'16/9', objectFit:'cover' } }) : null,
+      uploadCover: this.uploadCover, removeCover: this.removeCover, onAlt: this.onAlt,
+
+      hasTags: tagsUsed.length > 0, tags: tagsUsed,
+      tagInput: this.state.tagInput, onTagInput: this.onTagInput, onTagKey: this.onTagKey,
+      hasSuggestions: suggestions.length > 0, suggestions,
+
+      ingredients, ingCountLabel: r.ingredients.length + (r.ingredients.length === 1 ? ' item' : ' items'),
+      addIngredient: this.addIngredient,
+      steps, stepCountLabel: r.steps.length + (r.steps.length === 1 ? ' step' : ' steps'),
+      addStep: this.addStep,
+
+      saveSaving: this.state.save.state === 'saving',
+      saveSaved: this.state.save.state === 'saved',
+      saveError: this.state.save.state === 'error',
+      savedLabel: this.savedLabel(), retrySave: this.retrySave,
+
+      publish: this.publish, publishDisabled: !canPublish,
+      showChecklist: !canPublish,
+      checklist: cl,
+      askDiscard: this.askDiscard, update: this.update, unpublish: this.unpublish, preview: this.preview,
+
+      sessionExpired: this.state.sessionExpired, relogin: this.relogin,
+      imageProcessingNotice: anyProcessing || this.state.procNoticeForce,
+
+      discardOpen: this.state.discardOpen, cancelDiscard: this.cancelDiscard, confirmDiscard: this.confirmDiscard,
+      leaveOpen: this.state.leaveOpen, cancelLeave: this.cancelLeave, confirmLeave: this.confirmLeave,
+      onBack: this.onBack, stop: this.stop,
+      toasts,
+
+      vDraft: this.vDraft, vPublished: this.vPublished, vLoading: this.vLoading,
+      toggleSession: this.toggleSession, toggleProcNotice: this.toggleProcNotice, toggleSaveErr: this.toggleSaveErr
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -12,7 +12,7 @@ To write a new PRD, copy `docs/prds/template.md` and fill it in.
 
 - React 19 + TypeScript
 - React Router v7 (client-side routing)
-- Vite 6
+- Vite 7
 - CSS Modules
 - Vitest + Testing Library
 - Package manager: pnpm (do not use npm or yarn)
@@ -22,9 +22,9 @@ To write a new PRD, copy `docs/prds/template.md` and fill it in.
 - Components live in `src/components/<Name>/<Name>.tsx` with a barrel `index.ts`
 - Pages live in `src/pages/<Name>/<Name>.tsx` with a barrel `index.ts`
 - Each component/page has a co-located test file `<Name>.test.tsx`
-- Use path aliases: `@api/`, `@components/`, `@contexts/`, `@hooks/`, `@pages/`, `@types/`
+- Use path aliases: `@api/`, `@components/`, `@contexts/`, `@hooks/`, `@pages/`, `@models/` (→ `src/types/`)
 - Dark mode via `data-theme` attribute on the document root
-- Neo-brutalist design: use `var(--radius-none)` for border-radius — no rounded corners on any component
+- Neo-brutalist design: use `var(--radius-none)` for border-radius — no rounded corners on any component. **NOTE: a full redesign to a warm "paper" aesthetic (soft radii, hairline borders, Geist/JetBrains Mono) is specced in `docs/prds/paper-redesign.md` (source of truth `docs/design/paper/`). This neo-brutalist mandate applies to current code and will be replaced as that redesign lands.**
 - Use const arrow functions, not function declarations — enforced by ESLint (`func-style: expression`)
 - After modifying TSX files, run `pnpm exec eslint --fix` on changed files to auto-fix import order
 - Before creating new UI elements, check `src/components/` for existing reusable components (Image, Typography, Button, Card, Link, Loading, etc.). Always prefer existing components over raw HTML tags.

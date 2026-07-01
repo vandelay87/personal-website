@@ -1,0 +1,57 @@
+/* ── Spacing, radius, shadow, layout ──────────────────────────
+   The redesign trades the old hard-offset brutalist shadows for
+   soft, low-opacity elevation and generous rounding.
+   ──────────────────────────────────────────────────────────── */
+
+:root {
+  /* Spacing scale (4px base) */
+  --space-1:  0.25rem;  /* 4px  */
+  --space-2:  0.5rem;   /* 8px  */
+  --space-3:  0.75rem;  /* 12px */
+  --space-4:  1rem;     /* 16px */
+  --space-5:  1.25rem;  /* 20px */
+  --space-6:  1.5rem;   /* 24px */
+  --space-8:  2rem;     /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+  --space-24: 6rem;     /* 96px */
+
+  /* Border radius — soft, rounded */
+  --radius-sm:   6px;   /* chips, small controls */
+  --radius-md:   10px;  /* inputs, buttons */
+  --radius-lg:   12px;  /* code panels, callouts */
+  --radius-xl:   16px;  /* cards, panels, dialogs */
+  --radius-2xl:  18px;  /* modals */
+  --radius-full: 999px; /* pills, avatars, toggle */
+
+  /* Border widths */
+  --border-width:       1px;  /* default hairline */
+  --border-width-thick: 1.5px;/* checkboxes, emphasis */
+
+  /* Shadows — soft elevation, no hard offsets */
+  --shadow-sm:  0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:  0 4px 14px rgba(0,0,0,0.08);
+  --shadow-lg:  0 12px 30px rgba(0,0,0,0.16);
+  --shadow-xl:  0 24px 60px rgba(0,0,0,0.28); /* dialogs */
+
+  /* Focus ring */
+  --ring: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
+
+  /* Layout */
+  --max-w-site:    1080px; /* shell / header / footer width */
+  --max-w-reading: 720px;  /* index + hero reading column */
+  --max-w-article: 680px;  /* long-form article column */
+  --max-w-prose:   54ch;   /* hero paragraph measure */
+
+  /* Z-index */
+  --z-header:  20;
+  --z-overlay: 60;
+  --z-toast:   80;
+
+  /* Transitions */
+  --duration-fast: 180ms;
+  --duration-base: 250ms;
+  --easing-default: ease;
+}

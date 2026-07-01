@@ -1,5 +1,7 @@
 # PRD: Site Redesign — Modern Minimal Brutalist
 
+> ⚠️ **DEPRECATED (2026-07-01).** This neo-brutalist direction has been superseded by the warm editorial "paper" redesign. See [`paper-redesign.md`](./paper-redesign.md) and the design source of truth at `docs/design/paper/`. Kept for historical context only — do not implement from this document.
+
 ## Overview
 
 Redesign akli.dev with a modern neo-brutalist aesthetic. The site was recently migrated from Tailwind to CSS Modules, but the visual result drifted from the original without a clear design direction. This PRD defines that direction: clean, minimal, blocky, with generous whitespace and zero decorative animation. The goal is a portfolio that looks intentional and distinctive — not generic, not cluttered.

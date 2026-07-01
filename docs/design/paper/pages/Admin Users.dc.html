@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  :root {
+    --bg:#FBFAF7; --text:#1C1A16; --subtle:#3a3631; --muted:#6F6961; --faint:#9a938a;
+    --line:#ECE6DA; --surf:#F4F1EA; --hover:rgba(0,0,0,0.022); --field:#FFFFFF;
+    --btn-bg:#1C1A16; --btn-fg:#FBFAF7; --btn-border:#E0DACE;
+    --accent:#1F66E0; --accent-bg:rgba(31,102,224,0.10);
+    --green:#1F8A5B; --green-bg:rgba(31,138,91,0.10);
+    --amber:#A66E0A; --amber-bg:rgba(194,129,12,0.12);
+    --danger:#C0392B; --danger-bg:rgba(192,57,43,0.07);
+  }
+  [data-theme="dark"] {
+    --bg:#141310; --text:#F3F0E8; --subtle:#CFC9BD; --muted:#A6A093; --faint:#6E685E;
+    --line:#2A2823; --surf:#1C1A15; --hover:rgba(255,255,255,0.04); --field:#1B1914;
+    --btn-bg:#F3F0E8; --btn-fg:#141310; --btn-border:#36342C;
+    --accent:#6BA0FF; --accent-bg:rgba(107,160,255,0.14);
+    --green:#62C08D; --green-bg:rgba(98,192,141,0.12);
+    --amber:#E0A93B; --amber-bg:rgba(224,169,59,0.14);
+    --danger:#E8786B; --danger-bg:rgba(232,120,107,0.12);
+  }
+  .lnk { transition: color .25s ease; text-decoration:none; color:inherit; }
+  .lnk:hover { color: var(--accent); }
+  .site-header { position: sticky; top:0; z-index:20; background: color-mix(in srgb, var(--bg) 84%, transparent); backdrop-filter: saturate(140%) blur(10px); -webkit-backdrop-filter: saturate(140%) blur(10px); border-bottom:1px solid var(--line); }
+  .toggle-btn { transition: background .2s ease, border-color .2s ease, color .2s ease; cursor:pointer; background:transparent; }
+  .toggle-btn:hover { border-color: var(--btn-border); background: color-mix(in srgb, var(--text) 6%, transparent); }
+  .field { width:100%; font-family:'Geist',system-ui,sans-serif; font-size:15px; color:var(--text); background:var(--field); border:1px solid var(--line); border-radius:10px; padding:12px 13px; outline:none; transition: border-color .18s ease, box-shadow .18s ease; }
+  .field::placeholder { color:var(--faint); }
+  .field:focus { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent); }
+  .field.err { border-color:var(--danger); }
+  .field.err:focus { box-shadow:0 0 0 3px color-mix(in srgb, var(--danger) 18%, transparent); }
+  .primary-btn { font-family:'Geist',system-ui,sans-serif; font-size:14px; font-weight:600; color:var(--btn-fg); background:var(--btn-bg); border:none; border-radius:10px; padding:11px 18px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; transition: opacity .2s ease, transform .06s ease; }
+  .primary-btn:hover { opacity:.9; } .primary-btn:active { transform:translateY(1px); }
+  .primary-btn:disabled { opacity:.5; cursor:not-allowed; }
+  .ghost-btn { font-family:'Geist',system-ui,sans-serif; font-size:14px; font-weight:500; color:var(--subtle); background:transparent; border:1px solid var(--btn-border); border-radius:10px; padding:10px 16px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; transition: border-color .2s ease, color .2s ease, background .2s ease; }
+  .ghost-btn:hover { border-color:var(--accent); color:var(--accent); background:var(--hover); }
+  .danger-solid { font-family:'Geist',system-ui,sans-serif; font-size:14px; font-weight:600; color:#fff; background:var(--danger); border:none; border-radius:10px; padding:11px 18px; cursor:pointer; transition: opacity .2s ease; }
+  [data-theme="dark"] .danger-solid { color:#1A1410; } .danger-solid:hover { opacity:.9; }
+  .act { font-family:'Geist',system-ui,sans-serif; font-size:13px; font-weight:500; color:var(--muted); background:transparent; border:1px solid transparent; border-radius:8px; padding:6px 11px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition: color .18s ease, background .18s ease; }
+  .act:hover { color:var(--danger); background:var(--danger-bg); }
+  .act svg { width:15px; height:15px; }
+  .row { transition: background .18s ease; }
+  .row:hover { background:var(--hover); }
+  .roleseg { display:inline-flex; background:var(--field); border:1px solid var(--line); border-radius:9px; padding:3px; gap:2px; }
+  .roleseg button { font-family:'Geist',system-ui,sans-serif; font-size:13px; font-weight:500; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; }
+  .avatar { width:36px; height:36px; flex-shrink:0; border-radius:50%; background:var(--surf); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:600; color:var(--muted); }
+  .spinner { width:26px; height:26px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--accent); animation:spin .7s linear infinite; }
+  .spinner.sm { width:15px; height:15px; border-width:2px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .seg { display:inline-flex; background:var(--surf); border:1px solid var(--line); border-radius:9px; padding:3px; gap:2px; box-shadow:0 4px 14px rgba(0,0,0,0.08); }
+  .seg button { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); background:transparent; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; transition: background .18s ease, color .18s ease; }
+  .seg button[data-on="true"] { background:var(--field); color:var(--text); box-shadow:0 1px 2px rgba(0,0,0,0.05); }
+  .overlay { position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:24px; background:color-mix(in srgb, #000 38%, transparent); animation:fade .15s ease; }
+  @keyframes fade { from { opacity:0; } }
+  @keyframes pop { from { opacity:0; transform:translateY(8px) scale(.98); } }
+  @keyframes toastIn { from { opacity:0; transform:translateX(16px); } }
+  @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } }
+  .toast:hover { border-color: color-mix(in srgb, var(--text) 18%, var(--line)); }
+  .toast:hover .toast-x { opacity:1; color:var(--muted); }
+  a:focus-visible, button:focus-visible, .field:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius:6px; }
+  @media (prefers-reduced-motion: reduce) { .spinner{animation:none;} .overlay,.toast,.invite{animation:none;} }
+</style>
+</helmet>
+
+<div data-theme="{{ theme }}" style="background:var(--bg); color:var(--text); min-height:100vh; font-family:'Geist',system-ui,sans-serif; -webkit-font-smoothing:antialiased; display:flex; flex-direction:column;">
+
+  <!-- ===== SHELL HEADER ===== -->
+  <header class="site-header">
+    <div style="max-width:1080px; margin:0 auto; padding:18px clamp(20px,5vw,28px); display:flex; align-items:center; justify-content:space-between; gap:20px;">
+      <div style="display:flex; align-items:center; gap:clamp(18px,4vw,30px);">
+        <a class="lnk" href="/" style="font-size:15px; font-weight:600; letter-spacing:-0.01em;">Akli Aissat</a>
+        <nav aria-label="Admin" style="display:flex; align-items:center; gap:22px; font-size:14px; color:var(--muted);">
+          <a class="lnk" href="#">Recipes</a>
+          <a class="lnk" href="#" aria-current="page" style="color:var(--text); font-weight:500;">Users</a>
+        </nav>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <span style="font-size:13px; color:var(--muted);">{{ email }}</span>
+        <button class="ghost-btn" style="padding:7px 13px; font-size:13px;" onClick="{{ logout }}">Log out</button>
+        <button class="toggle-btn" onClick="{{ toggle }}" aria-label="{{ toggleLabel }}" title="{{ toggleLabel }}" style="display:inline-flex; width:32px; height:32px; align-items:center; justify-content:center; font-size:13px; color:var(--text); border:1px solid var(--btn-border); border-radius:50%;">{{ toggleIcon }}</button>
+      </div>
+    </div>
+  </header>
+
+  <main style="flex:1; max-width:1080px; width:100%; margin:0 auto; padding:clamp(32px,5vw,52px) clamp(20px,5vw,28px) 64px;">
+
+    <!-- page header -->
+    <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; justify-content:space-between; margin-bottom:30px;">
+      <div>
+        <h1 style="font-size:clamp(28px,4vw,34px); font-weight:600; letter-spacing:-0.025em; margin:0 0 6px;">Users</h1>
+        <p style="font-size:14.5px; color:var(--muted); margin:0;">{{ subtitle }}</p>
+      </div>
+      <sc-if value="{{ showInviteButton }}" hint-placeholder-val="{{ true }}">
+        <button class="primary-btn" onClick="{{ openInvite }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="22" y1="11" x2="16" y2="11"></line></svg>
+          Invite user
+        </button>
+      </sc-if>
+    </div>
+
+    <!-- ===== INVITE FORM ===== -->
+    <sc-if value="{{ inviteOpen }}" hint-placeholder-val="{{ false }}">
+      <div class="invite" style="border:1px solid var(--line); border-radius:16px; background:var(--surf); padding:clamp(18px,3vw,24px); margin-bottom:24px; animation:slideDown .2s ease;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px;">
+          <h2 style="font-size:17px; font-weight:600; letter-spacing:-0.015em; margin:0;">Invite a user</h2>
+          <button class="lnk" onClick="{{ cancelInvite }}" aria-label="Close" style="background:transparent; border:none; color:var(--faint); cursor:pointer; font-size:14px; line-height:1; padding:4px;">✕</button>
+        </div>
+        <form onSubmit="{{ sendInvite }}" novalidate="true" style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start;">
+          <div style="flex:1; min-width:240px;">
+            <label class="flabel" for="inv-email" style="font-size:13px; font-weight:500; color:var(--subtle); display:block; margin-bottom:7px;">Email address</label>
+            <input id="inv-email" class="field {{ emailErrClass }}" type="email" autocomplete="off" placeholder="name@example.com" value="{{ inviteEmail }}" onInput="{{ onInviteEmail }}">
+            <sc-if value="{{ hasInviteError }}" hint-placeholder-val="{{ false }}">
+              <div role="alert" style="display:flex; align-items:center; gap:7px; margin-top:8px; font-size:13px; color:var(--danger);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                {{ inviteError }}
+              </div>
+            </sc-if>
+          </div>
+          <div>
+            <span class="flabel" style="font-size:13px; font-weight:500; color:var(--subtle); display:block; margin-bottom:7px;">Role</span>
+            <div class="roleseg" role="group" aria-label="Role">
+              <button type="button" style="background:{{ contribBg }}; color:{{ contribFg }};" onClick="{{ pickContributor }}">Contributor</button>
+              <button type="button" style="background:{{ adminBg }}; color:{{ adminFg }};" onClick="{{ pickAdmin }}">Admin</button>
+            </div>
+          </div>
+          <div style="align-self:flex-start;">
+            <span aria-hidden="true" style="display:block; font-size:13px; margin-bottom:7px; height:18px;">&nbsp;</span>
+            <div style="display:flex; gap:10px;">
+              <button class="ghost-btn" type="button" onClick="{{ cancelInvite }}">Cancel</button>
+              <button class="primary-btn" type="submit" disabled="{{ sendDisabled }}">
+                <sc-if value="{{ inviteSending }}" hint-placeholder-val="{{ false }}"><span class="spinner sm" aria-hidden="true"></span></sc-if>
+                {{ sendLabel }}
+              </button>
+            </div>
+          </div>
+        </form>
+        <p style="font-size:12.5px; color:var(--faint); margin:14px 0 0; line-height:1.5;">{{ roleHint }}</p>
+      </div>
+    </sc-if>
+
+    <!-- ===== LIST ===== -->
+    <sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+      <div style="border:1px solid var(--line); border-radius:16px; overflow:hidden; background:var(--field);">
+        <sc-for list="{{ users }}" as="u" hint-placeholder-count="4">
+          <div class="row" style="display:flex; flex-wrap:wrap; gap:14px 18px; align-items:center; justify-content:space-between; padding:16px clamp(16px,2.5vw,22px); border-top:1px solid var(--line);">
+            <div style="display:flex; align-items:center; gap:13px; min-width:0;">
+              <span class="avatar">{{ u.initial }}</span>
+              <div style="min-width:0;">
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                  <span style="font-size:15px; font-weight:500; color:var(--text); word-break:break-word;">{{ u.email }}</span>
+                  <sc-if value="{{ u.isSelf }}" hint-placeholder-val="{{ false }}"><span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); background:var(--surf); border:1px solid var(--line); padding:2px 7px; border-radius:5px;">You</span></sc-if>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px 18px; flex-wrap:wrap;">
+              <span style="display:inline-flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase; padding:4px 10px; border-radius:999px; background:{{ u.roleBg }}; color:{{ u.roleFg }};">{{ u.role }}</span>
+              <span style="display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--muted); min-width:96px;"><span style="width:6px; height:6px; border-radius:50%; background:{{ u.statusFg }};"></span>{{ u.status }}</span>
+              <div style="width:84px; display:flex; justify-content:flex-end;">
+                <sc-if value="{{ u.removable }}" hint-placeholder-val="{{ true }}">
+                  <button class="act" onClick="{{ u.onRemove }}" title="Remove user">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path></svg>Remove
+                  </button>
+                </sc-if>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- ===== LOADING ===== -->
+    <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+      <div style="border:1px solid var(--line); border-radius:16px; padding:clamp(56px,9vw,92px) 24px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="spinner" aria-hidden="true"></div>
+        <p style="font-size:14px; color:var(--muted); margin:0;">Loading users…</p>
+      </div>
+    </sc-if>
+
+    <!-- ===== ERROR ===== -->
+    <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+      <div style="border:1px solid color-mix(in srgb, var(--danger) 30%, var(--line)); background:var(--danger-bg); border-radius:16px; padding:clamp(48px,8vw,80px) 24px; text-align:center; display:flex; flex-direction:column; align-items:center;">
+        <div style="width:52px; height:52px; border-radius:14px; background:var(--field); border:1px solid color-mix(in srgb, var(--danger) 30%, var(--line)); display:flex; align-items:center; justify-content:center; margin-bottom:20px; color:var(--danger);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        </div>
+        <h2 style="font-size:20px; font-weight:600; letter-spacing:-0.02em; margin:0 0 8px;">Couldn't load users</h2>
+        <p style="font-size:14.5px; line-height:1.6; color:var(--muted); margin:0 0 24px; max-width:38ch;">Something went wrong reaching the server. Check your connection and try again.</p>
+        <button class="ghost-btn" onClick="{{ retry }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>
+          Retry
+        </button>
+      </div>
+    </sc-if>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer style="border-top:1px solid var(--line);">
+    <div style="max-width:1080px; margin:0 auto; padding:22px clamp(20px,5vw,28px); display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;">
+      <span style="font-size:12.5px; color:var(--faint);">akli.dev admin</span>
+      <span style="font-size:12.5px; color:var(--faint);">Signed in as {{ email }}</span>
+    </div>
+  </footer>
+
+  <!-- ===== REMOVE DIALOG ===== -->
+  <sc-if value="{{ removeOpen }}" hint-placeholder-val="{{ false }}">
+    <div class="overlay" role="dialog" aria-modal="true" aria-labelledby="rm-title" onClick="{{ cancelRemove }}">
+      <div onClick="{{ stop }}" style="width:100%; max-width:430px; background:var(--bg); border:1px solid var(--line); border-radius:18px; padding:26px; box-shadow:0 24px 60px rgba(0,0,0,0.28); animation:pop .18s ease;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+          <div style="width:38px; height:38px; flex-shrink:0; border-radius:10px; background:var(--danger-bg); display:flex; align-items:center; justify-content:center; color:var(--danger);">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path></svg>
+          </div>
+          <h2 id="rm-title" style="font-size:18px; font-weight:600; letter-spacing:-0.02em; margin:0;">Remove user</h2>
+        </div>
+        <p style="font-size:14.5px; line-height:1.6; color:var(--subtle); margin:0 0 24px;">Remove <strong style="color:var(--text);">{{ removeEmail }}</strong>? They will lose access immediately. This can't be undone.</p>
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button class="ghost-btn" onClick="{{ cancelRemove }}">Cancel</button>
+          <button class="danger-solid" onClick="{{ confirmRemove }}">Remove user</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===== TOASTS ===== -->
+  <div style="position:fixed; bottom:18px; right:18px; z-index:80; display:flex; flex-direction:column; gap:10px; max-width:340px;">
+    <sc-for list="{{ toasts }}" as="t" hint-placeholder-count="0">
+      <button class="toast" type="button" aria-label="Dismiss notification" onClick="{{ t.dismiss }}" style="display:flex; align-items:center; gap:11px; width:100%; text-align:left; background:var(--bg); border:1px solid var(--line); border-radius:11px; padding:12px 15px; box-shadow:0 12px 30px rgba(0,0,0,0.16); animation:toastIn .2s ease; cursor:pointer; font-family:inherit;">
+        <span aria-hidden="true" style="width:18px; height:18px; flex-shrink:0; border-radius:50%; background:{{ t.dot }}; color:{{ t.accent }}; display:inline-flex; align-items:center; justify-content:center; font-size:11px; line-height:1;">{{ t.icon }}</span>
+        <span style="font-size:13.5px; line-height:1.45; color:var(--subtle); flex:1;">{{ t.msg }}</span>
+        <span class="toast-x" aria-hidden="true" style="flex-shrink:0; color:var(--faint); font-size:12px; line-height:1; opacity:.5; transition:opacity .18s ease, color .18s ease;">✕</span>
+      </button>
+    </sc-for>
+  </div>
+
+  <!-- preview switcher (design-time only) -->
+  <div style="position:fixed; bottom:18px; left:18px; z-index:30;">
+    <div class="seg" role="group" aria-label="Preview state">
+      <button data-on="{{ isList }}" onClick="{{ vList }}">List</button>
+      <button data-on="{{ isLoading }}" onClick="{{ vLoading }}">Loading</button>
+      <button data-on="{{ isError }}" onClick="{{ vError }}">Error</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  state = {
+    theme: 'light',
+    view: 'list',              // list | loading | error
+    users: [
+      { id: 1, email: 'akli@akli.dev', role: 'Admin', status: 'Confirmed', self: true },
+      { id: 2, email: 'sam.rivera@gmail.com', role: 'Contributor', status: 'Confirmed', self: false },
+      { id: 3, email: 'j.okafor@outlook.com', role: 'Contributor', status: 'Pending', self: false },
+      { id: 4, email: 'mei.tanaka@proton.me', role: 'Admin', status: 'Confirmed', self: false }
+    ],
+    invite: { open: false, email: '', role: 'Contributor', error: '', sending: false },
+    removeId: null,
+    toasts: []
+  };
+
+  email = 'akli@akli.dev';
+  _toastSeq = 0; _timers = [];
+
+  componentDidMount() {
+    try {
+      const saved = localStorage.getItem('akli-theme');
+      if (saved === 'light' || saved === 'dark') this.setState({ theme: saved });
+      else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) this.setState({ theme: 'dark' });
+    } catch (e) {}
+  }
+  componentWillUnmount() { this._timers.forEach(clearTimeout); }
+  later(fn, ms) { const t = setTimeout(fn, ms); this._timers.push(t); return t; }
+
+  toggle = () => {
+    this.setState(s => {
+      const theme = s.theme === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('akli-theme', theme); } catch (e) {}
+      return { theme };
+    });
+  };
+
+  toast(type, msg) {
+    const id = ++this._toastSeq;
+    this.setState(s => ({ toasts: s.toasts.concat([{ id, type, msg }]) }));
+    this.later(() => this.dismiss(id), 3600);
+  }
+  dismiss = (id) => this.setState(s => ({ toasts: s.toasts.filter(t => t.id !== id) }));
+
+  // ---- invite ----
+  openInvite = () => this.setState({ invite: { open: true, email: '', role: 'Contributor', error: '', sending: false } });
+  cancelInvite = () => this.setState(s => ({ invite: Object.assign({}, s.invite, { open: false, sending: false }) }));
+  onInviteEmail = (e) => this.setState(s => ({ invite: Object.assign({}, s.invite, { email: e.target.value, error: '' }) }));
+  pickRole = (role) => this.setState(s => ({ invite: Object.assign({}, s.invite, { role }) }));
+
+  sendInvite = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const inv = this.state.invite;
+    const email = inv.email.trim();
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!re.test(email)) return this.setState(s => ({ invite: Object.assign({}, s.invite, { error: 'Enter a valid email address.' }) }));
+    if (this.state.users.some(u => u.email.toLowerCase() === email.toLowerCase()))
+      return this.setState(s => ({ invite: Object.assign({}, s.invite, { error: 'A user with this email already exists.' }) }));
+
+    this.setState(s => ({ invite: Object.assign({}, s.invite, { sending: true, error: '' }) }));
+    this.later(() => {
+      this.setState(s => ({
+        users: s.users.concat([{ id: Date.now(), email, role: inv.role, status: 'Pending', self: false }]),
+        invite: { open: false, email: '', role: 'Contributor', error: '', sending: false }
+      }));
+      this.toast('success', 'Invite sent to ' + email + '.');
+    }, 1100);
+  };
+
+  // ---- remove ----
+  askRemove = (id) => this.setState({ removeId: id });
+  cancelRemove = () => this.setState({ removeId: null });
+  confirmRemove = () => {
+    const u = this.state.users.find(x => x.id === this.state.removeId);
+    this.setState(s => ({ users: s.users.filter(x => x.id !== s.removeId), removeId: null }));
+    if (u) this.toast('success', 'User ' + u.email + ' removed.');
+  };
+  stop = (e) => { if (e && e.stopPropagation) e.stopPropagation(); };
+  retry = () => { this.setState({ view: 'loading' }); this.later(() => this.setState({ view: 'list' }), 1000); };
+  logout = () => this.toast('info', 'Signing out…');
+
+  vList = () => this.setState({ view: 'list' });
+  vLoading = () => this.setState({ view: 'loading' });
+  vError = () => this.setState({ view: 'error' });
+
+  renderVals() {
+    const isDark = this.state.theme === 'dark';
+    const view = this.state.view;
+    const inv = this.state.invite;
+
+    const users = this.state.users.map(u => ({
+      email: u.email,
+      initial: (u.email[0] || '?').toUpperCase(),
+      role: u.role, isSelf: u.self,
+      roleBg: u.role === 'Admin' ? 'var(--accent-bg)' : 'var(--surf)',
+      roleFg: u.role === 'Admin' ? 'var(--accent)' : 'var(--muted)',
+      status: u.status,
+      statusFg: u.status === 'Confirmed' ? 'var(--green)' : 'var(--amber)',
+      removable: !u.self,
+      onRemove: () => this.askRemove(u.id)
+    }));
+
+    const tStyle = { success:{accent:'var(--green)',dot:'var(--green-bg)',icon:'\u2713'}, error:{accent:'var(--danger)',dot:'var(--danger-bg)',icon:'\u2715'}, info:{accent:'var(--accent)',dot:'color-mix(in srgb, var(--accent) 14%, transparent)',icon:'\u203a'} };
+    const toasts = this.state.toasts.map(t => Object.assign({}, tStyle[t.type] || tStyle.info, { msg: t.msg, dismiss: () => this.dismiss(t.id) }));
+
+    const rmUser = this.state.users.find(x => x.id === this.state.removeId);
+    const count = this.state.users.length;
+
+    return {
+      theme: this.state.theme, email: this.email,
+      toggle: this.toggle, toggleIcon: isDark ? '\u2600' : '\u263e',
+      toggleLabel: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+      logout: this.logout,
+
+      subtitle: count + (count === 1 ? ' person has access' : ' people have access'),
+      isList: view === 'list', isLoading: view === 'loading', isError: view === 'error',
+      showInviteButton: view === 'list' && !inv.open,
+      users,
+
+      openInvite: this.openInvite, cancelInvite: this.cancelInvite,
+      inviteOpen: inv.open && view === 'list',
+      inviteEmail: inv.email, onInviteEmail: this.onInviteEmail,
+      hasInviteError: !!inv.error, inviteError: inv.error,
+      emailErrClass: inv.error ? 'err' : '',
+      roleContributor: inv.role === 'Contributor', roleAdmin: inv.role === 'Admin',
+      contribBg: inv.role === 'Contributor' ? 'var(--accent)' : 'transparent',
+      contribFg: inv.role === 'Contributor' ? (isDark ? '#11151f' : '#fff') : 'var(--muted)',
+      adminBg: inv.role === 'Admin' ? 'var(--accent)' : 'transparent',
+      adminFg: inv.role === 'Admin' ? (isDark ? '#11151f' : '#fff') : 'var(--muted)',
+      pickContributor: () => this.pickRole('Contributor'), pickAdmin: () => this.pickRole('Admin'),
+      inviteSending: inv.sending, sendDisabled: inv.sending,
+      sendLabel: inv.sending ? 'Sending…' : 'Send invite',
+      roleHint: inv.role === 'Admin'
+        ? 'Admins can manage recipes and users, including inviting and removing people.'
+        : 'Contributors can create and manage recipes, but can\u2019t manage users.',
+      sendInvite: this.sendInvite,
+
+      removeOpen: !!rmUser, removeEmail: rmUser ? rmUser.email : '',
+      cancelRemove: this.cancelRemove, confirmRemove: this.confirmRemove, stop: this.stop,
+      retry: this.retry,
+      toasts,
+
+      vList: this.vList, vLoading: this.vLoading, vError: this.vError
+    };
+  }
+}
+</script>
+</body>
+</html>

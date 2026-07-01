@@ -1,0 +1,19 @@
+<!-- @dsCard group="Colors" viewport="700x150" subtitle="Backgrounds, surfaces & borders" name="Surfaces" -->
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; background:var(--bg); color:var(--text); font-family:var(--font-sans); padding:22px; }
+  .row { display:flex; gap:14px; flex-wrap:wrap; }
+  .sw { display:flex; flex-direction:column; gap:8px; }
+  .chip { width:148px; height:54px; border-radius:var(--radius-md); border:1px solid var(--line); }
+  .name { font-size:12px; font-weight:600; }
+  .hex { font-family:var(--font-mono); font-size:11px; color:var(--muted); }
+</style></head>
+<body>
+  <div class="row">
+    <div class="sw"><div class="chip" style="background:var(--bg);"></div><div><div class="name">bg — paper</div><div class="hex">--color-bg</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--surf);"></div><div><div class="name">surface</div><div class="hex">--color-surface</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--field);"></div><div><div class="name">field</div><div class="hex">--color-field</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--bg); border:2px solid var(--line);"></div><div><div class="name">border</div><div class="hex">--color-border</div></div></div>
+  </div>
+</body></html>

@@ -1,0 +1,19 @@
+<!-- @dsCard group="Colors" viewport="700x170" subtitle="4-step text hierarchy" name="Text" -->
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; background:var(--bg); font-family:var(--font-sans); padding:22px; }
+  .stack { display:flex; flex-direction:column; gap:10px; }
+  .line { display:flex; align-items:baseline; gap:14px; }
+  .swatch { width:18px; height:18px; border-radius:5px; border:1px solid var(--line); flex-shrink:0; }
+  .label { font-size:17px; font-weight:600; width:230px; }
+  .tok { font-family:var(--font-mono); font-size:11.5px; color:var(--muted); }
+</style></head>
+<body>
+  <div class="stack">
+    <div class="line"><span class="swatch" style="background:var(--text);"></span><span class="label" style="color:var(--text);">Strong — headings</span><span class="tok">--color-text-strong</span></div>
+    <div class="line"><span class="swatch" style="background:var(--subtle);"></span><span class="label" style="color:var(--subtle);">Body — long-form</span><span class="tok">--color-text</span></div>
+    <div class="line"><span class="swatch" style="background:var(--muted);"></span><span class="label" style="color:var(--muted);">Muted — secondary</span><span class="tok">--color-text-muted</span></div>
+    <div class="line"><span class="swatch" style="background:var(--faint);"></span><span class="label" style="color:var(--faint);">Faint — eyebrows</span><span class="tok">--color-text-faint</span></div>
+  </div>
+</body></html>

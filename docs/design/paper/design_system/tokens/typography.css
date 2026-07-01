@@ -1,0 +1,49 @@
+/* ── Typography ───────────────────────────────────────────────
+   Two families only:
+     • Geist — everything UI and display (sans).
+     • JetBrains Mono — eyebrows, meta lines, code, tags, numerics.
+   Sizes lean on clamp() at the display end for fluid headings;
+   the fixed scale below covers body and UI.
+   ──────────────────────────────────────────────────────────── */
+
+:root {
+  --font-sans: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Font sizes */
+  --font-size-xs:   0.6875rem; /* 11px — mono eyebrows, tags */
+  --font-size-sm:   0.8125rem; /* 13px — meta, labels */
+  --font-size-base: 0.9375rem; /* 15px — UI text, inputs */
+  --font-size-md:   1rem;      /* 16px — list body */
+  --font-size-lg:   1.125rem;  /* 18px — long-form body */
+  --font-size-xl:   1.3125rem; /* 21px — lead/intro */
+  --font-size-2xl:  1.5rem;    /* 24px */
+  --font-size-3xl:  1.8125rem; /* 29px — card/section titles */
+  --font-size-4xl:  2.875rem;  /* 46px — page titles */
+  --font-size-5xl:  3.5rem;    /* 56px — hero */
+
+  /* Fluid display sizes (hero / page titles) */
+  --font-display-hero:  clamp(40px, 7vw, 56px);
+  --font-display-title: clamp(32px, 5.6vw, 46px);
+  --font-display-h2:    clamp(23px, 3.2vw, 27px);
+
+  /* Weights — Geist */
+  --font-weight-normal:   400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+
+  /* Line heights */
+  --line-height-tight:   1.08;  /* display headings */
+  --line-height-snug:    1.25;  /* section headings */
+  --line-height-normal:  1.5;   /* UI text */
+  --line-height-relaxed: 1.65;  /* body */
+  --line-height-loose:   1.75;  /* long-form article body */
+
+  /* Letter spacing */
+  --tracking-tight:  -0.03em;   /* hero / page titles */
+  --tracking-snug:   -0.02em;   /* section + card titles */
+  --tracking-normal: 0;
+  --tracking-eyebrow: 0.16em;   /* mono uppercase eyebrows */
+  --tracking-meta:    0.04em;   /* mono meta lines */
+}

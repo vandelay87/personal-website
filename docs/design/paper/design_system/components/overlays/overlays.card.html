@@ -1,0 +1,27 @@
+<!-- @dsCard group="Components" viewport="700x300" subtitle="ConfirmDialog — neutral & danger" name="Overlays" -->
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body { margin:0; background:var(--surf); font-family:var(--font-sans); padding:24px; display:flex; gap:20px; flex-wrap:wrap; }
+  .dlg { width:300px; background:var(--bg); border:1px solid var(--line); border-radius:var(--radius-2xl); padding:24px; box-shadow:var(--shadow-xl); }
+  .hd { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .ic { width:36px; height:36px; border-radius:var(--radius-md); background:var(--danger-bg); display:flex; align-items:center; justify-content:center; color:var(--danger); font-size:17px; }
+  h2 { font-size:17px; font-weight:600; letter-spacing:-0.02em; margin:0; color:var(--text); }
+  p { font-size:14px; line-height:1.6; color:var(--subtle); margin:0 0 22px; }
+  .acts { display:flex; justify-content:flex-end; gap:10px; }
+  .ghost { font-size:13.5px; font-weight:500; color:var(--text); background:transparent; border:1px solid var(--btn-border); border-radius:var(--radius-md); padding:9px 15px; }
+  .solid { font-size:13.5px; font-weight:600; color:var(--btn-fg); background:var(--btn-bg); border:none; border-radius:var(--radius-md); padding:10px 15px; }
+  .ddanger { font-size:13.5px; font-weight:600; color:#fff; background:var(--danger); border:none; border-radius:var(--radius-md); padding:10px 15px; }
+</style></head>
+<body>
+  <div class="dlg">
+    <h2 style="margin-bottom:10px;">Discard this draft?</h2>
+    <p>This draft and everything in it will be permanently deleted.</p>
+    <div class="acts"><button class="ghost">Keep editing</button><button class="solid">Discard</button></div>
+  </div>
+  <div class="dlg">
+    <div class="hd"><span class="ic">⚠</span><h2>Remove user</h2></div>
+    <p>Remove sam@acme.com? They will lose access immediately.</p>
+    <div class="acts"><button class="ghost">Cancel</button><button class="ddanger">Remove user</button></div>
+  </div>
+</body></html>

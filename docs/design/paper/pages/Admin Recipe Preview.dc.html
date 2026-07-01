@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  :root {
+    --bg:#FBFAF7; --text:#1C1A16; --subtle:#3a3631; --muted:#6F6961; --faint:#9a938a;
+    --line:#ECE6DA; --surf:#F4F1EA; --hover:rgba(0,0,0,0.022); --field:#FFFFFF;
+    --btn-bg:#1C1A16; --btn-fg:#FBFAF7; --btn-border:#E0DACE;
+    --accent:#1F66E0;
+    --green:#1F8A5B; --green-bg:rgba(31,138,91,0.10);
+    --amber:#A66E0A; --amber-bg:rgba(194,129,12,0.12);
+    --danger:#C0392B;
+  }
+  [data-theme="dark"] {
+    --bg:#141310; --text:#F3F0E8; --subtle:#CFC9BD; --muted:#A6A093; --faint:#6E685E;
+    --line:#2A2823; --surf:#1C1A15; --hover:rgba(255,255,255,0.04); --field:#1B1914;
+    --btn-bg:#F3F0E8; --btn-fg:#141310; --btn-border:#36342C;
+    --accent:#6BA0FF;
+    --green:#62C08D; --green-bg:rgba(98,192,141,0.14);
+    --amber:#E0A93B; --amber-bg:rgba(224,169,59,0.16);
+    --danger:#E8786B;
+  }
+  .lnk { transition: color .25s ease; text-decoration:none; color:inherit; }
+  .lnk:hover { color: var(--accent); }
+  .lnk svg, .banner-btn svg { transition: transform .25s ease; }
+  .lnk:hover .ic-left, .banner-btn:hover .ic-left { transform: translateX(-3px); }
+  .lnk:hover .ic-upright, .banner-btn:hover .ic-upright { transform: translate(3px,-3px); }
+  .toggle-btn { transition: background .2s ease, border-color .2s ease, color .2s ease; cursor:pointer; background:transparent; }
+  .toggle-btn:hover { border-color: var(--btn-border); background: color-mix(in srgb, var(--text) 6%, transparent); }
+  .banner-btn { font-family:'Geist',system-ui,sans-serif; font-size:13px; font-weight:600; border-radius:9px; padding:8px 15px; cursor:pointer; white-space:nowrap; transition: opacity .2s ease, border-color .2s ease, color .2s ease, background .2s ease; text-decoration:none; display:inline-flex; align-items:center; gap:7px; }
+  .banner-solid { color:var(--btn-fg); background:var(--btn-bg); border:1px solid var(--btn-bg); }
+  .banner-solid:hover { opacity:.9; }
+  .banner-ghost { color:var(--text); background:transparent; border:1px solid var(--btn-border); }
+  .banner-ghost:hover { border-color:var(--accent); color:var(--accent); }
+  .tag-chip { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.04em; color:var(--muted); border:1px solid var(--line); background:var(--surf); padding:5px 10px; border-radius:7px; }
+  .ing { display:flex; align-items:center; gap:13px; width:100%; text-align:left; background:transparent; border:none; border-top:1px solid var(--line); padding:11px 4px; cursor:pointer; font-family:inherit; }
+  .ing:first-of-type { border-top:none; }
+  .ing-box { width:17px; height:17px; border:1.5px solid var(--btn-border); border-radius:5px; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:transparent; font-size:10px; line-height:1; transition: background .18s ease, border-color .18s ease, color .18s ease; }
+  .ing-name { flex:1; font-size:15px; color:var(--text); line-height:1.35; }
+  .ing-qty { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); flex-shrink:0; }
+  .ing[data-checked="true"] .ing-box { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .ing[data-checked="true"] .ing-name { text-decoration:line-through; color:var(--faint); }
+  .ing[data-checked="true"] .ing-qty { color:var(--faint); }
+  .spinner { width:26px; height:26px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--accent); animation:spin .7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .seg { display:inline-flex; background:var(--surf); border:1px solid var(--line); border-radius:9px; padding:3px; gap:2px; box-shadow:0 4px 14px rgba(0,0,0,0.10); }
+  .seg button { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); background:transparent; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; transition: background .18s ease, color .18s ease; }
+  .seg button[data-on="true"] { background:var(--field); color:var(--text); box-shadow:0 1px 2px rgba(0,0,0,0.05); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius:6px; }
+  .recipe-grid { display:grid; grid-template-columns:1fr; gap:clamp(36px,5vw,52px); }
+  @media (min-width:780px) { .recipe-grid { grid-template-columns:296px 1fr; gap:clamp(44px,5vw,72px); align-items:start; } .recipe-aside { position:sticky; top:96px; } }
+  @media (prefers-reduced-motion: reduce) { .spinner{animation:none;} }
+</style>
+</helmet>
+
+<div data-theme="{{ theme }}" style="background:var(--bg); color:var(--text); min-height:100vh; font-family:'Geist',system-ui,sans-serif; -webkit-font-smoothing:antialiased; display:flex; flex-direction:column;">
+
+  <!-- ===== STATUS BANNER ===== -->
+  <sc-if value="{{ isRecipe }}" hint-placeholder-val="{{ true }}">
+  <div role="region" aria-label="Preview status" style="position:sticky; top:0; z-index:30; background:{{ bannerBg }}; border-bottom:1px solid {{ bannerBorder }}; backdrop-filter:saturate(140%) blur(10px); -webkit-backdrop-filter:saturate(140%) blur(10px);">
+    <div style="max-width:1080px; margin:0 auto; padding:13px clamp(20px,5vw,28px); display:flex; flex-wrap:wrap; align-items:center; gap:12px 16px; justify-content:space-between;">
+      <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+        <a class="lnk" href="#" onClick="{{ onBack }}" style="display:inline-flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.03em; color:var(--muted);">
+          <svg class="ic-left" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+          Recipes
+        </a>
+        <span aria-hidden="true" style="width:1px; height:16px; background:{{ bannerBorder }};"></span>
+        <span aria-hidden="true" style="display:inline-flex; color:{{ bannerFg }};">
+          <sc-if value="{{ isPublished }}" hint-placeholder-val="{{ false }}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+          <sc-if value="{{ isDraft }}" hint-placeholder-val="{{ true }}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></sc-if>
+        </span>
+        <span style="font-size:14px; font-weight:500; color:var(--text);">{{ bannerText }}</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:9px;">
+        <a class="banner-btn banner-ghost" href="#" onClick="{{ onEdit }}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"></path></svg>
+          Edit
+        </a>
+        <sc-if value="{{ isDraft }}" hint-placeholder-val="{{ true }}">
+          <button class="banner-btn banner-solid" onClick="{{ onPublish }}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg>
+            Publish
+          </button>
+        </sc-if>
+        <sc-if value="{{ isPublished }}" hint-placeholder-val="{{ false }}">
+          <a class="banner-btn banner-solid" href="https://akli.dev/recipes/mild-thai-style-basa-coconut-rice" target="_blank" rel="noopener">
+            View public page
+            <svg class="ic-upright" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"></path><path d="M7 7h10v10"></path></svg>
+          </a>
+        </sc-if>
+        <button class="toggle-btn" onClick="{{ toggle }}" aria-label="{{ toggleLabel }}" title="{{ toggleLabel }}" style="display:inline-flex; width:32px; height:32px; align-items:center; justify-content:center; font-size:13px; color:var(--text); border:1px solid var(--btn-border); border-radius:50%;">{{ toggleIcon }}</button>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ===== PUBLIC RECIPE (visitor view) ===== -->
+  <main style="flex:1;">
+
+    <!-- LOADING -->
+    <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:680px; margin:0 auto; padding:clamp(80px,16vw,160px) 24px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="spinner" aria-hidden="true"></div>
+        <p style="font-size:14px; color:var(--muted); margin:0;">Loading preview…</p>
+      </div>
+    </sc-if>
+
+    <!-- NOT FOUND -->
+    <sc-if value="{{ isNotFound }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:520px; margin:0 auto; padding:clamp(72px,13vw,140px) 24px; text-align:center; display:flex; flex-direction:column; align-items:center;">
+        <div style="width:54px; height:54px; border-radius:14px; background:var(--surf); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; margin-bottom:22px; color:var(--muted);">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-3.5-3.5"></path><path d="M11 8v3"></path><path d="M11 14h.01"></path></svg>
+        </div>
+        <h1 style="font-size:24px; font-weight:600; letter-spacing:-0.02em; margin:0 0 10px;">Recipe not found</h1>
+        <p style="font-size:15px; line-height:1.6; color:var(--muted); margin:0 0 26px; max-width:38ch;">This recipe may have been deleted, or the link is incorrect.</p>
+        <a class="banner-btn banner-ghost" href="#" onClick="{{ onBack }}" style="font-size:14px; padding:10px 18px;">
+          <svg class="ic-left" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+          Back to recipes
+        </a>
+      </div>
+    </sc-if>
+
+    <!-- RECIPE -->
+    <sc-if value="{{ isRecipe }}" hint-placeholder-val="{{ true }}">
+      <article style="max-width:920px; margin:0 auto; padding:clamp(28px,5vw,48px) 24px clamp(64px,9vw,96px);">
+
+        <figure style="margin:0 0 36px;">
+          <img src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=1100&q=72" alt="One-pot Mild Thai-Style Basa &amp; Coconut Rice" style="display:block; width:100%; height:auto; aspect-ratio:16/10; object-fit:cover; border-radius:16px; border:1px solid var(--line);">
+        </figure>
+
+        <header style="max-width:680px;">
+          <h1 style="font-size:clamp(32px,5.4vw,46px); font-weight:600; line-height:1.08; letter-spacing:-0.03em; margin:0 0 18px;">Mild Thai-Style Basa &amp; Coconut Rice</h1>
+          <div style="display:flex; flex-wrap:wrap; align-items:center; gap:6px 12px; font-family:'JetBrains Mono',monospace; font-size:12.5px; letter-spacing:0.02em; color:var(--muted); margin-bottom:20px;">
+            <span>27 June 2026</span><span aria-hidden="true" style="color:var(--faint);">·</span>
+            <span>5 min prep</span><span aria-hidden="true" style="color:var(--faint);">·</span>
+            <span>30 min cook</span><span aria-hidden="true" style="color:var(--faint);">·</span>
+            <span>Serves 2</span>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;">
+            <span class="tag-chip">Thai</span><span class="tag-chip">Fish</span><span class="tag-chip">Rice</span><span class="tag-chip">One Pot</span><span class="tag-chip">Coconut</span>
+          </div>
+          <p style="font-size:clamp(17px,2.6vw,19px); line-height:1.7; color:var(--subtle); margin:0;">A comforting Thai-infused rice and fish one pot. Flavour the rice with coconut and fragrant green curry paste, then steam the fish on top for tenderness.</p>
+        </header>
+
+        <div style="height:1px; background:var(--line); margin:clamp(36px,5vw,52px) 0;"></div>
+
+        <div class="recipe-grid">
+          <aside class="recipe-aside">
+            <div style="border:1px solid var(--line); border-radius:16px; background:var(--surf); padding:22px 22px 14px;">
+              <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px;">
+                <h2 style="font-size:18px; font-weight:600; letter-spacing:-0.01em; margin:0;">Ingredients</h2>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--faint);">Serves 2</span>
+              </div>
+              <p style="font-size:12px; color:var(--faint); margin:0 0 12px;">Tap to check off as you go.</p>
+              <div>
+                <sc-for list="{{ ingredients }}" as="ing" hint-placeholder-count="9">
+                  <button class="ing" type="button" data-checked="{{ ing.checked }}" onClick="{{ ing.on }}">
+                    <span class="ing-box">✓</span>
+                    <span class="ing-name">{{ ing.name }}</span>
+                    <span class="ing-qty">{{ ing.qty }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </aside>
+
+          <section>
+            <h2 style="font-size:clamp(22px,3vw,26px); font-weight:600; letter-spacing:-0.02em; margin:0 0 8px;">Method</h2>
+            <p style="font-size:13px; color:var(--faint); font-family:'JetBrains Mono',monospace; margin:0 0 28px;">7 steps</p>
+            <div style="display:flex; flex-direction:column; gap:28px;">
+              <sc-for list="{{ steps }}" as="step" hint-placeholder-count="7">
+                <div style="display:flex; gap:18px;">
+                  <div style="flex-shrink:0; width:34px; height:34px; border-radius:50%; background:var(--surf); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:500; color:var(--accent);">{{ step.num }}</div>
+                  <div style="padding-top:3px; flex:1;">
+                    <sc-for list="{{ step.lines }}" as="line" hint-placeholder-count="2">
+                      <p style="font-size:16.5px; line-height:1.7; color:var(--subtle); margin:0 0 12px;">{{ line }}</p>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </div>
+      </article>
+    </sc-if>
+  </main>
+
+  <!-- ===== PUBLIC FOOTER ===== -->
+  <sc-if value="{{ isRecipe }}" hint-placeholder-val="{{ true }}">
+    <footer style="border-top:1px solid var(--line);">
+      <div style="max-width:1080px; margin:0 auto; padding:clamp(34px,5vw,44px) clamp(20px,5vw,28px); display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;">
+        <nav aria-label="Elsewhere" style="display:flex; flex-direction:column; gap:12px;">
+          <span style="font-size:15px; font-weight:600; color:var(--text);">Elsewhere</span>
+          <div style="display:flex; flex-wrap:wrap; gap:20px; font-size:14px; color:var(--muted);">
+            <a class="lnk" href="https://github.com/vandelay87">GitHub</a>
+            <a class="lnk" href="https://www.linkedin.com/in/akli-aissat-b08119115/">LinkedIn</a>
+            <a class="lnk" href="mailto:akliaissat@outlook.com?subject=Hello">Email</a>
+          </div>
+        </nav>
+        <span style="font-size:13px; font-weight:500; color:var(--muted);">akli.dev</span>
+      </div>
+    </footer>
+  </sc-if>
+
+  <!-- preview switcher (design-time only) -->
+  <div style="position:fixed; bottom:18px; left:18px; z-index:40;">
+    <div class="seg" role="group" aria-label="Preview state">
+      <button data-on="{{ isDraftView }}" onClick="{{ vDraft }}">Unpublished</button>
+      <button data-on="{{ isPublished }}" onClick="{{ vPublished }}">Published</button>
+      <button data-on="{{ isLoading }}" onClick="{{ vLoading }}">Loading</button>
+      <button data-on="{{ isNotFound }}" onClick="{{ vNotFound }}">Not found</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  state = { theme: 'light', view: 'recipe', status: 'draft', checked: {} };
+
+  componentDidMount() {
+    try {
+      const saved = localStorage.getItem('akli-theme');
+      if (saved === 'light' || saved === 'dark') this.setState({ theme: saved });
+      else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) this.setState({ theme: 'dark' });
+    } catch (e) {}
+  }
+
+  toggle = () => {
+    this.setState(s => {
+      const theme = s.theme === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('akli-theme', theme); } catch (e) {}
+      return { theme };
+    });
+  };
+
+  toggleIng = (i) => this.setState(s => { const c = Object.assign({}, s.checked); c[i] = !c[i]; return { checked: c }; });
+
+  onEdit = (e) => { if (e) e.preventDefault(); };
+  onPublish = () => this.setState({ status: 'published' });
+  onBack = (e) => { if (e) e.preventDefault(); };
+
+  vDraft = () => this.setState({ view: 'recipe', status: 'draft' });
+  vPublished = () => this.setState({ view: 'recipe', status: 'published' });
+  vLoading = () => this.setState({ view: 'loading' });
+  vNotFound = () => this.setState({ view: 'notfound' });
+
+  renderVals() {
+    const isDark = this.state.theme === 'dark';
+    const published = this.state.status === 'published';
+    const view = this.state.view;
+
+    const rawIng = [
+      { qty: '8 ml', name: 'Fish sauce' }, { qty: '1', name: 'Red pepper' },
+      { qty: '140 g', name: 'White basmati rice' }, { qty: '50 g', name: 'Solid creamed coconut' },
+      { qty: '2', name: 'Spring onions' }, { qty: '2', name: 'Basa fillets' },
+      { qty: '5 g', name: 'Thai basil' }, { qty: '15 g', name: 'Crispy onions' },
+      { qty: '40 g', name: 'Thai green curry paste' }
+    ];
+    const ingredients = rawIng.map((ing, i) => Object.assign({}, ing, { checked: !!this.state.checked[i], on: () => this.toggleIng(i) }));
+
+    const steps = [
+      { num: '1', lines: ['Boil a kettle.', 'Trim, then slice your spring onions finely.', 'Deseed your pepper and chop into large bite-sized pieces.'] },
+      { num: '2', lines: ['Heat a large, wide-based pan (preferably non-stick with a matching lid) with a drizzle of vegetable oil over a medium heat.', 'Once hot, add the chopped pepper and most of the sliced spring onion with your Thai green curry paste and cook for 2–3 min, until fragrant.'] },
+      { num: '3', lines: ['Dissolve the chopped creamed coconut and fish sauce in 300 ml boiled water.'] },
+      { num: '4', lines: ['Add your basmati rice and coconut stock to the pan with 1 tsp sugar and a generous pinch of salt, and give everything a good mix.', 'Reduce the heat to low, then cook covered for 10 min, until most of the stock has absorbed and the rice is almost cooked.'] },
+      { num: '5', lines: ['Meanwhile, chop your Thai basil finely, including the stalks.'] },
+      { num: '6', lines: ['Once the rice is almost cooked, increase the heat to medium-high and top with your basa fillets. Season with a pinch of salt and pepper.', 'Cook covered for 6–7 min, until the fish is cooked through and tender.'] },
+      { num: '7', lines: ['Transfer the cooked basa to a plate.', 'Add most of the chopped Thai basil to the pan and mix it all together.', 'Serve the basa over the one-pot Thai-style coconut rice.', 'Garnish with the remaining Thai basil and sliced spring onion, then sprinkle over your crispy onions.'] }
+    ];
+
+    return {
+      theme: this.state.theme,
+      toggle: this.toggle, toggleIcon: isDark ? '\u2600' : '\u263e',
+      toggleLabel: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+
+      isLoading: view === 'loading', isNotFound: view === 'notfound', isRecipe: view === 'recipe',
+      isDraft: view === 'recipe' && !published,
+      isPublished: view === 'recipe' && published,
+      isDraftView: view === 'recipe' && !published,
+
+      bannerText: published ? 'This recipe is published.' : 'Preview — this recipe is not yet published.',
+      bannerBg: published ? 'color-mix(in srgb, var(--green) 13%, color-mix(in srgb, var(--bg) 78%, transparent))' : 'color-mix(in srgb, var(--amber) 14%, color-mix(in srgb, var(--bg) 78%, transparent))',
+      bannerBorder: published ? 'color-mix(in srgb, var(--green) 30%, var(--line))' : 'color-mix(in srgb, var(--amber) 30%, var(--line))',
+      bannerFg: published ? 'var(--green)' : 'var(--amber)',
+
+      onEdit: this.onEdit, onPublish: this.onPublish, onBack: this.onBack,
+      ingredients, steps,
+
+      vDraft: this.vDraft, vPublished: this.vPublished, vLoading: this.vLoading, vNotFound: this.vNotFound
+    };
+  }
+}
+</script>
+</body>
+</html>

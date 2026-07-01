@@ -1,0 +1,82 @@
+<!-- @dsCard group="Public site" viewport="1080x760" subtitle="Recipes index — header, hero, filter, grid, footer" name="Public site" -->
+<!-- @startingPoint section="Public site" subtitle="Recipes index screen — full marketing/content layout" viewport="1080x760" -->
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:var(--font-sans); -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:var(--max-w-site); margin:0 auto; padding:0 28px; }
+  /* header */
+  header { border-bottom:1px solid var(--line); }
+  .nav { display:flex; align-items:center; justify-content:space-between; padding:22px 0; }
+  .brand { font-size:15px; font-weight:600; letter-spacing:-0.01em; color:var(--text); text-decoration:none; }
+  .links { display:flex; align-items:center; gap:28px; font-size:14px; color:var(--muted); }
+  .links a { color:inherit; text-decoration:none; }
+  .links a.active { color:var(--text); font-weight:500; }
+  .toggle { width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--btn-border); border-radius:50%; color:var(--text); background:transparent; cursor:pointer; }
+  /* hero */
+  .hero { max-width:var(--max-w-reading); margin:0 auto; padding:96px 28px 48px; }
+  .eyebrow { font-family:var(--font-mono); font-size:12px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--faint); margin-bottom:22px; }
+  h1 { font-size:var(--font-display-hero); font-weight:600; line-height:var(--line-height-tight); letter-spacing:var(--tracking-tight); margin:0 0 22px; }
+  .lead { font-size:var(--font-size-lg); line-height:var(--line-height-relaxed); color:var(--muted); margin:0; max-width:54ch; }
+  /* recipes */
+  .section { padding:24px 28px 96px; max-width:var(--max-w-site); margin:0 auto; }
+  .count { display:flex; align-items:baseline; gap:12px; font-family:var(--font-mono); font-size:12px; letter-spacing:0.06em; color:var(--faint); margin-bottom:18px; }
+  .count .rule { flex:1; height:1px; background:var(--line); }
+  .controls { display:flex; flex-wrap:wrap; align-items:center; gap:14px 12px; margin-bottom:34px; }
+  .search { position:relative; flex:1 1 280px; max-width:420px; }
+  .search input { width:100%; font-family:var(--font-sans); font-size:15px; color:var(--text); background:var(--surf); border:1px solid var(--line); border-radius:var(--radius-full); padding:12px 16px 12px 42px; outline:none; }
+  .search svg { position:absolute; left:15px; top:50%; transform:translateY(-50%); color:var(--faint); }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .chip { font-family:var(--font-mono); font-size:11px; letter-spacing:0.04em; color:var(--muted); border:1px solid var(--line); background:var(--surf); padding:6px 12px; border-radius:var(--radius-sm); cursor:pointer; }
+  .chip.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:26px; }
+  .card { border:1px solid var(--line); border-radius:var(--radius-xl); overflow:hidden; background:var(--bg); text-decoration:none; color:inherit; }
+  .card .img { aspect-ratio:3/2; }
+  .card .body { padding:18px 20px; }
+  .card h3 { font-size:18px; font-weight:600; letter-spacing:-0.02em; margin:0 0 7px; }
+  .card p { font-size:14px; line-height:1.55; color:var(--muted); margin:0 0 14px; }
+  .meta { font-family:var(--font-mono); font-size:11.5px; color:var(--faint); display:flex; gap:12px; flex-wrap:wrap; }
+  /* footer */
+  footer { border-top:1px solid var(--line); }
+  .foot { display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between; padding:40px 0; }
+  .foot .col { display:flex; flex-direction:column; gap:12px; }
+  .foot .lbl { font-size:15px; font-weight:600; }
+  .foot .social { display:flex; gap:20px; font-size:14px; color:var(--muted); }
+  .foot .social a { color:inherit; text-decoration:none; }
+  .foot .dom { font-size:13px; font-weight:500; color:var(--muted); }
+</style></head>
+<body>
+  <header><div class="wrap"><div class="nav">
+    <a class="brand" href="#">Akli Aissat</a>
+    <nav class="links"><a href="#">Apps</a><a class="active" href="#">Recipes</a><a href="#">Blog</a><button class="toggle">☾</button></nav>
+  </div></div></header>
+
+  <section class="hero">
+    <div class="eyebrow">From the Kitchen</div>
+    <h1>Things I keep<br>coming back to.</h1>
+    <p class="lead">A small, growing collection of recipes I cook on repeat — written down so they're easy to make again. Tried, tweaked, and worth the effort.</p>
+  </section>
+
+  <section class="section">
+    <div class="count"><span>6 recipes</span><span class="rule"></span></div>
+    <div class="controls">
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg>
+        <input placeholder="Search recipes…">
+      </div>
+      <div class="chips"><span class="chip active">all</span><span class="chip">Pasta</span><span class="chip">Mains</span><span class="chip">Quick</span><span class="chip">Baking</span></div>
+    </div>
+    <div class="grid">
+      <a class="card"><div class="img" style="background:linear-gradient(135deg,#cfe3c4,#9fc77f);"></div><div class="body"><h3>Weeknight Beef Ragù</h3><p>Slow-simmered beef and pork over wide pappardelle.</p><div class="meta"><span>Prep: 20 min</span><span>Cook: 3 hr</span><span>Serves: 4</span></div></div></a>
+      <a class="card"><div class="img" style="background:linear-gradient(135deg,#e6c79a,#c98f55);"></div><div class="body"><h3>Lemon Roast Chicken</h3><p>One pan, crisp skin, soft potatoes underneath.</p><div class="meta"><span>Prep: 20 min</span><span>Cook: 1 hr 20</span><span>Serves: 4</span></div></div></a>
+      <a class="card"><div class="img" style="background:linear-gradient(135deg,#e8a87c,#d2603a);"></div><div class="body"><h3>Weekend Shakshuka</h3><p>Eggs poached in a spiced tomato and pepper sauce.</p><div class="meta"><span>Prep: 10 min</span><span>Cook: 25 min</span><span>Serves: 2</span></div></div></a>
+    </div>
+  </section>
+
+  <footer><div class="wrap"><div class="foot">
+    <div class="col"><span class="lbl">Elsewhere</span><div class="social"><a href="#">GitHub</a><a href="#">LinkedIn</a><a href="#">Email</a></div></div>
+    <span class="dom">akli.dev</span>
+  </div></div></footer>
+</body></html>

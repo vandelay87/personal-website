@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; }
+  :root {
+    --bg:#FBFAF7; --text:#1C1A16; --subtle:#3a3631; --muted:#6F6961; --faint:#9a938a;
+    --line:#ECE6DA; --surf:#F4F1EA; --hover:rgba(0,0,0,0.022);
+    --btn-bg:#1C1A16; --btn-fg:#FBFAF7; --btn-border:#E0DACE;
+    --ring:rgba(0,0,0,0.06);
+    --accent:#1F66E0;
+  }
+  [data-theme="dark"] {
+    --bg:#141310; --text:#F3F0E8; --subtle:#CFC9BD; --muted:#A6A093; --faint:#6E685E;
+    --line:#2A2823; --surf:#1C1A15; --hover:rgba(255,255,255,0.04);
+    --btn-bg:#F3F0E8; --btn-fg:#141310; --btn-border:#36342C;
+    --ring:rgba(255,255,255,0.08);
+    --accent:#6BA0FF;
+  }
+  .lnk { transition: color .25s ease, opacity .25s ease; text-decoration:none; color:inherit; }
+  .lnk:hover { color: var(--accent); }
+  .btn { transition: background .22s ease, color .22s ease, border-color .22s ease; text-decoration:none; }
+  .btn-solid:hover { background: var(--accent); color:#fff; }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--hover); }
+  .toggle-btn { transition: background .2s ease, border-color .2s ease, color .2s ease; cursor:pointer; background:transparent; }
+  .toggle-btn:hover { border-color: var(--btn-border); background: color-mix(in srgb, var(--text) 6%, transparent); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius:6px; }
+  [data-sticky="true"] .site-header {
+    position: sticky; top:0; z-index:20;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: saturate(140%) blur(10px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+  }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--btn-bg); color:var(--btn-fg); padding:10px 16px; border-radius:8px; z-index:50; }
+  .skip:focus { left:16px; top:16px; }
+  .app-card { display:flex; flex-direction:column; text-decoration:none; color:inherit; background:var(--bg); border:1px solid var(--line); border-radius:18px; overflow:hidden; transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s ease, border-color .35s ease; }
+  .app-card:hover { transform: translateY(-5px); box-shadow: 0 18px 44px rgba(0,0,0,0.10); border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); }
+  .app-prev { transition: transform .55s cubic-bezier(.2,.7,.2,1); }
+  .app-card:hover .app-prev { transform: scale(1.035); }
+  .app-arrow { display:inline-block; transition: transform .3s ease; }
+  .app-card:hover .app-arrow { transform: translate(3px,-3px); }
+  .arrowx { display:inline-block; transition: transform .25s ease; }
+  .arrowx-host:hover .arrowx { transform: translateX(3px); }
+  @keyframes riseIn { from { transform: translateY(12px); opacity:0; } to { transform:none; opacity:1; } }
+  .rise { animation: riseIn .6s cubic-bezier(.2,.7,.2,1) both; }
+  @media (prefers-reduced-motion: reduce) { .rise{animation:none;} .app-card,.app-prev{transition:none;} .app-card:hover{transform:none;} .app-card:hover .app-prev{transform:none;} html{scroll-behavior:auto;} }
+</style>
+</helmet>
+
+<div data-theme="{{ theme }}" data-sticky="{{ sticky }}" style="background:var(--bg); color:var(--text); min-height:100vh; font-family:'Geist',system-ui,sans-serif; -webkit-font-smoothing:antialiased;">
+  <a class="skip" href="#main">Skip to content</a>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header">
+    <div style="max-width:1080px; margin:0 auto; padding:22px clamp(20px,5vw,28px); display:flex; align-items:center; justify-content:space-between;">
+      <a class="lnk" href="/" style="font-size:15px; font-weight:600; letter-spacing:-0.01em;">Akli Aissat</a>
+      <nav aria-label="Primary" style="display:flex; align-items:center; gap:clamp(18px,4vw,28px); font-size:14px; color:var(--muted);">
+        <a class="lnk" href="https://akli.dev/apps" style="color:var(--text); font-weight:500;">Apps</a>
+        <a class="lnk" href="https://akli.dev/recipes">Recipes</a>
+        <a class="lnk" href="https://akli.dev/blog">Blog</a>
+        <button class="toggle-btn" onClick="{{ toggle }}" aria-label="{{ toggleLabel }}" title="{{ toggleLabel }}" style="display:inline-flex; width:32px; height:32px; align-items:center; justify-content:center; font-size:13px; color:var(--text); border:1px solid var(--btn-border); border-radius:50%;">{{ toggleIcon }}</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ===== HERO ===== -->
+    <section style="max-width:720px; margin:0 auto; padding:clamp(64px,11vw,108px) 24px clamp(40px,6vw,60px);">
+      <div style="font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.16em; color:var(--faint); text-transform:uppercase; margin-bottom:22px;">Apps &amp; Experiments</div>
+      <h1 style="font-size:clamp(40px,7vw,56px); font-weight:600; line-height:1.04; letter-spacing:-0.03em; margin:0 0 22px;">Things I built to<br>figure something out.</h1>
+      <p style="font-size:clamp(17px,2.6vw,19px); line-height:1.65; color:var(--muted); margin:0; max-width:54ch;">A collection of interactive experiments and side projects. Most of these started as a way to learn something new — or to answer a question I had about how things actually work.</p>
+    </section>
+
+    <!-- ===== APPS GRID ===== -->
+    <section style="max-width:1080px; margin:0 auto; padding:clamp(20px,4vw,36px) 24px clamp(72px,10vw,108px);">
+      <div style="display:flex; align-items:baseline; gap:12px; margin-bottom:26px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.06em; color:var(--faint);">
+        <span>{{ countLabel }}</span>
+        <span style="flex:1; height:1px; background:var(--line);"></span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:clamp(20px,3vw,28px);">
+        <sc-for list="{{ apps }}" as="app" hint-placeholder-count="2">
+          <a class="app-card" href="{{ app.href }}">
+            <div style="position:relative; aspect-ratio:16/10; overflow:hidden; background:var(--surf); border-bottom:1px solid var(--line);">
+              <div class="app-prev" style="position:absolute; inset:0; opacity:0.09; color:var(--text); background-image:{{ app.preview }}; background-size:18px 18px;"></div>
+              <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;">
+                <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--faint); background:color-mix(in srgb, var(--bg) 86%, transparent); padding:7px 12px; border-radius:999px; border:1px solid var(--line);">{{ app.shot }}</span>
+              </div>
+              <div style="position:absolute; top:14px; left:14px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.1em; color:var(--muted); background:color-mix(in srgb, var(--bg) 80%, transparent); padding:5px 10px; border-radius:7px;">{{ app.tag }}</div>
+            </div>
+            <div style="padding:24px 26px 28px; display:flex; flex-direction:column; flex:1;">
+              <div style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; margin-bottom:10px;">
+                <span style="font-size:23px; font-weight:600; letter-spacing:-0.02em; line-height:1.2;">{{ app.title }}</span>
+                <span class="app-arrow" style="font-size:18px; color:var(--accent); flex-shrink:0;">↗</span>
+              </div>
+              <p style="font-size:15px; line-height:1.6; color:var(--muted); margin:0 0 20px;">{{ app.desc }}</p>
+              <div style="margin-top:auto; display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--accent);">
+                <span>Open app</span>
+              </div>
+            </div>
+          </a>
+        </sc-for>
+      </div>
+
+      <!-- ===== MORE SOON ===== -->
+      <div style="margin-top:clamp(28px,4vw,40px); border:1px dashed var(--btn-border); border-radius:18px; padding:clamp(28px,5vw,40px); text-align:center;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--faint); margin-bottom:10px;">In progress</div>
+        <p style="font-size:16px; line-height:1.6; color:var(--muted); margin:0 auto 18px; max-width:46ch;">More experiments are in the works. If you want to follow along, I usually write up the interesting ones on the blog.</p>
+        <a class="lnk arrowx-host" href="https://akli.dev/blog" style="display:inline-flex; align-items:center; gap:7px; font-size:14px; font-weight:600; color:var(--accent);">Read the blog <span class="arrowx">→</span></a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer style="border-top:1px solid var(--line);">
+    <div style="max-width:1080px; margin:0 auto; padding:clamp(34px,5vw,44px) clamp(20px,5vw,28px); display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;">
+      <nav aria-label="Elsewhere" style="display:flex; flex-direction:column; gap:12px;">
+        <span style="font-size:15px; font-weight:600; color:var(--text);">Elsewhere</span>
+        <div style="display:flex; flex-wrap:wrap; gap:20px; font-size:14px; color:var(--muted);">
+          <a class="lnk" href="https://github.com/vandelay87">GitHub</a>
+          <a class="lnk" href="https://www.linkedin.com/in/akli-aissat-b08119115/">LinkedIn</a>
+          <a class="lnk" href="mailto:akliaissat@outlook.com?subject=Hello">Email</a>
+        </div>
+      </nav>
+      <span style="font-size:13px; font-weight:500; color:var(--muted);">akli.dev</span>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;stickyNav&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Layout&quot; }
+}">
+class Component extends DCLogic {
+  state = { theme: 'light' };
+
+  componentDidMount() {
+    try {
+      const saved = localStorage.getItem('akli-theme');
+      if (saved === 'light' || saved === 'dark') {
+        this.setState({ theme: saved });
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        this.setState({ theme: 'dark' });
+      }
+    } catch (e) {}
+  }
+
+  toggle = () => {
+    this.setState(s => {
+      const theme = s.theme === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('akli-theme', theme); } catch (e) {}
+      return { theme };
+    });
+  };
+
+  renderVals() {
+    const isDark = this.state.theme === 'dark';
+    const dots = 'radial-gradient(currentColor 1.1px, transparent 1.1px)';
+    const stripe = 'repeating-linear-gradient(135deg, currentColor 0 1px, transparent 1px 9px)';
+    const apps = [
+      {
+        title: 'Pokédex',
+        desc: 'A searchable encyclopedia of Gen 1 Pokémon, styled after the classic Game Boy Color Pokédex.',
+        href: 'https://akli.dev/apps/pokedex',
+        tag: 'React · AWS',
+        shot: 'screenshot — pokédex',
+        preview: 'radial-gradient(currentColor 1.2px, transparent 1.2px)'
+      },
+      {
+        title: 'Sand box',
+        desc: 'A real-time particle physics simulation of falling sand grains on a black canvas.',
+        href: 'https://akli.dev/apps/sand-box',
+        tag: 'Canvas · Physics',
+        shot: 'screenshot — sand box',
+        preview: 'repeating-linear-gradient(135deg, currentColor 0 1px, transparent 1px 9px)'
+      }
+    ];
+    return {
+      apps,
+      countLabel: apps.length + (apps.length === 1 ? ' experiment' : ' experiments'),
+      theme: this.state.theme,
+      sticky: String(this.props.stickyNav ?? true),
+      toggle: this.toggle,
+      toggleIcon: isDark ? '☀' : '☾',
+      toggleLabel: isDark ? 'Switch to light mode' : 'Switch to dark mode'
+    };
+  }
+}
+</script>
+</body>
+</html>

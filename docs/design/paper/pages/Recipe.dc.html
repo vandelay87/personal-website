@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; }
+  :root {
+    --bg:#FBFAF7; --text:#1C1A16; --subtle:#3a3631; --muted:#6F6961; --faint:#9a938a;
+    --line:#ECE6DA; --surf:#F4F1EA; --hover:rgba(0,0,0,0.022);
+    --btn-bg:#1C1A16; --btn-fg:#FBFAF7; --btn-border:#E0DACE;
+    --ring:rgba(0,0,0,0.06); --accent:#1F66E0;
+  }
+  [data-theme="dark"] {
+    --bg:#141310; --text:#F3F0E8; --subtle:#CFC9BD; --muted:#A6A093; --faint:#6E685E;
+    --line:#2A2823; --surf:#1C1A15; --hover:rgba(255,255,255,0.04);
+    --btn-bg:#F3F0E8; --btn-fg:#141310; --btn-border:#36342C;
+    --ring:rgba(255,255,255,0.08); --accent:#6BA0FF;
+  }
+  .lnk { transition: color .25s ease, opacity .25s ease; text-decoration:none; color:inherit; }
+  .lnk:hover { color: var(--accent); }
+  .toggle-btn { transition: background .2s ease, border-color .2s ease, color .2s ease; cursor:pointer; background:transparent; }
+  .toggle-btn:hover { border-color: var(--btn-border); background: color-mix(in srgb, var(--text) 6%, transparent); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius:6px; }
+  [data-sticky="true"] .site-header {
+    position: sticky; top:0; z-index:20;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: saturate(140%) blur(10px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+  }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--btn-bg); color:var(--btn-fg); padding:10px 16px; border-radius:8px; z-index:50; }
+  .skip:focus { left:16px; top:16px; }
+  .arrowx { display:inline-block; transition: transform .25s ease; }
+  .back-link:hover .arrowx { transform: translateX(-3px); }
+  .tag-chip { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.04em; color:var(--muted); border:1px solid var(--line); background:var(--surf); padding:5px 10px; border-radius:7px; text-decoration:none; transition: color .2s ease, border-color .2s ease; }
+  .tag-chip:hover { border-color: var(--accent); color: var(--accent); }
+  .recipe-grid { display:grid; grid-template-columns:1fr; gap:clamp(36px,5vw,52px); }
+  @media (min-width:780px) {
+    .recipe-grid { grid-template-columns:296px 1fr; gap:clamp(44px,5vw,72px); align-items:start; }
+    .recipe-aside { position:sticky; top:92px; }
+  }
+  .ing { display:flex; align-items:center; gap:13px; width:100%; text-align:left; background:transparent; border:none; border-top:1px solid var(--line); padding:11px 4px; cursor:pointer; font-family:inherit; }
+  .ing:first-of-type { border-top:none; }
+  .ing-box { width:17px; height:17px; border:1.5px solid var(--btn-border); border-radius:5px; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:transparent; font-size:10px; line-height:1; transition: background .18s ease, border-color .18s ease, color .18s ease; }
+  .ing-name { flex:1; font-size:15px; color:var(--text); line-height:1.35; }
+  .ing-qty { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); flex-shrink:0; }
+  .ing[data-checked="true"] .ing-box { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .ing[data-checked="true"] .ing-name { text-decoration:line-through; color:var(--faint); }
+  .ing[data-checked="true"] .ing-qty { color:var(--faint); }
+  @media (prefers-reduced-motion: reduce) { html{scroll-behavior:auto;} *{transition:none !important;} }
+</style>
+</helmet>
+
+<div data-theme="{{ theme }}" data-sticky="{{ sticky }}" style="background:var(--bg); color:var(--text); min-height:100vh; font-family:'Geist',system-ui,sans-serif; -webkit-font-smoothing:antialiased;">
+  <a class="skip" href="#main">Skip to content</a>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header">
+    <div style="max-width:1080px; margin:0 auto; padding:22px clamp(20px,5vw,28px); display:flex; align-items:center; justify-content:space-between;">
+      <a class="lnk" href="/" style="font-size:15px; font-weight:600; letter-spacing:-0.01em;">Akli Aissat</a>
+      <nav aria-label="Primary" style="display:flex; align-items:center; gap:clamp(18px,4vw,28px); font-size:14px; color:var(--muted);">
+        <a class="lnk" href="https://akli.dev/apps">Apps</a>
+        <a class="lnk" href="https://akli.dev/recipes" style="color:var(--text); font-weight:500;">Recipes</a>
+        <a class="lnk" href="https://akli.dev/blog">Blog</a>
+        <button class="toggle-btn" onClick="{{ toggle }}" aria-label="{{ toggleLabel }}" title="{{ toggleLabel }}" style="display:inline-flex; width:32px; height:32px; align-items:center; justify-content:center; font-size:13px; color:var(--text); border:1px solid var(--btn-border); border-radius:50%;">{{ toggleIcon }}</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <article style="max-width:920px; margin:0 auto; padding:clamp(28px,5vw,48px) 24px clamp(64px,9vw,96px);">
+
+      <!-- back -->
+      <a class="lnk back-link" href="https://akli.dev/recipes" style="display:inline-flex; align-items:center; gap:7px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.04em; color:var(--muted); margin-bottom:28px;"><span class="arrowx">←</span> All recipes</a>
+
+      <!-- hero -->
+      <figure style="margin:0 0 36px;">
+        <img src="https://images.akli.dev/recipes/mild-thai-basa-coconut-rice/cover-medium.webp" alt="One-pot Mild Thai-Style Basa &amp; Coconut Rice" loading="eager" style="display:block; width:100%; height:auto; aspect-ratio:16/10; object-fit:cover; border-radius:16px; border:1px solid var(--line);">
+      </figure>
+
+      <!-- header -->
+      <header style="max-width:680px;">
+        <h1 style="font-size:clamp(32px,5.4vw,46px); font-weight:600; line-height:1.08; letter-spacing:-0.03em; margin:0 0 18px;">Mild Thai-Style Basa &amp; Coconut Rice</h1>
+        <div style="display:flex; flex-wrap:wrap; align-items:center; gap:6px 12px; font-family:'JetBrains Mono',monospace; font-size:12.5px; letter-spacing:0.02em; color:var(--muted); margin-bottom:20px;">
+          <span>27 June 2026</span><span aria-hidden="true" style="color:var(--faint);">·</span>
+          <span>5 min prep</span><span aria-hidden="true" style="color:var(--faint);">·</span>
+          <span>30 min cook</span><span aria-hidden="true" style="color:var(--faint);">·</span>
+          <span>Serves 2</span>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;">
+          <a class="tag-chip" href="https://akli.dev/recipes?tag=Thai">Thai</a>
+          <a class="tag-chip" href="https://akli.dev/recipes?tag=Fish">Fish</a>
+          <a class="tag-chip" href="https://akli.dev/recipes?tag=Rice">Rice</a>
+          <a class="tag-chip" href="https://akli.dev/recipes?tag=One+Pot">One Pot</a>
+          <a class="tag-chip" href="https://akli.dev/recipes?tag=Coconut">Coconut</a>
+        </div>
+        <p style="font-size:clamp(17px,2.6vw,19px); line-height:1.7; color:var(--subtle); margin:0;">A comforting Thai-infused rice and fish one pot. Flavour the rice with coconut and fragrant green curry paste, then steam the fish on top for tenderness.</p>
+      </header>
+
+      <div style="height:1px; background:var(--line); margin:clamp(36px,5vw,52px) 0;"></div>
+
+      <!-- ingredients + method -->
+      <div class="recipe-grid">
+
+        <!-- ingredients -->
+        <aside class="recipe-aside">
+          <div style="border:1px solid var(--line); border-radius:16px; background:var(--surf); padding:22px 22px 14px;">
+            <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px;">
+              <h2 style="font-size:18px; font-weight:600; letter-spacing:-0.01em; margin:0;">Ingredients</h2>
+              <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--faint);">{{ servesLabel }}</span>
+            </div>
+            <p style="font-size:12px; color:var(--faint); margin:0 0 12px;">Tap to check off as you go.</p>
+            <div>
+              <sc-for list="{{ ingredients }}" as="ing" hint-placeholder-count="9">
+                <button class="ing" type="button" data-checked="{{ ing.checked }}" onClick="{{ ing.on }}">
+                  <span class="ing-box">✓</span>
+                  <span class="ing-name">{{ ing.name }}</span>
+                  <span class="ing-qty">{{ ing.qty }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </aside>
+
+        <!-- method -->
+        <section>
+          <h2 style="font-size:clamp(22px,3vw,26px); font-weight:600; letter-spacing:-0.02em; margin:0 0 8px;">Method</h2>
+          <p style="font-size:13px; color:var(--faint); font-family:'JetBrains Mono',monospace; margin:0 0 28px;">{{ stepsLabel }}</p>
+          <div style="display:flex; flex-direction:column; gap:28px;">
+            <sc-for list="{{ steps }}" as="step" hint-placeholder-count="7">
+              <div style="display:flex; gap:18px;">
+                <div style="flex-shrink:0; width:34px; height:34px; border-radius:50%; background:var(--surf); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:500; color:var(--accent);">{{ step.num }}</div>
+                <div style="padding-top:3px; flex:1;">
+                  <sc-for list="{{ step.lines }}" as="line" hint-placeholder-count="2">
+                    <p style="font-size:16.5px; line-height:1.7; color:var(--subtle); margin:0 0 12px;">{{ line }}</p>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+      </div>
+    </article>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer style="border-top:1px solid var(--line);">
+    <div style="max-width:1080px; margin:0 auto; padding:clamp(34px,5vw,44px) clamp(20px,5vw,28px); display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;">
+      <nav aria-label="Elsewhere" style="display:flex; flex-direction:column; gap:12px;">
+        <span style="font-size:15px; font-weight:600; color:var(--text);">Elsewhere</span>
+        <div style="display:flex; flex-wrap:wrap; gap:20px; font-size:14px; color:var(--muted);">
+          <a class="lnk" href="https://github.com/vandelay87">GitHub</a>
+          <a class="lnk" href="https://www.linkedin.com/in/akli-aissat-b08119115/">LinkedIn</a>
+          <a class="lnk" href="mailto:akliaissat@outlook.com?subject=Hello">Email</a>
+        </div>
+      </nav>
+      <span style="font-size:13px; font-weight:500; color:var(--muted);">akli.dev</span>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;stickyNav&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Layout&quot; }
+}">
+class Component extends DCLogic {
+  state = { theme: 'light', checked: {} };
+
+  componentDidMount() {
+    try {
+      const saved = localStorage.getItem('akli-theme');
+      if (saved === 'light' || saved === 'dark') {
+        this.setState({ theme: saved });
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        this.setState({ theme: 'dark' });
+      }
+    } catch (e) {}
+  }
+
+  toggle = () => {
+    this.setState(s => {
+      const theme = s.theme === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('akli-theme', theme); } catch (e) {}
+      return { theme };
+    });
+  };
+
+  toggleIng = (i) => {
+    this.setState(s => {
+      const checked = Object.assign({}, s.checked);
+      checked[i] = !checked[i];
+      return { checked };
+    });
+  };
+
+  renderVals() {
+    const isDark = this.state.theme === 'dark';
+    const rawIng = [
+      { qty: '8 ml', name: 'Fish sauce' },
+      { qty: '1', name: 'Red pepper' },
+      { qty: '140 g', name: 'White basmati rice' },
+      { qty: '50 g', name: 'Solid creamed coconut' },
+      { qty: '2', name: 'Spring onions' },
+      { qty: '2', name: 'Basa fillets' },
+      { qty: '5 g', name: 'Thai basil' },
+      { qty: '15 g', name: 'Crispy onions' },
+      { qty: '40 g', name: 'Thai green curry paste' }
+    ];
+    const ingredients = rawIng.map((ing, i) => Object.assign({}, ing, {
+      checked: !!this.state.checked[i],
+      on: () => this.toggleIng(i)
+    }));
+
+    const steps = [
+      { num: '1', lines: ['Boil a kettle.', 'Trim, then slice your spring onions finely.', 'Deseed your pepper and chop into large bite-sized pieces.'] },
+      { num: '2', lines: ['Heat a large, wide-based pan (preferably non-stick with a matching lid) with a drizzle of vegetable oil over a medium heat.', 'Once hot, add the chopped pepper and most of the sliced spring onion (save the rest for garnish!) with your Thai green curry paste and cook for 2–3 min, until fragrant.'] },
+      { num: '3', lines: ['Dissolve the chopped creamed coconut and fish sauce in 300 ml boiled water.'] },
+      { num: '4', lines: ['Add your basmati rice and coconut stock to the pan with 1 tsp sugar and a generous pinch of salt, and give everything a good mix.', 'Reduce the heat to low, then cook covered for 10 min, until most of the stock has absorbed and the rice is almost cooked.'] },
+      { num: '5', lines: ['Meanwhile, chop your Thai basil finely, including the stalks.'] },
+      { num: '6', lines: ['Once the rice is almost cooked, increase the heat to medium-high and top with your basa fillets. Season with a pinch of salt and pepper.', 'Cook covered for 6–7 min, until the fish is cooked through and tender.'] },
+      { num: '7', lines: ['Transfer the cooked basa to a plate.', 'Add most of the chopped Thai basil (save the rest for garnish!) to the pan and mix it all together.', 'Serve the basa over the one-pot Thai-style coconut rice.', 'Garnish with the remaining Thai basil and sliced spring onion, then sprinkle over your crispy onions.'] }
+    ];
+
+    return {
+      ingredients,
+      steps,
+      servesLabel: 'Serves 2',
+      stepsLabel: steps.length + ' steps',
+      theme: this.state.theme,
+      sticky: String(this.props.stickyNav ?? true),
+      toggle: this.toggle,
+      toggleIcon: isDark ? '☀' : '☾',
+      toggleLabel: isDark ? 'Switch to light mode' : 'Switch to dark mode'
+    };
+  }
+}
+</script>
+</body>
+</html>
