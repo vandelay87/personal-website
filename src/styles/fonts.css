@@ -58,21 +58,12 @@
 }
 
 /* ── Metric-matched fallback (FOUT/CLS mitigation) ───────────
-   Geist 400/500 are preloaded (see index.html), but `font-display:
-   swap` still guarantees a brief flash of fallback text before they
-   arrive. This synthetic face re-shapes the local Arial/Helvetica
-   metrics to match Geist Regular's box model so the fallback holds
-   the same line height / glyph width and CLS stays ~0 when the swap
-   happens. Inserted into --font-sans between 'Geist' and the system
-   stack (src/styles/tokens.css).
-
-   Values computed from the actual shipped Geist Regular (400) woff2
-   against Arial's published metrics, using the same
-   ascent/descent/line-gap/size-adjust technique next/font's local
-   font fallback generation uses (@capsizecss/core `createFontStack`,
-   fed Geist's real font metrics extracted via @capsizecss/unpack and
-   Arial's metrics from @capsizecss/metrics — the same metrics-diffing
-   approach Capsize/next/font implement). Not a guessed round number. */
+   Re-shapes local Arial to Geist Regular's box model so the `swap`
+   flash holds layout (CLS ~0). Inserted into --font-sans between
+   'Geist' and the system stack (src/styles/tokens.css). Values
+   computed from the shipped Geist 400 woff2 vs. Arial's published
+   metrics via @capsizecss (the technique next/font's local fallback
+   generation uses) — not guessed round numbers. */
 @font-face {
   font-family: 'Geist Fallback';
   src: local('Arial'), local('Helvetica'), local('Helvetica Neue');
