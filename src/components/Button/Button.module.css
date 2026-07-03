@@ -19,11 +19,12 @@
   border: var(--border-width) solid var(--color-border-strong);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background-color var(--duration-fast) var(--easing-default),
-              border-color var(--duration-fast) var(--easing-default),
-              color var(--duration-fast) var(--easing-default),
-              opacity var(--duration-fast) var(--easing-default),
-              transform var(--duration-fast) var(--easing-default);
+  transition:
+    background-color var(--duration-fast) var(--easing-default),
+    border-color var(--duration-fast) var(--easing-default),
+    color var(--duration-fast) var(--easing-default),
+    opacity var(--duration-fast) var(--easing-default),
+    transform var(--duration-fast) var(--easing-default);
 }
 
 .button:active:not(:disabled) {
@@ -111,32 +112,15 @@
 }
 
 .spinner {
+  /* Size/border/color are a legitimate delta (must inherit the button's own
+     text color across variants) — but the rotation itself reuses the
+     sitewide `spin` keyframe (src/styles/animations.css), which is already
+     neutered under prefers-reduced-motion at the keyframe level, instead of
+     a second identical keyframe + reduced-motion override. */
   width: 1em;
   height: 1em;
   border: 2px solid currentcolor;
   border-right-color: transparent;
   border-radius: var(--radius-full);
-  animation: btn-spin var(--duration-base) linear infinite;
-}
-
-@keyframes btn-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  /* Freeze rotation entirely (keyframe-level override), matching the
-     sitewide convention in src/styles/animations.css rather than merely
-     slowing the spin down — a still spinner remains a valid, understood
-     "in progress" affordance. */
-  @keyframes btn-spin {
-    from,
-    to {
-      transform: none;
-    }
-  }
+  animation: spin var(--duration-base) linear infinite;
 }

@@ -1,5 +1,10 @@
 import { handleSessionError } from '@api/auth'
-import { deleteRecipe, fetchAllRecipes, publishRecipe, unpublishRecipe } from '@api/recipes'
+import {
+  deleteRecipe,
+  fetchAllRecipes,
+  publishRecipe,
+  unpublishRecipe,
+} from '@api/recipes'
 import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
 import Link from '@components/Link'
@@ -25,8 +30,12 @@ const RecipeList = () => {
   const [deleteTarget, setDeleteTarget] = useState<Recipe | null>(null)
 
   const sortedRecipes = useMemo(
-    () => [...recipes].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
-    [recipes],
+    () =>
+      [...recipes].sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      ),
+    [recipes]
   )
 
   useEffect(() => {
@@ -135,37 +144,51 @@ const RecipeList = () => {
               </tr>
             </thead>
             <tbody>
-              {sortedRecipes.map((recipe) => (
-                <tr key={recipe.id}>
-                  <td>{recipe.title}</td>
-                  <td>
-                    <StatusBadge tone={recipe.status === 'published' ? 'success' : 'warning'}>
-                      {recipe.status === 'published' ? 'Published' : 'Draft'}
-                    </StatusBadge>
-                  </td>
-                  <td>{recipe.tags.join(', ')}</td>
-                  <td>{new Date(recipe.updatedAt).toLocaleDateString()}</td>
-                  <td className={styles.actions}>
-                    <div className={styles.actionsInner}>
-                      <Link to={`/admin/recipes/${recipe.id}/edit`} ariaLabel={`Edit ${recipe.title}`}>
-                        Edit
-                      </Link>
-                      <Link
-                        to={`/admin/recipes/${recipe.id}/preview`}
-                        ariaLabel={`Preview ${recipe.title}`}
-                      >
-                        Preview
-                      </Link>
-                      <button type="button" className={styles.actionLink} onClick={() => handlePublish(recipe)}>
-                        {recipe.status === 'published' ? 'Unpublish' : 'Publish'}
-                      </button>
-                      <button type="button" className={styles.actionLink} onClick={() => setDeleteTarget(recipe)}>
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {sortedRecipes.map((recipe) => {
+                const isPublished = recipe.status === 'published'
+                return (
+                  <tr key={recipe.id}>
+                    <td>{recipe.title}</td>
+                    <td>
+                      <StatusBadge tone={isPublished ? 'success' : 'warning'}>
+                        {isPublished ? 'Published' : 'Draft'}
+                      </StatusBadge>
+                    </td>
+                    <td>{recipe.tags.join(', ')}</td>
+                    <td>{new Date(recipe.updatedAt).toLocaleDateString()}</td>
+                    <td className={styles.actions}>
+                      <div className={styles.actionsInner}>
+                        <Link
+                          to={`/admin/recipes/${recipe.id}/edit`}
+                          ariaLabel={`Edit ${recipe.title}`}
+                        >
+                          Edit
+                        </Link>
+                        <Link
+                          to={`/admin/recipes/${recipe.id}/preview`}
+                          ariaLabel={`Preview ${recipe.title}`}
+                        >
+                          Preview
+                        </Link>
+                        <button
+                          type="button"
+                          className={styles.actionLink}
+                          onClick={() => handlePublish(recipe)}
+                        >
+                          {isPublished ? 'Unpublish' : 'Publish'}
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.actionLink}
+                          onClick={() => setDeleteTarget(recipe)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -177,17 +200,14 @@ const RecipeList = () => {
           onConfirm={handleDeleteConfirm}
           onCancel={() => setDeleteTarget(null)}
         >
-          Are you sure you want to delete &quot;{deleteTarget?.title ?? ''}&quot;?
+          Are you sure you want to delete &quot;{deleteTarget?.title ?? ''}
+          &quot;?
         </ConfirmDialog>
       </>
     )
   }
 
-  return (
-    <div className={styles.page}>
-      {renderContent()}
-    </div>
-  )
+  return <div className={styles.page}>{renderContent()}</div>
 }
 
 export default RecipeList
