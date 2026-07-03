@@ -1,0 +1,83 @@
+/* Self-hosted webfonts — Geist (sans) + JetBrains Mono (mono).
+   Latin subset, weights actually used by the design system only.
+   Files vendored from the official Fontsource-distributed woff2 builds
+   (@fontsource/geist-sans, @fontsource/jetbrains-mono — used only as a
+   one-time local source for the binaries; no runtime dependency).
+   OFL.txt (SIL Open Font License) ships alongside in ../assets/fonts/. */
+
+/* ── Geist (sans) ─────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Geist';
+  src: url('../assets/fonts/geist-sans-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist';
+  src: url('../assets/fonts/geist-sans-latin-500-normal.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist';
+  src: url('../assets/fonts/geist-sans-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist';
+  src: url('../assets/fonts/geist-sans-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── JetBrains Mono ───────────────────────────────────────── */
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('../assets/fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('../assets/fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Metric-matched fallback (FOUT/CLS mitigation) ───────────
+   Geist 400/500 are preloaded (see index.html), but `font-display:
+   swap` still guarantees a brief flash of fallback text before they
+   arrive. This synthetic face re-shapes the local Arial/Helvetica
+   metrics to match Geist Regular's box model so the fallback holds
+   the same line height / glyph width and CLS stays ~0 when the swap
+   happens. Inserted into --font-sans between 'Geist' and the system
+   stack (src/styles/tokens.css).
+
+   Values computed from the actual shipped Geist Regular (400) woff2
+   against Arial's published metrics, using the same
+   ascent/descent/line-gap/size-adjust technique next/font's local
+   font fallback generation uses (@capsizecss/core `createFontStack`,
+   fed Geist's real font metrics extracted via @capsizecss/unpack and
+   Arial's metrics from @capsizecss/metrics — the same metrics-diffing
+   approach Capsize/next/font implement). Not a guessed round number. */
+@font-face {
+  font-family: 'Geist Fallback';
+  src: local('Arial'), local('Helvetica'), local('Helvetica Neue');
+  ascent-override: 86.71%;
+  descent-override: 20.73%;
+  line-gap-override: 9.43%;
+  size-adjust: 106.1%;
+}

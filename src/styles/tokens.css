@@ -2,14 +2,15 @@
    Source of truth: docs/design/paper/design_system/tokens/.
    Two layers: semantic --color-* (light on :root, dark under
    [data-theme="dark"]) plus short working aliases.
-   Fonts are self-hosted in a later issue (#219); the families below
-   won't render until then — that's expected. */
+   Fonts are self-hosted (see src/styles/fonts.css, imported before this
+   file) — Geist + JetBrains Mono woff2, plus a metric-matched 'Geist
+   Fallback' face that holds layout during the font-display: swap flash. */
 
 :root {
   color-scheme: light;
 
   /* ── Typography ───────────────────────────────────────────── */
-  --font-sans: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Geist', 'Geist Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
   /* Font sizes */
