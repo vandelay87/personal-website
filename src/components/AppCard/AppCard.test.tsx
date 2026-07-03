@@ -69,4 +69,18 @@ describe('AppCard', () => {
     expect(link).toHaveAttribute('target', '_blank')
     expect(link).toHaveAttribute('rel', 'noreferrer')
   })
+
+  it('renders the arrow once, hidden from assistive tech, next to the title rather than "Open app"', () => {
+    renderCard()
+
+    const arrows = screen.getAllByText('↗', { selector: '[aria-hidden="true"]' })
+    expect(arrows).toHaveLength(1)
+
+    const title = screen.getByRole('heading', { name: mockProps.title })
+    const openApp = screen.getByText('Open app')
+
+    expect(openApp).toHaveTextContent('Open app')
+    expect(title.parentElement).toContainElement(arrows[0])
+    expect(openApp).not.toContainElement(arrows[0])
+  })
 })

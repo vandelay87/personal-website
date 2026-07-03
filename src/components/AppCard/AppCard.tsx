@@ -28,15 +28,19 @@ const AppCard: FC<AppCardProps> = ({ title, description, href, image }) => {
       </div>
 
       <div className={styles.body}>
-        <Typography variant="heading3" as="h2" className={styles.title}>
-          {title}
-        </Typography>
+        <div className={styles.titleRow}>
+          <Typography variant="heading3" as="h2" className={styles.title}>
+            {title}
+          </Typography>
+
+          <span className={styles.arrowIcon} aria-hidden="true">
+            ↗
+          </span>
+        </div>
 
         <Typography variant="body" className={styles.description}>{description}</Typography>
 
-        <span className={styles.openApp}>
-          Open app <span aria-hidden="true">↗</span>
-        </span>
+        <span className={styles.openApp}>Open app</span>
       </div>
     </>
   )
