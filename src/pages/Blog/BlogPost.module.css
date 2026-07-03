@@ -17,8 +17,8 @@
   font-family: var(--font-mono);
   font-weight: var(--font-weight-normal);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background: var(--color-bg-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
   color: var(--color-text);
   text-decoration: none;
   transition: background var(--duration-fast) var(--easing-default),
@@ -33,7 +33,7 @@
 .shareSection {
   margin-block-start: var(--space-8);
   padding-block-start: var(--space-6);
-  border-top: var(--border-width) solid var(--color-border-subtle);
+  border-top: var(--border-width) solid var(--color-border);
 }
 
 .shareLinks {
@@ -50,7 +50,7 @@
   height: var(--space-10);
   color: var(--color-text);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-full);
   background: var(--color-surface);
   transition: background var(--duration-fast) var(--easing-default),
               color var(--duration-fast) var(--easing-default);
@@ -69,7 +69,7 @@
 .relatedSection {
   margin-block-start: var(--space-8);
   padding-block-start: var(--space-6);
-  border-top: var(--border-width) solid var(--color-border-subtle);
+  border-top: var(--border-width) solid var(--color-border);
 }
 
 .relatedGrid {
@@ -83,7 +83,7 @@
   display: block;
   padding: var(--space-4);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-xl);
   background: var(--color-surface);
   text-decoration: none;
   color: inherit;

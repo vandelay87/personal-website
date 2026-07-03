@@ -17,7 +17,7 @@
 
 .postCard {
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-xl);
   padding: var(--space-6);
   background: var(--color-surface);
   box-shadow: var(--shadow-md);
@@ -57,7 +57,7 @@
 }
 
 .postTitle:hover {
-  color: var(--color-link-hover);
+  color: var(--color-link);
 }
 
 .meta {
@@ -115,5 +115,5 @@
 }
 
 .clearLink:hover {
-  color: var(--color-link-hover);
+  color: var(--color-link);
 }

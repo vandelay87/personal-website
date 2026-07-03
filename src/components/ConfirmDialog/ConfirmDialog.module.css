@@ -11,10 +11,13 @@
 .dialog {
   background: var(--color-surface);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-md);
   padding: var(--space-6);
-  max-width: var(--max-w-sm);
+  /* No paper max-w token fits a compact dialog (smallest is --max-w-article
+     at 680px, ~1.8x this box) — literal preserves the prior 24rem width.
+     See docs/design/paper/token-migration.md. */
+  max-width: 24rem;
   width: 100%;
 }
 

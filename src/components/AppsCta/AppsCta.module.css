@@ -12,11 +12,11 @@
   inset-inline-start: 50%;
   inline-size: 100vw;
   transform: translateX(-50%);
-  border-block-start: var(--border-width) solid var(--color-border-subtle);
+  border-block-start: var(--border-width) solid var(--color-border);
 }
 
 .inner {
-  max-width: var(--max-w-2xl);
+  max-width: var(--max-w-article); /* 680px, closely matches the prior 672px width */
   margin-inline: auto;
   text-align: center;
 }

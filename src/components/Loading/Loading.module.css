@@ -3,7 +3,7 @@
   width: 1em;
   height: 1em;
   vertical-align: middle;
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-full);
   border: var(--border-width-thick) solid var(--color-border);
   border-block-start-color: var(--color-primary);
   border-inline-end-color: var(--color-primary);

@@ -2,8 +2,8 @@
   display: flex;
   margin: var(--space-4) 0;
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background-color: var(--color-bg-subtle);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
   box-shadow: var(--shadow-md);
   font-family: var(--font-sans);
   font-size: var(--font-size-base);

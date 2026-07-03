@@ -14,7 +14,7 @@
   flex-shrink: 0;
   inline-size: 0.5rem;
   block-size: 0.5rem;
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-full);
   background-color: var(--color-text-muted);
 }
 
@@ -54,13 +54,13 @@
   color: var(--color-primary);
   background: transparent;
   border: 0;
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-sm);
   text-decoration: underline;
   cursor: pointer;
 }
 
 .retryButton:hover {
-  color: var(--color-primary-hover);
+  color: var(--color-primary);
 }
 
 .retryButton:focus-visible {

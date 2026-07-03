@@ -4,16 +4,16 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-sm);
 }
 
 .badge[data-status='published'] {
-  background: var(--color-bg-subtle);
+  background: var(--color-surface);
   color: var(--color-text);
   border-color: var(--color-primary);
 }
 
 .badge[data-status='draft'] {
-  background: var(--color-bg-subtle);
+  background: var(--color-surface);
   color: var(--color-text-muted);
 }

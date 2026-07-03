@@ -3,13 +3,16 @@
 .card {
   background-color: var(--color-surface);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
   margin-block: var(--space-8);
   margin-inline: auto;
   padding-block: var(--space-6);
   padding-inline: var(--space-6);
-  max-width: var(--max-w-sm);
+  /* No paper max-w token fits a compact card (smallest is --max-w-article
+     at 680px, ~1.8x this box) — literal preserves the prior 24rem width.
+     See docs/design/paper/token-migration.md. */
+  max-width: 24rem;
 }
 
 .heading {

@@ -36,13 +36,13 @@
   padding: var(--space-4);
   border-right: var(--border-width) solid var(--color-border);
   min-width: 180px;
-  background: var(--color-bg-subtle);
+  background: var(--color-surface);
 }
 
 .navLink {
   padding: var(--space-2) var(--space-3);
   text-decoration: none;
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-md);
   color: var(--color-text);
   font-weight: var(--font-weight-medium);
 }

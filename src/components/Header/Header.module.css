@@ -6,7 +6,7 @@
   z-index: var(--z-header);
   background-color: var(--color-bg);
   color: var(--color-text);
-  border-block-end: var(--border-width) solid var(--color-border-subtle);
+  border-block-end: var(--border-width) solid var(--color-border);
 }
 
 .headerInner {

@@ -26,9 +26,9 @@
   padding: var(--space-1) var(--space-2);
   font-size: var(--font-size-sm);
   font-family: var(--font-mono);
-  background: var(--color-bg-subtle);
+  background: var(--color-surface);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-sm);
   color: var(--color-text);
   text-decoration: none;
 }

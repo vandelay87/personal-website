@@ -28,7 +28,7 @@
   gap: var(--space-3);
   padding: var(--space-4);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-lg);
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
 }
@@ -47,7 +47,7 @@
 .input {
   padding: var(--space-2) var(--space-3);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-md);
   background: var(--color-bg);
   color: var(--color-text);
   font: inherit;
@@ -108,17 +108,17 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-sm);
 }
 
 .badge[data-role='admin'] {
-  background: var(--color-bg-subtle);
+  background: var(--color-surface);
   color: var(--color-text);
   border-color: var(--color-primary);
 }
 
 .badge[data-role='contributor'] {
-  background: var(--color-bg-subtle);
+  background: var(--color-surface);
   color: var(--color-text-muted);
 }
 

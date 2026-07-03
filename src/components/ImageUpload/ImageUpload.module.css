@@ -19,7 +19,7 @@
 
 .preview {
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-lg);
   object-fit: cover;
 }
 

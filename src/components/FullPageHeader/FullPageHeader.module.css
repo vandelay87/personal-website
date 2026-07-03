@@ -65,7 +65,7 @@
 
 .heading {
   font-size: var(--font-size-5xl);
-  font-weight: var(--font-weight-extrabold);
+  font-weight: var(--font-weight-bold);
 
   @media (min-width: 768px) {
     font-size: clamp(var(--font-size-5xl), 6vw, 4rem);
@@ -102,15 +102,18 @@
 .imageWrapper {
   position: relative;
   inline-size: 100%;
-  max-inline-size: var(--max-w-xs);
+  /* No paper max-w token fits a portrait image cap (smallest is
+     --max-w-article at 680px) — literals preserve the prior px-equivalent
+     widths (20rem/28rem/32rem). See docs/design/paper/token-migration.md. */
+  max-inline-size: 20rem;
   overflow: hidden;
 
   @media (min-width: 768px) {
-    max-inline-size: var(--max-w-md);
+    max-inline-size: 28rem;
   }
 
   @media (min-width: 1024px) {
-    max-inline-size: var(--max-w-lg);
+    max-inline-size: 32rem;
   }
 }
 

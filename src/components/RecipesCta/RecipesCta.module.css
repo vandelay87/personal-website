@@ -12,7 +12,7 @@
   inset-inline-start: 50%;
   inline-size: 100vw;
   transform: translateX(-50%);
-  border-block-start: var(--border-width) solid var(--color-border-subtle);
+  border-block-start: var(--border-width) solid var(--color-border);
 }
 
 .inner {

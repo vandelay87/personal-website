@@ -10,7 +10,7 @@
   color: var(--color-text);
   background: var(--color-surface);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
 }
 

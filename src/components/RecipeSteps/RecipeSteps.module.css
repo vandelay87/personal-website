@@ -17,6 +17,6 @@
 .image {
   display: block;
   max-width: 100%;
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-lg);
   border: var(--border-width) solid var(--color-border);
 }
