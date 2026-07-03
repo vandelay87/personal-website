@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import AppCard, { AppCardProps } from './AppCard'
 
@@ -48,8 +48,25 @@ describe('AppCard', () => {
   it('renders the link with the correct destination', () => {
     renderCard()
 
-    const link = screen.getByRole('link')
+    const link = screen.getByRole('link', { name: new RegExp(mockProps.title) })
     expect(link).toHaveAttribute('href', mockProps.href)
-    expect(link).toHaveTextContent(mockProps.href)
+  })
+
+  it('makes the whole card a single interactive element', () => {
+    renderCard()
+
+    const link = screen.getByRole('link', { name: new RegExp(mockProps.title) })
+    expect(within(link).getByRole('img')).toBeInTheDocument()
+    expect(within(link).getByText(mockProps.description)).toBeInTheDocument()
+    expect(screen.getAllByRole('link')).toHaveLength(1)
+  })
+
+  it('opens external hrefs in a new tab', () => {
+    renderCard({ ...mockProps, href: 'https://example.com/apps/test' })
+
+    const link = screen.getByRole('link', { name: new RegExp(mockProps.title) })
+    expect(link).toHaveAttribute('href', 'https://example.com/apps/test')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noreferrer')
   })
 })

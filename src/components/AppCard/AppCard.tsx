@@ -1,8 +1,8 @@
 import Image from '@components/Image'
 import type { ImageProps } from '@components/Image/Image'
-import Link from '@components/Link'
 import Typography from '@components/Typography'
 import type { FC } from 'react'
+import { Link as RouterLink } from 'react-router-dom'
 import styles from './AppCard.module.css'
 
 export interface AppCardProps {
@@ -12,9 +12,12 @@ export interface AppCardProps {
   image: ImageProps
 }
 
+const isExternalHref = (href: string) =>
+  /^https?:\/\//.test(href) || href.startsWith('mailto:') || href.startsWith('tel:')
+
 const AppCard: FC<AppCardProps> = ({ title, description, href, image }) => {
-  return (
-    <article className={styles.card}>
+  const content = (
+    <>
       <div className={styles.imageWrapper}>
         <Image
           {...image}
@@ -31,9 +34,25 @@ const AppCard: FC<AppCardProps> = ({ title, description, href, image }) => {
 
         <Typography variant="body" className={styles.description}>{description}</Typography>
 
-        <Link to={href}>{href}</Link>
+        <span className={styles.openApp}>
+          Open app <span aria-hidden="true">↗</span>
+        </span>
       </div>
-    </article>
+    </>
+  )
+
+  if (isExternalHref(href)) {
+    return (
+      <a href={href} className={styles.card} target="_blank" rel="noreferrer">
+        {content}
+      </a>
+    )
+  }
+
+  return (
+    <RouterLink to={href} className={styles.card}>
+      {content}
+    </RouterLink>
   )
 }
 

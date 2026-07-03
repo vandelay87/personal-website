@@ -5,7 +5,7 @@
    the lift shadow is a literal, matching the shared utility. */
 
 .card {
-  composes: cardLift from '../../styles/interactions.module.css';
+  composes: cardLift focusRing from '../../styles/interactions.module.css';
   position: relative;
   display: flex;
   flex-direction: column;
@@ -13,6 +13,8 @@
   border-radius: var(--radius-xl);
   border: var(--border-width) solid var(--color-border);
   background-color: var(--color-surface);
+  text-decoration: none;
+  color: inherit;
   transition: border-color var(--duration-fast) var(--easing-default);
 }
 
@@ -36,6 +38,7 @@
 
 .imageWrapper > figure > div {
   border: none;
+  border-radius: 0;
 }
 
 /* Applied to the underlying <img> (via Image's `className` prop) — pairs
@@ -59,4 +62,14 @@
 
 .description {
   margin-block-end: var(--space-4);
+}
+
+.openApp {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-block-start: auto;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
 }
