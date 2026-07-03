@@ -19,6 +19,15 @@
       type="font/woff2"
       crossorigin
     />
+    <script>
+      try {
+        var persistedTheme = localStorage.getItem('theme')
+        var theme =
+          persistedTheme ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        document.documentElement.setAttribute('data-theme', theme)
+      } catch (error) {}
+    </script>
     <!--ssr-head-->
   </head>
   <body>

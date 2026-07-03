@@ -1,41 +1,38 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import styles from './ThemeToggle.module.css'
 
+type Theme = 'light' | 'dark'
+
+const getInitialTheme = (): Theme => {
+  if (typeof document === 'undefined') return 'light'
+
+  const domTheme = document.documentElement.getAttribute('data-theme')
+  if (domTheme === 'light' || domTheme === 'dark') return domTheme
+
+  const storedTheme = typeof window !== 'undefined' ? localStorage.getItem('theme') : null
+  return storedTheme === 'dark' ? 'dark' : 'light'
+}
+
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState(() =>
-    typeof window !== 'undefined' ? localStorage.getItem('theme') || 'light' : 'light'
-  )
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('theme', theme)
-  }, [theme])
+  const [theme, setTheme] = useState<Theme>(getInitialTheme)
 
   const isDark = theme === 'dark'
 
-  const trackClass = [styles.track, isDark ? styles.checked : ''].filter(Boolean).join(' ')
-
-  const thumbClass = [styles.thumb, isDark ? styles.checked : ''].filter(Boolean).join(' ')
+  const handleClick = () => {
+    const nextTheme: Theme = isDark ? 'light' : 'dark'
+    document.documentElement.setAttribute('data-theme', nextTheme)
+    localStorage.setItem('theme', nextTheme)
+    setTheme(nextTheme)
+  }
 
   return (
-    <div className={styles.wrapper}>
-      <span id="theme-toggle-label" className={styles.label}>
-        Dark Mode
-      </span>
-
-      <label htmlFor="theme-toggle" className={styles.toggleLabel}>
-        <input
-          id="theme-toggle"
-          type="checkbox"
-          className={styles.input}
-          checked={isDark}
-          onChange={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
-          aria-labelledby="theme-toggle-label"
-          aria-checked={isDark}
-        />
-        <div className={trackClass}>
-          <div className={thumbClass} />
-        </div>
-      </label>
-    </div>
+    <button
+      type="button"
+      className={styles.toggle}
+      onClick={handleClick}
+      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
+      <span aria-hidden="true">{isDark ? '☀' : '☾'}</span>
+    </button>
   )
 }
