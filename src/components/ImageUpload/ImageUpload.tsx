@@ -140,18 +140,18 @@ const ImageUpload: FC<ImageUploadProps> = ({
       {error && (
         <div className={styles.error} role="alert">
           <span>{error}</span>
-          <Button onClick={handleRetry} variant="secondary" ariaLabel="Retry">
+          <Button onClick={handleRetry} variant="outline" ariaLabel="Retry">
             Retry
           </Button>
         </div>
       )}
 
       {hasCurrentImage && !preview ? (
-        <Button onClick={handleClick} ariaLabel="Replace image" variant="secondary">
+        <Button onClick={handleClick} ariaLabel="Replace image" variant="outline">
           Replace
         </Button>
       ) : (
-        <Button onClick={handleClick} variant="primary">
+        <Button onClick={handleClick} variant="solid">
           Upload
         </Button>
       )}

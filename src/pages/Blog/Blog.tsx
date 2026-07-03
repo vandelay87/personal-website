@@ -70,7 +70,7 @@ const Blog = () => {
                 {post.tags.map((tag) => (
                   <Button
                     key={tag}
-                    variant="secondary"
+                    variant="outline"
                     className={styles.tag}
                     ariaPressed={activeTag === tag ? 'true' : 'false'}
                     onClick={() => handleTagClick(tag)}

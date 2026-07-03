@@ -1,5 +1,6 @@
 import { fetchUsers, inviteUser, removeUser, UserExistsError } from '@api/users'
 import { useAuth } from '@contexts/AuthContext'
+import { ToastProvider } from '@contexts/ToastContext'
 import type { AdminUser } from '@models/auth'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -48,7 +49,9 @@ const pendingUser: AdminUser = {
 const renderUserManagement = () =>
   render(
     <MemoryRouter initialEntries={['/admin/users']}>
-      <UserManagement />
+      <ToastProvider>
+        <UserManagement />
+      </ToastProvider>
     </MemoryRouter>
   )
 
@@ -188,8 +191,8 @@ describe('Admin UserManagement page', () => {
         expect(inviteUser).toHaveBeenCalledWith('token-123', 'new@akli.dev', 'contributor')
       })
 
-      const toast = await screen.findByRole('status')
-      expect(toast).toHaveTextContent(/invite sent to new@akli\.dev/i)
+      const toast = await screen.findByRole('button', { name: /invite sent to new@akli\.dev/i })
+      expect(toast).toBeInTheDocument()
     })
 
     it('shows an inline "User already exists" error when inviteUser rejects with UserExistsError', async () => {
@@ -278,8 +281,8 @@ describe('Admin UserManagement page', () => {
       })
 
       // Success toast
-      const toasts = await screen.findAllByRole('status')
-      expect(toasts.some((t) => /removed|success/i.test(t.textContent ?? ''))).toBe(true)
+      const toast = await screen.findByRole('button', { name: /removed/i })
+      expect(toast).toBeInTheDocument()
     })
   })
 })

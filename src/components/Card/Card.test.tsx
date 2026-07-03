@@ -1,55 +1,57 @@
+import Card from '@components/Card'
 import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
-import Card, { CardProps } from './Card'
+import userEvent from '@testing-library/user-event'
+import styles from './Card.module.css'
 
 describe('Card', () => {
-  beforeEach(() => {
-    vi.resetAllMocks()
+  it('renders children inside a div by default', () => {
+    render(<Card>Card content</Card>)
+
+    const card = screen.getByText('Card content')
+
+    expect(card).toBeInTheDocument()
+    expect(card.tagName).toBe('DIV')
   })
 
-  const mockProps: CardProps = {
-    title: 'Test Project',
-    description: 'This is a test description for the card component.',
-    image: { src: '/test-image.jpg', alt: 'Test Project' },
-    href: '/projects/test',
-  }
+  it('renders as the element passed via the "as" prop', () => {
+    render(<Card as="section">Section content</Card>)
 
-  const renderCard = (props = mockProps) =>
-    render(
-      <MemoryRouter>
-        <Card {...props} />
-      </MemoryRouter>
-    )
+    const card = screen.getByText('Section content')
 
-  it('renders the title and description correctly', () => {
-    renderCard()
-
-    expect(screen.getByText(mockProps.title)).toBeInTheDocument()
-    expect(screen.getByText(mockProps.description)).toBeInTheDocument()
+    expect(card.tagName).toBe('SECTION')
   })
 
-  it('renders the image with the correct alt text', () => {
-    renderCard()
+  it('renders a real button with the shared focus ring when onClick is provided, and fires onClick when clicked', async () => {
+    const user = userEvent.setup()
+    const handleClick = vi.fn()
 
-    const img = screen.getByRole('img')
-    expect(img).toHaveAttribute('alt', mockProps.image.alt)
+    render(<Card onClick={handleClick}>Click me</Card>)
+
+    const button = screen.getByRole('button', { name: /click me/i })
+
+    expect(button).toHaveAttribute('type', 'button')
+    // Card.module.css's `.asButton` composes the shared `focusRing` utility
+    // from interactions.module.css. Vitest's CSS Modules transform doesn't
+    // resolve cross-file `composes` merging (only Card.module.css's own
+    // local token is present at test time), so we assert the `asButton`
+    // class itself — the token that carries the focus ring in the real
+    // stylesheet — rather than the composed class name directly.
+    expect(button).toHaveClass(styles.asButton)
+
+    await user.click(button)
+
+    expect(handleClick).toHaveBeenCalledTimes(1)
   })
 
-  it('uses image.alt prop for alt text when provided', () => {
-    renderCard({
-      ...mockProps,
-      image: { src: '/test-image.jpg', alt: 'Custom Alt Text' },
-    })
+  it('applies the fill class when fill is true', () => {
+    render(<Card fill>Filled content</Card>)
 
-    const img = screen.getByRole('img')
-    expect(img).toHaveAttribute('alt', 'Custom Alt Text')
+    expect(screen.getByText('Filled content')).toHaveClass(styles.fill)
   })
 
-  it('renders the link with the correct destination', () => {
-    renderCard()
+  it('applies the hover class when hover is true', () => {
+    render(<Card hover>Hoverable content</Card>)
 
-    const link = screen.getByRole('link')
-    expect(link).toHaveAttribute('href', mockProps.href)
-    expect(link).toHaveTextContent(mockProps.href)
+    expect(screen.getByText('Hoverable content')).toHaveClass(styles.hover)
   })
 })

@@ -1,11 +1,11 @@
-import type { CardProps } from '@components/Card'
+import type { AppCardProps } from '@components/AppCard'
 import { render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import Apps from './Apps'
 
-vi.mock('@components/Card', () => ({
-  default: ({ title, description, href }: CardProps) => (
+vi.mock('@components/AppCard', () => ({
+  default: ({ title, description, href }: AppCardProps) => (
     <div data-testid="card-mock">
       <h3>{title}</h3>
       <p>{description}</p>

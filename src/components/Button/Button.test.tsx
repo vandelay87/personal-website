@@ -54,4 +54,32 @@ describe('Button', () => {
 
     expect(button).toBeDisabled()
   })
+
+  it('keeps the original label in the accessible name, and sets disabled/aria-busy, while loading', () => {
+    render(
+      <Button onClick={mockOnClick} loading>
+        Save
+      </Button>
+    )
+
+    // The visible label is only visually hidden while loading (an sr-only
+    // "Loading" prefix is added alongside it) — the original label text
+    // must still be reachable in the accessible name.
+    const button = screen.getByRole('button', { name: /save/i })
+
+    expect(button).toBeDisabled()
+    expect(button).toHaveAttribute('aria-busy', 'true')
+  })
+
+  it('does not fire onClick while loading', () => {
+    render(
+      <Button onClick={mockOnClick} loading>
+        Save
+      </Button>
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /save/i }))
+
+    expect(mockOnClick).not.toHaveBeenCalled()
+  })
 })

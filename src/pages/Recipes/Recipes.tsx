@@ -90,7 +90,7 @@ const Recipes: FC = () => {
           <Typography variant="bodyLarge">
             Something went wrong loading recipes.
           </Typography>
-          <Button variant="secondary" onClick={loadData}>
+          <Button variant="outline" onClick={loadData}>
             Retry
           </Button>
         </div>
@@ -133,7 +133,7 @@ const Recipes: FC = () => {
       {filteredRecipes.length === 0 ? (
         <div className={styles.empty}>
           <Typography variant="bodyLarge">No recipes found</Typography>
-          <Button variant="secondary" onClick={handleClearFilters}>
+          <Button variant="outline" onClick={handleClearFilters}>
             Clear filter
           </Button>
         </div>

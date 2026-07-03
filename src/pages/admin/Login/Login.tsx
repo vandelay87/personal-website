@@ -1,6 +1,5 @@
 import { completeNewPassword } from '@api/auth'
 import Button from '@components/Button'
-import Loading from '@components/Loading'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import type { AuthChallenge } from '@models/auth'
@@ -123,8 +122,8 @@ const Login = () => {
             </p>
           )}
 
-          <Button type="submit" disabled={loading}>
-            {loading ? <Loading size="small" /> : 'Set new password'}
+          <Button type="submit" loading={loading}>
+            Set new password
           </Button>
         </form>
       </div>
@@ -174,8 +173,8 @@ const Login = () => {
           </p>
         )}
 
-        <Button type="submit" disabled={loading}>
-          {loading ? <Loading size="small" /> : 'Log in'}
+        <Button type="submit" loading={loading}>
+          Log in
         </Button>
       </form>
     </div>

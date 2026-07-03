@@ -71,7 +71,7 @@ const RecipeDetail: FC = () => {
       <div className={styles.error}>
         <p>Something went wrong loading this recipe.</p>
         <Button
-          variant="secondary"
+          variant="outline"
           onClick={() => {
             setError(undefined)
             setLoading(true)

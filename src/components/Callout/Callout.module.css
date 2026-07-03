@@ -1,38 +1,55 @@
 .callout {
   display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
   margin: var(--space-4) 0;
-  border: var(--border-width) solid var(--color-border);
+  padding: var(--space-4) var(--space-5);
   border-radius: var(--radius-lg);
-  background-color: var(--color-surface);
-  box-shadow: var(--shadow-md);
   font-family: var(--font-sans);
   font-size: var(--font-size-base);
-  line-height: var(--line-height-normal);
+  line-height: var(--line-height-relaxed);
   color: var(--color-text);
 }
 
-.accentBar {
+.emoji {
   flex-shrink: 0;
-  width: 10px;
+  /* Design spec is 17px; --font-size-lg (18px) is the closest token. */
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-normal);
 }
 
-.content {
-  padding: var(--space-4);
-}
-
-.indicator {
-  font-weight: var(--font-weight-semibold);
+.label {
   margin-bottom: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
 }
 
-.tip .accentBar {
-  background-color: var(--color-success);
+.tip {
+  border: var(--border-width) solid color-mix(in srgb, var(--color-success) 24%, var(--color-border));
+  background: color-mix(in srgb, var(--color-success) 6%, var(--color-surface));
 }
 
-.warning .accentBar {
-  background-color: var(--color-warning);
+.tip .label {
+  color: var(--color-success);
 }
 
-.info .accentBar {
-  background-color: var(--color-primary);
+.warning {
+  border: var(--border-width) solid color-mix(in srgb, var(--color-warning) 24%, var(--color-border));
+  background: color-mix(in srgb, var(--color-warning) 6%, var(--color-surface));
+}
+
+.warning .label {
+  color: var(--color-warning);
+}
+
+.info {
+  border: var(--border-width) solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+}
+
+.info .label {
+  color: var(--color-primary);
 }

@@ -79,7 +79,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
             <Button
               onClick={() => handleMoveUp(index)}
               ariaLabel={`Move up ingredient ${index + 1}`}
-              variant="secondary"
+              variant="outline"
               disabled={index === 0}
               className={styles.actionButton}
             >
@@ -88,7 +88,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
             <Button
               onClick={() => handleMoveDown(index)}
               ariaLabel={`Move down ingredient ${index + 1}`}
-              variant="secondary"
+              variant="outline"
               disabled={index === ingredients.length - 1}
               className={styles.actionButton}
             >
@@ -97,7 +97,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
             <Button
               onClick={() => handleRemove(index)}
               ariaLabel={`Remove ingredient ${index + 1}`}
-              variant="secondary"
+              variant="outline"
               disabled={ingredients.length <= 1}
               className={styles.actionButton}
             >
@@ -106,7 +106,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
           </div>
         </div>
       ))}
-      <Button onClick={handleAdd} variant="secondary">
+      <Button onClick={handleAdd} variant="outline">
         Add ingredient
       </Button>
     </div>

@@ -1,13 +1,18 @@
 import { handleSessionError } from '@api/auth'
-import { deleteRecipe, fetchAllRecipes, publishRecipe, unpublishRecipe } from '@api/recipes'
+import {
+  deleteRecipe,
+  fetchAllRecipes,
+  publishRecipe,
+  unpublishRecipe,
+} from '@api/recipes'
 import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
 import Link from '@components/Link'
 import Loading from '@components/Loading'
 import StatusBadge from '@components/StatusBadge'
-import Toast, { type ToastState } from '@components/Toast'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
+import { useToast } from '@contexts/ToastContext'
 import type { Recipe } from '@models/recipe'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -16,23 +21,27 @@ import styles from './RecipeList.module.css'
 
 const RecipeList = () => {
   const { getAccessToken, logout } = useAuth()
+  const { showToast } = useToast()
   const navigate = useNavigate()
   const location = useLocation()
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Recipe | null>(null)
-  const [toast, setToast] = useState<ToastState | null>(null)
 
   const sortedRecipes = useMemo(
-    () => [...recipes].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
-    [recipes],
+    () =>
+      [...recipes].sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      ),
+    [recipes]
   )
 
   useEffect(() => {
     const state = location.state as { accessDenied?: boolean } | null
     if (state?.accessDenied) {
-      setToast({ message: 'Access denied', type: 'error' })
+      showToast('Access denied', 'error')
       navigate(location.pathname, { replace: true, state: null })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -135,58 +144,70 @@ const RecipeList = () => {
               </tr>
             </thead>
             <tbody>
-              {sortedRecipes.map((recipe) => (
-                <tr key={recipe.id}>
-                  <td>{recipe.title}</td>
-                  <td>
-                    <StatusBadge status={recipe.status} />
-                  </td>
-                  <td>{recipe.tags.join(', ')}</td>
-                  <td>{new Date(recipe.updatedAt).toLocaleDateString()}</td>
-                  <td className={styles.actions}>
-                    <div className={styles.actionsInner}>
-                      <Link to={`/admin/recipes/${recipe.id}/edit`} ariaLabel={`Edit ${recipe.title}`}>
-                        Edit
-                      </Link>
-                      <Link
-                        to={`/admin/recipes/${recipe.id}/preview`}
-                        ariaLabel={`Preview ${recipe.title}`}
-                      >
-                        Preview
-                      </Link>
-                      <button type="button" className={styles.actionLink} onClick={() => handlePublish(recipe)}>
-                        {recipe.status === 'published' ? 'Unpublish' : 'Publish'}
-                      </button>
-                      <button type="button" className={styles.actionLink} onClick={() => setDeleteTarget(recipe)}>
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {sortedRecipes.map((recipe) => {
+                const isPublished = recipe.status === 'published'
+                return (
+                  <tr key={recipe.id}>
+                    <td>{recipe.title}</td>
+                    <td>
+                      <StatusBadge tone={isPublished ? 'success' : 'warning'}>
+                        {isPublished ? 'Published' : 'Draft'}
+                      </StatusBadge>
+                    </td>
+                    <td>{recipe.tags.join(', ')}</td>
+                    <td>{new Date(recipe.updatedAt).toLocaleDateString()}</td>
+                    <td className={styles.actions}>
+                      <div className={styles.actionsInner}>
+                        <Link
+                          to={`/admin/recipes/${recipe.id}/edit`}
+                          ariaLabel={`Edit ${recipe.title}`}
+                        >
+                          Edit
+                        </Link>
+                        <Link
+                          to={`/admin/recipes/${recipe.id}/preview`}
+                          ariaLabel={`Preview ${recipe.title}`}
+                        >
+                          Preview
+                        </Link>
+                        <button
+                          type="button"
+                          className={styles.actionLink}
+                          onClick={() => handlePublish(recipe)}
+                        >
+                          {isPublished ? 'Unpublish' : 'Publish'}
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.actionLink}
+                          onClick={() => setDeleteTarget(recipe)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
 
         <ConfirmDialog
           title="Delete recipe"
-          message={`Are you sure you want to delete "${deleteTarget?.title ?? ''}"?`}
-          isOpen={deleteTarget !== null}
+          danger
+          open={deleteTarget !== null}
           onConfirm={handleDeleteConfirm}
           onCancel={() => setDeleteTarget(null)}
-        />
+        >
+          Are you sure you want to delete &quot;{deleteTarget?.title ?? ''}
+          &quot;?
+        </ConfirmDialog>
       </>
     )
   }
 
-  return (
-    <div className={styles.page}>
-      {renderContent()}
-      {toast && (
-        <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />
-      )}
-    </div>
-  )
+  return <div className={styles.page}>{renderContent()}</div>
 }
 
 export default RecipeList

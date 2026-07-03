@@ -15,7 +15,7 @@ const RecipeTagFilter: FC<RecipeTagFilterProps> = ({ tags, activeTag, onTagClick
       {tags.map(({ tag, count }) => (
         <Button
           key={tag}
-          variant="secondary"
+          variant="outline"
           className={styles.tag}
           ariaPressed={activeTag === tag ? 'true' : 'false'}
           onClick={() => onTagClick(tag)}

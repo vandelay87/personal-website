@@ -116,7 +116,7 @@ const StepList: FC<StepListProps> = ({
             <Button
               onClick={() => handleMoveUp(index)}
               ariaLabel={`Move up step ${index + 1}`}
-              variant="secondary"
+              variant="outline"
               disabled={index === 0}
               className={styles.actionButton}
             >
@@ -125,7 +125,7 @@ const StepList: FC<StepListProps> = ({
             <Button
               onClick={() => handleMoveDown(index)}
               ariaLabel={`Move down step ${index + 1}`}
-              variant="secondary"
+              variant="outline"
               disabled={index === steps.length - 1}
               className={styles.actionButton}
             >
@@ -134,7 +134,7 @@ const StepList: FC<StepListProps> = ({
             <Button
               onClick={() => handleRemove(index)}
               ariaLabel={`Remove step ${index + 1}`}
-              variant="secondary"
+              variant="outline"
               disabled={steps.length <= 1}
               className={styles.actionButton}
             >
@@ -143,7 +143,7 @@ const StepList: FC<StepListProps> = ({
           </div>
         </div>
       ))}
-      <Button onClick={handleAdd} variant="secondary">
+      <Button onClick={handleAdd} variant="outline">
         Add step
       </Button>
     </div>

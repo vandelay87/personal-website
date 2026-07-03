@@ -1,19 +1,43 @@
 .badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
   padding: var(--space-1) var(--space-2);
-  font-size: var(--font-size-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-meta);
   border: var(--border-width) solid var(--color-border);
+  /* Chips/tags/badges → --radius-sm per docs/design/paper/token-migration.md §3a
+     (StatusBadge .badge is listed explicitly). */
   border-radius: var(--radius-sm);
-}
-
-.badge[data-status='published'] {
-  background: var(--color-surface);
-  color: var(--color-text);
-  border-color: var(--color-primary);
-}
-
-.badge[data-status='draft'] {
   background: var(--color-surface);
   color: var(--color-text-muted);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: currentcolor;
+}
+
+.success {
+  color: var(--color-success);
+  background: var(--color-success-bg);
+}
+
+.warning {
+  color: var(--color-warning);
+  background: var(--color-warning-bg);
+}
+
+.error {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
+.neutral {
+  color: var(--color-text-muted);
+  background: var(--color-surface);
 }

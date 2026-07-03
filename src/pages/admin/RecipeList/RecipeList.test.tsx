@@ -1,5 +1,6 @@
 import { deleteRecipe, fetchAllRecipes, publishRecipe, unpublishRecipe } from '@api/recipes'
 import { useAuth } from '@contexts/AuthContext'
+import { ToastProvider } from '@contexts/ToastContext'
 import type { Recipe } from '@models/recipe'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
@@ -59,7 +60,9 @@ const mockPublishedRecipe: Recipe = {
 const renderRecipeList = () =>
   render(
     <MemoryRouter initialEntries={['/admin/recipes']}>
-      <RecipeList />
+      <ToastProvider>
+        <RecipeList />
+      </ToastProvider>
     </MemoryRouter>
   )
 
@@ -68,7 +71,9 @@ const renderRecipeListWithAccessDenied = () =>
     <MemoryRouter
       initialEntries={[{ pathname: '/admin/recipes', state: { accessDenied: true } }]}
     >
-      <RecipeList />
+      <ToastProvider>
+        <RecipeList />
+      </ToastProvider>
     </MemoryRouter>
   )
 
@@ -225,13 +230,10 @@ describe('Admin RecipeList page', () => {
   it('shows an "Access denied" toast when navigated here with accessDenied state', async () => {
     renderRecipeListWithAccessDenied()
 
-    const toast = await screen.findByText(/access denied/i)
+    // Toasts render as a dismissible button labelled with the message inside
+    // the ToastProvider's aria-live region.
+    const toast = await screen.findByRole('button', { name: /access denied/i })
     expect(toast).toBeInTheDocument()
-
-    // The toast should use role="status" for accessibility (aria-live)
-    const statuses = await screen.findAllByRole('status')
-    const accessDeniedStatus = statuses.find((el) => /access denied/i.test(el.textContent ?? ''))
-    expect(accessDeniedStatus).toBeDefined()
   })
 
   it('calls fetchAllRecipes (not fetchMyRecipes) to load both draft and published recipes', async () => {
@@ -278,7 +280,7 @@ describe('Admin RecipeList page', () => {
     expect(titles).toEqual(['Newest', 'Middle', 'Oldest'])
   })
 
-  it('renders a StatusBadge with matching data-status for each row in a mixed draft/published list', async () => {
+  it('renders a status label matching each row in a mixed draft/published list', async () => {
     renderRecipeList()
 
     await waitFor(() => {
@@ -291,10 +293,7 @@ describe('Admin RecipeList page', () => {
     expect(draftRow).not.toBeNull()
     expect(publishedRow).not.toBeNull()
 
-    const draftBadge = within(draftRow as HTMLElement).getByText(/draft/i)
-    const publishedBadge = within(publishedRow as HTMLElement).getByText(/^published$/i)
-
-    expect(draftBadge).toHaveAttribute('data-status', 'draft')
-    expect(publishedBadge).toHaveAttribute('data-status', 'published')
+    expect(within(draftRow as HTMLElement).getByText(/draft/i)).toBeInTheDocument()
+    expect(within(publishedRow as HTMLElement).getByText(/^published$/i)).toBeInTheDocument()
   })
 })

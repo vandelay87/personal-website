@@ -1,0 +1,87 @@
+/* AppCard component styles — the app-grid card: lift + cover-zoom, the
+   design's signature hover (see docs/design/paper/pages/Apps.dc.html
+   .app-card). Uses the shared cardLift/cardLiftImage composables rather
+   than the --shadow-* scale (reserved for toasts/dropdowns/dialogs) —
+   the lift shadow is a literal, matching the shared utility. */
+
+.card {
+  composes: cardLift focusRing nudgeUpRight from '../../styles/interactions.module.css';
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  border: var(--border-width) solid var(--color-border);
+  background-color: var(--color-surface);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color var(--duration-fast) var(--easing-default);
+}
+
+.card:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}
+
+.imageWrapper {
+  /* aspect-video = 16/9 */
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  overflow: hidden;
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.imageWrapper > figure > div {
+  border: none;
+  border-radius: 0;
+}
+
+/* Applied to the underlying <img> (via Image's `className` prop) — pairs
+   with `.card`'s composed `cardLift` for the cover-zoom-on-hover effect. */
+.imageScaled {
+  composes: cardLiftImage from '../../styles/interactions.module.css';
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding-block-start: 0;
+  padding-block-end: var(--space-6);
+  padding-inline: var(--space-6);
+}
+
+.titleRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-block-end: var(--space-2);
+}
+
+.title {
+  margin-block-end: 0;
+}
+
+.arrowIcon {
+  composes: linkIcon from '../../styles/interactions.module.css';
+  flex-shrink: 0;
+  color: var(--color-primary);
+  font-size: var(--font-size-lg);
+}
+
+.description {
+  margin-block-end: var(--space-4);
+}
+
+.openApp {
+  margin-block-start: auto;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
