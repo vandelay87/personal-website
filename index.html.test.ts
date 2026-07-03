@@ -81,20 +81,13 @@ describe('index.html no-flash theme script', () => {
   })
 
   it('does not throw when localStorage access fails (e.g. private browsing)', () => {
-    const throwingRun = () => {
-      const setAttribute = vi.fn()
-      const documentElement = { getAttribute: vi.fn(), setAttribute }
-      const mockDocument = { documentElement }
-      const mockLocalStorage = {
-        getItem: vi.fn(() => {
+    const throwingRun = () =>
+      run({
+        getItem: () => {
           throw new Error('SecurityError: access denied')
-        }),
-      }
-      const mockWindow = { matchMedia: vi.fn(() => ({ matches: false })) }
-
-      const scriptFn = new Function('document', 'localStorage', 'window', scriptBody)
-      scriptFn(mockDocument, mockLocalStorage, mockWindow)
-    }
+        },
+        matches: false,
+      })
 
     expect(throwingRun).not.toThrow()
   })
