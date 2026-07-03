@@ -7,14 +7,19 @@
    (relative path from a component two levels down in src/components/<Name>/ —
    there is no `@/` or `@styles` alias in this project) instead.
 
-   Field focus-ring and the `--ring` box-shadow are deliberately NOT in this
-   file — that's owned by the a11y-engineer pass (issue #221 AC2), which
-   also adds the forced-colors / `@supports(color-mix/backdrop-filter)`
-   fallbacks. Toast hover-reveal, header sticky-blur, and theme-toggle hover
-   are out of scope here too: each belongs to a component that either
-   already has its own paper-spec styling (ThemeToggle) or is a separate
-   future rebuild issue (Toast, Header) that will port its own `_helpers.css`
-   rule when it lands. */
+   Toast hover-reveal and theme-toggle hover are out of scope here: each
+   belongs to a component that either already has its own paper-spec
+   styling (ThemeToggle) or is a separate future rebuild issue (Toast)
+   that will port its own `_helpers.css` rule when it lands.
+
+   The focus-ring composable below (`.focusRing`) is the a11y-engineer
+   pass's addition (issue #221 AC2) — it's the canonical `:focus-visible`
+   + forced-colors + `@supports(color-mix)` pattern future component
+   rebuilds should `composes` from, same as the utilities above. There is
+   no `backdrop-filter` `@supports` fallback here: nothing in scope today
+   uses `backdrop-filter` (the sticky header's blur, and its solid-bg
+   fallback, land with the Header rebuild in issue #224) — see the note
+   above `.focusRing` for the fallback pattern to reuse when that lands. */
 
 /* ── Links — icon nudge ──────────────────────────────────────
    Apply `linkIcon` to the icon element, and one direction class to the
@@ -91,6 +96,60 @@
   color: var(--color-error);
   border-color: color-mix(in srgb, var(--color-error) 40%, var(--color-border));
 }
+
+/* ── Focus ring ────────────────────────────────────────────────
+   Composable `:focus-visible` ring — apply by composing `focusRing` onto
+   the interactive element's own class (not onto a `:focus-visible` rule;
+   CSS Modules only allows `composes` on a plain single-class selector),
+   e.g. (path relative to a component two levels down in
+   src/components/<Name>/):
+     .toggle { composes: focusRing from '../../styles/interactions.module.css'; }
+   Never pair this with the element's own `outline: none` — `.focusRing`
+   already owns `outline` on :focus-visible and must be the only source
+   of it, or forced-colors mode below loses its indicator.
+
+   Pairs the `--ring` box-shadow (tokens.css) with a transparent 2px
+   outline: box-shadow is dropped in forced-colors/Windows High Contrast
+   mode, but browsers substitute a visible system color for *any*
+   `outline-color` (even `transparent`) in that mode, so the outline
+   alone keeps the indicator visible there. `outline-offset` is literal
+   (no matching --space-* token, mirrors this file's other literal
+   values) — kept separate from the ring so the two don't visually
+   merge into one thick band. */
+.focusRing:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--ring);
+}
+
+/* `--ring` uses color-mix(); without support it resolves to an invalid
+   custom property, which makes `box-shadow` compute to `none` (guaranteed-
+   invalid value → property's initial value) — silently invisible focus in
+   normal (non-forced-colors) rendering, since the outline above is
+   transparent there. Detect the same function used by `--ring` (not just
+   any `color-mix()`, since browsers may support different color spaces)
+   and fall back to a solid, opaque outline instead. */
+@supports not (color: color-mix(in srgb, red 50%, transparent)) {
+  .focusRing:focus-visible {
+    outline-color: var(--color-primary);
+    box-shadow: none;
+  }
+}
+
+/* Reusable pattern for the future Header rebuild (issue #224): the
+   sticky header's `backdrop-filter` blur needs the same treatment —
+   guard it with `@supports (backdrop-filter: blur(1px))` for the blur
+   itself, and provide an opaque `background` fallback in the negated
+   query so text never bleeds through an unblurred translucent bg:
+     .stickyHeader { background: var(--color-bg); }
+     @supports (backdrop-filter: blur(1px)) {
+       .stickyHeader {
+         background: color-mix(in srgb, var(--color-bg) 85%, transparent);
+         backdrop-filter: blur(8px);
+       }
+     }
+   Not applied anywhere in this file — no component in scope for issue
+   #221 uses `backdrop-filter` yet (Header is still old neo-brutalist). */
 
 /* ── Spinner ───────────────────────────────────────────────── */
 .spinner {
