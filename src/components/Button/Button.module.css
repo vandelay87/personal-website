@@ -122,5 +122,9 @@
   border: 2px solid currentcolor;
   border-right-color: transparent;
   border-radius: var(--radius-full);
-  animation: spin var(--duration-base) linear infinite;
+  /* `global(...)` is required here — without it, Vite's CSS Modules
+     transform scopes the `spin` identifier to a hashed local name that has
+     no matching @keyframes, silently no-op'ing the animation (spin lives,
+     unscoped, in the plain src/styles/animations.css file). */
+  animation: global(spin) var(--duration-base) linear infinite;
 }

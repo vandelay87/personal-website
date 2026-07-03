@@ -151,8 +151,12 @@
      literal per _helpers.css spec. */
   border: 3px solid var(--color-border);
   border-top-color: var(--color-primary);
-  /* 0.7s not in the duration token scale; kept literal per _helpers.css spec. */
-  animation: spin 0.7s linear infinite;
+  /* 0.7s not in the duration token scale; kept literal per _helpers.css spec.
+     `global(...)` is required — without it, Vite's CSS Modules transform
+     scopes the `spin` identifier to a hashed local name with no matching
+     @keyframes, silently no-op'ing the animation (spin lives, unscoped, in
+     the plain src/styles/animations.css file, not a .module.css). */
+  animation: global(spin) 0.7s linear infinite;
 }
 
 .spinnerSm {
@@ -176,8 +180,9 @@
     var(--color-surface) 70%
   );
   background-size: 200% 100%;
-  /* 1.3s not in the duration token scale; kept literal per _helpers.css spec. */
-  animation: shimmerSweep 1.3s linear infinite;
+  /* 1.3s not in the duration token scale; kept literal per _helpers.css spec.
+     `global(...)` required — see the .spinner comment above. */
+  animation: global(shimmerSweep) 1.3s linear infinite;
 }
 
 /* ── Reduced motion ────────────────────────────────────────────
