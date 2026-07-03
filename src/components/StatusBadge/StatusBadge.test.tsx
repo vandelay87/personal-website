@@ -2,39 +2,21 @@ import StatusBadge from '@components/StatusBadge'
 import { render, screen } from '@testing-library/react'
 
 describe('StatusBadge', () => {
-  it('renders "Draft" text when status is draft', () => {
-    render(<StatusBadge status="draft" />)
-
-    expect(screen.getByText('Draft')).toBeInTheDocument()
-  })
-
-  it('renders "Published" text when status is published', () => {
-    render(<StatusBadge status="published" />)
+  it('renders the provided children as its text content', () => {
+    render(<StatusBadge tone="success">Published</StatusBadge>)
 
     expect(screen.getByText('Published')).toBeInTheDocument()
   })
 
-  it('sets data-status="draft" on the element when status is draft', () => {
-    render(<StatusBadge status="draft" />)
+  it('renders different label text per tone', () => {
+    render(<StatusBadge tone="warning">Draft</StatusBadge>)
 
-    const badge = screen.getByText('Draft').closest('[data-status]')
-
-    expect(badge).toHaveAttribute('data-status', 'draft')
+    expect(screen.getByText('Draft')).toBeInTheDocument()
   })
 
-  it('sets data-status="published" on the element when status is published', () => {
-    render(<StatusBadge status="published" />)
+  it('is visible to assistive tech (not aria-hidden itself)', () => {
+    render(<StatusBadge tone="error">Failed</StatusBadge>)
 
-    const badge = screen.getByText('Published').closest('[data-status]')
-
-    expect(badge).toHaveAttribute('data-status', 'published')
-  })
-
-  it('includes a visually-hidden "Status:" prefix for screen readers', () => {
-    render(<StatusBadge status="draft" />)
-
-    const prefix = screen.getByText('Status:', { exact: false, selector: '.sr-only' })
-
-    expect(prefix).toBeInTheDocument()
+    expect(screen.getByText('Failed')).toBeVisible()
   })
 })

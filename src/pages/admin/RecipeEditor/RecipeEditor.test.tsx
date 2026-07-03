@@ -9,6 +9,7 @@ import {
   updateRecipe,
 } from '@api/recipes'
 import { useAuth } from '@contexts/AuthContext'
+import { ToastProvider } from '@contexts/ToastContext'
 import { useAutosave, type AutosaveStatus, type UseAutosaveResult } from '@hooks/useAutosave'
 import type {
   ImageReadyUpdate,
@@ -252,7 +253,11 @@ const renderEditor = (route = '/admin/recipes/new') => {
     ],
     { initialEntries: [route] }
   )
-  return render(<RouterProvider router={router} />)
+  return render(
+    <ToastProvider>
+      <RouterProvider router={router} />
+    </ToastProvider>
+  )
 }
 
 describe('RecipeEditor page', () => {
@@ -593,8 +598,10 @@ describe('RecipeEditor page', () => {
         )
       })
 
-      // Primary button still reads "Update" — mode did not change.
-      expect(screen.getByRole('button', { name: /update/i })).toBeInTheDocument()
+      // Primary button still reads "Update" — mode did not change. Match the
+      // exact accessible name so this doesn't also match the "Recipe
+      // updated" success toast that appears after the save resolves.
+      expect(screen.getByRole('button', { name: 'Update' })).toBeInTheDocument()
       expect(screen.queryByRole('button', { name: /^publish$/i })).not.toBeInTheDocument()
     })
   })

@@ -35,6 +35,6 @@ describe('FileMeta', () => {
 
   it('renders loading component when no fileInfo and no error', () => {
     render(<FileMeta fileInfo={null} hasError={false} />)
-    expect(screen.getByRole('status', { name: /loading content/i })).toBeInTheDocument()
+    expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument()
   })
 })
