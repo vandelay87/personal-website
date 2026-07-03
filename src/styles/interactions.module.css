@@ -29,7 +29,7 @@
      .icon  { composes: linkIcon   from '../../styles/interactions.module.css'; } */
 .linkIcon {
   display: inline-flex;
-  transition: transform var(--duration-fast) var(--easing-default);
+  transition: transform var(--duration-base) var(--easing-default);
 }
 
 .nudgeRight:hover .linkIcon {
