@@ -59,7 +59,7 @@ const TagInput: FC<TagInputProps> = ({
             <Button
               onClick={() => removeTag(i)}
               ariaLabel={`Remove ${tag}`}
-              variant="secondary"
+              variant="outline"
               className={styles.removeBtn}
             >
               &times;

@@ -2,6 +2,10 @@
   margin: 0;
 }
 
+.small .inner {
+  border-radius: var(--radius-md);
+}
+
 .inner {
   position: relative;
   overflow: hidden;

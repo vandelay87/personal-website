@@ -11,6 +11,7 @@ import {
 import { AuthProvider } from './contexts/AuthContext'
 import { RecipeDataContext } from './contexts/RecipeDataContext'
 import type { RecipeData } from './contexts/RecipeDataContext'
+import { ToastProvider } from './contexts/ToastContext'
 import { getMetaTags, escapeHtml } from './meta'
 import { routes } from './routes'
 
@@ -102,9 +103,11 @@ export const render = async (url: string, data?: RecipeData): Promise<string> =>
   return new Promise<string>((resolve, reject) => {
     const { pipe } = renderToPipeableStream(
       <AuthProvider>
-        <RecipeDataContext.Provider value={data ?? {}}>
-          <StaticRouterProvider router={router} context={context} />
-        </RecipeDataContext.Provider>
+        <ToastProvider>
+          <RecipeDataContext.Provider value={data ?? {}}>
+            <StaticRouterProvider router={router} context={context} />
+          </RecipeDataContext.Provider>
+        </ToastProvider>
       </AuthProvider>,
       {
         onAllReady() {

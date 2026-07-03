@@ -1,59 +1,31 @@
-/* Card component styles */
+/* Generic Card container — hairline border, optional fill + hover. */
 
 .card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border-radius: var(--radius-xl);
+  display: block;
   border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-bg);
+  padding: var(--space-6);
+  transition: background-color var(--duration-fast) var(--easing-default);
+}
+
+.fill {
   background-color: var(--color-surface);
-  box-shadow: var(--shadow-md);
-  transition:
-    transform var(--duration-fast) var(--easing-default),
-    box-shadow var(--duration-fast) var(--easing-default);
 }
 
-.card:hover {
-  transform: translate(-4px, -4px);
-  box-shadow: var(--shadow-lg);
+.hover:hover {
+  background-color: var(--color-hover);
 }
 
-.imageWrapper {
-  /* aspect-video = 16/9 */
-  aspect-ratio: 16 / 9;
+.asButton {
   width: 100%;
-  overflow: hidden;
-  border-bottom: var(--border-width) solid var(--color-border);
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: pointer;
 }
 
-.imageWrapper > figure > div {
-  border: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card {
-    transition: none;
-  }
-
-  .card:hover {
-    transform: none;
-  }
-}
-
-.body {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  padding-block-start: 0;
-  padding-block-end: var(--space-6);
-  padding-inline: var(--space-6);
-}
-
-.title {
-  margin-block-end: var(--space-2);
-}
-
-.description {
-  margin-block-end: var(--space-4);
+.asButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }

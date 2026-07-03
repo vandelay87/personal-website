@@ -1,6 +1,9 @@
 /* Link component styles */
 
 .link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
   color: var(--color-link);
   font-weight: inherit;
   text-decoration: underline;
@@ -9,10 +12,28 @@
   transition: color var(--duration-fast) var(--easing-default);
 }
 
+.link:hover {
+  color: var(--color-primary);
+}
+
 .link:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
+}
+
+/* ── Tone ────────────────────────────────────────────────────── */
+
+.inherit {
+  color: inherit;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.accent {
+  color: var(--color-primary);
 }
 
 /* ── Underline modifier ──────────────────────────────────────── */
@@ -20,4 +41,24 @@
 .underline {
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+/* ── Icon + nudge ────────────────────────────────────────────── */
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  transition: transform var(--duration-base) var(--easing-default);
+}
+
+.link:hover .nudge-right {
+  transform: translateX(3px);
+}
+
+.link:hover .nudge-left {
+  transform: translateX(-3px);
+}
+
+.link:hover .nudge-up-right {
+  transform: translate(3px, -3px);
 }

@@ -1,17 +1,30 @@
-import type { Recipe } from '@models/recipe'
-import type { FC } from 'react'
+import type { CSSProperties, FC, ReactNode } from 'react'
 
 import styles from './StatusBadge.module.css'
 
 export interface StatusBadgeProps {
-  status: Recipe['status']
+  /** @default 'neutral' */
+  tone?: 'success' | 'warning' | 'error' | 'neutral'
+  /** Show the leading dot. @default true */
+  dot?: boolean
+  children?: ReactNode
+  className?: string
+  style?: CSSProperties
 }
 
-const StatusBadge: FC<StatusBadgeProps> = ({ status }) => {
+const StatusBadge: FC<StatusBadgeProps> = ({
+  tone = 'neutral',
+  dot = true,
+  children,
+  className: extraClassName,
+  style,
+}) => {
+  const className = [styles.badge, styles[tone], extraClassName].filter(Boolean).join(' ')
+
   return (
-    <span className={styles.badge} data-status={status}>
-      <span className="sr-only">Status: </span>
-      {status === 'published' ? 'Published' : 'Draft'}
+    <span className={className} style={style}>
+      {dot && <span aria-hidden="true" className={styles.dot} />}
+      {children}
     </span>
   )
 }

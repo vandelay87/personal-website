@@ -29,7 +29,7 @@ const AdminLayout: FC<AdminLayoutProps> = ({ children }) => {
           <Typography variant="body" as="span">
             {user?.email}
           </Typography>
-          <Button onClick={logout} variant="secondary" ariaLabel="Logout">
+          <Button onClick={logout} variant="outline" ariaLabel="Logout">
             Logout
           </Button>
         </div>

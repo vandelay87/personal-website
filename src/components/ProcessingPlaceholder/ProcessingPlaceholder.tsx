@@ -3,7 +3,10 @@ import styles from './ProcessingPlaceholder.module.css'
 
 export interface ProcessingPlaceholderProps {
   aspectRatio?: string
+  height?: string
   caption?: string
+  /** Compact variant (step thumbnails). @default false */
+  small?: boolean
   className?: string
 }
 
@@ -11,7 +14,9 @@ const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
 
 const ProcessingPlaceholder: FC<ProcessingPlaceholderProps> = ({
   aspectRatio,
+  height,
   caption = 'Processing image…',
+  small = false,
   className = '',
 }) => {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
@@ -34,6 +39,7 @@ const ProcessingPlaceholder: FC<ProcessingPlaceholderProps> = ({
 
   const rootClassName = [
     styles.root,
+    small ? styles.small : '',
     prefersReducedMotion ? styles.reducedMotion : '',
     className,
   ]
@@ -44,11 +50,11 @@ const ProcessingPlaceholder: FC<ProcessingPlaceholderProps> = ({
     <figure className={rootClassName}>
       <div
         className={styles.inner}
-        style={{ aspectRatio: aspectRatio ?? undefined }}
+        style={{ aspectRatio: aspectRatio ?? undefined, height }}
       >
         <div className={styles.overlay} aria-hidden="true" />
       </div>
-      <figcaption className={styles.caption}>{caption}</figcaption>
+      <figcaption className={small ? 'sr-only' : styles.caption}>{caption}</figcaption>
     </figure>
   )
 }

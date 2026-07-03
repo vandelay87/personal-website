@@ -2,21 +2,17 @@ import type { FC } from 'react'
 import styles from './Loading.module.css'
 
 export interface LoadingProps {
-  size?: 'default' | 'small'
+  label?: string
 }
 
-const Loading: FC<LoadingProps> = ({ size = 'default' }) => {
-  const className = size === 'small'
-    ? `${styles.spinner} ${styles.small}`
-    : styles.spinner
-
+const Loading: FC<LoadingProps> = ({ label = 'Loading…' }) => {
   return (
-    <span
-      role="status"
-      aria-live="polite"
-      aria-label="Loading content"
-      className={className}
-    />
+    <span role="status" aria-live="polite" aria-label={label} className={styles.container}>
+      <span className={styles.spinner} aria-hidden="true" />
+      <span className={styles.label} aria-hidden="true">
+        {label}
+      </span>
+    </span>
   )
 }
 

@@ -1,0 +1,59 @@
+/* Card component styles */
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  border: var(--border-width) solid var(--color-border);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  transition:
+    transform var(--duration-fast) var(--easing-default),
+    box-shadow var(--duration-fast) var(--easing-default);
+}
+
+.card:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.imageWrapper {
+  /* aspect-video = 16/9 */
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  overflow: hidden;
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.imageWrapper > figure > div {
+  border: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding-block-start: 0;
+  padding-block-end: var(--space-6);
+  padding-inline: var(--space-6);
+}
+
+.title {
+  margin-block-end: var(--space-2);
+}
+
+.description {
+  margin-block-end: var(--space-4);
+}

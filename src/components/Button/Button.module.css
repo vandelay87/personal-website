@@ -4,11 +4,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: var(--space-2);
   padding: var(--space-2) var(--space-6);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-normal);
-  border: var(--border-width) solid var(--color-border);
+  font-family: inherit;
+  border: var(--border-width) solid var(--color-border-strong);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
@@ -38,12 +40,71 @@
 
 /* ── Variants ────────────────────────────────────────────────── */
 
-.primary {
-  background-color: var(--color-primary);
-  color: var(--color-on-primary);
+.solid {
+  background-color: var(--color-btn-bg);
+  color: var(--color-btn-fg);
+  border-color: var(--color-btn-bg);
 }
 
-.secondary {
+.outline {
   background-color: transparent;
   color: var(--color-text);
+}
+
+.danger {
+  background-color: var(--color-error);
+  color: var(--color-on-primary);
+  border-color: var(--color-error);
+}
+
+/* ── Shape ───────────────────────────────────────────────────── */
+
+.pill {
+  border-radius: var(--radius-full);
+}
+
+/* ── Size ────────────────────────────────────────────────────── */
+
+.sm {
+  padding: var(--space-1) var(--space-4);
+  font-size: var(--font-size-sm);
+}
+
+/* ── Modifiers ───────────────────────────────────────────────── */
+
+.fullWidth {
+  width: 100%;
+}
+
+.loading {
+  cursor: wait;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.spinner {
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentcolor;
+  border-right-color: transparent;
+  border-radius: var(--radius-full);
+  animation: btn-spin var(--duration-base) linear infinite;
+}
+
+@keyframes btn-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 1.5s;
+  }
 }

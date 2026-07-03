@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import Card, { CardProps } from './Card'
+import AppCard, { AppCardProps } from './AppCard'
 
-describe('Card', () => {
+describe('AppCard', () => {
   beforeEach(() => {
     vi.resetAllMocks()
   })
 
-  const mockProps: CardProps = {
+  const mockProps: AppCardProps = {
     title: 'Test Project',
     description: 'This is a test description for the card component.',
     image: { src: '/test-image.jpg', alt: 'Test Project' },
@@ -17,7 +17,7 @@ describe('Card', () => {
   const renderCard = (props = mockProps) =>
     render(
       <MemoryRouter>
-        <Card {...props} />
+        <AppCard {...props} />
       </MemoryRouter>
     )
 

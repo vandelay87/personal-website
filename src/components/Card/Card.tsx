@@ -1,39 +1,54 @@
-import Image from '@components/Image'
-import type { ImageProps } from '@components/Image/Image'
-import Link from '@components/Link'
-import Typography from '@components/Typography'
-import type { FC } from 'react'
+import type { CSSProperties, ElementType, MouseEvent, ReactNode } from 'react'
 import styles from './Card.module.css'
 
 export interface CardProps {
-  title: string
-  description: string
-  href: string
-  image: ImageProps
+  as?: ElementType
+  /** Surface fill vs page background. @default false */
+  fill?: boolean
+  /** CSS padding value. */
+  padding?: string
+  /** CSS border-radius. */
+  radius?: string
+  /** Subtle hover wash for clickable cards. @default false */
+  hover?: boolean
+  onClick?: (e: MouseEvent) => void
+  children?: ReactNode
+  className?: string
+  style?: CSSProperties
 }
 
-const Card: FC<CardProps> = ({ title, description, href, image }) => {
+const Card = ({
+  as,
+  fill = false,
+  padding,
+  radius,
+  hover = false,
+  onClick,
+  children,
+  className: extraClassName,
+  style,
+}: CardProps) => {
+  const Component = as ?? (onClick ? 'button' : 'div')
+
+  const className = [
+    styles.card,
+    fill && styles.fill,
+    hover && styles.hover,
+    Component === 'button' && styles.asButton,
+    extraClassName,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return (
-    <article className={styles.card}>
-      <div className={styles.imageWrapper}>
-        <Image
-          {...image}
-          className={styles.imageScaled}
-          aspectRatio="16/9"
-          objectFit="cover"
-        />
-      </div>
-
-      <div className={styles.body}>
-        <Typography variant="heading3" as="h2" className={styles.title}>
-          {title}
-        </Typography>
-
-        <Typography variant="body" className={styles.description}>{description}</Typography>
-
-        <Link to={href}>{href}</Link>
-      </div>
-    </article>
+    <Component
+      type={Component === 'button' ? 'button' : undefined}
+      className={className}
+      onClick={onClick}
+      style={{ padding, borderRadius: radius, ...style }}
+    >
+      {children}
+    </Component>
   )
 }
 

@@ -1,5 +1,5 @@
-import Card from '@components/Card'
-import type { CardProps } from '@components/Card'
+import AppCard from '@components/AppCard'
+import type { AppCardProps } from '@components/AppCard'
 import Grid from '@components/Grid'
 import SocialCard from '@components/SocialCard'
 import Typography from '@components/Typography'
@@ -10,7 +10,7 @@ import imgSrc from '../../assets/sand-box.webp'
 import imgSrcSet from '../../assets/sand-box.webp?w=320;640;768;1024;1280;1536;1920&format=webp&as=srcset'
 import styles from './Apps.module.css'
 
-const CARDS: CardProps[] = [
+const CARDS: AppCardProps[] = [
   {
     title: 'Pokedex',
     description:
@@ -46,7 +46,7 @@ const Apps: FC = () => {
       </Typography>
       <Grid columns={3}>
         {CARDS.map((card) => (
-          <Card {...card} key={card.href} />
+          <AppCard {...card} key={card.href} />
         ))}
       </Grid>
       <div className={styles.social}>

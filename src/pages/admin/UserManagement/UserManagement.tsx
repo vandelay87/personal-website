@@ -3,9 +3,9 @@ import { fetchUsers, inviteUser, removeUser, UserExistsError } from '@api/users'
 import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
 import Loading from '@components/Loading'
-import Toast, { type ToastState } from '@components/Toast'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
+import { useToast } from '@contexts/ToastContext'
 import type { AdminRole, AdminUser } from '@models/auth'
 import { useCallback, useEffect, useId, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -18,6 +18,7 @@ const isValidEmail = (value: string): boolean => EMAIL_PATTERN.test(value.trim()
 
 const UserManagement = () => {
   const { getAccessToken, logout, user: currentUser } = useAuth()
+  const { showToast } = useToast()
   const navigate = useNavigate()
   const emailInputId = useId()
   const roleInputId = useId()
@@ -26,7 +27,6 @@ const UserManagement = () => {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
-  const [toast, setToast] = useState<ToastState | null>(null)
 
   const [inviteFormOpen, setInviteFormOpen] = useState(false)
   const [inviteEmail, setInviteEmail] = useState('')
@@ -74,7 +74,7 @@ const UserManagement = () => {
       const token = await getAccessToken()
       await inviteUser(token, trimmedEmail, inviteRole)
       resetInviteForm()
-      setToast({ message: `Invite sent to ${trimmedEmail}`, type: 'success' })
+      showToast(`Invite sent to ${trimmedEmail}`, 'success')
       await loadUsers()
     } catch (err) {
       if (err instanceof UserExistsError) {
@@ -94,11 +94,11 @@ const UserManagement = () => {
     try {
       const token = await getAccessToken()
       await removeUser(token, target.userId)
-      setToast({ message: `User ${target.email} removed`, type: 'success' })
+      showToast(`User ${target.email} removed`, 'success')
       await loadUsers()
     } catch (err) {
       if (!handleSessionError(err, logout, navigate)) {
-        setToast({ message: 'Failed to remove user', type: 'error' })
+        showToast('Failed to remove user', 'error')
       }
     }
   }
@@ -176,7 +176,7 @@ const UserManagement = () => {
             </div>
 
             <div className={styles.formActions}>
-              <Button onClick={resetInviteForm} variant="secondary">
+              <Button onClick={resetInviteForm} variant="outline">
                 Cancel
               </Button>
               <Button type="submit" disabled={submitDisabled}>
@@ -216,7 +216,7 @@ const UserManagement = () => {
                       {!isSelf && (
                         <Button
                           onClick={() => setRemoveTarget(userRow)}
-                          variant="secondary"
+                          variant="outline"
                           ariaLabel={`Remove ${userRow.email}`}
                         >
                           Remove
@@ -232,16 +232,15 @@ const UserManagement = () => {
 
         <ConfirmDialog
           title="Remove user"
-          message={
-            removeTarget
-              ? `Are you sure you want to remove ${removeTarget.email}? They will lose access immediately.`
-              : ''
-          }
-          isOpen={removeTarget !== null}
+          danger
+          open={removeTarget !== null}
           onConfirm={handleRemoveConfirm}
           onCancel={() => setRemoveTarget(null)}
           confirmLabel="Confirm"
-        />
+        >
+          {removeTarget &&
+            `Are you sure you want to remove ${removeTarget.email}? They will lose access immediately.`}
+        </ConfirmDialog>
       </>
     )
   }
@@ -249,9 +248,6 @@ const UserManagement = () => {
   return (
     <div className={styles.page}>
       {renderContent()}
-      {toast && (
-        <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />
-      )}
     </div>
   )
 }

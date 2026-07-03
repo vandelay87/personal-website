@@ -18,8 +18,8 @@ import Link from '@components/Link'
 import Loading from '@components/Loading'
 import StepList from '@components/StepList'
 import TagInput from '@components/TagInput'
-import Toast from '@components/Toast'
 import { useAuth } from '@contexts/AuthContext'
+import { useToast } from '@contexts/ToastContext'
 import { useAutosave } from '@hooks/useAutosave'
 import {
   useImageProcessingPoll,
@@ -232,6 +232,7 @@ const NEW_PATH = '/admin/recipes/new'
 const RecipeEditor: FC = () => {
   const { id: routeId } = useParams<{ id: string }>()
   const { getAccessToken } = useAuth()
+  const { showToast } = useToast()
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -241,7 +242,6 @@ const RecipeEditor: FC = () => {
   const [existingTags, setExistingTags] = useState<string[]>([])
   const [loading, setLoading] = useState(Boolean(routeId))
   const [submitting, setSubmitting] = useState(false)
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [announcement, setAnnouncement] = useState({ message: '', toggle: false })
   const [sessionExpired, setSessionExpired] = useState(false)
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false)
@@ -273,8 +273,8 @@ const RecipeEditor: FC = () => {
     if (err instanceof Error && /^409\b/.test(message)) {
       setSlugError(message.replace(/^409\s*/, ''))
     }
-    setToast({ message: fallback ?? `Error: ${message}`, type: 'error' })
-  }, [])
+    showToast(fallback ?? `Error: ${message}`, 'error')
+  }, [showToast])
 
   const blocker = useBlocker(form.dirty)
 
@@ -436,7 +436,7 @@ const RecipeEditor: FC = () => {
       const updated = await publishRecipe(token, form.id)
       dispatch({ type: 'MARK_PRISTINE' })
       dispatch({ type: 'SET_MODE', mode: updated.status })
-      setToast({ message: 'Recipe published', type: 'success' })
+      showToast('Recipe published', 'success')
     } catch (err) {
       handleError(err)
     } finally {
@@ -451,7 +451,7 @@ const RecipeEditor: FC = () => {
       const token = await getAccessToken()
       await updateRecipe(token, form.id, buildPatchPayload(form))
       dispatch({ type: 'MARK_PRISTINE' })
-      setToast({ message: 'Recipe updated', type: 'success' })
+      showToast('Recipe updated', 'success')
     } catch (err) {
       handleError(err)
     } finally {
@@ -469,7 +469,7 @@ const RecipeEditor: FC = () => {
       const token = await getAccessToken()
       const updated = await unpublishRecipe(token, form.id)
       dispatch({ type: 'SET_MODE', mode: updated.status })
-      setToast({ message: 'Recipe unpublished', type: 'success' })
+      showToast('Recipe unpublished', 'success')
     } catch (err) {
       handleError(err)
     } finally {
@@ -493,10 +493,6 @@ const RecipeEditor: FC = () => {
       handleError(err)
     }
   }
-
-  const handleDismissToast = useCallback(() => {
-    setToast(null)
-  }, [])
 
   const setIngredients = useCallback((next: Ingredient[]) => setField('ingredients', next), [setField])
   const setSteps = useCallback((next: Step[]) => setField('steps', next), [setField])
@@ -601,7 +597,7 @@ const RecipeEditor: FC = () => {
               <Button
                 onClick={() => dispatch({ type: 'RESET_SLUG_TO_TITLE' })}
                 type="button"
-                variant="secondary"
+                variant="outline"
               >
                 Reset to title slug
               </Button>
@@ -735,15 +731,16 @@ const RecipeEditor: FC = () => {
               <Button
                 onClick={handlePublish}
                 type="button"
-                disabled={submitting || !canPublish}
+                loading={submitting}
+                disabled={!canPublish}
                 ariaDescribedBy={!canPublish ? MISSING_FIELDS_ID : undefined}
               >
-                {submitting ? <Loading size="small" /> : 'Publish'}
+                Publish
               </Button>
               <Button
                 onClick={() => setDiscardDialogOpen(true)}
                 type="button"
-                variant="secondary"
+                variant="outline"
                 disabled={submitting}
               >
                 Discard draft
@@ -751,13 +748,13 @@ const RecipeEditor: FC = () => {
             </>
           ) : (
             <>
-              <Button onClick={handleUpdate} type="button" disabled={submitting}>
-                {submitting ? <Loading size="small" /> : 'Update'}
+              <Button onClick={handleUpdate} type="button" loading={submitting}>
+                Update
               </Button>
               <Button
                 onClick={handleUnpublish}
                 type="button"
-                variant="secondary"
+                variant="outline"
                 disabled={submitting}
               >
                 Unpublish
@@ -786,29 +783,29 @@ const RecipeEditor: FC = () => {
         {announcement.message && `${announcement.message}${announcement.toggle ? '\u200B' : ''}`}
       </div>
 
-      {toast && (
-        <Toast message={toast.message} type={toast.type} onDismiss={handleDismissToast} />
-      )}
-
       <ConfirmDialog
-        isOpen={blocker.state === 'blocked'}
+        open={blocker.state === 'blocked'}
         title="Unsaved changes"
-        message="Are you sure you want to leave this page? Your edits will be lost."
+        danger
         confirmLabel="Discard changes"
         cancelLabel="Stay on this page"
         onConfirm={() => blocker.proceed?.()}
         onCancel={() => blocker.reset?.()}
-      />
+      >
+        Are you sure you want to leave this page? Your edits will be lost.
+      </ConfirmDialog>
 
       <ConfirmDialog
-        isOpen={discardDialogOpen}
+        open={discardDialogOpen}
         title="Discard draft?"
-        message="This will permanently delete this draft recipe. This action cannot be undone."
+        danger
         confirmLabel="Discard"
         cancelLabel="Cancel"
         onConfirm={handleDiscardConfirm}
         onCancel={() => setDiscardDialogOpen(false)}
-      />
+      >
+        This will permanently delete this draft recipe. This action cannot be undone.
+      </ConfirmDialog>
     </div>
   )
 }
