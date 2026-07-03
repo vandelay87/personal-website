@@ -3,6 +3,7 @@
 }
 
 .toast {
+  composes: focusRing from '../../styles/interactions.module.css';
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -11,20 +12,25 @@
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  background: var(--color-surface);
+  /* Design: toast sits on the page background, not the surface tone. */
+  background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);
   font-size: var(--font-size-base);
   text-align: left;
   cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-default);
 }
 
-.success {
-  color: var(--color-success);
+/* Ported from _helpers.css .ds-toast:hover. */
+.toast:hover {
+  border-color: color-mix(in srgb, var(--color-text-strong) 18%, var(--color-border));
 }
 
-.error {
-  color: var(--color-error);
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    transition: none;
+  }
 }
 
 .message {
@@ -34,6 +40,7 @@
 
 .close {
   opacity: 0;
+  color: var(--color-text-faint);
   transition: opacity var(--duration-fast) var(--easing-default);
 }
 
@@ -42,7 +49,53 @@
   opacity: 1;
 }
 
-.toast:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+@media (prefers-reduced-motion: reduce) {
+  .close {
+    transition: none;
+  }
+}
+
+/* ── Tone indicator ────────────────────────────────────────────
+   The design shows a small tone-tinted glyph circle before the message
+   (see docs/design/paper/design_system/components/feedback/feedback.card.html
+   ".tdot"). Toast.tsx renders no dedicated icon element for it, so this is
+   implemented as generated content on `.toast::before` rather than adding
+   new markup — a deliberate CSS-only tradeoff, flagged in the PR: it's
+   decorative only (the message text + aria-live region remain the source
+   of truth for screen readers), but a future react pass could promote it
+   to a real `aria-hidden` element if that's ever preferred. */
+.toast::before {
+  content: '';
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  /* Design's ".tdot" is 18px; between --space-4 (16px) and --space-5
+     (20px) with no exact token, kept literal. */
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+}
+
+.success::before {
+  content: '✓';
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.error::before {
+  content: '✕';
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+/* No dedicated --color-info-bg token exists; --color-hover (the generic
+   subtle wash) stands in for it. */
+.info::before {
+  content: 'ℹ';
+  background: var(--color-hover);
+  color: var(--color-primary);
 }

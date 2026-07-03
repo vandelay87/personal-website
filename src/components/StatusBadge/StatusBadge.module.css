@@ -8,7 +8,9 @@
   font-weight: var(--font-weight-semibold);
   letter-spacing: var(--tracking-meta);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-full);
+  /* Chips/tags/badges → --radius-sm per docs/design/paper/token-migration.md §3a
+     (StatusBadge .badge is listed explicitly). */
+  border-radius: var(--radius-sm);
   background: var(--color-surface);
   color: var(--color-text-muted);
 }

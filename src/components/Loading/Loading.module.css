@@ -24,25 +24,7 @@
   font-family: var(--font-mono);
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .spinner {
-    animation: pulse 1.5s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%,
-    100% {
-      opacity: 1;
-    }
-
-    50% {
-      opacity: 0.4;
-    }
-  }
-}
+/* Uses the global `spin` keyframe (src/styles/animations.css), which is
+   already neutered under prefers-reduced-motion at the keyframe level
+   (rotation frozen) — no local override needed, matching the convention
+   documented in src/styles/interactions.module.css. */

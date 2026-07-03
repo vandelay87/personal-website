@@ -1,6 +1,7 @@
 /* Mono chip — tech tag, category, removable, or filter button. */
 
 .tag {
+  composes: focusRing from '../../styles/interactions.module.css';
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -9,24 +10,32 @@
   font-size: var(--font-size-xs);
   letter-spacing: var(--tracking-meta);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-full);
+  /* Chips/tags/badges → --radius-sm per docs/design/paper/token-migration.md §3a. */
+  border-radius: var(--radius-sm);
   background-color: var(--color-surface);
   color: var(--color-text-muted);
 }
 
 button.tag {
   cursor: pointer;
-  transition: background-color var(--duration-fast) var(--easing-default),
+  transition: border-color var(--duration-fast) var(--easing-default),
               color var(--duration-fast) var(--easing-default);
 }
 
-button.tag:hover {
-  background-color: var(--color-hover);
+/* Mirrors interactions.module.css's chipHover (border-color/color → accent
+   on hover) — can't `composes` it here since composition only applies to a
+   simple single-class selector, and this hover must be scoped to
+   interactive (button) tags only, not static display spans. Guarded against
+   .active so the hover tint doesn't fight the selected-filter fill. */
+button.tag:hover:not(.active) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
-button.tag:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+@media (prefers-reduced-motion: reduce) {
+  button.tag {
+    transition: none;
+  }
 }
 
 .active {
@@ -36,6 +45,7 @@ button.tag:focus-visible {
 }
 
 .remove {
+  composes: focusRing from '../../styles/interactions.module.css';
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -45,9 +55,4 @@ button.tag:focus-visible {
   cursor: pointer;
   padding: 0;
   line-height: 1;
-}
-
-.remove:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
 }

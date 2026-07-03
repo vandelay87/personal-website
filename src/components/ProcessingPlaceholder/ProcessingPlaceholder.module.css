@@ -14,38 +14,32 @@
   border-radius: var(--radius-lg);
 }
 
-/* ── Pulsing overlay ─────────────────────────────────────── */
+/* ── Shimmer overlay ───────────────────────────────────────
+   Ported from interactions.module.css's `.shimmer` (itself a port of
+   _helpers.css .ds-shimmer — a sweeping gradient highlight), replacing
+   the previous plain opacity pulse to match the design's actual
+   "shimmer placeholder" treatment. */
 .overlay {
+  composes: shimmer from '../../styles/interactions.module.css';
   position: absolute;
   inset: 0;
-  background-color: var(--color-surface);
-  opacity: 0.4;
-  animation: pulse 1.6s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.4;
-  }
-
-  50% {
-    opacity: 0.8;
-  }
 }
 
 /* ── Reduced-motion fallbacks ────────────────────────────── */
-/* Class-based path — set by the TSX when matchMedia reports reduce. */
+/* The composed `.shimmer` already relies on the global `shimmerSweep`
+   keyframe being neutered under reduced motion (see
+   src/styles/interactions.module.css), but these two paths are kept for
+   defense-in-depth / explicitness, matching this component's pre-existing
+   dual (class + media-query) strategy. */
 .root.reducedMotion .overlay {
   animation: none;
-  opacity: 0.6;
+  background-position: 0 0;
 }
 
-/* Media-query path — covers cases where JS hasn't applied the class yet. */
 @media (prefers-reduced-motion: reduce) {
   .overlay {
     animation: none;
-    opacity: 0.6;
+    background-position: 0 0;
   }
 }
 

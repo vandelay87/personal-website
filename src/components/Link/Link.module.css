@@ -1,6 +1,7 @@
 /* Link component styles */
 
 .link {
+  composes: focusRing from '../../styles/interactions.module.css';
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -9,6 +10,7 @@
   text-decoration: underline;
   text-underline-offset: 2px;
   width: fit-content;
+  border-radius: var(--radius-sm);
   transition: color var(--duration-fast) var(--easing-default);
 }
 
@@ -16,10 +18,10 @@
   color: var(--color-primary);
 }
 
-.link:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
+@media (prefers-reduced-motion: reduce) {
+  .link {
+    transition: none;
+  }
 }
 
 /* ── Tone ────────────────────────────────────────────────────── */
@@ -43,22 +45,23 @@
   text-underline-offset: 2px;
 }
 
-/* ── Icon + nudge ────────────────────────────────────────────── */
+/* ── Icon + nudge ────────────────────────────────────────────────
+   Ported from the shared interactions.module.css composables (itself a
+   port of _helpers.css .ds-link/.ds-link-ic) rather than duplicating the
+   transition/transform declarations locally. */
 
 .icon {
-  display: inline-flex;
-  align-items: center;
-  transition: transform var(--duration-base) var(--easing-default);
+  composes: linkIcon from '../../styles/interactions.module.css';
 }
 
-.link:hover .nudge-right {
-  transform: translateX(3px);
+.nudgeRight {
+  composes: nudgeRight from '../../styles/interactions.module.css';
 }
 
-.link:hover .nudge-left {
-  transform: translateX(-3px);
+.nudgeLeft {
+  composes: nudgeLeft from '../../styles/interactions.module.css';
 }
 
-.link:hover .nudge-up-right {
-  transform: translate(3px, -3px);
+.nudgeUpRight {
+  composes: nudgeUpRight from '../../styles/interactions.module.css';
 }

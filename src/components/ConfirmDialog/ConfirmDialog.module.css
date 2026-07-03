@@ -1,17 +1,19 @@
 .dialog {
-  background: var(--color-surface);
+  background: var(--color-bg);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-xl);
   padding: var(--space-6);
-  /* No paper max-w token fits; see token-migration.md §3c. */
-  max-width: 24rem;
-  width: 100%;
+  /* No paper max-w token fits a dialog; see token-migration.md §3c — kept
+     as a literal, capped against the viewport for small screens. */
+  inline-size: min(92vw, 24rem);
   color: var(--color-text);
 }
 
 .dialog::backdrop {
-  background: rgba(0, 0, 0, 0.5);
+  /* No design scrim/overlay color token exists; kept literal. No blur —
+     the PRD reserves backdrop-filter for the sticky header only. */
+  background: rgb(0 0 0 / 0.5);
 }
 
 .message {
@@ -23,4 +25,32 @@
   gap: var(--space-3);
   justify-content: flex-end;
   margin-top: var(--space-6);
+}
+
+/* ── Danger variant — header icon chip ──────────────────────────
+   The design precedes the title with a 36px danger-tinted icon chip for
+   destructive confirmations. Rather than adding a new DOM node, this is
+   wired via a conditional className on the existing title (Typography
+   accepts `className`) and rendered as generated content — decorative
+   only, consistent with the Toast tone-icon approach elsewhere in this
+   pass. */
+.dangerTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.dangerTitle::before {
+  content: '⚠';
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  /* Design: 36px. No exact token; --space-8 (32px) is the nearest step. */
+  width: var(--space-8);
+  height: var(--space-8);
+  border-radius: var(--radius-md);
+  background: var(--color-error-bg);
+  color: var(--color-error);
+  font-size: var(--font-size-lg);
 }

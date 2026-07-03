@@ -83,7 +83,12 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({
     >
       {open && (
         <>
-          <Typography variant="heading3" as="h2" id={TITLE_ID}>
+          <Typography
+            variant="heading3"
+            as="h2"
+            id={TITLE_ID}
+            className={danger ? styles.dangerTitle : undefined}
+          >
             {title}
           </Typography>
           {children && (

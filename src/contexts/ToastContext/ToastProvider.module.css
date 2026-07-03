@@ -1,9 +1,9 @@
 .container {
   position: fixed;
-  bottom: var(--space-4);
-  right: var(--space-4);
+  inset-block-end: var(--space-4);
+  inset-inline-end: var(--space-4);
   z-index: var(--z-toast);
-  max-width: 24rem;
+  max-width: min(24rem, calc(100vw - 2 * var(--space-4)));
 }
 
 .list {

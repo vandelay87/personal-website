@@ -1,41 +1,48 @@
-/* Button component styles */
+/* Button component styles.
+   Soft box-shadow (the --shadow-* scale) is deliberately not used here —
+   the PRD reserves it for toasts/dropdowns/dialogs; buttons carry no
+   ambient elevation in the design. */
 
 .button {
+  composes: focusRing from '../../styles/interactions.module.css';
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-6);
+  /* Design prototype: 11/16px. --space-3/--space-4 (12/16px) is the
+     nearest token pairing. */
+  padding: var(--space-3) var(--space-4);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-normal);
   font-family: inherit;
   border: var(--border-width) solid var(--color-border-strong);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: transform var(--duration-fast) var(--easing-default),
-              box-shadow var(--duration-fast) var(--easing-default);
+  transition: background-color var(--duration-fast) var(--easing-default),
+              border-color var(--duration-fast) var(--easing-default),
+              color var(--duration-fast) var(--easing-default),
+              opacity var(--duration-fast) var(--easing-default),
+              transform var(--duration-fast) var(--easing-default);
 }
 
-.button:hover:not(:disabled) {
-  transform: translate(2px, 2px);
-  box-shadow: 0 0 0 var(--color-border);
-}
-
-.button[aria-pressed='true'] {
-  transform: translate(2px, 2px);
-  box-shadow: 0 0 0 var(--color-border);
-}
-
-.button:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+.button:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 .button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+
+  .button:active:not(:disabled) {
+    transform: none;
+  }
 }
 
 /* ── Variants ────────────────────────────────────────────────── */
@@ -49,6 +56,7 @@
 .outline {
   background-color: transparent;
   color: var(--color-text);
+  font-weight: var(--font-weight-medium);
 }
 
 .danger {
@@ -57,10 +65,27 @@
   border-color: var(--color-error);
 }
 
+/* Filled variants (solid/danger) dim slightly on hover — matches the
+   design's admin ".primary-btn"/".danger-btn" hover (opacity .9); the new
+   token system has no hover-color tokens to reach for instead. */
+.solid:hover:not(:disabled),
+.danger:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.outline:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: var(--color-hover);
+}
+
 /* ── Shape ───────────────────────────────────────────────────── */
 
 .pill {
   border-radius: var(--radius-full);
+  /* Marketing CTA pills get a slightly larger tap target than form buttons
+     (design: 12/24px). */
+  padding: var(--space-3) var(--space-6);
 }
 
 /* ── Size ────────────────────────────────────────────────────── */
@@ -104,7 +129,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .spinner {
-    animation-duration: 1.5s;
+  /* Freeze rotation entirely (keyframe-level override), matching the
+     sitewide convention in src/styles/animations.css rather than merely
+     slowing the spin down — a still spinner remains a valid, understood
+     "in progress" affordance. */
+  @keyframes btn-spin {
+    from,
+    to {
+      transform: none;
+    }
   }
 }

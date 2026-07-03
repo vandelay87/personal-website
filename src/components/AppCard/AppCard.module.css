@@ -1,6 +1,11 @@
-/* Card component styles */
+/* AppCard component styles — the app-grid card: lift + cover-zoom, the
+   design's signature hover (see docs/design/paper/pages/Apps.dc.html
+   .app-card). Uses the shared cardLift/cardLiftImage composables rather
+   than the --shadow-* scale (reserved for toasts/dropdowns/dialogs) —
+   the lift shadow is a literal, matching the shared utility. */
 
 .card {
+  composes: cardLift from '../../styles/interactions.module.css';
   position: relative;
   display: flex;
   flex-direction: column;
@@ -8,15 +13,17 @@
   border-radius: var(--radius-xl);
   border: var(--border-width) solid var(--color-border);
   background-color: var(--color-surface);
-  box-shadow: var(--shadow-md);
-  transition:
-    transform var(--duration-fast) var(--easing-default),
-    box-shadow var(--duration-fast) var(--easing-default);
+  transition: border-color var(--duration-fast) var(--easing-default);
 }
 
 .card:hover {
-  transform: translate(-4px, -4px);
-  box-shadow: var(--shadow-lg);
+  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
 }
 
 .imageWrapper {
@@ -31,14 +38,10 @@
   border: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .card {
-    transition: none;
-  }
-
-  .card:hover {
-    transform: none;
-  }
+/* Applied to the underlying <img> (via Image's `className` prop) — pairs
+   with `.card`'s composed `cardLift` for the cover-zoom-on-hover effect. */
+.imageScaled {
+  composes: cardLiftImage from '../../styles/interactions.module.css';
 }
 
 .body {

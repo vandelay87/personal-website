@@ -49,6 +49,7 @@
 }
 
 .retryButton {
+  composes: focusRing from '../../styles/interactions.module.css';
   padding: 0;
   font: inherit;
   color: var(--color-primary);
@@ -57,11 +58,6 @@
   border-radius: var(--radius-sm);
   text-decoration: underline;
   cursor: pointer;
-}
-
-.retryButton:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-  outline-offset: 2px;
 }
 
 @keyframes autosaveStatusPulse {

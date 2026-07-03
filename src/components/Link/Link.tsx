@@ -18,6 +18,13 @@ export interface LinkProps {
   className?: string
 }
 
+const NUDGE_CLASSES: Record<NonNullable<LinkProps['nudge']>, string | undefined> = {
+  left: styles.nudgeLeft,
+  right: styles.nudgeRight,
+  'up-right': styles.nudgeUpRight,
+  none: undefined,
+}
+
 const Link: FC<LinkProps> = ({
   children,
   to,
@@ -41,7 +48,7 @@ const Link: FC<LinkProps> = ({
     .filter(Boolean)
     .join(' ')
 
-  const iconClassName = [styles.icon, styles[`nudge-${nudge}`]].filter(Boolean).join(' ')
+  const iconClassName = [styles.icon, NUDGE_CLASSES[nudge]].filter(Boolean).join(' ')
 
   const content = icon ? (
     <>
