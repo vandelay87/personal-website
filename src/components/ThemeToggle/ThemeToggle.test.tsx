@@ -8,41 +8,58 @@ describe('ThemeToggle', () => {
     document.documentElement.removeAttribute('data-theme')
   })
 
-  it('renders the toggle component', () => {
-    render(<ThemeToggle />)
-    expect(screen.getByLabelText(/dark mode/i)).toBeInTheDocument()
-  })
-
-  it('toggles theme from light to dark', () => {
+  it('renders a round icon button with an accessible label describing the switch action', () => {
     render(<ThemeToggle />)
 
-    const toggle = screen.getByRole('checkbox')
-
-    expect(toggle).not.toBeChecked()
-    expect(document.documentElement.getAttribute('data-theme')).toBe('light')
-
-    fireEvent.click(toggle)
-
-    expect(toggle).toBeChecked()
-    expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
-    expect(localStorage.getItem('theme')).toBe('dark')
+    expect(
+      screen.getByRole('button', { name: /switch to (dark|light) mode/i })
+    ).toBeInTheDocument()
   })
 
-  it('toggles theme from dark to light', () => {
-    localStorage.setItem('theme', 'dark')
+  it('labels the button "Switch to dark mode" when the current theme is light', () => {
+    document.documentElement.setAttribute('data-theme', 'light')
+
+    render(<ThemeToggle />)
+
+    expect(screen.getByRole('button', { name: 'Switch to dark mode' })).toBeInTheDocument()
+  })
+
+  it('reflects the theme already set on the document root on initial render (no hydration mismatch)', () => {
+    // Simulates the blocking no-flash script having already set data-theme
+    // before React mounts. The toggle must reflect that on first render,
+    // not default to assuming light.
     document.documentElement.setAttribute('data-theme', 'dark')
 
     render(<ThemeToggle />)
 
-    const toggle = screen.getByRole('checkbox')
+    expect(screen.getByRole('button', { name: 'Switch to light mode' })).toBeInTheDocument()
+  })
 
-    expect(toggle).toBeChecked()
+  it('flips data-theme on the document root and updates its label when clicked', () => {
+    document.documentElement.setAttribute('data-theme', 'light')
+
+    render(<ThemeToggle />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to dark mode' }))
+
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
+    expect(screen.getByRole('button', { name: 'Switch to light mode' })).toBeInTheDocument()
 
-    fireEvent.click(toggle)
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to light mode' }))
 
-    expect(toggle).not.toBeChecked()
     expect(document.documentElement.getAttribute('data-theme')).toBe('light')
-    expect(localStorage.getItem('theme')).toBe('light')
+    expect(screen.getByRole('button', { name: 'Switch to dark mode' })).toBeInTheDocument()
+  })
+
+  it('persists the new theme to the existing "theme" localStorage key (kept, not renamed)', () => {
+    document.documentElement.setAttribute('data-theme', 'light')
+
+    render(<ThemeToggle />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to dark mode' }))
+
+    expect(localStorage.getItem('theme')).toBe('dark')
+    // The design reference's `akli-theme` key is an explicit non-adoption per the PRD.
+    expect(localStorage.getItem('akli-theme')).toBeNull()
   })
 })
