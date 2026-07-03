@@ -59,7 +59,8 @@ export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
         aria-live={hasError ? 'assertive' : 'polite'}
         aria-atomic="false"
       >
-        <ul className={styles.list}>
+        {/* eslint-disable-next-line jsx-a11y/no-redundant-roles -- Toast's .item sets list-style: none, which drops implicit list semantics in Safari/VoiceOver; role="list" (paired with role="listitem" in Toast) restores it */}
+        <ul className={styles.list} role="list">
           {toasts.map((toast) => (
             <Toast key={toast.id} tone={toast.tone} onDismiss={() => dismissToast(toast.id)}>
               {toast.message}

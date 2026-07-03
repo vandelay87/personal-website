@@ -62,7 +62,24 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({
   }, [])
 
   const handleScrimClick = (event: MouseEvent<HTMLDialogElement>) => {
-    if (event.target === dialogRef.current) {
+    const dialog = dialogRef.current
+    if (!dialog || event.target !== dialog) return
+
+    // `.dialog`'s background/border/padding live on the <dialog> element
+    // itself (no separate inner wrapper), so `target === dialog` alone
+    // doesn't distinguish a genuine scrim click from a click that lands in
+    // the dialog's own padding (still `target === dialog`, since the padding
+    // area has no other element painted over it). Compare against the
+    // rendered box instead: outside it is the ::backdrop (scrim), inside it
+    // is dialog content/whitespace.
+    const rect = dialog.getBoundingClientRect()
+    const clickedInsideDialogBox =
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom
+
+    if (!clickedInsideDialogBox) {
       onCancel()
     }
   }
