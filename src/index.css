@@ -39,18 +39,9 @@ svg[id^="mermaid-"] {
 }
 
 [data-theme="dark"] svg[id^="mermaid-"] {
-  /* Mermaid renders its default light theme (white bg, dark strokes);
-     inverting simulates a dark theme without a Mermaid theme-config change.
-     A fractional invert (not a full 100% invert) is used deliberately — a
-     hard flip reproduces the old system's harsh pure black/white swap,
-     which reads wrong against the soft, warm paper dark palette. 0.88 still
-     turns the white diagram background dark while keeping it a soft
-     near-black rather than true black. Border/shadow are NOT overridden
-     here — they inherit var(--color-border) and var(--shadow-md) from the
-     base rule above, and the filter turns the dark hairline into a light
-     one and the soft black shadow into a soft light glow, both correct
-     against the dark page background. hue-rotate(180deg) corrects the hue
-     shift the invert causes on any coloured diagram nodes. */
+  /* Fractional invert (not invert(1)) avoids the old harsh black/white swap;
+     border/shadow inherit from the base rule since the filter already
+     recolors them correctly for dark mode. See token-migration.md §5. */
   filter: invert(0.88) hue-rotate(180deg);
 }
 

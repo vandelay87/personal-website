@@ -24,7 +24,3 @@
   text-underline-offset: 2px;
   font-size: var(--font-size-lg);
 }
-
-.homeLink:hover {
-  color: var(--color-primary);
-}

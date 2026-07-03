@@ -59,10 +59,6 @@
   cursor: pointer;
 }
 
-.retryButton:hover {
-  color: var(--color-primary);
-}
-
 .retryButton:focus-visible {
   outline: var(--border-width) solid var(--color-primary);
   outline-offset: 2px;

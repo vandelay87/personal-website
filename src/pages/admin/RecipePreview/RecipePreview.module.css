@@ -39,10 +39,6 @@
   text-underline-offset: 2px;
 }
 
-.actionLink:hover:not(:disabled) {
-  color: var(--color-link);
-}
-
 .actionLink:focus-visible {
   outline: var(--border-width) solid var(--color-primary);
   outline-offset: 2px;

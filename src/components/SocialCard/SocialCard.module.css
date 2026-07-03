@@ -9,9 +9,7 @@
   margin-inline: auto;
   padding-block: var(--space-6);
   padding-inline: var(--space-6);
-  /* No paper max-w token fits a compact card (smallest is --max-w-article
-     at 680px, ~1.8x this box) — literal preserves the prior 24rem width.
-     See docs/design/paper/token-migration.md. */
+  /* No paper max-w token fits; see token-migration.md §3c. */
   max-width: 24rem;
 }
 

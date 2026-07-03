@@ -14,9 +14,7 @@
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-md);
   padding: var(--space-6);
-  /* No paper max-w token fits a compact dialog (smallest is --max-w-article
-     at 680px, ~1.8x this box) — literal preserves the prior 24rem width.
-     See docs/design/paper/token-migration.md. */
+  /* No paper max-w token fits; see token-migration.md §3c. */
   max-width: 24rem;
   width: 100%;
 }

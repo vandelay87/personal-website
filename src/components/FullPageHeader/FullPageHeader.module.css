@@ -102,9 +102,7 @@
 .imageWrapper {
   position: relative;
   inline-size: 100%;
-  /* No paper max-w token fits a portrait image cap (smallest is
-     --max-w-article at 680px) — literals preserve the prior px-equivalent
-     widths (20rem/28rem/32rem). See docs/design/paper/token-migration.md. */
+  /* No paper max-w token fits; see token-migration.md §3c. */
   max-inline-size: 20rem;
   overflow: hidden;
 

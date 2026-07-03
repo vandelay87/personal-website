@@ -113,7 +113,3 @@
   color: var(--color-link);
   font-weight: var(--font-weight-semibold);
 }
-
-.clearLink:hover {
-  color: var(--color-link);
-}

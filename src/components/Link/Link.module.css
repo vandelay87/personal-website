@@ -9,10 +9,6 @@
   transition: color var(--duration-fast) var(--easing-default);
 }
 
-.link:hover {
-  color: var(--color-link);
-}
-
 .link:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
