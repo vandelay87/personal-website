@@ -22,7 +22,7 @@ const FileMeta: FC<FileMetaProps> = ({ fileInfo, hasError }) => {
     const { type, size, date } = fileInfo
 
     return (
-      <ul role="list" className={styles.list}>
+      <ul className={styles.list}>
         <li>{`${type} format`}</li>
         <li aria-hidden="true">•</li>
         <li>{size}</li>

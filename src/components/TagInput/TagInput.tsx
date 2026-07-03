@@ -84,9 +84,12 @@ const TagInput: FC<TagInputProps> = ({
         {isExpanded && (
           <ul id={listboxId} role="listbox" className={styles.listbox}>
             {filtered.map((tag) => (
+              // Arrow-key highlight + Enter-to-select keyboard nav tracked in #237.
+              // eslint-disable-next-line jsx-a11y/click-events-have-key-events
               <li
                 key={tag}
                 role="option"
+                aria-selected={false}
                 className={styles.option}
                 onClick={() => addTag(tag)}
               >
