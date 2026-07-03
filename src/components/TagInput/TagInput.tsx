@@ -89,7 +89,7 @@ const TagInput: FC<TagInputProps> = ({
               <li
                 key={tag}
                 role="option"
-                aria-selected={false}
+                aria-selected="false"
                 className={styles.option}
                 onClick={() => addTag(tag)}
               >
