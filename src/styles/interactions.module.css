@@ -136,20 +136,10 @@
   }
 }
 
-/* Reusable pattern for the future Header rebuild (issue #224): the
-   sticky header's `backdrop-filter` blur needs the same treatment —
-   guard it with `@supports (backdrop-filter: blur(1px))` for the blur
-   itself, and provide an opaque `background` fallback in the negated
-   query so text never bleeds through an unblurred translucent bg:
-     .stickyHeader { background: var(--color-bg); }
-     @supports (backdrop-filter: blur(1px)) {
-       .stickyHeader {
-         background: color-mix(in srgb, var(--color-bg) 85%, transparent);
-         backdrop-filter: blur(8px);
-       }
-     }
-   Not applied anywhere in this file — no component in scope for issue
-   #221 uses `backdrop-filter` yet (Header is still old neo-brutalist). */
+/* The sticky header's future `backdrop-filter` blur (issue #224) needs an
+   analogous @supports(backdrop-filter) fallback with an opaque `background`
+   default — not written here since nothing in scope today uses
+   `backdrop-filter` yet (Header is still old neo-brutalist). */
 
 /* ── Spinner ───────────────────────────────────────────────── */
 .spinner {
@@ -191,10 +181,12 @@
 }
 
 /* ── Reduced motion ────────────────────────────────────────────
-   Disables ALL transform/opacity motion from this file: animations,
-   transitions, and the hover-triggered transform values themselves (not
-   just their timing), matching/exceeding _helpers.css's own
-   `prefers-reduced-motion` block. */
+   Disables the transitions/hover-transforms defined in this file (not
+   just their timing) that `animations.css` has no way to know about.
+   `.spinner`/`.shimmer` need no entry here — their `spin`/`shimmerSweep`
+   keyframes are already neutered under reduced motion at the keyframe
+   level in `animations.css`, so re-disabling `animation` here would just
+   duplicate that same outcome through a second mechanism. */
 @media (prefers-reduced-motion: reduce) {
   .linkIcon {
     transition: none;
@@ -217,13 +209,5 @@
 
   .cardLift:hover .cardLiftImage {
     transform: none;
-  }
-
-  .spinner {
-    animation: none;
-  }
-
-  .shimmer {
-    animation: none;
   }
 }
