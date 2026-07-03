@@ -65,9 +65,9 @@ const SocialCard: FC = () => {
       <Typography variant="heading3" as="h2" id="social-heading" className={styles.heading}>
         Get in touch
       </Typography>
-      <ul className={styles.list} role="list">
+      <ul className={styles.list}>
         {SOCIAL_CARD_PROPS.map(({ name, url, icon }) => (
-          <li key={name} role="listitem">
+          <li key={name}>
             <a
               href={url}
               target="_blank"

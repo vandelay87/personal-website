@@ -63,6 +63,8 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({
 
   return (
     <div className={styles.overlay}>
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions --
+          stopgap until #223 moves this to native <dialog>/showModal(). */}
       <div
         ref={dialogRef}
         role="dialog"
