@@ -177,7 +177,8 @@
   --color-text:          #CFC9BD;
   --color-text-muted:    #A6A093;
   /* WCAG AA override: spec's dark faint #6E685E is only ~3.4:1 on #141310
-     (fails AA). Lightened to #877F73 (~4.7:1) per PRD's "darken if needed". */
+     (fails AA — the PRD flagged this value for a manual check). Raised the
+     lightness to #877F73 (~4.7:1) to pass. */
   --color-text-faint:    #877F73;
 
   --color-border:        #2A2823;
