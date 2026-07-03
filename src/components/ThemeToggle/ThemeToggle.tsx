@@ -1,20 +1,15 @@
-import { useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import styles from './ThemeToggle.module.css'
 
 type Theme = 'light' | 'dark'
 
-const getInitialTheme = (): Theme => {
-  if (typeof document === 'undefined') return 'light'
-
-  const domTheme = document.documentElement.getAttribute('data-theme')
-  if (domTheme === 'light' || domTheme === 'dark') return domTheme
-
-  const storedTheme = typeof window !== 'undefined' ? localStorage.getItem('theme') : null
-  return storedTheme === 'dark' ? 'dark' : 'light'
-}
-
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>(getInitialTheme)
+  const [theme, setTheme] = useState<Theme>('light')
+
+  useLayoutEffect(() => {
+    const domTheme = document.documentElement.getAttribute('data-theme')
+    if (domTheme === 'dark') setTheme('dark')
+  }, [])
 
   const isDark = theme === 'dark'
 

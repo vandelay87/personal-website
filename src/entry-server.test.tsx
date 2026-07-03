@@ -39,6 +39,18 @@ describe('entry-server render', () => {
       // The root div should not be empty — it should have rendered content
       expect(html).not.toContain('<div id="root"></div>')
     })
+
+    it('always renders ThemeToggle in its light-theme state, since SSR has no way to know the visitor\'s real theme', async () => {
+      const html = await render('/')
+      // The server always runs with no `document`, so ThemeToggle must always
+      // start from its light-theme markup — the client's mount-gated
+      // useLayoutEffect correction depends on the first client render
+      // matching this exactly. If SSR output ever became theme-dependent,
+      // this would drift from the client's first render and reintroduce a
+      // hydration mismatch.
+      expect(html).toContain('aria-label="Switch to dark mode"')
+      expect(html).not.toContain('aria-label="Switch to light mode"')
+    })
   })
 
   describe('apps page /apps', () => {
