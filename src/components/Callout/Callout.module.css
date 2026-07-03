@@ -11,11 +11,15 @@
   color: var(--color-text);
 }
 
-.indicator {
+.emoji {
   flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
+  /* Design spec is 17px; --font-size-lg (18px) is the closest token. */
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-normal);
+}
+
+.label {
+  margin-bottom: var(--space-2);
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
@@ -23,18 +27,12 @@
   text-transform: uppercase;
 }
 
-/* Upsizes the emoji glyph (the indicator's first child) relative to the
-   mono label text beside it — no separate DOM hook needed. */
-.indicator span:first-child {
-  font-size: var(--font-size-lg);
-}
-
 .tip {
   border: var(--border-width) solid color-mix(in srgb, var(--color-success) 24%, var(--color-border));
   background: color-mix(in srgb, var(--color-success) 6%, var(--color-surface));
 }
 
-.tip .indicator {
+.tip .label {
   color: var(--color-success);
 }
 
@@ -43,7 +41,7 @@
   background: color-mix(in srgb, var(--color-warning) 6%, var(--color-surface));
 }
 
-.warning .indicator {
+.warning .label {
   color: var(--color-warning);
 }
 
@@ -52,6 +50,6 @@
   background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
 }
 
-.info .indicator {
+.info .label {
   color: var(--color-primary);
 }
