@@ -1,6 +1,7 @@
 import Link from '@components/Link'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import styles from './Link.module.css'
 
 describe('Link', () => {
   it('renders correctly with children', () => {
@@ -41,5 +42,84 @@ describe('Link', () => {
     expect(linkElement).toHaveAttribute('href', externalUrl)
     expect(linkElement).toHaveAttribute('target', '_blank')
     expect(linkElement).toHaveAttribute('rel', 'noreferrer')
+  })
+
+  it('wraps the icon in an aria-hidden element so it does not gain its own accessible name', () => {
+    render(
+      <MemoryRouter>
+        <Link to="/apps" icon={<span data-testid="icon">{'→'}</span>}>
+          Apps
+        </Link>
+      </MemoryRouter>
+    )
+
+    const icon = screen.getByTestId('icon')
+
+    expect(icon.parentElement).toHaveAttribute('aria-hidden', 'true')
+
+    // The icon must not contribute to the accessible name — only the
+    // link's own text should.
+    const linkElement = screen.getByRole('link', { name: 'Apps' })
+    expect(linkElement).toBeInTheDocument()
+  })
+
+  it('positions the icon before the link text when iconSide is "left"', () => {
+    render(
+      <MemoryRouter>
+        <Link to="/apps" icon={<span data-testid="icon" />} iconSide="left">
+          <span data-testid="text">Apps</span>
+        </Link>
+      </MemoryRouter>
+    )
+
+    const linkElement = screen.getByRole('link')
+    const icon = within(linkElement).getByTestId('icon')
+    const text = within(linkElement).getByTestId('text')
+
+    expect(icon.compareDocumentPosition(text) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('positions the icon after the link text when iconSide is "right" (default)', () => {
+    render(
+      <MemoryRouter>
+        <Link to="/apps" icon={<span data-testid="icon" />}>
+          <span data-testid="text">Apps</span>
+        </Link>
+      </MemoryRouter>
+    )
+
+    const linkElement = screen.getByRole('link')
+    const icon = within(linkElement).getByTestId('icon')
+    const text = within(linkElement).getByTestId('text')
+
+    expect(text.compareDocumentPosition(icon) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('applies the tone class for the given tone', () => {
+    render(
+      <MemoryRouter>
+        <Link to="/apps" tone="accent">
+          Apps
+        </Link>
+      </MemoryRouter>
+    )
+
+    const linkElement = screen.getByRole('link', { name: /apps/i })
+
+    expect(linkElement).toHaveClass(styles.accent)
+  })
+
+  it('applies the nudge direction class to the icon wrapper', () => {
+    render(
+      <MemoryRouter>
+        <Link to="/apps" icon={<span data-testid="icon" />} nudge="left">
+          Apps
+        </Link>
+      </MemoryRouter>
+    )
+
+    const icon = screen.getByTestId('icon')
+
+    expect(icon.parentElement).toHaveClass(styles.nudgeLeft)
   })
 })
