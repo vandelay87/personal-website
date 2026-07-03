@@ -47,16 +47,20 @@ const AppCard: FC<AppCardProps> = ({ title, description, href, image }) => {
 
   if (isExternalHref(href)) {
     return (
-      <a href={href} className={styles.card} target="_blank" rel="noreferrer">
-        {content}
-      </a>
+      <article>
+        <a href={href} className={styles.card} target="_blank" rel="noreferrer">
+          {content}
+        </a>
+      </article>
     )
   }
 
   return (
-    <RouterLink to={href} className={styles.card}>
-      {content}
-    </RouterLink>
+    <article>
+      <RouterLink to={href} className={styles.card}>
+        {content}
+      </RouterLink>
+    </article>
   )
 }
 
