@@ -37,6 +37,10 @@
   padding: var(--space-4) var(--space-6);
 }
 
+/* Brand's left-hand group: admin groups brand+nav together here, while
+   public/logged-out render brand alone (their nav/label lives in .actions
+   instead) — grouping is variant-dependent per the page-level prototypes,
+   not the isolated component card. */
 .left {
   display: flex;
   align-items: center;
@@ -49,6 +53,10 @@
   font-weight: var(--font-weight-medium);
   text-decoration: none;
   border-radius: var(--radius-sm);
+}
+
+.brand:hover {
+  color: var(--color-primary);
 }
 
 .nav {
@@ -78,6 +86,9 @@
   font-size: var(--font-size-sm);
 }
 
+/* Right-hand group: holds whichever of nav/label/admin-extras is not in
+   .left for the current variant, plus the theme toggle, so .inner always
+   ends up with exactly two direct flex children. */
 .actions {
   display: flex;
   align-items: center;

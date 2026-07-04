@@ -44,6 +44,21 @@ const Header: FC<HeaderProps> = ({
 
   const navLabel = variant === 'admin' ? 'Admin navigation' : 'Main navigation'
 
+  const nav = links.length > 0 && (
+    <nav aria-label={navLabel} className={styles.nav}>
+      {links.map((link) => (
+        <RouterLink
+          key={link.to}
+          to={link.to}
+          className={styles.navLink}
+          aria-current={isLinkActive(pathname, link.to) ? 'page' : undefined}
+        >
+          {link.label}
+        </RouterLink>
+      ))}
+    </nav>
+  )
+
   return (
     <header className={className}>
       <div className={styles.inner}>
@@ -52,27 +67,14 @@ const Header: FC<HeaderProps> = ({
             {brand}
           </RouterLink>
 
-          {variant === 'logged-out' ? (
-            <span className={styles.loggedOutLabel}>Admin</span>
-          ) : (
-            links.length > 0 && (
-              <nav aria-label={navLabel} className={styles.nav}>
-                {links.map((link) => (
-                  <RouterLink
-                    key={link.to}
-                    to={link.to}
-                    className={styles.navLink}
-                    aria-current={isLinkActive(pathname, link.to) ? 'page' : undefined}
-                  >
-                    {link.label}
-                  </RouterLink>
-                ))}
-              </nav>
-            )
-          )}
+          {variant === 'admin' && nav}
         </div>
 
         <div className={styles.actions}>
+          {variant === 'public' && nav}
+
+          {variant === 'logged-out' && <span className={styles.loggedOutLabel}>Admin</span>}
+
           {variant === 'admin' && (
             <>
               {email && <span className={styles.email}>{email}</span>}
@@ -83,6 +85,7 @@ const Header: FC<HeaderProps> = ({
               )}
             </>
           )}
+
           <ThemeToggle />
         </div>
       </div>
