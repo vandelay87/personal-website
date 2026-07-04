@@ -65,12 +65,6 @@ describe('Home', () => {
     expect(img).toHaveAttribute('src', expect.stringContaining('profile'))
   })
 
-  it('renders an Email me CTA linking to mailto', () => {
-    renderHome()
-    const link = screen.getByRole('link', { name: 'Email me' })
-    expect(link).toHaveAttribute('href', expect.stringContaining('mailto:akliaissat@outlook.com'))
-  })
-
   it('renders a Download CV CTA', () => {
     renderHome()
     const link = screen.getByRole('link', { name: 'Download CV' })

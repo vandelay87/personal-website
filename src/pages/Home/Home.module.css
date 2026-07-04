@@ -16,6 +16,15 @@
   margin-block-end: var(--space-8);
 }
 
+/* Image's inner placeholder container has no prop to opt out of its
+   gray background/border — override it here since the circular hero
+   photo (priority-loaded, no placeholder ever shown) doesn't want it. */
+.photo > div {
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+}
+
 .photoImage {
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-lg);

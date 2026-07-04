@@ -115,9 +115,6 @@ const Home: FC = () => {
           containerClassName={styles.photo}
           className={styles.photoImage}
         />
-        <Typography variant="caption" as="p" className={styles.eyebrow}>
-          Hello, I&apos;m
-        </Typography>
         <Typography variant="heading1" className={styles.heading}>
           Akli Aissat
         </Typography>
@@ -130,12 +127,6 @@ const Home: FC = () => {
           some of what I&apos;ve built and written along the way.
         </Typography>
         <div className={styles.ctaRow}>
-          <Link
-            to="mailto:akliaissat@outlook.com?subject=Hello"
-            className={`${styles.cta} ${styles.ctaSolid}`}
-          >
-            Email me
-          </Link>
           <a
             className={`${styles.cta} ${styles.ctaOutline}`}
             href={cvFileUrl}
