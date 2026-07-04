@@ -171,7 +171,7 @@ const Home: FC = () => {
             <ul className={styles.recipeGrid}>
               {recipes.map((recipe) => (
                 <li key={recipe.id}>
-                  <RecipeCard recipe={recipe} eager hideTags hideMeta />
+                  <RecipeCard recipe={recipe} eager hideTags />
                 </li>
               ))}
             </ul>

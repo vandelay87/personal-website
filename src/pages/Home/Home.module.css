@@ -119,6 +119,11 @@
 .ctaSolid:hover {
   background: var(--color-primary);
   border-color: var(--color-primary);
+  /* Without this, Link's own generic `.link:hover` rule (accent-blue
+     text) bleeds through onto the now-blue background, making the
+     label unreadable in both themes. #fff matches the design exactly
+     (hardcoded there too, not theme-dependent). */
+  color: #fff;
 }
 
 .ctaOutline {
