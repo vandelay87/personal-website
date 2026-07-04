@@ -152,13 +152,18 @@ const Home: FC = () => {
 
           <section className={styles.kitchenSection} aria-labelledby="kitchen-section-heading">
             <div className={styles.kitchenIntro}>
-              <Typography variant="caption" as="p" className={styles.eyebrow}>
+              <Typography variant="caption" as="p" className={styles.kitchenKicker}>
                 From the kitchen
               </Typography>
-              <Typography variant="heading2" as="h2" id="kitchen-section-heading">
+              <Typography
+                variant="heading2"
+                as="h2"
+                id="kitchen-section-heading"
+                className={styles.kitchenHeading}
+              >
                 Lately I&apos;ve been cooking.
               </Typography>
-              <Typography variant="body" as="p">
+              <Typography variant="body" as="p" className={styles.kitchenText}>
                 A small, growing collection of recipes I keep coming back to —
                 written down so they&apos;re easy to make again.
               </Typography>

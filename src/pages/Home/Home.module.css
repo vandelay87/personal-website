@@ -1,7 +1,9 @@
 /* ── Hero ─────────────────────────────────────────────────────── */
 
 .hero {
-  max-width: var(--max-w-reading);
+  /* 640px: the design's hero column is narrower than the shared
+     720px --max-w-reading column used by Apps/Blog's own heroes. */
+  max-width: 640px;
   margin-inline: auto;
   padding-block: var(--space-24) var(--space-16);
   padding-inline: var(--space-6);
@@ -27,11 +29,29 @@
 
 .photoImage {
   border-radius: var(--radius-full);
-  box-shadow: var(--shadow-lg);
+  /* Layered to match the design exactly: a near-invisible 1px separation
+     ring, then the soft drop shadow. The ring tint is a design-prototype
+     one-off (not a design-system token) — light/dark values below. */
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 6%),
+    var(--shadow-lg);
 }
 
-.eyebrow {
-  composes: eyebrow from '../../styles/text.module.css';
+[data-theme='dark'] .photoImage {
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 8%),
+    var(--shadow-lg);
+}
+
+/* Uppercase kicker label introducing a link-section or the kitchen rail.
+   Deliberately NOT mono — the design keeps these in the body sans font;
+   only Apps.tsx/Blog.tsx's own page-top hero eyebrows use JetBrains Mono. */
+.kicker {
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
 }
 
 .heading {
@@ -43,6 +63,11 @@
 }
 
 .role {
+  /* clamp + line-height match the design's role line exactly — distinct
+     from Typography's shared bodyLarge variant (which correctly serves
+     Apps/Blog's own hero lead paragraphs at a different measure). */
+  font-size: clamp(18px, 3.4vw, 21px);
+  line-height: 1.5;
   color: var(--color-text);
   font-weight: var(--font-weight-medium);
   /* 22px: matches the design's hero role-line margin exactly; no spacing token lands on it. */
@@ -50,7 +75,12 @@
 }
 
 .bio {
-  max-width: var(--max-w-prose);
+  /* Matches the design's hero bio measure/line-height exactly — distinct
+     from the shared --max-w-prose (54ch) and body line-height, which
+     correctly serve other pages' own body text. */
+  font-size: var(--font-size-md);
+  line-height: 1.72;
+  max-width: 46ch;
   margin: 0;
   color: var(--color-text-muted);
 }
@@ -68,7 +98,8 @@
   composes: focusRing from '../../styles/interactions.module.css';
   display: inline-flex;
   align-items: center;
-  font-size: var(--font-size-sm);
+  /* 14px: matches the design's CTA font-size exactly; no token lands on it. */
+  font-size: 14px;
   font-weight: var(--font-weight-semibold);
   padding: var(--space-3) var(--space-6);
   border-radius: var(--radius-full);
@@ -91,6 +122,8 @@
 }
 
 .ctaOutline {
+  /* Design uses medium here vs. the solid button's semibold. */
+  font-weight: var(--font-weight-medium);
   color: var(--color-text-strong);
   border: var(--border-width) solid var(--color-border-strong);
 }
@@ -110,7 +143,8 @@
 /* ── Section divider ──────────────────────────────────────────── */
 
 .divider {
-  max-width: var(--max-w-reading);
+  /* 640px: matches the design's hero/link-section column (see .hero). */
+  max-width: 640px;
   margin-inline: auto;
   border: none;
   border-block-start: var(--border-width) solid var(--color-border);
@@ -119,7 +153,8 @@
 /* ── Link sections (Apps & experiments / The blog) ───────────── */
 
 .linkSection {
-  max-width: var(--max-w-reading);
+  /* 640px: matches the design's hero/link-section column (see .hero). */
+  max-width: 640px;
   margin-inline: auto;
   padding-block: var(--space-16);
   padding-inline: var(--space-4);
@@ -134,7 +169,7 @@
 }
 
 .sectionHeading {
-  composes: eyebrow;
+  composes: kicker;
   margin: 0;
 }
 
@@ -185,10 +220,18 @@
 }
 
 .rowTitle {
+  /* Looser than Typography's heading4 line-height (1.08, tuned for
+     display headings) — the design wants a roomier 1.3 for row titles. */
+  line-height: 1.3;
+  letter-spacing: -0.01em;
   margin: 0 0 var(--space-1);
 }
 
 .rowSub {
+  /* 14px/1.55: matches the design's row sub-line exactly — distinct
+     from Typography's shared body variant (15px/1.5). */
+  font-size: 14px;
+  line-height: 1.55;
   margin: 0;
   color: var(--color-text-muted);
 }
@@ -203,10 +246,30 @@
 }
 
 .kitchenIntro {
-  max-width: var(--max-w-prose);
+  /* 46ch: matches the design's kitchen-intro wrapper exactly — distinct
+     from the shared --max-w-prose (54ch) used elsewhere. */
+  max-width: 46ch;
   margin-inline: auto;
   text-align: center;
   margin-block-end: var(--space-10);
+}
+
+.kitchenKicker {
+  composes: kicker;
+  /* 18px: matches the design's "From the Kitchen" kicker margin exactly. */
+  margin: 0 0 18px;
+}
+
+.kitchenHeading {
+  font-size: clamp(28px, 5vw, 34px);
+  letter-spacing: -0.02em;
+  margin: 0 0 14px;
+}
+
+.kitchenText {
+  font-size: var(--font-size-md);
+  line-height: 1.7;
+  color: var(--color-text-muted);
 }
 
 .recipeGrid {
