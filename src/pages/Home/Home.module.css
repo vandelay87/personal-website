@@ -197,20 +197,36 @@
   padding: 0;
 }
 
-.rowList > li + li {
-  /* Inset to match .row's own 14px padding-inline, same pattern as the
-     section .divider being inset within its own padded wrapper. */
+/* A pseudo-element rather than a border/margin-inline on the <li> itself
+   — margin-inline on the li shrinks its actual box (and the .row link
+   that fills it), making every other row narrower than the first. This
+   keeps every <li> the same full width and only insets the thin
+   divider line, matching .row's own 14px padding-inline (same pattern
+   as the section .divider being inset within its own padded wrapper). */
+.rowList > li + li::before {
+  content: '';
+  display: block;
+  height: var(--border-width);
   margin-inline: 14px;
-  border-block-start: var(--border-width) solid var(--color-border);
+  background: var(--color-border);
 }
 
-.row {
+/* `a.row` (element + class), not just `.row` — Link's own base class
+   sets `width: fit-content` (the right default for a typical inline
+   text link), which otherwise wins since neither selector is more
+   specific on its own. Without this, each row shrink-wraps to its own
+   content's natural width instead of stretching to fill the <li> — a
+   longer, wrapping description can coincidentally end up looking full
+   width while a shorter one doesn't, even though every row should be
+   identical width regardless of content. */
+a.row {
   /* Nudge direction comes from the Link component's own `nudge` prop
      on the icon span, not a composed class here — see .sectionAll. */
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-5);
+  width: 100%;
   padding-block: var(--space-5);
   /* 14px: matches the design exactly; no token lands on it. The design
      has no compensating negative margin here — .ls-row is a direct
