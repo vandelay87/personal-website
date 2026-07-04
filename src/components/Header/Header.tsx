@@ -40,7 +40,14 @@ const Header: FC<HeaderProps> = ({
 }) => {
   const { pathname } = useLocation()
 
-  const className = [styles.header, styles.sticky, extraClassName].filter(Boolean).join(' ')
+  const className = [
+    styles.header,
+    styles.sticky,
+    variant === 'admin' && styles.admin,
+    extraClassName,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   const navLabel = variant === 'admin' ? 'Admin navigation' : 'Main navigation'
 

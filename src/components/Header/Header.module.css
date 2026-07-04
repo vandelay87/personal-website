@@ -12,7 +12,16 @@
   z-index: var(--z-header);
   background-color: var(--color-bg);
   color: var(--color-text);
-  border-block-end: var(--border-width) solid var(--color-border);
+  /* Transparent, not omitted: reserves the same 1px box height as the
+     visible .admin border so nothing shifts between variants. Matches
+     the design's public-page header exactly (border-bottom:1px solid
+     transparent) — only the admin list pages (Recipes/Users/Editor)
+     get a real visible line. */
+  border-block-end: var(--border-width) solid transparent;
+}
+
+.admin {
+  border-block-end-color: var(--color-border);
 }
 
 .sticky {
