@@ -4,6 +4,15 @@
 
 /* ── Global base styles ────────────────────────────────────── */
 
+/* Design's Home.dc.html uses a bare `* { box-sizing: border-box }` —
+   extended to ::before/::after here since the universal selector alone
+   doesn't reach pseudo-elements. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans);
