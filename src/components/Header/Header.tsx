@@ -19,8 +19,6 @@ export interface HeaderProps {
   brandTo?: string
   /** Nav links; the current page is derived from the URL, not a per-link flag. */
   links?: HeaderLink[]
-  /** Sticky + translucent blur. @default true */
-  sticky?: boolean
   /** Admin: signed-in email shown at right. */
   email?: string
   /** Admin: renders the "Log out" button when set. */
@@ -36,16 +34,13 @@ const Header: FC<HeaderProps> = ({
   brand = 'akli.dev',
   brandTo = '/',
   links = [],
-  sticky = true,
   email,
   onLogout,
   className: extraClassName,
 }) => {
   const { pathname } = useLocation()
 
-  const className = [styles.header, sticky && styles.sticky, extraClassName]
-    .filter(Boolean)
-    .join(' ')
+  const className = [styles.header, styles.sticky, extraClassName].filter(Boolean).join(' ')
 
   const navLabel = variant === 'admin' ? 'Admin navigation' : 'Main navigation'
 
@@ -76,11 +71,15 @@ const Header: FC<HeaderProps> = ({
         )}
 
         <div className={styles.actions}>
-          {variant === 'admin' && email && <span className={styles.email}>{email}</span>}
-          {variant === 'admin' && onLogout && (
-            <Button onClick={onLogout} variant="outline" size="sm">
-              Log out
-            </Button>
+          {variant === 'admin' && (
+            <>
+              {email && <span className={styles.email}>{email}</span>}
+              {onLogout && (
+                <Button onClick={onLogout} variant="outline" size="sm">
+                  Log out
+                </Button>
+              )}
+            </>
           )}
           <ThemeToggle />
         </div>

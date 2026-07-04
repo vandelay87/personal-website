@@ -15,10 +15,12 @@ const ADMIN_LINKS: HeaderLink[] = [
   { label: 'Users', to: '/admin/users' },
 ]
 
+const ADMIN_LINKS_RECIPES_ONLY: HeaderLink[] = [{ label: 'Recipes', to: '/admin/recipes' }]
+
 const AdminLayout: FC<AdminLayoutProps> = ({ children }) => {
   const { user, isAdmin, logout } = useAuth()
 
-  const links = isAdmin ? ADMIN_LINKS : ADMIN_LINKS.filter((link) => link.to !== '/admin/users')
+  const links = isAdmin ? ADMIN_LINKS : ADMIN_LINKS_RECIPES_ONLY
 
   return (
     <div className={styles.layout}>
