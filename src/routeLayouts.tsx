@@ -41,8 +41,8 @@ export const RootLayout = () => (
 
 /**
  * Login sits outside the admin shell (its own "logged-out" header — brand +
- * "Admin" label + ThemeToggle, no nav/logout) but still uses the public
- * Footer, since no design counterpart specifies an admin-styled one for it.
+ * "Admin" label + ThemeToggle, no nav/logout) but the PRD groups Login under
+ * the admin-shell Footer too, so no `email` (no authenticated user yet).
  */
 export const LoginLayout = () => (
   <>
@@ -52,7 +52,7 @@ export const LoginLayout = () => (
     <Layout>
       <Outlet />
     </Layout>
-    <Footer variant="public" />
+    <Footer variant="admin" />
   </>
 )
 

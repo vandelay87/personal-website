@@ -44,15 +44,17 @@ export const routes: RouteObject[] = [
     ],
   },
   {
-    element: <AdminRootLayout />,
+    element: (
+      <ProtectedRoute>
+        <AdminRootLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: '/admin/recipes',
         element: (
           <AdminSuspense>
-            <ProtectedRoute>
-              <RecipeList />
-            </ProtectedRoute>
+            <RecipeList />
           </AdminSuspense>
         ),
       },
@@ -60,9 +62,7 @@ export const routes: RouteObject[] = [
         path: '/admin/recipes/new',
         element: (
           <AdminSuspense>
-            <ProtectedRoute>
-              <RecipeEditor />
-            </ProtectedRoute>
+            <RecipeEditor />
           </AdminSuspense>
         ),
       },
@@ -70,9 +70,7 @@ export const routes: RouteObject[] = [
         path: '/admin/recipes/:id/edit',
         element: (
           <AdminSuspense>
-            <ProtectedRoute>
-              <RecipeEditor />
-            </ProtectedRoute>
+            <RecipeEditor />
           </AdminSuspense>
         ),
       },
@@ -80,9 +78,7 @@ export const routes: RouteObject[] = [
         path: '/admin/recipes/:id/preview',
         element: (
           <AdminSuspense>
-            <ProtectedRoute>
-              <RecipePreview />
-            </ProtectedRoute>
+            <RecipePreview />
           </AdminSuspense>
         ),
       },
