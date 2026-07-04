@@ -2,6 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import React, { lazy } from 'react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
+import { axe } from 'vitest-axe'
 import BlogPost from './BlogPost'
 import type { PostMeta } from './posts'
 
@@ -120,11 +121,26 @@ describe('BlogPost', () => {
     expect(screen.getByTestId('not-found')).toBeInTheDocument()
   })
 
+  describe('back link', () => {
+    it('renders a link back to the blog index', () => {
+      renderWithRoute('test-post')
+      const backLink = screen.getByRole('link', { name: /all posts/i })
+      expect(backLink).toHaveAttribute('href', '/blog')
+    })
+  })
+
   describe('tags', () => {
     it('displays tags in the post header', () => {
       renderWithRoute('test-post')
       expect(screen.getByText('react')).toBeInTheDocument()
       expect(screen.getByText('aws')).toBeInTheDocument()
+    })
+
+    it('renders tags as a list of links to the filtered blog index', () => {
+      renderWithRoute('test-post')
+      const reactTagLink = screen.getByRole('link', { name: 'react' })
+      expect(reactTagLink).toHaveAttribute('href', '/blog?tag=react')
+      expect(reactTagLink.closest('li')).toBeInTheDocument()
     })
   })
 
@@ -209,6 +225,15 @@ describe('BlogPost', () => {
       const externalLink = await screen.findByText('External Link')
       expect(externalLink.closest('a')).toHaveAttribute('target', '_blank')
       expect(externalLink.closest('a')).toHaveAttribute('rel', 'noreferrer')
+    })
+  })
+
+  describe('accessibility', () => {
+    it('renders content with no detectable axe violations', async () => {
+      const { container } = renderWithRoute('test-post')
+      await screen.findByText('MDX content here')
+
+      expect(await axe(container)).toHaveNoViolations()
     })
   })
 })

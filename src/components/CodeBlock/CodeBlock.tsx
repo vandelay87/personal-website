@@ -62,6 +62,9 @@ const CodeBlock = ({
             )}
           </span>
         </button>
+        <span className="sr-only" aria-live="polite">
+          {copied ? 'Copied to clipboard' : ''}
+        </span>
       </div>
       <pre
         ref={preRef}

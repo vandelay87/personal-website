@@ -1,0 +1,18 @@
+/* Shared text-treatment composables — CSS Modules port of small text
+   styles repeated verbatim across page `.module.css` files. Mirrors the
+   `composes: x from '../../styles/interactions.module.css'` pattern used
+   for interaction utilities (see interactions.module.css) — consuming
+   files `composes` from here (relative path from a page two levels down
+   in src/pages/<Name>/) rather than duplicating the declarations. */
+
+/* Mono, uppercase, tracked, faint — section/hero kicker text. Pair with
+   `Typography` (e.g. `variant="caption" as="p"` or `as="h2"` for an
+   eyebrow that doubles as the section heading). */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  margin: 0 0 var(--space-5);
+}

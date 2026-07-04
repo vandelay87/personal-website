@@ -1,0 +1,211 @@
+/* ── Hero ─────────────────────────────────────────────────────── */
+
+.hero {
+  max-width: var(--max-w-reading);
+  margin-inline: auto;
+  padding-block: var(--space-24) var(--space-16);
+  padding-inline: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.photo {
+  width: clamp(150px, 24vw, 200px);
+  margin-block-end: var(--space-8);
+}
+
+.photoImage {
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-lg);
+}
+
+.eyebrow {
+  composes: eyebrow from '../../styles/text.module.css';
+}
+
+.heading {
+  font-size: var(--font-display-hero);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--tracking-tight);
+  margin: 0 0 var(--space-3);
+}
+
+.role {
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+  margin: 0 0 var(--space-4);
+}
+
+.bio {
+  max-width: var(--max-w-prose);
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.ctaRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-block-start: var(--space-8);
+}
+
+.cta {
+  composes: focusRing from '../../styles/interactions.module.css';
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  transition:
+    background var(--duration-fast) var(--easing-default),
+    color var(--duration-fast) var(--easing-default),
+    border-color var(--duration-fast) var(--easing-default);
+}
+
+.ctaSolid {
+  background: var(--color-btn-bg);
+  color: var(--color-btn-fg);
+  border: var(--border-width) solid var(--color-btn-bg);
+}
+
+.ctaSolid:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.ctaOutline {
+  color: var(--color-text-strong);
+  border: var(--border-width) solid var(--color-border-strong);
+}
+
+.ctaOutline:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta {
+    transition: none;
+  }
+}
+
+/* ── Section divider ──────────────────────────────────────────── */
+
+.divider {
+  max-width: var(--max-w-reading);
+  margin-inline: auto;
+  border: none;
+  border-block-start: var(--border-width) solid var(--color-border);
+}
+
+/* ── Link sections (Apps & experiments / The blog) ───────────── */
+
+.linkSection {
+  max-width: var(--max-w-reading);
+  margin-inline: auto;
+  padding-block: var(--space-16);
+  padding-inline: var(--space-4);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin: 0 0 var(--space-6);
+}
+
+.sectionHeading {
+  composes: eyebrow;
+  margin: 0;
+}
+
+.sectionAll {
+  composes: nudgeUpRight from '../../styles/interactions.module.css';
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.rowList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rowList > li + li {
+  border-block-start: var(--border-width) solid var(--color-border);
+}
+
+.row {
+  composes: nudgeUpRight from '../../styles/interactions.module.css';
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding-block: var(--space-5);
+  padding-inline: var(--space-2);
+  margin-inline: calc(-1 * var(--space-2));
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius-md);
+  transition: background var(--duration-fast) var(--easing-default);
+}
+
+.row:hover {
+  background: var(--color-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    transition: none;
+  }
+}
+
+.rowTitle {
+  margin: 0 0 var(--space-1);
+}
+
+.rowSub {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+/* ── From the kitchen ─────────────────────────────────────────── */
+
+.kitchenSection {
+  max-width: var(--max-w-site);
+  margin-inline: auto;
+  padding-block: var(--space-16);
+  padding-inline: var(--space-4);
+}
+
+.kitchenIntro {
+  max-width: var(--max-w-prose);
+  margin-inline: auto;
+  text-align: center;
+  margin-block-end: var(--space-10);
+}
+
+.recipeGrid {
+  list-style: none;
+  margin: 0 0 var(--space-10);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-6);
+}
+
+.browseAll {
+  text-align: center;
+}

@@ -16,6 +16,7 @@ vi.mock('react-router-dom', async () => {
 const renderWithRouter = (initialPath: string) => {
   return render(
     <MemoryRouter initialEntries={[initialPath]}>
+      <main id="main" tabIndex={-1} />
       <ScrollToTop />
     </MemoryRouter>
   )
@@ -37,10 +38,21 @@ describe('ScrollToTop', () => {
     expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
   })
 
+  it('moves focus to #main on PUSH navigation', () => {
+    renderWithRouter('/apps')
+    expect(document.activeElement).toBe(document.getElementById('main'))
+  })
+
   it('does not scroll on POP navigation (back/forward)', () => {
     mockNavigationType.mockReturnValue('POP')
     renderWithRouter('/apps')
     expect(window.scrollTo).not.toHaveBeenCalled()
+  })
+
+  it('does not move focus to #main on POP navigation (back/forward)', () => {
+    mockNavigationType.mockReturnValue('POP')
+    renderWithRouter('/apps')
+    expect(document.activeElement).not.toBe(document.getElementById('main'))
   })
 
   it('scrolls to top on REPLACE navigation', () => {
@@ -58,6 +70,7 @@ describe('ScrollToTop', () => {
     expect(document.querySelector).toHaveBeenCalledWith('#section')
     expect(mockElement.scrollIntoView).toHaveBeenCalled()
     expect(window.scrollTo).not.toHaveBeenCalled()
+    expect(document.activeElement).not.toBe(document.getElementById('main'))
   })
 
   it('scrolls to top when hash element does not exist', () => {

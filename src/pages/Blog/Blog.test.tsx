@@ -1,6 +1,7 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { axe } from 'vitest-axe'
 import Blog from './Blog'
 
 const mockPosts = vi.hoisted(() => ({
@@ -56,6 +57,8 @@ const renderBlog = (initialRoute = '/blog') => {
   )
 }
 
+const getFilterBar = () => screen.getByRole('group', { name: /filter posts by tag/i })
+
 describe('Blog', () => {
   beforeEach(() => {
     mockPosts.value = [
@@ -96,6 +99,11 @@ describe('Blog', () => {
   })
 
   describe('post rendering', () => {
+    it('renders each post as an article', () => {
+      renderBlog()
+      expect(screen.getAllByRole('article')).toHaveLength(3)
+    })
+
     it('renders all posts sorted by date (newest first)', () => {
       renderBlog()
       const links = screen.getAllByRole('link')
@@ -155,21 +163,33 @@ describe('Blog', () => {
       ).toBeInTheDocument()
     })
 
-    it('renders tag pills for each post', () => {
+    it('renders a tag chip list within each post', () => {
       renderBlog()
-      // Tags should appear as clickable buttons
-      expect(
-        screen.getAllByRole('button', { name: 'react' })
-      ).toHaveLength(2)
+      // 2 posts have "aws"; each post's tag chips live in their own <ul>
       expect(
         screen.getAllByRole('button', { name: 'aws' })
-      ).toHaveLength(2)
-      expect(
-        screen.getAllByRole('button', { name: 'cdk' })
-      ).toHaveLength(2)
-      expect(
-        screen.getAllByRole('button', { name: 'testing' })
-      ).toHaveLength(1)
+      ).toHaveLength(3) // 1 in the top filter bar + 2 within post cards
+    })
+  })
+
+  describe('tag filter bar', () => {
+    it('renders a group of tag filter chips including "All"', () => {
+      renderBlog()
+      const bar = getFilterBar()
+      expect(within(bar).getByRole('button', { name: 'All' })).toBeInTheDocument()
+      expect(within(bar).getByRole('button', { name: 'react' })).toBeInTheDocument()
+      expect(within(bar).getByRole('button', { name: 'aws' })).toBeInTheDocument()
+      expect(within(bar).getByRole('button', { name: 'cdk' })).toBeInTheDocument()
+      expect(within(bar).getByRole('button', { name: 'testing' })).toBeInTheDocument()
+    })
+
+    it('"All" is pressed by default', () => {
+      renderBlog()
+      const bar = getFilterBar()
+      expect(within(bar).getByRole('button', { name: 'All' })).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      )
     })
   })
 
@@ -177,11 +197,9 @@ describe('Blog', () => {
     it('filters posts when a tag is clicked', () => {
       renderBlog()
 
-      // Click the "testing" tag — only "React Testing Patterns" has it
-      const testingTags = screen.getAllByRole('button', { name: 'testing' })
-      fireEvent.click(testingTags[0])
+      const bar = getFilterBar()
+      fireEvent.click(within(bar).getByRole('button', { name: 'testing' }))
 
-      // Only the matching post should remain
       expect(
         screen.getByText('React Testing Patterns')
       ).toBeInTheDocument()
@@ -196,10 +214,9 @@ describe('Blog', () => {
     it('highlights the active tag with aria-pressed', () => {
       renderBlog()
 
-      const awsTags = screen.getAllByRole('button', { name: 'aws' })
-      fireEvent.click(awsTags[0])
+      const bar = getFilterBar()
+      fireEvent.click(within(bar).getByRole('button', { name: 'aws' }))
 
-      // All visible "aws" tag buttons should be pressed
       const pressedButtons = screen.getAllByRole('button', { name: 'aws' })
       pressedButtons.forEach((button) => {
         expect(button).toHaveAttribute('aria-pressed', 'true')
@@ -209,19 +226,14 @@ describe('Blog', () => {
     it('deselects tag when clicking the active tag again', () => {
       renderBlog()
 
-      const testingTags = screen.getAllByRole('button', { name: 'testing' })
-      fireEvent.click(testingTags[0])
-
-      // Only one post visible
+      const bar = getFilterBar()
+      fireEvent.click(within(bar).getByRole('button', { name: 'testing' }))
       expect(
         screen.queryByText('Building a Pokedex with React and AWS')
       ).not.toBeInTheDocument()
 
-      // Click the active tag again to clear the filter
-      const activeTag = screen.getByRole('button', { name: 'testing' })
-      fireEvent.click(activeTag)
+      fireEvent.click(within(bar).getByRole('button', { name: 'testing' }))
 
-      // All posts should be visible again
       expect(
         screen.getByText('Building a Pokedex with React and AWS')
       ).toBeInTheDocument()
@@ -233,21 +245,29 @@ describe('Blog', () => {
       ).toBeInTheDocument()
     })
 
+    it('clicking "All" clears an active filter', () => {
+      renderBlog('/blog?tag=testing')
+      const bar = getFilterBar()
+      fireEvent.click(within(bar).getByRole('button', { name: 'All' }))
+
+      expect(
+        screen.getByText('Building a Pokedex with React and AWS')
+      ).toBeInTheDocument()
+      expect(screen.getByText('React Testing Patterns')).toBeInTheDocument()
+    })
+
     it('shows only posts matching the clicked tag', () => {
       renderBlog()
 
-      const awsTags = screen.getAllByRole('button', { name: 'aws' })
-      fireEvent.click(awsTags[0])
+      const bar = getFilterBar()
+      fireEvent.click(within(bar).getByRole('button', { name: 'aws' }))
 
-      // "aws" tagged posts should show
       expect(
         screen.getByText('Building a Pokedex with React and AWS')
       ).toBeInTheDocument()
       expect(
         screen.getByText('CDK Custom Resources Deep Dive')
       ).toBeInTheDocument()
-
-      // Non-"aws" post should be hidden
       expect(
         screen.queryByText('React Testing Patterns')
       ).not.toBeInTheDocument()
@@ -256,7 +276,6 @@ describe('Blog', () => {
     it('pre-filters posts when loaded with ?tag= in the URL', () => {
       renderBlog('/blog?tag=testing')
 
-      // Only the "testing"-tagged post should be visible
       expect(
         screen.getByText('React Testing Patterns')
       ).toBeInTheDocument()
@@ -276,6 +295,35 @@ describe('Blog', () => {
         expect(button).toHaveAttribute('aria-pressed', 'true')
       })
     })
+
+    it('provides a visible "Clear filter" affordance when a tag is active', () => {
+      renderBlog('/blog?tag=aws')
+      expect(screen.getByRole('button', { name: /clear filter/i })).toBeInTheDocument()
+    })
+
+    it('does not show the "Clear filter" affordance when no tag is active', () => {
+      renderBlog()
+      expect(screen.queryByRole('button', { name: /clear filter/i })).not.toBeInTheDocument()
+    })
+  })
+
+  describe('result count announcement', () => {
+    it('announces the total pluralized count with no filter', () => {
+      renderBlog()
+      expect(screen.getByText('3 posts')).toBeInTheDocument()
+    })
+
+    it('announces the pluralized filtered count and active tag', () => {
+      renderBlog('/blog?tag=testing')
+      expect(screen.getByText('1 post tagged testing')).toBeInTheDocument()
+    })
+
+    it('updates the announced count when the filter changes', () => {
+      renderBlog()
+      const bar = getFilterBar()
+      fireEvent.click(within(bar).getByRole('button', { name: 'aws' }))
+      expect(screen.getByText('2 posts tagged aws')).toBeInTheDocument()
+    })
   })
 
   describe('empty states', () => {
@@ -284,8 +332,7 @@ describe('Blog', () => {
 
       expect(screen.getByText(/no posts found/i)).toBeInTheDocument()
 
-      // There should be a link to clear the filter
-      const clearLink = screen.getByRole('button', { name: /clear/i })
+      const clearLink = screen.getByRole('button', { name: /clear filter/i })
       expect(clearLink).toBeInTheDocument()
     })
 
@@ -306,6 +353,19 @@ describe('Blog', () => {
       expect(
         screen.queryByRole('button', { name: 'aws' })
       ).not.toBeInTheDocument()
+    })
+  })
+
+  describe('accessibility', () => {
+    it('renders the default post list with no detectable axe violations', async () => {
+      const { container } = renderBlog()
+      expect(await axe(container)).toHaveNoViolations()
+    })
+
+    it('renders the empty state with no detectable axe violations', async () => {
+      mockPosts.value = []
+      const { container } = renderBlog()
+      expect(await axe(container)).toHaveNoViolations()
     })
   })
 })

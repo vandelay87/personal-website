@@ -18,7 +18,7 @@ const isExternalHref = (href: string) =>
 const AppCard: FC<AppCardProps> = ({ title, description, href, image }) => {
   const content = (
     <>
-      <div className={styles.imageWrapper}>
+      <div className={styles.imageWrapper} aria-hidden="true">
         <Image
           {...image}
           className={styles.imageScaled}

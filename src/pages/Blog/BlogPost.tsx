@@ -59,15 +59,33 @@ const BlogPost = () => {
 
   return (
     <article className={styles.article}>
-      <Typography variant="heading1">{post.title}</Typography>
-      <Typography variant="body">
-        {formatDate(post.date)} - {post.readingTime} min read
-      </Typography>
-      <div className={styles.tags}>
-        {post.tags.map((tag) => (
-          <RouterLink key={tag} to={`/blog?tag=${tag}`} className={styles.tag}>{tag}</RouterLink>
-        ))}
-      </div>
+      <Link
+        to="/blog"
+        icon="←"
+        iconSide="left"
+        nudge="left"
+        className={styles.backLink}
+      >
+        All posts
+      </Link>
+
+      <header className={styles.header}>
+        <p className={styles.meta}>
+          {formatDate(post.date)} <span aria-hidden="true">·</span>{' '}
+          {post.readingTime} min read
+        </p>
+        <Typography variant="heading1">{post.title}</Typography>
+        <ul className={styles.tags}>
+          {post.tags.map((tag) => (
+            <li key={tag}>
+              <RouterLink to={`/blog?tag=${tag}`} className={styles.tag}>
+                {tag}
+              </RouterLink>
+            </li>
+          ))}
+        </ul>
+      </header>
+
       <Suspense fallback={<Typography variant="body">Loading...</Typography>}>
         <PostContent components={mdxComponents} />
       </Suspense>
@@ -111,18 +129,21 @@ const BlogPost = () => {
       </section>
 
       {showRelated && (
-        <section className={styles.relatedSection}>
-          <Typography variant="heading3" as="h2">Related Posts</Typography>
-          <div className={styles.relatedGrid}>
+        <section className={styles.relatedSection} aria-label="Related posts">
+          <Typography variant="heading3" as="h2">Related posts</Typography>
+          <ul className={styles.relatedGrid}>
             {relatedPosts.map((rp) => (
-              <Link key={rp.slug} to={`/blog/${rp.slug}`} className={styles.relatedCard}>
+              <li key={rp.slug}>
+                <Link to={`/blog/${rp.slug}`} className={styles.relatedCard}>
                   <Typography variant="heading4" as="h3">{rp.title}</Typography>
                   <Typography variant="body">
-                    {formatDate(rp.date)} · {rp.readingTime} min read
+                    {formatDate(rp.date)} <span aria-hidden="true">·</span>{' '}
+                    {rp.readingTime} min read
                   </Typography>
-              </Link>
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
       )}
     </article>

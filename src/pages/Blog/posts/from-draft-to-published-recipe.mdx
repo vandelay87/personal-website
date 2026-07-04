@@ -51,6 +51,8 @@ Uploading the cover image looks instant to me, but the server does it in three s
 
 ```mermaid
 graph LR
+    accTitle: Recipe cover image upload pipeline
+    accDescr: The browser asks the image handler API for a presigned upload URL, then uploads the original file straight to the S3 uploads bucket using that URL. The upload triggers an S3 ObjectCreated event that invokes the resizer Lambda, which writes WebP variants to the S3 processed bucket and marks the image ready in DynamoDB.
     B[Browser] -->|ask for URL| API[image handler]
     API -->|presigned PUT| B
     B -->|upload original| S3[(S3 uploads/)]
