@@ -8,7 +8,7 @@ import RecipeDetail from '@pages/RecipeDetail'
 import Recipes from '@pages/Recipes'
 import { lazy } from 'react'
 import { type RouteObject } from 'react-router-dom'
-import { AdminSuspense, RootLayout } from './routeLayouts'
+import { AdminRootLayout, AdminSuspense, LoginLayout, RootLayout } from './routeLayouts'
 
 const Login = lazy(() => import('@pages/admin/Login'))
 const RecipeList = lazy(() => import('@pages/admin/RecipeList'))
@@ -26,14 +26,26 @@ export const routes: RouteObject[] = [
       { path: '/blog/:slug', element: <BlogPost /> },
       { path: '/recipes', element: <Recipes /> },
       { path: '/recipes/:slug', element: <RecipeDetail /> },
+      { path: '*', element: <NotFound /> },
+    ],
+  },
+  {
+    path: '/admin/login',
+    element: <LoginLayout />,
+    children: [
       {
-        path: '/admin/login',
+        index: true,
         element: (
           <AdminSuspense>
             <Login />
           </AdminSuspense>
         ),
       },
+    ],
+  },
+  {
+    element: <AdminRootLayout />,
+    children: [
       {
         path: '/admin/recipes',
         element: (
@@ -84,7 +96,6 @@ export const routes: RouteObject[] = [
           </AdminSuspense>
         ),
       },
-      { path: '*', element: <NotFound /> },
     ],
   },
 ]

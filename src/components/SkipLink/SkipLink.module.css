@@ -1,0 +1,30 @@
+/* SkipLink.module.css
+   Classic visually-hidden-until-focused pattern: offscreen above the
+   viewport (not `display:none`/`visibility:hidden`, which would drop it
+   from the focus order), revealed by shifting `top` back on focus. */
+
+.skipLink {
+  composes: focusRing from '../../styles/interactions.module.css';
+  position: absolute;
+  z-index: var(--z-overlay);
+  /* -40px doesn't match a --space-* token; sized to reliably clear the
+     link's own rendered height offscreen, not a design value. */
+  top: -40px;
+  left: var(--space-4);
+  background-color: var(--color-bg);
+  color: var(--color-text-strong);
+  padding: var(--space-2) var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: top var(--duration-fast) var(--easing-default);
+}
+
+.skipLink:focus-visible {
+  top: var(--space-4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skipLink {
+    transition: none;
+  }
+}

@@ -5,32 +5,6 @@
   align-items: flex-start;
 }
 
-.input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.preview {
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-lg);
-  object-fit: cover;
-}
-
-.error {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  color: var(--color-error);
-  font-size: var(--font-size-sm);
-}
-
 .srOnly {
   position: absolute;
   width: 1px;
@@ -41,4 +15,33 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* Same visually-hidden technique as `.srOnly` above — composes it instead
+   of duplicating the declarations. */
+.input {
+  composes: srOnly;
+}
+
+/* Matches ImageUpload.jsx's `ready`-state frame (1px border, radius-lg,
+   overflow hidden) — the empty/processing states are ProcessingPlaceholder's
+   own frame (already ported to the design's shimmer treatment). */
+.preview {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+}
+
+/* No error-state visual exists in the design's ImageUpload.jsx — styled
+   as a small alert chip using the existing error-tint token, consistent
+   with `role="alert"` treatment elsewhere in the app. */
+.error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-error);
+  background-color: var(--color-error-bg);
+  font-size: var(--font-size-sm);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
 }

@@ -1,0 +1,35 @@
+/* Textarea.module.css — shares Input's `.ds-field` styling language
+   (background, border, focus border-tint) per Textarea.jsx/prompt.md. */
+
+.field {
+  composes: focusRing from '../../styles/interactions.module.css';
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-strong);
+  background-color: var(--color-field);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  resize: vertical;
+  min-height: var(--space-20);
+  transition: border-color var(--duration-fast) var(--easing-default);
+}
+
+/* Ports .ds-field's focus border tint (design_system/components/_helpers.css)
+   onto the shared focusRing ring — :focus-visible not :focus, no !important,
+   per the PRD's explicit correction. */
+.field:focus-visible {
+  border-color: var(--color-primary);
+}
+
+.field:disabled {
+  background-color: var(--color-surface);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field {
+    transition: none;
+  }
+}

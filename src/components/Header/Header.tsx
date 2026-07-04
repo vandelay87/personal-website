@@ -1,14 +1,92 @@
-import Navigation from '@components/Navigation'
+import Button from '@components/Button'
 import ThemeToggle from '@components/ThemeToggle'
+import type { FC } from 'react'
+import { Link as RouterLink, useLocation } from 'react-router-dom'
 import styles from './Header.module.css'
 
-export default function Header() {
+export interface HeaderLink {
+  label: string
+  to: string
+}
+
+export type HeaderVariant = 'public' | 'admin' | 'logged-out'
+
+export interface HeaderProps {
+  /** @default 'public' */
+  variant?: HeaderVariant
+  /** Wordmark text. @default 'akli.dev' */
+  brand?: string
+  brandTo?: string
+  /** Nav links; the current page is derived from the URL, not a per-link flag. */
+  links?: HeaderLink[]
+  /** Sticky + translucent blur. @default true */
+  sticky?: boolean
+  /** Admin: signed-in email shown at right. */
+  email?: string
+  /** Admin: renders the "Log out" button when set. */
+  onLogout?: () => void
+  className?: string
+}
+
+const isLinkActive = (pathname: string, to: string) =>
+  to === '/' ? pathname === '/' : pathname === to || pathname.startsWith(`${to}/`)
+
+const Header: FC<HeaderProps> = ({
+  variant = 'public',
+  brand = 'akli.dev',
+  brandTo = '/',
+  links = [],
+  sticky = true,
+  email,
+  onLogout,
+  className: extraClassName,
+}) => {
+  const { pathname } = useLocation()
+
+  const className = [styles.header, sticky && styles.sticky, extraClassName]
+    .filter(Boolean)
+    .join(' ')
+
+  const navLabel = variant === 'admin' ? 'Admin navigation' : 'Main navigation'
+
   return (
-    <header className={styles.header}>
-      <div className={styles.headerInner}>
-        <Navigation />
-        <ThemeToggle />
+    <header className={className}>
+      <div className={styles.inner}>
+        <RouterLink to={brandTo} className={styles.brand}>
+          {brand}
+        </RouterLink>
+
+        {variant === 'logged-out' ? (
+          <span className={styles.loggedOutLabel}>Admin</span>
+        ) : (
+          links.length > 0 && (
+            <nav aria-label={navLabel} className={styles.nav}>
+              {links.map((link) => (
+                <RouterLink
+                  key={link.to}
+                  to={link.to}
+                  className={styles.navLink}
+                  aria-current={isLinkActive(pathname, link.to) ? 'page' : undefined}
+                >
+                  {link.label}
+                </RouterLink>
+              ))}
+            </nav>
+          )
+        )}
+
+        <div className={styles.actions}>
+          {variant === 'admin' && email && <span className={styles.email}>{email}</span>}
+          {variant === 'admin' && onLogout && (
+            <Button onClick={onLogout} variant="outline" size="sm">
+              Log out
+            </Button>
+          )}
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   )
 }
+
+export default Header

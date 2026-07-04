@@ -1,0 +1,83 @@
+/* Input.module.css — ports the design's `.ds-field` (design_system/
+   components/_helpers.css): border tints to accent on focus, on top of
+   the shared `focusRing` ring/outline. The source rule uses `!important`
+   and bare `:focus` — both dropped here per the PRD's explicit correction. */
+
+.wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.field {
+  composes: focusRing from '../../styles/interactions.module.css';
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  color: var(--color-text-strong);
+  background-color: var(--color-field);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  transition: border-color var(--duration-fast) var(--easing-default);
+}
+
+.field:focus-visible {
+  border-color: var(--color-primary);
+}
+
+.field:disabled {
+  background-color: var(--color-surface);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field {
+    transition: none;
+  }
+}
+
+/* Invalid: error border always on, plus an error-tinted ring on focus
+   (mirrors --ring's own color-mix() formula — no token exists for an
+   error-colored ring, so the shape is kept literal-but-consistent). Needs
+   its own no-color-mix fallback since it overrides `.focusRing`'s
+   accent-colored one for this state. */
+.invalid {
+  border-color: var(--color-error);
+}
+
+.invalid:focus-visible {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 15%, transparent);
+}
+
+@supports not (color: color-mix(in srgb, red 50%, transparent)) {
+  .invalid:focus-visible {
+    outline-color: var(--color-error);
+    box-shadow: none;
+  }
+}
+
+.prefixIcon {
+  position: absolute;
+  inset-inline-start: var(--space-3);
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  color: var(--color-text-faint);
+  pointer-events: none;
+}
+
+.wrapper:has(.prefixIcon) .field {
+  padding-inline-start: var(--space-10);
+}
+
+.suffix {
+  position: absolute;
+  inset-inline-end: var(--space-3);
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  display: flex;
+}
+
+.wrapper:has(.suffix) .field {
+  padding-inline-end: var(--space-10);
+}
