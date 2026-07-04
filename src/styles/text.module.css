@@ -16,3 +16,34 @@
   color: var(--color-text-faint);
   margin: 0 0 var(--space-5);
 }
+
+/* Page hero/heading/lead — shared layout for the top-of-page intro block
+   used by top-level page components (e.g. Blog, Apps). */
+.pageHero {
+  max-width: var(--max-w-reading);
+  margin-inline: auto;
+  padding-block: var(--space-16) var(--space-6);
+  padding-inline: var(--space-4);
+}
+
+.pageHeading {
+  font-size: var(--font-display-hero);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--tracking-tight);
+  margin: 0 0 var(--space-4);
+}
+
+.pageLead {
+  max-width: var(--max-w-prose);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* Mono, tracked, faint meta text — used for byline/count-row style labels
+   (e.g. post date/reading time, item counts). */
+.metaText {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  letter-spacing: var(--tracking-meta);
+  color: var(--color-text-faint);
+}

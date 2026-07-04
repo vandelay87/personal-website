@@ -1,6 +1,7 @@
 import Tag from '@components/Tag'
 import Typography from '@components/Typography'
 import type { FC } from 'react'
+import { useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { pluralize } from '../../utils/pluralize'
 import styles from './Blog.module.css'
@@ -24,9 +25,10 @@ const Blog = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTag = searchParams.get('tag')
 
-  const filteredPosts = activeTag
-    ? posts.filter((post) => post.tags.includes(activeTag))
-    : posts
+  const filteredPosts = useMemo(
+    () => (activeTag ? posts.filter((post) => post.tags.includes(activeTag)) : posts),
+    [activeTag]
+  )
 
   const handleTagClick = (tag: string) => {
     if (activeTag === tag) {

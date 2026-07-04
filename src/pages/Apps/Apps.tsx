@@ -35,9 +35,9 @@ const APPS: AppCardProps[] = [
   },
 ]
 
-const Apps: FC = () => {
-  const countLabel = pluralize(APPS.length, 'app')
+const APPS_COUNT_LABEL = pluralize(APPS.length, 'app')
 
+const Apps: FC = () => {
   return (
     <>
       <section className={styles.hero}>
@@ -56,7 +56,7 @@ const Apps: FC = () => {
 
       <section className={styles.gridSection} aria-label="App grid">
         <div className={styles.countRow}>
-          <span>{countLabel}</span>
+          <span>{APPS_COUNT_LABEL}</span>
         </div>
         <ul className={styles.grid}>
           {APPS.map((app) => (

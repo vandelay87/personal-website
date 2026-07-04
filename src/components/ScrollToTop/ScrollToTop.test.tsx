@@ -62,7 +62,7 @@ describe('ScrollToTop', () => {
   })
 
   it('scrolls to anchor element when hash is present', () => {
-    const mockElement = { scrollIntoView: vi.fn() }
+    const mockElement = { scrollIntoView: vi.fn(), focus: vi.fn() }
     vi.spyOn(document, 'querySelector').mockReturnValue(mockElement as unknown as Element)
 
     renderWithRouter('/apps#section')
@@ -71,6 +71,15 @@ describe('ScrollToTop', () => {
     expect(mockElement.scrollIntoView).toHaveBeenCalled()
     expect(window.scrollTo).not.toHaveBeenCalled()
     expect(document.activeElement).not.toBe(document.getElementById('main'))
+  })
+
+  it('moves focus to the anchor element when hash is present', () => {
+    const mockElement = { scrollIntoView: vi.fn(), focus: vi.fn() }
+    vi.spyOn(document, 'querySelector').mockReturnValue(mockElement as unknown as Element)
+
+    renderWithRouter('/apps#section')
+
+    expect(mockElement.focus).toHaveBeenCalledWith({ preventScroll: true })
   })
 
   it('scrolls to top when hash element does not exist', () => {

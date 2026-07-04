@@ -6,7 +6,7 @@ import Link from '@components/Link'
 import Typography from '@components/Typography'
 import NotFound from '@pages/NotFound'
 import type { AnchorHTMLAttributes } from 'react'
-import { Suspense } from 'react'
+import { Suspense, useMemo } from 'react'
 import { Link as RouterLink, useParams } from 'react-router-dom'
 import styles from './BlogPost.module.css'
 import { formatDate, getLazyPost, getPost, posts } from './posts'
@@ -45,6 +45,11 @@ const BlogPost = () => {
   const post = slug ? getPost(slug) : undefined
   const PostContent = slug ? getLazyPost(slug) : undefined
 
+  const relatedPosts = useMemo(
+    () => (post ? getRelatedPosts(post, posts) : []),
+    [post]
+  )
+
   if (!post || !PostContent) {
     return <NotFound />
   }
@@ -54,7 +59,6 @@ const BlogPost = () => {
   const twitterHref = `https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareText}`
   const linkedinHref = `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`
 
-  const relatedPosts = getRelatedPosts(post, posts)
   const showRelated = posts.length > 1
 
   return (
