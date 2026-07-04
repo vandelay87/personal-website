@@ -205,8 +205,15 @@
   justify-content: space-between;
   gap: var(--space-5);
   padding-block: var(--space-5);
-  padding-inline: var(--space-2);
-  margin-inline: calc(-1 * var(--space-2));
+  /* 14px: matches the design exactly; no token lands on it. The design
+     has no compensating negative margin here — .ls-row is a direct
+     child of the section with this same padding, so its box already
+     spans the full content width. Our earlier negative-margin/padding
+     combo (meant to bleed the hover background wider) instead left the
+     row's own box wider than its container and cancelled out the
+     padding inset entirely, so the text sat flush with no breathing
+     room. Removed. */
+  padding-inline: 14px;
   text-decoration: none;
   color: inherit;
   border-radius: var(--radius-md);
