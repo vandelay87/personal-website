@@ -58,7 +58,7 @@ const LinkSection: FC<LinkSectionProps> = ({ headingId, eyebrow, allHref, rows }
       >
         {eyebrow}
       </Typography>
-      <Link to={allHref} icon="→" nudge="up-right" className={styles.sectionAll}>
+      <Link to={allHref} icon="→" nudge="right" className={styles.sectionAll}>
         All
       </Link>
     </div>

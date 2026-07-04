@@ -174,11 +174,14 @@
 }
 
 .sectionAll {
-  composes: nudgeUpRight from '../../styles/interactions.module.css';
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  font-size: var(--font-size-sm);
+  /* 14px: matches the design exactly; no token lands on it. Nudge
+     direction comes from the Link component's own `nudge` prop, not a
+     composed class here — a leftover `nudgeUpRight` composition used
+     to sit on this element regardless of the icon it was paired with. */
+  font-size: 14px;
   font-weight: var(--font-weight-semibold);
   color: var(--color-primary);
   text-decoration: none;
@@ -195,7 +198,8 @@
 }
 
 .row {
-  composes: nudgeUpRight from '../../styles/interactions.module.css';
+  /* Nudge direction comes from the Link component's own `nudge` prop
+     on the icon span, not a composed class here — see .sectionAll. */
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -234,6 +238,16 @@
   line-height: 1.55;
   margin: 0;
   color: var(--color-text-muted);
+}
+
+/* The row's ↗ icon (Link's own internal span, last child when
+   iconSide="right") — accent-colored and 15px per the design, always,
+   not just on hover. A plain descendant selector (rather than the
+   Link `tone` prop) so this reliably wins over .row's own
+   `color: inherit` regardless of CSS Modules bundle order. */
+.row > span:last-child {
+  font-size: var(--font-size-base);
+  color: var(--color-primary);
 }
 
 /* ── From the kitchen ─────────────────────────────────────────── */
