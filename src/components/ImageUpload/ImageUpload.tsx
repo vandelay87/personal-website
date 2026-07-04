@@ -130,7 +130,7 @@ const ImageUpload: FC<ImageUploadProps> = ({
         type="file"
         accept="image/*"
         onChange={handleChange}
-        className={styles.input}
+        className="sr-only"
         id={inputId}
         aria-label="Upload image"
       />
@@ -156,7 +156,7 @@ const ImageUpload: FC<ImageUploadProps> = ({
         </Button>
       )}
 
-      <div aria-live="polite" className={styles.srOnly} />
+      <div aria-live="polite" className="sr-only" />
     </div>
   )
 }

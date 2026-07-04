@@ -1,7 +1,18 @@
+/* TagInput.module.css — chips reuse the shipped Tag component's chip look
+   (composes, rather than duplicating its declarations); the field row
+   shares Input's `.ds-field` treatment; suggestions restyle to the
+   design's dashed mono pill row. The suggestion list keeps its existing
+   `role="listbox"`/`role="option"` markup (TagInput.tsx is out of scope
+   to restructure) but renders as a static inline-flow row rather than an
+   absolutely-positioned popup — that's a pure CSS layout choice (ARIA
+   listbox semantics don't require a floating popup) and matches the
+   design's inline suggestion-chips row (TagInput.jsx), rather than the
+   dropdown look this stub previously had. */
+
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .chips {
@@ -11,21 +22,29 @@
 }
 
 .chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1) var(--space-2);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  font-size: var(--font-size-sm);
+  composes: tag from '../Tag/Tag.module.css';
 }
 
-.removeBtn {
-  padding: 0 var(--space-1);
-  min-width: auto;
+/* Overrides the Button component's `.button`/`.outline` styles (border,
+   padding, radius-md) to match Tag's own borderless `.remove` control —
+   descendant selector beats Button's single-class selectors on
+   specificity alone, so this doesn't depend on CSS import order or need
+   `!important`. */
+.chip .removeBtn {
+  border: none;
+  background: transparent;
+  color: var(--color-text-faint);
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
   font-size: var(--font-size-sm);
   line-height: 1;
+}
+
+.chip .removeBtn:hover {
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
 }
 
 .inputWrapper {
@@ -33,41 +52,63 @@
 }
 
 .input {
+  composes: focusRing from '../../styles/interactions.module.css';
   width: 100%;
-  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  color: var(--color-text-strong);
+  background-color: var(--color-field);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: var(--font-size-base);
-  font-family: var(--font-sans);
+  padding: var(--space-3);
+  transition: border-color var(--duration-fast) var(--easing-default);
 }
 
 .input:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .input {
+    transition: none;
+  }
 }
 
 .listbox {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
-  border: var(--border-width) solid var(--color-border);
-  border-top: none;
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  z-index: 10;
 }
 
 .option {
-  padding: var(--space-2) var(--space-3);
+  composes: chipHover from '../../styles/interactions.module.css';
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--tracking-meta);
+  color: var(--color-text-muted);
+  background: transparent;
+  border: var(--border-width) dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
   cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--easing-default),
+    color var(--duration-fast) var(--easing-default);
 }
 
-.option:hover {
-  background: var(--hover);
+/* Decorative "+" affordance from the design (TagInput.jsx renders "+ {tag}")
+   — generated content rather than a JSX text change, since suggestion
+   labels aren't meaningfully different without it (purely visual). */
+.option::before {
+  content: '+ ';
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option {
+    transition: none;
+  }
 }

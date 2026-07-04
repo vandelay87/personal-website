@@ -1,19 +1,111 @@
-/* Header.module.css */
+/* Header.module.css
+   Ports `.ds-header-sticky` from design_system/components/_helpers.css:
+   position: sticky + translucent color-mix() background + backdrop-filter
+   blur. `.header`'s solid --color-bg is the always-present base layer —
+   it *is* the fallback when color-mix()/backdrop-filter aren't supported,
+   so no separate fallback rule is needed beyond gating the translucent
+   override behind @supports. No -webkit-backdrop-filter prefix: this
+   project's conventions forbid vendor prefixes even though the design's
+   own _helpers.css includes one for older Safari. */
 
 .header {
-  position: sticky;
-  inset-block-start: 0;
   z-index: var(--z-header);
   background-color: var(--color-bg);
   color: var(--color-text);
   border-block-end: var(--border-width) solid var(--color-border);
 }
 
-.headerInner {
+.sticky {
+  position: sticky;
+  inset-block-start: 0;
+}
+
+@supports (backdrop-filter: blur(1px)) and (color: color-mix(in srgb, red 50%, transparent)) {
+  .sticky {
+    background-color: color-mix(in srgb, var(--color-bg) 84%, transparent);
+    backdrop-filter: saturate(140%) blur(10px);
+  }
+}
+
+.inner {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: var(--space-4);
+  row-gap: var(--space-3);
   max-width: var(--max-w-site);
   margin-inline: auto;
   padding: var(--space-4) var(--space-6);
+}
+
+/* Brand's left-hand group: admin groups brand+nav together here, while
+   public/logged-out render brand alone (their nav/label lives in .actions
+   instead) — grouping is variant-dependent per the page-level prototypes,
+   not the isolated component card. */
+.left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.brand {
+  composes: focusRing from '../../styles/interactions.module.css';
+  color: var(--color-text-strong);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+
+.brand:hover {
+  color: var(--color-primary);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.navLink {
+  composes: focusRing from '../../styles/interactions.module.css';
+  color: var(--color-text-muted);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+
+.navLink:hover {
+  color: var(--color-primary);
+}
+
+.navLink[aria-current='page'] {
+  color: var(--color-text-strong);
+  font-weight: var(--font-weight-medium);
+}
+
+.loggedOutLabel {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Right-hand group: holds whichever of nav/label/admin-extras is not in
+   .left for the current variant, plus the theme toggle, so .inner always
+   ends up with exactly two direct flex children. */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.email {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Redundant with Footer's "Signed in as {email}" line on admin pages, so it's
+   dropped rather than wrapped once the header itself needs to wrap. */
+@media (max-width: 640px) {
+  .email {
+    display: none;
+  }
 }
