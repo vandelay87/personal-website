@@ -109,7 +109,7 @@ describe('Link', () => {
     expect(linkElement).toHaveClass(styles.accent)
   })
 
-  it('applies the nudge direction class to the icon wrapper', () => {
+  it('applies the nudge direction class to the link itself, not the icon', () => {
     render(
       <MemoryRouter>
         <Link to="/apps" icon={<span data-testid="icon" />} nudge="left">
@@ -119,7 +119,13 @@ describe('Link', () => {
     )
 
     const icon = screen.getByTestId('icon')
+    const linkElement = screen.getByRole('link', { name: /apps/i })
 
-    expect(icon.parentElement).toHaveClass(styles.nudgeLeft)
+    // The CSS is a `.nudgeX:hover .linkIcon` ancestor/descendant rule, so
+    // hovering anywhere on the link (not just the icon glyph) must trigger
+    // the icon's transform — the nudge class has to sit on the link, and
+    // the icon's own wrapper must not carry it (or the rule can never match).
+    expect(linkElement).toHaveClass(styles.nudgeLeft)
+    expect(icon.parentElement).not.toHaveClass(styles.nudgeLeft)
   })
 })
