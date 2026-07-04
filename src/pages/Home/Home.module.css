@@ -143,8 +143,10 @@
 /* ── Section divider ──────────────────────────────────────────── */
 
 .divider {
-  /* 640px: matches the design's hero/link-section column (see .hero). */
-  max-width: 640px;
+  /* 592px: the design's divider line sits inset within a 640px/24px-
+     padded wrapper (640 - 24*2), matching the hero/link-section content
+     edges exactly — not the full 640px outer column (see .hero). */
+  max-width: 592px;
   margin-inline: auto;
   border: none;
   border-block-start: var(--border-width) solid var(--color-border);
@@ -157,7 +159,9 @@
   max-width: 640px;
   margin-inline: auto;
   padding-block: var(--space-16);
-  padding-inline: var(--space-4);
+  /* 24px, matching .hero — was 16px, misaligning this section's content
+     with the hero column above it by 8px. */
+  padding-inline: var(--space-6);
 }
 
 .sectionHeader {
@@ -194,6 +198,9 @@
 }
 
 .rowList > li + li {
+  /* Inset to match .row's own 14px padding-inline, same pattern as the
+     section .divider being inset within its own padded wrapper. */
+  margin-inline: 14px;
   border-block-start: var(--border-width) solid var(--color-border);
 }
 
