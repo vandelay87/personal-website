@@ -14,7 +14,7 @@ export type HeaderVariant = 'public' | 'admin' | 'logged-out'
 export interface HeaderProps {
   /** @default 'public' */
   variant?: HeaderVariant
-  /** Wordmark text. @default 'akli.dev' */
+  /** Wordmark text. @default 'Akli Aissat' */
   brand?: string
   brandTo?: string
   /** Nav links; the current page is derived from the URL, not a per-link flag. */
@@ -31,7 +31,7 @@ const isLinkActive = (pathname: string, to: string) =>
 
 const Header: FC<HeaderProps> = ({
   variant = 'public',
-  brand = 'akli.dev',
+  brand = 'Akli Aissat',
   brandTo = '/',
   links = [],
   email,
@@ -47,28 +47,30 @@ const Header: FC<HeaderProps> = ({
   return (
     <header className={className}>
       <div className={styles.inner}>
-        <RouterLink to={brandTo} className={styles.brand}>
-          {brand}
-        </RouterLink>
+        <div className={styles.left}>
+          <RouterLink to={brandTo} className={styles.brand}>
+            {brand}
+          </RouterLink>
 
-        {variant === 'logged-out' ? (
-          <span className={styles.loggedOutLabel}>Admin</span>
-        ) : (
-          links.length > 0 && (
-            <nav aria-label={navLabel} className={styles.nav}>
-              {links.map((link) => (
-                <RouterLink
-                  key={link.to}
-                  to={link.to}
-                  className={styles.navLink}
-                  aria-current={isLinkActive(pathname, link.to) ? 'page' : undefined}
-                >
-                  {link.label}
-                </RouterLink>
-              ))}
-            </nav>
-          )
-        )}
+          {variant === 'logged-out' ? (
+            <span className={styles.loggedOutLabel}>Admin</span>
+          ) : (
+            links.length > 0 && (
+              <nav aria-label={navLabel} className={styles.nav}>
+                {links.map((link) => (
+                  <RouterLink
+                    key={link.to}
+                    to={link.to}
+                    className={styles.navLink}
+                    aria-current={isLinkActive(pathname, link.to) ? 'page' : undefined}
+                  >
+                    {link.label}
+                  </RouterLink>
+                ))}
+              </nav>
+            )
+          )}
+        </div>
 
         <div className={styles.actions}>
           {variant === 'admin' && (

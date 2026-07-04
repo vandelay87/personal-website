@@ -37,6 +37,12 @@
   padding: var(--space-4) var(--space-6);
 }
 
+.left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
 .brand {
   composes: focusRing from '../../styles/interactions.module.css';
   color: var(--color-text-strong);
