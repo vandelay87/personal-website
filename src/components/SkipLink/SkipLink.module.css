@@ -3,9 +3,13 @@
    viewport (not `display:none`/`visibility:hidden`, which would drop it
    from the focus order), revealed by translating it back on focus.
    `top` is fixed at `--space-4`; the hidden state instead shifts the
-   element up 56px via `transform` (16px + 40px, matching the old
-   `top: -40px` hidden / `top: var(--space-4)` visible values) so the
-   transition animates a compositor-only property instead of layout. */
+   element via `transform` so the transition animates a compositor-only
+   property instead of layout. The offset is percentage-based
+   (`-100%`, i.e. the element's own rendered height) plus `--space-4` to
+   cancel out the `top` offset, so the hidden position self-adjusts to
+   the element's actual height instead of relying on a hardcoded pixel
+   guess that silently drifts out of sync with padding/border/font
+   changes. */
 
 .skipLink {
   composes: focusRing from '../../styles/interactions.module.css';
@@ -18,7 +22,7 @@
   padding: var(--space-2) var(--space-4);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
-  transform: translateY(-56px);
+  transform: translateY(calc(-100% - var(--space-4)));
   transition: transform var(--duration-fast) var(--easing-default);
 }
 
