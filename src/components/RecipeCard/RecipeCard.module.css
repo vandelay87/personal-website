@@ -6,15 +6,17 @@
   border-radius: var(--radius-xl);
   border: var(--border-width) solid var(--color-border);
   background-color: var(--color-surface);
-  box-shadow: var(--shadow-md);
+  /* No resting shadow — the design only shows one on hover. */
   transition:
     transform var(--duration-fast) var(--easing-default),
     box-shadow var(--duration-fast) var(--easing-default);
 }
 
 .card:hover {
-  transform: translate(-4px, -4px);
-  box-shadow: var(--shadow-lg);
+  /* Vertical lift only, not the neo-brutalist diagonal offset. 14px/34px/
+     0.10 opacity: matches the design exactly; no shadow token lands on it. */
+  transform: translateY(-4px);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.1);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -43,6 +45,22 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  /* Cover-zoom on card hover, matching the design's signature interaction. */
+  transition: transform var(--duration-base) var(--easing-default);
+}
+
+.card:hover .image {
+  transform: scale(1.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image {
+    transition: none;
+  }
+
+  .card:hover .image {
+    transform: none;
+  }
 }
 
 .body {
@@ -53,10 +71,13 @@
 }
 
 .title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-tight);
-  margin: 0 0 var(--space-2);
+  /* 17px/600/1.3/-0.01em: matches the design exactly; no token combo
+     lands on it (Typography's heading3 is 18px/bold/1.08/untracked). */
+  font-size: 17px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
 }
 
 .titleLink {
@@ -94,12 +115,13 @@
   align-items: center;
   flex-wrap: nowrap;
   gap: var(--space-2);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
+  /* faint, not muted, and 12.5px: matches the design exactly. */
+  color: var(--color-text-faint);
+  font-size: 12.5px;
   white-space: nowrap;
   margin-block-start: auto;
 }
 
 .separator {
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-normal);
 }
