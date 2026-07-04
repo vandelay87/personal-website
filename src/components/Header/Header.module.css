@@ -29,9 +29,11 @@
 
 .inner {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
+  row-gap: var(--space-3);
   max-width: var(--max-w-site);
   margin-inline: auto;
   padding: var(--space-4) var(--space-6);
@@ -98,4 +100,12 @@
 .email {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
+}
+
+/* Redundant with Footer's "Signed in as {email}" line on admin pages, so it's
+   dropped rather than wrapped once the header itself needs to wrap. */
+@media (max-width: 640px) {
+  .email {
+    display: none;
+  }
 }
