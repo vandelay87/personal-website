@@ -1,13 +1,26 @@
 .article {
-  padding-block-end: var(--space-12);
+  /* Matches the design's article column exactly: a narrower, dedicated
+     680px long-form width (--max-w-article), not the wider 720px
+     index/hero reading column (--max-w-reading) used elsewhere on the
+     Blog page — a bare max-width was previously unset entirely, so
+     the whole post stretched to the page's own width with no reading
+     column at all. Padding is the design's literal clamp values; no
+     tokens land on them. */
+  max-width: var(--max-w-article);
+  margin-inline: auto;
+  padding: clamp(40px, 7vw, 72px) var(--space-6) clamp(64px, 9vw, 96px);
   overflow-x: hidden;
 }
 
 .backLink {
   composes: focusRing from '../../styles/interactions.module.css';
   composes: metaText from '../../styles/text.module.css';
+  /* 12px: matches the design's back-link exactly; metaText's own
+     font-size-sm (13px) is tuned for other mono-meta contexts, not
+     this one — same override Blog's own hero eyebrow already needed. */
+  font-size: 12px;
   color: var(--color-text-muted);
-  margin-block-end: var(--space-8);
+  margin-block-end: 36px;
 }
 
 .header {
@@ -16,7 +29,21 @@
 
 .meta {
   composes: metaText from '../../styles/text.module.css';
-  margin: 0 0 var(--space-4);
+  /* 12px: matches the design's meta line exactly, same override as
+     .backLink above. */
+  font-size: 12px;
+  margin: 0 0 18px;
+}
+
+.title {
+  /* Fluid 32-46px/-0.03em: matches the design's h1 exactly —
+     Typography's shared heading1 variant is a fixed 46px with no
+     letter-spacing or margin, both needed here. line-height already
+     matches via --line-height-tight (1.08), same value the design
+     hardcodes. */
+  font-size: clamp(32px, 5.6vw, 46px);
+  letter-spacing: -0.03em;
+  margin: 0 0 var(--space-6);
 }
 
 .tags {
@@ -26,6 +53,31 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+}
+
+/* Long-form MDX body typography — matches the design's `.prose`
+   exactly. Previously unstyled entirely (plain <p>/<h2> tags render
+   with only the page's ambient body styles), which is the bulk of why
+   a post's content didn't look "wrapped" like the design at all. */
+.prose p {
+  font-size: var(--font-size-lg);
+  line-height: 1.75;
+  color: var(--color-text);
+  margin: 0 0 22px;
+}
+
+.prose h2 {
+  font-size: clamp(23px, 3.2vw, 27px);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--color-text-strong);
+  margin: 54px 0 18px;
+}
+
+.prose strong {
+  color: var(--color-text-strong);
+  font-weight: var(--font-weight-semibold);
 }
 
 .tag {

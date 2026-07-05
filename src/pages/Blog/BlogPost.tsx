@@ -78,7 +78,9 @@ const BlogPost = () => {
           {formatDate(post.date)} <span aria-hidden="true">·</span>{' '}
           {post.readingTime} min read
         </p>
-        <Typography variant="heading1">{post.title}</Typography>
+        <Typography variant="heading1" className={styles.title}>
+          {post.title}
+        </Typography>
         <ul className={styles.tags}>
           {post.tags.map((tag) => (
             <li key={tag}>
@@ -90,9 +92,11 @@ const BlogPost = () => {
         </ul>
       </header>
 
-      <Suspense fallback={<Typography variant="body">Loading...</Typography>}>
-        <PostContent components={mdxComponents} />
-      </Suspense>
+      <div className={styles.prose}>
+        <Suspense fallback={<Typography variant="body">Loading...</Typography>}>
+          <PostContent components={mdxComponents} />
+        </Suspense>
+      </div>
 
       <section className={styles.shareSection} aria-label="Share this post">
         <Typography variant="heading3" as="h2">Share this post</Typography>
