@@ -65,6 +65,17 @@
   background: var(--color-surface);
 }
 
+/* index.css's `.shiki span` rule paints the *same* --shiki-light-bg
+   onto every individual token span, not just the <pre> — invisible
+   when the block's own background was white too (no visible seam),
+   but a grid of mismatched white boxes now that .pre is --color-
+   surface. No feature here relies on a per-span background (line
+   highlighting isn't wired up in vite.config.ts's Shiki transformer),
+   so this is safe to disable outright. */
+.wrapper .pre span {
+  background-color: transparent;
+}
+
 /* Line numbers via CSS counters */
 .pre code {
   counter-reset: line;
