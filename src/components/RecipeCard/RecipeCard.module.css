@@ -5,7 +5,9 @@
   overflow: hidden;
   border-radius: var(--radius-xl);
   border: var(--border-width) solid var(--color-border);
-  background-color: var(--color-surface);
+  /* The design's .rc uses the page background, not the elevated
+     "surface" tone — this isn't meant to look like a raised panel. */
+  background-color: var(--color-bg);
   /* No resting shadow — the design only shows one on hover. */
   transition:
     transform var(--duration-fast) var(--easing-default),
@@ -37,7 +39,14 @@
 }
 
 .imageWrapper > figure > div {
+  /* Image's own container div has a 12px radius on all four corners by
+     default (for standalone use) — here it sits flush at the top of a
+     card whose own overflow:hidden already rounds the top edge, so the
+     container's radius only ever shows as an unwanted rounded seam
+     where the image meets the body below. Flattened to a plain rect;
+     the card's outer radius handles the top corners. */
   border: none;
+  border-radius: 0;
 }
 
 .image {
@@ -85,8 +94,16 @@
   text-decoration: none;
 }
 
-.titleLink:hover {
-  color: var(--color-link);
+/* Stretched-link pattern: makes the whole card clickable (matching the
+   design's single <a> wrapping the entire .rc) while keeping the link's
+   accessible name scoped to just the title, not a wall of card text.
+   .card's own `position: relative` is what this anchors against. The
+   design has no separate hover color for the title text — only the
+   card-level lift/shadow/zoom — so none is added here either. */
+.titleLink::after {
+  content: '';
+  position: absolute;
+  inset: 0;
 }
 
 .titleLink:focus-visible {
