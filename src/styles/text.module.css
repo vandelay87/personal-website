@@ -21,15 +21,18 @@
 }
 
 /* Page hero/heading/lead — shared layout for the top-of-page intro block
-   used by top-level page components (e.g. Blog, Apps). Bottom padding
-   is deliberately left out — Apps' and Blog's own hero sections want
-   slightly different values there (clamp(40px,6vw,60px) vs
-   clamp(36px,5vw,52px)), set via each page's own `.hero`. */
+   used by top-level page components (e.g. Blog, Apps). Bottom padding is
+   a custom property, not a fixed value — Apps' and Blog's own hero
+   sections want slightly different fluid values there
+   (clamp(40px,6vw,60px) vs clamp(36px,5vw,52px)), set via each page's
+   own `.hero` overriding `--page-hero-pad-end`. The fallback keeps this
+   composable usable on its own if a future page composes it without
+   setting one. */
 .pageHero {
   max-width: var(--max-w-reading);
   margin-inline: auto;
-  padding-block-start: clamp(64px, 11vw, 108px);
-  padding-inline: 24px;
+  padding-block: clamp(64px, 11vw, 108px) var(--page-hero-pad-end, var(--space-6));
+  padding-inline: var(--space-6);
 }
 
 .pageHeading {

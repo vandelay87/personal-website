@@ -1,5 +1,6 @@
 import Image from '@components/Image'
 import type { ImageProps } from '@components/Image/Image'
+import Tag from '@components/Tag'
 import Typography from '@components/Typography'
 import type { FC } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
@@ -32,7 +33,7 @@ const AppCard: FC<AppCardProps> = ({ title, description, href, image, tag }) => 
           aria-hidden (the image is decorative/redundant with the
           title), but this tag's text (e.g. tech stack) is meaningful
           and must stay in the accessible tree. */}
-      {tag && <span className={styles.tag}>{tag}</span>}
+      {tag && <Tag className={styles.tagOverlay}>{tag}</Tag>}
 
       <div className={styles.body}>
         <div className={styles.titleRow}>

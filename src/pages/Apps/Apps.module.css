@@ -1,9 +1,8 @@
 .hero {
   composes: pageHero from '../../styles/text.module.css';
-  /* Matches the design's Apps hero exactly; Blog's own hero wants a
-     slightly different bottom value (see Blog.module.css), which is
-     why this isn't in the shared pageHero composable. */
-  padding-block-end: clamp(40px, 6vw, 60px);
+  /* Matches the design's Apps hero exactly (Blog's own hero wants a
+     different value here, see Blog.module.css). */
+  --page-hero-pad-end: clamp(40px, 6vw, 60px);
 }
 
 .eyebrow {

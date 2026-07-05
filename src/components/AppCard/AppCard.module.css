@@ -47,19 +47,26 @@
 }
 
 /* Tech-stack pill overlaying the top-left corner of the preview image —
-   matches the design exactly (docs/design/paper/pages/Apps.dc.html
-   .app-card's `{{ app.tag }}`). Positioned against `.card` (a sibling of
-   `.imageWrapper`, not nested in it — see the accessibility note in
-   AppCard.tsx), which lands in the same spot since the image sits flush
-   at the card's own top-left corner. */
-.tag {
+   built on the shared Tag component (font-family/font-size/color already
+   match the design via Tag's own base styles) rather than a bespoke
+   span, per CLAUDE.md's "prefer existing components" convention. This
+   class only carries what the overlay placement needs beyond Tag's
+   defaults, matching docs/design/paper/pages/Apps.dc.html's
+   `.app-card`'s `{{ app.tag }}` exactly: no border (Tag's default has
+   one), a translucent background instead of a solid one, and
+   letter-spacing/padding/radius a notch different from Tag's own
+   chip-list values (0.1em vs --tracking-meta's 0.04em; 5px 10px vs
+   Tag's --space-1/--space-3; 7px vs --radius-sm's 6px — all exact
+   design values, no tokens land on them). Positioned against `.card`
+   (a sibling of `.imageWrapper`, not nested in it — see the
+   accessibility note in AppCard.tsx), which lands in the same spot
+   since the image sits flush at the card's own top-left corner. */
+.tagOverlay {
   position: absolute;
   top: 14px;
   left: 14px;
-  font-family: var(--font-mono);
-  font-size: 11px;
+  border: none;
   letter-spacing: 0.1em;
-  color: var(--color-text-muted);
   background: color-mix(in srgb, var(--color-bg) 80%, transparent);
   padding: 5px 10px;
   border-radius: 7px;
