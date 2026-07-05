@@ -106,34 +106,20 @@
      .toggle { composes: focusRing from '../../styles/interactions.module.css'; }
    Never pair this with the element's own `outline: none` — `.focusRing`
    already owns `outline` on :focus-visible and must be the only source
-   of it, or forced-colors mode below loses its indicator.
+   of it.
 
-   Pairs the `--ring` box-shadow (tokens.css) with a transparent 2px
-   outline: box-shadow is dropped in forced-colors/Windows High Contrast
-   mode, but browsers substitute a visible system color for *any*
-   `outline-color` (even `transparent`) in that mode, so the outline
-   alone keeps the indicator visible there. `outline-offset` is literal
-   (no matching --space-* token, mirrors this file's other literal
-   values) — kept separate from the ring so the two don't visually
-   merge into one thick band. */
+   Matches the design's global `a:focus-visible, button:focus-visible`
+   rule exactly: a solid 2px outline, not the soft translucent
+   `--ring` box-shadow glow (that token is for form-field focus, see
+   `.ds-field:focus` in the design system, not general interactive
+   elements). A plain solid outline also needs no color-mix()/forced-
+   colors fallback — browsers substitute a system color for any
+   explicit `outline-color` in forced-colors mode natively, unlike
+   box-shadow, which is stripped there. `outline-offset` is literal (no
+   matching --space-* token, mirrors this file's other literal values). */
 .focusRing:focus-visible {
-  outline: 2px solid transparent;
-  outline-offset: 2px;
-  box-shadow: var(--ring);
-}
-
-/* `--ring` uses color-mix(); without support it resolves to an invalid
-   custom property, which makes `box-shadow` compute to `none` (guaranteed-
-   invalid value → property's initial value) — silently invisible focus in
-   normal (non-forced-colors) rendering, since the outline above is
-   transparent there. Detect the same function used by `--ring` (not just
-   any `color-mix()`, since browsers may support different color spaces)
-   and fall back to a solid, opaque outline instead. */
-@supports not (color: color-mix(in srgb, red 50%, transparent)) {
-  .focusRing:focus-visible {
-    outline-color: var(--color-primary);
-    box-shadow: none;
-  }
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
 }
 
 /* The sticky header's future `backdrop-filter` blur (issue #224) needs an
