@@ -105,4 +105,22 @@ describe('RecipeIngredients checkboxes', () => {
       localStorage.getItem('recipe-ingredients:thai-green-curry')
     ).toBeNull()
   })
+
+  it('does not bleed checked state when the slug prop changes on the same instance (client-side navigation, no unmount)', () => {
+    const { rerender } = render(
+      <RecipeIngredients ingredients={mockIngredients} slug="spaghetti-bolognese" />
+    )
+
+    fireEvent.click(screen.getByRole('checkbox', { name: '200 g flour' }))
+    expect(screen.getByRole('checkbox', { name: '200 g flour' })).toBeChecked()
+
+    // Same component instance, no unmount — mirrors React Router reusing
+    // the <RecipeDetail> route element when navigating between recipes.
+    rerender(<RecipeIngredients ingredients={mockIngredients} slug="thai-green-curry" />)
+
+    expect(screen.getByRole('checkbox', { name: '200 g flour' })).not.toBeChecked()
+    expect(
+      localStorage.getItem('recipe-ingredients:thai-green-curry')
+    ).toBeNull()
+  })
 })

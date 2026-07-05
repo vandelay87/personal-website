@@ -11,7 +11,7 @@ export interface RecipeTagFilterProps {
 
 const RecipeTagFilter: FC<RecipeTagFilterProps> = ({ tags, activeTag, onTagClick }) => {
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} role="group" aria-label="Filter by tag">
       {tags.map(({ tag, count }) => (
         <Button
           key={tag}

@@ -58,7 +58,7 @@ const RecipeDetailView: FC<RecipeDetailViewProps> = ({ recipe }) => (
 
     <section className={styles.section}>
       <Typography variant="heading2" className={styles.sectionHeading}>Ingredients</Typography>
-      <RecipeIngredients ingredients={recipe.ingredients} />
+      <RecipeIngredients ingredients={recipe.ingredients} slug={recipe.slug} />
     </section>
 
     <section className={styles.section}>

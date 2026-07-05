@@ -22,7 +22,7 @@ const RecipeSearch: FC<RecipeSearchProps> = ({ value: controlledValue, onSearch 
   }, [value, onSearch])
 
   return (
-    <div className={styles.wrapper}>
+    <form className={styles.wrapper} role="search" onSubmit={(e) => e.preventDefault()}>
       <input
         type="search"
         aria-label="Search recipes"
@@ -31,7 +31,7 @@ const RecipeSearch: FC<RecipeSearchProps> = ({ value: controlledValue, onSearch 
         onChange={(e) => setValue(e.target.value)}
         className={styles.input}
       />
-    </div>
+    </form>
   )
 }
 
