@@ -67,6 +67,27 @@ svg[id^="mermaid-"] {
   filter: invert(0.88) hue-rotate(180deg);
 }
 
+/* Mermaid's own label text renders at ~#333, too close to the also-
+   inverted box/background tones after the filter above to read
+   (measured empirically: (51,51,51) only inverts to a mid-gray, not
+   the ~224,224,224 pure black gets). Forcing pure black would fix
+   it, but mermaid ships its own <style> tag *inside* the SVG using
+   `#mermaid-N .cluster-label span{color:#333}`-style ID-scoped
+   selectors — the ID is generated per-diagram, so no external
+   selector can out-specify it by stacking classes. `!important`
+   here isn't a shortcut around our own specificity; it's the only
+   way to beat a selector this stylesheet structurally cannot match.
+   Targeting the tag names directly (not mermaid's class names)
+   catches every text-bearing wrapper mermaid uses across node/edge/
+   cluster labels without needing to track each one's exact class. */
+[data-theme="dark"] svg[id^="mermaid-"] span,
+[data-theme="dark"] svg[id^="mermaid-"] p,
+[data-theme="dark"] svg[id^="mermaid-"] text,
+[data-theme="dark"] svg[id^="mermaid-"] tspan {
+  color: #000 !important;
+  fill: #000 !important;
+}
+
 /* ── Global accessibility utilities ──────────────────────── */
 
 /* Visually hidden but accessible to screen readers */
