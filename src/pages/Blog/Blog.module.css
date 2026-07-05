@@ -141,10 +141,6 @@
   margin: 0;
 }
 
-.postCard:hover .postTitle {
-  color: var(--color-primary);
-}
-
 .arrowIcon {
   composes: linkIcon from '../../styles/interactions.module.css';
   flex-shrink: 0;
