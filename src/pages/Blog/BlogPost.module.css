@@ -80,6 +80,15 @@
   font-weight: var(--font-weight-semibold);
 }
 
+/* Matches the design's `.prose a`/`.prose a:hover` exactly: no
+   underline until hover. Link's own `underline` prop makes it
+   permanent, so this is a scoped override rather than that prop —
+   BlogLink (BlogPost.tsx) only sets `tone="accent"` for the color. */
+.prose a:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .tag {
   composes: focusRing chipHover from '../../styles/interactions.module.css';
   display: inline-block;

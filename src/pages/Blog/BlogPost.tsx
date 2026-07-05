@@ -13,7 +13,7 @@ import { formatDate, getLazyPost, getPost, posts } from './posts'
 import type { PostMeta } from './posts'
 
 const BlogLink = ({ href, children }: AnchorHTMLAttributes<HTMLAnchorElement>) => (
-  <Link to={href ?? '#'} underline>{children}</Link>
+  <Link to={href ?? '#'} tone="accent">{children}</Link>
 )
 
 const mdxComponents = {
