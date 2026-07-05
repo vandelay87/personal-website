@@ -13,6 +13,18 @@
   box-sizing: border-box;
 }
 
+/* Reserves the scrollbar's own width permanently, on every page, so a
+   classic (non-overlay) scrollbar appearing/disappearing — e.g. the
+   Blog page's post list crossing the viewport-height threshold when a
+   tag filter changes how many posts render — never shifts content
+   horizontally. Without this, that shift is real but easy to miss:
+   overlay-scrollbar systems (macOS, most of this session's testing)
+   never reflow on scrollbar presence, so it only shows up on browsers/
+   OSes with classic reflowing scrollbars. */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans);
