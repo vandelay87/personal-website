@@ -315,22 +315,24 @@ describe('Blog', () => {
 
     it('announces the pluralized filtered count and active tag', () => {
       renderBlog('/blog?tag=testing')
-      expect(screen.getByText('1 post tagged testing')).toBeInTheDocument()
+      expect(screen.getByText((_, element) => element?.textContent === '1 post tagged testing')).toBeInTheDocument()
     })
 
     it('updates the announced count when the filter changes', () => {
       renderBlog()
       const bar = getFilterBar()
       fireEvent.click(within(bar).getByRole('button', { name: 'aws' }))
-      expect(screen.getByText('2 posts tagged aws')).toBeInTheDocument()
+      expect(screen.getByText((_, element) => element?.textContent === '2 posts tagged aws')).toBeInTheDocument()
     })
   })
 
   describe('empty states', () => {
-    it('shows "No posts found" with a clear filter link when tag matches nothing', () => {
+    it('shows "No posts tagged" with a clear filter link when tag matches nothing', () => {
       renderBlog('/blog?tag=nonexistent')
 
-      expect(screen.getByText(/no posts found/i)).toBeInTheDocument()
+      expect(
+        screen.getByText((_, element) => element?.textContent === 'No posts tagged nonexistent yet.')
+      ).toBeInTheDocument()
 
       const clearLink = screen.getByRole('button', { name: /clear filter/i })
       expect(clearLink).toBeInTheDocument()

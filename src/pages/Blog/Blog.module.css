@@ -32,6 +32,10 @@
   min-height: var(--space-6);
 }
 
+.activeTagName {
+  color: var(--color-primary);
+}
+
 .clearLink {
   composes: focusRing chipHover from '../../styles/interactions.module.css';
   font-family: var(--font-mono);
@@ -140,4 +144,8 @@
 
 .empty .clearLink {
   margin-block-start: var(--space-4);
+}
+
+.emptyTagName {
+  color: var(--color-text-strong);
 }

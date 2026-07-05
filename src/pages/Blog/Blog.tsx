@@ -41,7 +41,7 @@ const Blog = () => {
   const clearFilter = () => setSearchParams({})
 
   const countLabel = activeTag
-    ? `${pluralize(filteredPosts.length, 'post')} tagged ${activeTag}`
+    ? pluralize(filteredPosts.length, 'post')
     : pluralize(posts.length, 'post')
 
   if (posts.length === 0) {
@@ -72,7 +72,15 @@ const Blog = () => {
       </section>
 
       <div className={styles.countRow}>
-        <span aria-live="polite">{countLabel}</span>
+        <span aria-live="polite">
+          {countLabel}
+          {activeTag && (
+            <>
+              {' tagged '}
+              <span className={styles.activeTagName}>{activeTag}</span>
+            </>
+          )}
+        </span>
         {activeTag && filteredPosts.length > 0 && (
           <button type="button" onClick={clearFilter} className={styles.clearLink}>
             ✕ Clear filter
@@ -92,7 +100,7 @@ const Blog = () => {
       {filteredPosts.length === 0 ? (
         <div className={styles.empty}>
           <Typography variant="bodyLarge">
-            No posts found for this tag.
+            No posts tagged <span className={styles.emptyTagName}>{activeTag}</span> yet.
           </Typography>
           <button type="button" onClick={clearFilter} className={styles.clearLink}>
             Clear filter
