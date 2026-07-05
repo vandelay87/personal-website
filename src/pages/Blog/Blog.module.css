@@ -23,7 +23,7 @@
   margin-inline: auto;
   padding-inline: var(--space-4);
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: var(--space-3);
   margin-block-end: var(--space-5);
   /* Reserves .clearLink's own rendered height (11px font-size-xs at its
@@ -34,6 +34,16 @@
      height — undetectable in Chromium's overlay-scrollbar headless
      tests, but a real, visible shift in Firefox. */
   min-height: 26px;
+}
+
+/* Divider line filling the row's remaining width, matching the
+   design's trailing `<span style="flex:1; height:1px; ...">` exactly
+   — same pattern as Apps' own `.countRow::after` (see Apps.module.css). */
+.countRow::after {
+  content: '';
+  flex: 1;
+  height: var(--border-width);
+  background: var(--color-border);
 }
 
 .activeTagName {

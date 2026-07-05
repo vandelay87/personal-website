@@ -83,7 +83,7 @@ const Blog = () => {
         </span>
         {activeTag && filteredPosts.length > 0 && (
           <button type="button" onClick={clearFilter} className={styles.clearLink}>
-            ✕ Clear filter
+            ✕ clear
           </button>
         )}
       </div>

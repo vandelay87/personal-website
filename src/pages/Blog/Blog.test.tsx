@@ -297,14 +297,14 @@ describe('Blog', () => {
       })
     })
 
-    it('provides a visible "Clear filter" affordance when a tag is active', () => {
+    it('provides a visible "clear" affordance when a tag is active', () => {
       renderBlog('/blog?tag=aws')
-      expect(screen.getByRole('button', { name: /clear filter/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: '✕ clear' })).toBeInTheDocument()
     })
 
-    it('does not show the "Clear filter" affordance when no tag is active', () => {
+    it('does not show the "clear" affordance when no tag is active', () => {
       renderBlog()
-      expect(screen.queryByRole('button', { name: /clear filter/i })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: '✕ clear' })).not.toBeInTheDocument()
     })
   })
 
