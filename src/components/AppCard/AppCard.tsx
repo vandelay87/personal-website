@@ -10,12 +10,13 @@ export interface AppCardProps {
   description: string
   href: string
   image: ImageProps
+  tag?: string
 }
 
 const isExternalHref = (href: string) =>
   /^https?:\/\//.test(href) || href.startsWith('mailto:') || href.startsWith('tel:')
 
-const AppCard: FC<AppCardProps> = ({ title, description, href, image }) => {
+const AppCard: FC<AppCardProps> = ({ title, description, href, image, tag }) => {
   const content = (
     <>
       <div className={styles.imageWrapper} aria-hidden="true">
@@ -26,6 +27,12 @@ const AppCard: FC<AppCardProps> = ({ title, description, href, image }) => {
           objectFit="cover"
         />
       </div>
+
+      {/* Sibling of imageWrapper, not nested in it — imageWrapper is
+          aria-hidden (the image is decorative/redundant with the
+          title), but this tag's text (e.g. tech stack) is meaningful
+          and must stay in the accessible tree. */}
+      {tag && <span className={styles.tag}>{tag}</span>}
 
       <div className={styles.body}>
         <div className={styles.titleRow}>

@@ -77,6 +77,19 @@ describe('AppCard', () => {
     expect(link).toHaveAttribute('rel', 'noreferrer')
   })
 
+  it('renders the tag inside the link, accessible (not hidden alongside the decorative image)', () => {
+    renderCard({ ...mockProps, tag: 'React · AWS' })
+
+    const link = screen.getByRole('link', { name: new RegExp(mockProps.title) })
+    expect(within(link).getByText('React · AWS')).toBeInTheDocument()
+  })
+
+  it('renders no tag when the prop is omitted', () => {
+    renderCard()
+
+    expect(screen.queryByText('React · AWS')).not.toBeInTheDocument()
+  })
+
   it('renders the arrow once, hidden from assistive tech, next to the title rather than "Open app"', () => {
     renderCard()
 
