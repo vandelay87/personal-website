@@ -94,6 +94,13 @@
   text-decoration: none;
 }
 
+/* Suppresses the browser's native default focus outline here — the
+   visible ring is drawn on .card instead (below), so the small
+   title-text box doesn't show its own separate, narrower one too. */
+.titleLink:focus-visible {
+  outline: none;
+}
+
 /* Stretched-link pattern: makes the whole card clickable (matching the
    design's single <a> wrapping the entire .rc) while keeping the link's
    accessible name scoped to just the title, not a wall of card text.
@@ -106,9 +113,15 @@
   inset: 0;
 }
 
-.titleLink:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-  outline-offset: 2px;
+/* Ring shows on .card (the visual click target established by the
+   stretched-link above), not just the small title-text link, so
+   keyboard focus matches what the pointer/click target actually is.
+   2px/3px: matches the design's global `a:focus-visible,
+   button:focus-visible` rule exactly (card's own border-radius already
+   shapes the outline, so no separate outline-radius needed here). */
+.card:has(.titleLink:focus-visible) {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
 }
 
 .tags {
