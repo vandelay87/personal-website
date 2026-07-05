@@ -40,7 +40,11 @@ button.tag:hover:not(.active) {
 
 .active {
   background-color: var(--color-primary);
-  color: var(--color-on-primary);
+  /* Fixed white, not --color-on-primary (which flips to dark text in
+     dark mode) — the design's `.tag-chip[data-active]`/`.cat-chip
+     [data-active]` both hardcode color:#fff regardless of theme, same
+     pattern as the "Browse all recipes" CTA. */
+  color: #fff;
   border-color: var(--color-primary);
 }
 

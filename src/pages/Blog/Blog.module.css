@@ -42,6 +42,9 @@
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: var(--space-1) var(--space-2);
+  /* Native <button> defaults to cursor:default, not pointer — Tag's
+     own button variant sets this explicitly too. */
+  cursor: pointer;
   transition:
     color var(--duration-fast) var(--easing-default),
     border-color var(--duration-fast) var(--easing-default);
