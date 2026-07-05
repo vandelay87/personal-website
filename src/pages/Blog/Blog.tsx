@@ -1,8 +1,9 @@
+import Link from '@components/Link'
 import Tag from '@components/Tag'
 import Typography from '@components/Typography'
 import type { FC } from 'react'
 import { useMemo } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { pluralize } from '../../utils/pluralize'
 import styles from './Blog.module.css'
 import { formatDate, posts } from './posts'
@@ -110,18 +111,25 @@ const Blog = () => {
         <ul className={styles.postList}>
           {filteredPosts.map((post) => (
             <li key={post.slug}>
-              <article className={styles.postCard}>
-                <Typography variant="heading3" as="h2" className={styles.postHeading}>
-                  <Link to={`/blog/${post.slug}`} className={styles.postTitle}>
-                    {post.title}
-                  </Link>
-                </Typography>
-                <div className={styles.meta}>
-                  <span>{formatDate(post.date)}</span>
-                  <span aria-hidden="true">·</span>
-                  <span>{post.readingTime} min read</span>
-                </div>
-                <p className={styles.description}>{post.description}</p>
+              <article>
+                <Link
+                  to={`/blog/${post.slug}`}
+                  icon="↗"
+                  nudge="up-right"
+                  className={styles.postLink}
+                >
+                  <span>
+                    <div className={styles.meta}>
+                      <span>{formatDate(post.date)}</span>
+                      <span aria-hidden="true">·</span>
+                      <span>{post.readingTime} min read</span>
+                    </div>
+                    <Typography variant="heading3" as="h2" className={styles.postTitle}>
+                      {post.title}
+                    </Typography>
+                    <p className={styles.description}>{post.description}</p>
+                  </span>
+                </Link>
                 <ul className={styles.tags}>
                   {post.tags.map((tag) => (
                     <li key={tag}>

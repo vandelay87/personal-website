@@ -77,38 +77,59 @@
   padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
+  /* No gap here — like Home's LinkSection `.rowList`, spacing between
+     rows comes from .postLink's own padding-block, not a container
+     gap. .tags' own bottom padding gives the tags row (which sits
+     outside .postLink, unlike LinkSection's plain rows) the matching
+     breathing room before the next divider. */
 }
 
-.postCard {
-  border-block-end: var(--border-width) solid var(--color-border);
-  padding-block-end: var(--space-8);
-}
-
-.postList > li:last-child .postCard {
-  border-block-end: none;
-}
-
-.postHeading {
-  margin-block: 0;
-}
-
-.postTitle {
-  composes: focusRing from '../../styles/interactions.module.css';
+/* Divider between posts — a pseudo-element rather than a border on the
+   card itself, matching Home's LinkSection `.rowList > li + li::before`
+   exactly (see Home.module.css), so it insets the same 14px as
+   .postLink's own padding-inline instead of running edge-to-edge. */
+.postList > li + li::before {
+  content: '';
   display: block;
-  color: var(--color-text-strong);
-  text-decoration: none;
-  transition: color var(--duration-fast) var(--easing-default);
+  height: var(--border-width);
+  margin-inline: 14px;
+  background: var(--color-border);
 }
 
-.postTitle:hover {
-  color: var(--color-primary);
+/* The whole post (date/title/description) is one clickable row, same
+   pattern as Home's LinkSection `a.row` — full-width flex link with a
+   hover background fill and a nudging icon, not just the title text.
+   Tag chips stay outside (they're their own interactive buttons — a
+   button can't nest inside an anchor). */
+.postLink {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-5);
+  width: 100%;
+  padding-block: var(--space-5);
+  padding-inline: 14px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius-md);
+  transition: background var(--duration-fast) var(--easing-default);
+}
+
+.postLink:hover {
+  background: var(--color-hover);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .postTitle {
+  .postLink {
     transition: none;
   }
+}
+
+/* The row's ↗ icon (Link's own internal span) — accent-colored, matching
+   LinkSection's `.row > span:last-child` exactly. */
+.postLink > span:last-child {
+  font-size: var(--font-size-base);
+  color: var(--color-primary);
 }
 
 .meta {
@@ -116,20 +137,23 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  margin-block-start: var(--space-3);
+  margin-block-end: var(--space-3);
+}
+
+.postTitle {
+  margin-block: 0;
 }
 
 .description {
   color: var(--color-text-muted);
   line-height: var(--line-height-relaxed);
-  margin-block-start: var(--space-3);
-  margin-block-end: var(--space-4);
+  margin-block: var(--space-3) 0;
 }
 
 .tags {
   list-style: none;
-  margin: 0;
-  padding: 0;
+  margin: var(--space-5) 0 0;
+  padding: 0 14px var(--space-5);
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);

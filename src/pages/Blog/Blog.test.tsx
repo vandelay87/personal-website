@@ -122,10 +122,11 @@ describe('Blog', () => {
 
     it('renders the title as a link to the post', () => {
       renderBlog()
-      const link = screen.getByRole('link', {
+      const heading = screen.getByRole('heading', {
+        level: 2,
         name: 'Building a Pokedex with React and AWS',
       })
-      expect(link).toHaveAttribute('href', '/blog/building-a-pokedex')
+      expect(heading.closest('a')).toHaveAttribute('href', '/blog/building-a-pokedex')
     })
 
     it('renders the date for each post', () => {
