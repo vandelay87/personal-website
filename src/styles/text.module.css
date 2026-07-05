@@ -17,7 +17,9 @@
   letter-spacing: var(--tracking-eyebrow);
   text-transform: uppercase;
   color: var(--color-text-faint);
-  margin: 0 0 var(--space-5);
+  /* 22px: matches Apps'/Blog's own hero eyebrow margin exactly; was
+     --space-5 (20px), 2px short. */
+  margin: 0 0 22px;
 }
 
 /* Page hero/heading/lead — shared layout for the top-of-page intro block
