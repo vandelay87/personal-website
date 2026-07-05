@@ -55,19 +55,17 @@ const Recipes: FC = () => {
     setSearchQuery('')
   }
 
-  const filteredRecipes = useMemo(
-    () =>
-      (recipes ?? []).filter((recipe) => {
-        const matchesTag = !activeTag || recipe.tags.includes(activeTag)
-        const query = searchQuery.toLowerCase()
-        const matchesSearch =
-          !searchQuery ||
-          recipe.title.toLowerCase().includes(query) ||
-          recipe.tags.some((tag) => tag.toLowerCase().includes(query))
-        return matchesTag && matchesSearch
-      }),
-    [recipes, activeTag, searchQuery]
-  )
+  const filteredRecipes = useMemo(() => {
+    const query = searchQuery.toLowerCase()
+    return (recipes ?? []).filter((recipe) => {
+      const matchesTag = !activeTag || recipe.tags.includes(activeTag)
+      const matchesSearch =
+        !searchQuery ||
+        recipe.title.toLowerCase().includes(query) ||
+        recipe.tags.some((tag) => tag.toLowerCase().includes(query))
+      return matchesTag && matchesSearch
+    })
+  }, [recipes, activeTag, searchQuery])
 
   if (recipes === null && !error) {
     return (

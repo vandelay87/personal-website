@@ -41,18 +41,16 @@ const RecipeIngredients: FC<RecipeIngredientsProps> = ({ ingredients, slug }) =>
   }
 
   const toggle = (key: string): void => {
-    setChecked((prev) => {
-      const next = new Set(prev)
-      if (next.has(key)) {
-        next.delete(key)
-      } else {
-        next.add(key)
-      }
-      if (slug) {
-        localStorage.setItem(storageKey(slug), JSON.stringify(Array.from(next)))
-      }
-      return next
-    })
+    const next = new Set(checked)
+    if (next.has(key)) {
+      next.delete(key)
+    } else {
+      next.add(key)
+    }
+    setChecked(next)
+    if (slug) {
+      localStorage.setItem(storageKey(slug), JSON.stringify(Array.from(next)))
+    }
   }
 
   return (
