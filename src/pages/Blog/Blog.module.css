@@ -26,6 +26,10 @@
   align-items: center;
   gap: var(--space-3);
   margin-block-end: var(--space-5);
+  /* Reserves the height of .clearLink (padding + border make it taller
+     than the plain count text) so the row doesn't grow — and push
+     everything below it down — only when a tag filter is selected. */
+  min-height: var(--space-6);
 }
 
 .clearLink {
