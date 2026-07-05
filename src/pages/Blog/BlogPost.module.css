@@ -89,6 +89,18 @@
   text-underline-offset: 2px;
 }
 
+/* Inline code within running prose text — matches the design exactly.
+   Scoped to `p code` (not a blanket `.prose code`) so it doesn't also
+   catch CodeBlock's own <pre><code> fenced blocks, which render
+   directly inside .prose too and have their own distinct styling. */
+.prose p code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--color-surface);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
 .tag {
   composes: focusRing chipHover from '../../styles/interactions.module.css';
   display: inline-block;
