@@ -52,7 +52,7 @@
 }
 
 .input {
-  composes: focusRing from '../../styles/interactions.module.css';
+  composes: fieldFocusRing from '../../styles/interactions.module.css';
   width: 100%;
   font-family: var(--font-sans);
   font-size: var(--font-size-md);
@@ -62,23 +62,6 @@
   border-radius: var(--radius-md);
   padding: var(--space-3);
   transition: border-color var(--duration-fast) var(--easing-default);
-}
-
-/* Matches the design's `.ds-field:focus`: border-color + soft glow, not
-   the shared `.focusRing`'s solid outline used by links/buttons/cards
-   (suppressed here) — see Input.module.css for the full rationale. */
-.input:focus-visible {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: var(--ring);
-}
-
-@supports not (color: color-mix(in srgb, red 50%, transparent)) {
-  .input:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-    box-shadow: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

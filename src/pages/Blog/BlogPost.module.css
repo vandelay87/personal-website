@@ -5,9 +5,7 @@
 
 .backLink {
   composes: focusRing from '../../styles/interactions.module.css';
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  letter-spacing: var(--tracking-meta);
+  composes: metaText from '../../styles/text.module.css';
   color: var(--color-text-muted);
   margin-block-end: var(--space-8);
 }

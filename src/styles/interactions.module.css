@@ -118,8 +118,36 @@
    box-shadow, which is stripped there. `outline-offset` is literal (no
    matching --space-* token, mirrors this file's other literal values). */
 .focusRing:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 3px;
+  outline: var(--focus-ring-outline);
+  outline-offset: var(--focus-ring-outline-offset);
+}
+
+/* ── Form-field focus ring ─────────────────────────────────────
+   Composable border-tint + soft glow, matching the design system's
+   `.ds-field:focus` exactly — deliberately different from `.focusRing`
+   above (no crisp outline; general interactive elements get that, not
+   form fields). Apply the same way as `.focusRing`, e.g.:
+     .field { composes: fieldFocusRing from '../../styles/interactions.module.css'; }
+   then add the field's own border-color if it needs one beyond focus
+   (see Input.module.css's `.invalid` for a variant of this same shape).
+   Suppresses any composed `.focusRing` outline that might already sit
+   on the same element — must stay the only source of `outline` there. */
+.fieldFocusRing:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--ring);
+}
+
+/* `--ring` uses color-mix(); without support it resolves to an invalid
+   value, silently dropping the box-shadow with no visible focus state
+   at all (outline above is suppressed). Falls back to the same solid
+   outline `.focusRing` uses. */
+@supports not (color: color-mix(in srgb, red 50%, transparent)) {
+  .fieldFocusRing:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    box-shadow: none;
+  }
 }
 
 /* The sticky header's future `backdrop-filter` blur (issue #224) needs an

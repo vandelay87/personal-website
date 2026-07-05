@@ -2,7 +2,7 @@
    (background, border, focus border-tint) per Textarea.jsx/prompt.md. */
 
 .field {
-  composes: focusRing from '../../styles/interactions.module.css';
+  composes: fieldFocusRing from '../../styles/interactions.module.css';
   width: 100%;
   font-family: var(--font-sans);
   font-size: var(--font-size-md);
@@ -15,30 +15,6 @@
   resize: vertical;
   min-height: var(--space-20);
   transition: border-color var(--duration-fast) var(--easing-default);
-}
-
-/* Ports .ds-field's focus border tint + soft glow (design_system/
-   components/_helpers.css) — :focus-visible not :focus, no !important,
-   per the PRD's explicit correction. A deliberately different
-   treatment from the shared `.focusRing`'s solid outline used by
-   links/buttons/cards elsewhere (suppressed here), matching the design
-   system's own distinction between `.ds-field:focus` and the generic
-   `a/button:focus-visible` rule. */
-.field:focus-visible {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: var(--ring);
-}
-
-/* `--ring` uses color-mix(); without support it resolves to an invalid
-   value, silently dropping the box-shadow with no visible focus state
-   at all (outline above is suppressed). */
-@supports not (color: color-mix(in srgb, red 50%, transparent)) {
-  .field:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-    box-shadow: none;
-  }
 }
 
 .field:disabled {

@@ -45,7 +45,7 @@
   padding: 0;
   /* Without this, links fall back to the ambient 16px body size instead
      of the design's 14px (same fix as Header's .nav). */
-  font-size: 14px;
+  font-size: var(--font-size-sm-plus);
 }
 
 /* Overrides Link's own permanent underline (Link.module.css always sets

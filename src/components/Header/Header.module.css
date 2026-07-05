@@ -80,7 +80,7 @@
   gap: var(--space-6);
   /* Without this, nav links fall back to the ambient 16px body size
      instead of the design's 14px (same fix as Footer's .linkList). */
-  font-size: 14px;
+  font-size: var(--font-size-sm-plus);
 }
 
 .navLink {

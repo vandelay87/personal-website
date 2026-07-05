@@ -113,15 +113,17 @@
   inset: 0;
 }
 
-/* Ring shows on .card (the visual click target established by the
-   stretched-link above), not just the small title-text link, so
-   keyboard focus matches what the pointer/click target actually is.
-   2px/3px: matches the design's global `a:focus-visible,
-   button:focus-visible` rule exactly (card's own border-radius already
-   shapes the outline, so no separate outline-radius needed here). */
-.card:has(.titleLink:focus-visible) {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 3px;
+/* Ring shows on the stretched ::after (the visual click target, which
+   already spans the whole card), not just the small title-text link,
+   so keyboard focus matches what the pointer/click target actually
+   is. Reuses the same tokens as the shared `.focusRing` composable
+   (interactions.module.css) rather than repeating its literal values.
+   A plain compound selector on the focused element's own pseudo-
+   element — not a `:has()` relational selector — so focusing/blurring
+   one card in a grid doesn't trigger ancestor re-evaluation. */
+.titleLink:focus-visible::after {
+  outline: var(--focus-ring-outline);
+  outline-offset: var(--focus-ring-outline-offset);
 }
 
 .tags {
