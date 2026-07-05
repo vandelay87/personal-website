@@ -44,37 +44,52 @@
   transform: translate(3px, -3px);
 }
 
-/* ── Recipe card — lift + cover zoom (the signature hover) ───
-   Durations/curve are a deliberate custom easing distinct from the
-   standard --duration-fast/--duration-base scale (source: _helpers.css
-   ".ds-recipe-card", labelled "the signature hover") — not in the token
-   scale, kept literal on purpose. Apply `cardLift` to the card root and
-   `cardLiftImage` to the cover image inside it. */
+/* ── App card — lift + cover zoom (the signature hover) ──────
+   Matches docs/design/paper/pages/Apps.dc.html's `.app-card`/`.app-prev`
+   exactly (AppCard.module.css is this composable's only consumer —
+   RecipeCard has its own near-identical but not-quite-matching values
+   copied literally, since its design spec differs slightly: 4px lift,
+   not 5px). Durations/curve/shadow are a deliberate custom easing
+   distinct from the standard --duration-fast/--duration-base scale and
+   --shadow-* tokens — kept literal per the design's own spec. Apply
+   `cardLift` to the card root and `cardLiftImage` to the cover image
+   inside it. */
 .cardLift {
   transition:
-    transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1),
-    box-shadow 0.3s var(--easing-default);
+    transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.35s var(--easing-default),
+    border-color 0.35s var(--easing-default);
 }
 
 .cardLift:hover {
-  transform: translateY(-4px);
-  /* Elevation shadow doesn't match an existing --shadow-* token exactly
-     (closest is --shadow-lg); kept literal per _helpers.css spec. */
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.1);
 }
 
 .cardLiftImage {
-  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .cardLift:hover .cardLiftImage {
-  transform: scale(1.04);
+  transform: scale(1.035);
 }
 
 /* ── Surface hover wash — generic card/tag background tint ───
    (source: _helpers.css ".ds-card-hover") */
 .surfaceHover:hover {
   background: var(--color-hover);
+}
+
+/* ── Code panel header chrome ─────────────────────────────────
+   Not ported from _helpers.css — shared between FileTree's `.title`
+   and CodeBlock's `.toolbar`, which both need a title-bar background
+   visibly distinct from the panel's own body (matching the design's
+   separate `--code-head` vs `--code-bg`, a token pair that doesn't
+   exist in our system) plus identical padding/border-bottom. */
+.codeHeaderPanel {
+  padding: 8px 10px 8px var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 60%, var(--color-border) 40%);
 }
 
 /* ── Chip hover — tag buttons + suggestion pills ──────────────
@@ -106,32 +121,46 @@
      .toggle { composes: focusRing from '../../styles/interactions.module.css'; }
    Never pair this with the element's own `outline: none` — `.focusRing`
    already owns `outline` on :focus-visible and must be the only source
-   of it, or forced-colors mode below loses its indicator.
+   of it.
 
-   Pairs the `--ring` box-shadow (tokens.css) with a transparent 2px
-   outline: box-shadow is dropped in forced-colors/Windows High Contrast
-   mode, but browsers substitute a visible system color for *any*
-   `outline-color` (even `transparent`) in that mode, so the outline
-   alone keeps the indicator visible there. `outline-offset` is literal
-   (no matching --space-* token, mirrors this file's other literal
-   values) — kept separate from the ring so the two don't visually
-   merge into one thick band. */
+   Matches the design's global `a:focus-visible, button:focus-visible`
+   rule exactly: a solid 2px outline, not the soft translucent
+   `--ring` box-shadow glow (that token is for form-field focus, see
+   `.ds-field:focus` in the design system, not general interactive
+   elements). A plain solid outline also needs no color-mix()/forced-
+   colors fallback — browsers substitute a system color for any
+   explicit `outline-color` in forced-colors mode natively, unlike
+   box-shadow, which is stripped there. `outline-offset` is literal (no
+   matching --space-* token, mirrors this file's other literal values). */
 .focusRing:focus-visible {
-  outline: 2px solid transparent;
-  outline-offset: 2px;
+  outline: var(--focus-ring-outline);
+  outline-offset: var(--focus-ring-outline-offset);
+}
+
+/* ── Form-field focus ring ─────────────────────────────────────
+   Composable border-tint + soft glow, matching the design system's
+   `.ds-field:focus` exactly — deliberately different from `.focusRing`
+   above (no crisp outline; general interactive elements get that, not
+   form fields). Apply the same way as `.focusRing`, e.g.:
+     .field { composes: fieldFocusRing from '../../styles/interactions.module.css'; }
+   then add the field's own border-color if it needs one beyond focus
+   (see Input.module.css's `.invalid` for a variant of this same shape).
+   Suppresses any composed `.focusRing` outline that might already sit
+   on the same element — must stay the only source of `outline` there. */
+.fieldFocusRing:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
   box-shadow: var(--ring);
 }
 
 /* `--ring` uses color-mix(); without support it resolves to an invalid
-   custom property, which makes `box-shadow` compute to `none` (guaranteed-
-   invalid value → property's initial value) — silently invisible focus in
-   normal (non-forced-colors) rendering, since the outline above is
-   transparent there. Detect the same function used by `--ring` (not just
-   any `color-mix()`, since browsers may support different color spaces)
-   and fall back to a solid, opaque outline instead. */
+   value, silently dropping the box-shadow with no visible focus state
+   at all (outline above is suppressed). Falls back to the same solid
+   outline `.focusRing` uses. */
 @supports not (color: color-mix(in srgb, red 50%, transparent)) {
-  .focusRing:focus-visible {
-    outline-color: var(--color-primary);
+  .fieldFocusRing:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
     box-shadow: none;
   }
 }

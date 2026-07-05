@@ -1,5 +1,6 @@
 import Image from '@components/Image'
 import type { ImageProps } from '@components/Image/Image'
+import Tag from '@components/Tag'
 import Typography from '@components/Typography'
 import type { FC } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
@@ -10,15 +11,16 @@ export interface AppCardProps {
   description: string
   href: string
   image: ImageProps
+  tag?: string
 }
 
 const isExternalHref = (href: string) =>
   /^https?:\/\//.test(href) || href.startsWith('mailto:') || href.startsWith('tel:')
 
-const AppCard: FC<AppCardProps> = ({ title, description, href, image }) => {
+const AppCard: FC<AppCardProps> = ({ title, description, href, image, tag }) => {
   const content = (
     <>
-      <div className={styles.imageWrapper}>
+      <div className={styles.imageWrapper} aria-hidden="true">
         <Image
           {...image}
           className={styles.imageScaled}
@@ -26,6 +28,12 @@ const AppCard: FC<AppCardProps> = ({ title, description, href, image }) => {
           objectFit="cover"
         />
       </div>
+
+      {/* Sibling of imageWrapper, not nested in it — imageWrapper is
+          aria-hidden (the image is decorative/redundant with the
+          title), but this tag's text (e.g. tech stack) is meaningful
+          and must stay in the accessible tree. */}
+      {tag && <Tag className={styles.tagOverlay}>{tag}</Tag>}
 
       <div className={styles.body}>
         <div className={styles.titleRow}>

@@ -5,4 +5,10 @@
   padding-inline: var(--space-6);
   max-width: var(--max-w-site);
   margin-inline: auto;
+  /* SC 2.4.11: reserves room above the main landmark roughly equal to a
+     single-row sticky header's height (Header.module.css .inner: --space-4
+     block padding either side of a 32px control, ~64px), so the header —
+     pinned via position: sticky — never fully covers focus/scroll landing
+     here or on a near-top descendant. */
+  scroll-margin-block-start: var(--space-16);
 }

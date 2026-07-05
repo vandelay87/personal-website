@@ -1,4 +1,16 @@
 .callout {
+  /* Read by BlogPost.module.css's `.prose code`'s
+     `background: var(--inline-code-bg, var(--color-surface))` —
+     inline code inside a callout needs the page background instead
+     of the shared prose default, since the callout's own background
+     is already a tinted surface color. Setting the variable here
+     (rather than a `.callout code` background rule) means .prose's
+     rule wins the cascade unconditionally and just resolves a
+     different value inside a callout — no specificity contest, no
+     `!important`, and it still works if Callout is used somewhere
+     with a differently-named local code style, as long as that
+     consumer also reads the same variable. */
+  --inline-code-bg: var(--color-bg);
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);

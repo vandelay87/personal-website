@@ -43,16 +43,9 @@
   list-style: none;
   margin: 0;
   padding: 0;
-}
-
-/* Overrides Link's own permanent underline (Link.module.css always sets
-   text-decoration regardless of its `underline` prop) — the design's
-   footer links are plain, tinting to accent only on hover (Link's own
-   :hover already does that). Element+class beats Link's single-class
-   selector regardless of CSS import order, so this doesn't need `!important`
-   or touching the shared Link component. */
-.linkList a {
-  text-decoration: none;
+  /* Without this, links fall back to the ambient 16px body size instead
+     of the design's 14px (same fix as Header's .nav). */
+  font-size: var(--font-size-sm-plus);
 }
 
 .brand {

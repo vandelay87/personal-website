@@ -52,7 +52,7 @@
 }
 
 .input {
-  composes: focusRing from '../../styles/interactions.module.css';
+  composes: fieldFocusRing from '../../styles/interactions.module.css';
   width: 100%;
   font-family: var(--font-sans);
   font-size: var(--font-size-md);
@@ -62,10 +62,6 @@
   border-radius: var(--radius-md);
   padding: var(--space-3);
   transition: border-color var(--duration-fast) var(--easing-default);
-}
-
-.input:focus-visible {
-  border-color: var(--color-primary);
 }
 
 @media (prefers-reduced-motion: reduce) {

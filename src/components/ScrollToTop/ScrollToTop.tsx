@@ -13,6 +13,11 @@ export default function ScrollToTop() {
           const element = document.querySelector(hash)
           if (element) {
             element.scrollIntoView()
+            // SC 2.4.3: move focus to the anchor target too, mirroring the
+            // #main focus below, so keyboard/screen-reader users land on
+            // the scrolled-to content instead of staying on the old focus
+            // target. preventScroll avoids fighting scrollIntoView above.
+            ;(element as HTMLElement).focus({ preventScroll: true })
             return
           }
         } catch {
@@ -20,6 +25,11 @@ export default function ScrollToTop() {
         }
       }
       window.scrollTo(0, 0)
+      // SC 2.4.3: move focus to the main landmark (which contains the page's
+      // <h1>) after a client-side route change, so keyboard/screen-reader
+      // users get the new page's context instead of staying on the old
+      // focus target. preventScroll avoids fighting the scrollTo above.
+      document.getElementById('main')?.focus({ preventScroll: true })
     }
   }, [pathname, hash, navigationType])
 

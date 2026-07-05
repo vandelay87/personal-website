@@ -1,6 +1,6 @@
 /* Input.module.css — ports the design's `.ds-field` (design_system/
-   components/_helpers.css): border tints to accent on focus, on top of
-   the shared `focusRing` ring/outline. The source rule uses `!important`
+   components/_helpers.css): border tints to accent on focus, via the
+   shared `fieldFocusRing` composable. The source rule uses `!important`
    and bare `:focus` — both dropped here per the PRD's explicit correction. */
 
 .wrapper {
@@ -9,7 +9,7 @@
 }
 
 .field {
-  composes: focusRing from '../../styles/interactions.module.css';
+  composes: fieldFocusRing from '../../styles/interactions.module.css';
   width: 100%;
   font-family: var(--font-sans);
   font-size: var(--font-size-md);
@@ -19,10 +19,6 @@
   border-radius: var(--radius-md);
   padding: var(--space-3);
   transition: border-color var(--duration-fast) var(--easing-default);
-}
-
-.field:focus-visible {
-  border-color: var(--color-primary);
 }
 
 .field:disabled {
@@ -38,7 +34,7 @@
 /* Invalid: error border always on, plus an error-tinted ring on focus
    (mirrors --ring's own color-mix() formula — no token exists for an
    error-colored ring, so the shape is kept literal-but-consistent). Needs
-   its own no-color-mix fallback since it overrides `.focusRing`'s
+   its own no-color-mix fallback since it overrides `.fieldFocusRing`'s
    accent-colored one for this state. */
 .invalid {
   border-color: var(--color-error);

@@ -1,0 +1,328 @@
+/* ── Hero ─────────────────────────────────────────────────────── */
+
+.hero {
+  /* 640px: the design's hero column is narrower than the shared
+     720px --max-w-reading column used by Apps/Blog's own heroes. */
+  max-width: 640px;
+  margin-inline: auto;
+  padding-block: var(--space-24) var(--space-16);
+  padding-inline: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.photo {
+  width: clamp(150px, 24vw, 200px);
+  margin-block-end: var(--space-10);
+}
+
+/* Image's inner placeholder container has no prop to opt out of its
+   gray background/border — override it here since the circular hero
+   photo (priority-loaded, no placeholder ever shown) doesn't want it. */
+.photo > div {
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+}
+
+.photoImage {
+  border-radius: var(--radius-full);
+  /* Layered to match the design exactly: a near-invisible 1px separation
+     ring, then the soft drop shadow. The ring tint is a design-prototype
+     one-off (not a design-system token) — light/dark values below. */
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 6%),
+    var(--shadow-lg);
+}
+
+[data-theme='dark'] .photoImage {
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 8%),
+    var(--shadow-lg);
+}
+
+/* Uppercase kicker label introducing a link-section or the kitchen rail.
+   Deliberately NOT mono — the design keeps these in the body sans font;
+   only Apps.tsx/Blog.tsx's own page-top hero eyebrows use JetBrains Mono. */
+.kicker {
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.heading {
+  font-size: var(--font-display-hero);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--tracking-tight);
+  /* 18px: matches the design's hero h1 margin exactly; no spacing token lands on it. */
+  margin: 0 0 18px;
+}
+
+.role {
+  /* clamp + line-height match the design's role line exactly — distinct
+     from Typography's shared bodyLarge variant (which correctly serves
+     Apps/Blog's own hero lead paragraphs at a different measure). */
+  font-size: clamp(18px, 3.4vw, 21px);
+  line-height: 1.5;
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+  /* 22px: matches the design's hero role-line margin exactly; no spacing token lands on it. */
+  margin: 0 0 22px;
+}
+
+.bio {
+  /* Matches the design's hero bio line-height exactly — distinct from
+     other pages' own body line-height. */
+  font-size: var(--font-size-md);
+  line-height: 1.72;
+  max-width: var(--max-w-prose-narrow);
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.ctaRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  /* 38px: matches the design's hero CTA-row margin exactly; no spacing token lands on it. */
+  margin-block-start: 38px;
+}
+
+.cta {
+  composes: focusRing from '../../styles/interactions.module.css';
+  display: inline-flex;
+  align-items: center;
+  /* 8px: matches the design's icon gap on "Browse all recipes" (the
+     only CTA with an icon; harmless no-op on the icon-less Download CV). */
+  gap: var(--space-2);
+  font-size: var(--font-size-sm-plus);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  transition:
+    background var(--duration-fast) var(--easing-default),
+    color var(--duration-fast) var(--easing-default),
+    border-color var(--duration-fast) var(--easing-default);
+}
+
+.ctaSolid {
+  background: var(--color-btn-bg);
+  color: var(--color-btn-fg);
+  border: var(--border-width) solid var(--color-btn-bg);
+}
+
+.ctaSolid:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  /* Without this, Link's own generic `.link:hover` rule (accent-blue
+     text) bleeds through onto the now-blue background, making the
+     label unreadable in both themes. #fff matches the design exactly
+     (hardcoded there too, not theme-dependent). */
+  color: #fff;
+}
+
+.ctaOutline {
+  composes: chipHover surfaceHover from '../../styles/interactions.module.css';
+  /* Design uses medium here vs. the solid button's semibold. */
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-strong);
+  border: var(--border-width) solid var(--color-border-strong);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta {
+    transition: none;
+  }
+}
+
+/* ── Section divider ──────────────────────────────────────────── */
+
+.divider {
+  /* 592px: the design's divider line sits inset within a 640px/24px-
+     padded wrapper (640 - 24*2), matching the hero/link-section content
+     edges exactly — not the full 640px outer column (see .hero). */
+  max-width: 592px;
+  margin-inline: auto;
+  border: none;
+  border-block-start: var(--border-width) solid var(--color-border);
+}
+
+/* ── Link sections (Apps & experiments / The blog) ───────────── */
+
+.linkSection {
+  /* 640px: matches the design's hero/link-section column (see .hero). */
+  max-width: 640px;
+  margin-inline: auto;
+  padding-block: var(--space-16);
+  /* 24px, matching .hero — was 16px, misaligning this section's content
+     with the hero column above it by 8px. */
+  padding-inline: var(--space-6);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin: 0 0 var(--space-6);
+}
+
+.sectionHeading {
+  composes: kicker;
+  margin: 0;
+}
+
+.sectionAll {
+  composes: ctaText from '../../styles/text.module.css';
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  /* Nudge direction comes from the Link component's own `nudge` prop,
+     not a composed class here — a leftover `nudgeUpRight` composition
+     used to sit on this element regardless of the icon it was paired
+     with. */
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.rowList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* A pseudo-element rather than a border/margin-inline on the <li> itself
+   — margin-inline on the li shrinks its actual box (and the .row link
+   that fills it), making every other row narrower than the first. This
+   keeps every <li> the same full width and only insets the thin
+   divider line, matching .row's own 14px padding-inline (same pattern
+   as the section .divider being inset within its own padded wrapper). */
+.rowList > li + li::before {
+  content: '';
+  display: block;
+  height: var(--border-width);
+  margin-inline: 14px;
+  background: var(--color-border);
+}
+
+/* `a.row` (element + class), not just `.row` — Link's own base class
+   sets `width: fit-content` (the right default for a typical inline
+   text link), which otherwise wins since neither selector is more
+   specific on its own. Without this, each row shrink-wraps to its own
+   content's natural width instead of stretching to fill the <li> — a
+   longer, wrapping description can coincidentally end up looking full
+   width while a shorter one doesn't, even though every row should be
+   identical width regardless of content. */
+a.row {
+  /* Nudge direction comes from the Link component's own `nudge` prop
+     on the icon span, not a composed class here — see .sectionAll. */
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-5);
+  width: 100%;
+  padding-block: var(--space-5);
+  /* 14px: matches the design exactly; no token lands on it. The design
+     has no compensating negative margin here — .ls-row is a direct
+     child of the section with this same padding, so its box already
+     spans the full content width. Our earlier negative-margin/padding
+     combo (meant to bleed the hover background wider) instead left the
+     row's own box wider than its container and cancelled out the
+     padding inset entirely, so the text sat flush with no breathing
+     room. Removed. */
+  padding-inline: 14px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius-md);
+  transition: background var(--duration-fast) var(--easing-default);
+}
+
+.row:hover {
+  background: var(--color-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    transition: none;
+  }
+}
+
+.rowTitle {
+  /* Looser than Typography's heading4 line-height (1.08, tuned for
+     display headings) — the design wants a roomier 1.3 for row titles. */
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--space-1);
+}
+
+.rowSub {
+  /* 1.55: matches the design's row sub-line exactly — distinct from
+     Typography's shared body variant (15px/1.5). */
+  font-size: var(--font-size-sm-plus);
+  line-height: 1.55;
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+/* The row's ↗ icon (Link's own internal span, last child when
+   iconSide="right") — accent-colored and 15px per the design, always,
+   not just on hover. A plain descendant selector (rather than the
+   Link `tone` prop) so this reliably wins over .row's own
+   `color: inherit` regardless of CSS Modules bundle order. */
+.row > span:last-child {
+  font-size: var(--font-size-base);
+  color: var(--color-primary);
+}
+
+/* ── From the kitchen ─────────────────────────────────────────── */
+
+.kitchenSection {
+  max-width: var(--max-w-site);
+  margin-inline: auto;
+  padding-block: var(--space-16);
+  padding-inline: var(--space-4);
+}
+
+.kitchenIntro {
+  max-width: var(--max-w-prose-narrow);
+  margin-inline: auto;
+  text-align: center;
+  margin-block-end: var(--space-10);
+}
+
+.kitchenKicker {
+  composes: kicker;
+  /* 18px: matches the design's "From the Kitchen" kicker margin exactly. */
+  margin: 0 0 18px;
+}
+
+.kitchenHeading {
+  font-size: clamp(28px, 5vw, 34px);
+  letter-spacing: -0.02em;
+  margin: 0 0 14px;
+}
+
+.kitchenText {
+  font-size: var(--font-size-md);
+  line-height: 1.7;
+  color: var(--color-text-muted);
+}
+
+.recipeGrid {
+  list-style: none;
+  margin: 0 0 var(--space-10);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-6);
+}
+
+.browseAll {
+  text-align: center;
+}

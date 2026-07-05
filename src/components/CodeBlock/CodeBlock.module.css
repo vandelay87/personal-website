@@ -2,22 +2,30 @@
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
-  margin: var(--space-6) 0;
-  box-shadow: var(--shadow-md);
+  /* 28px: matches the design's `.code` exactly; no token lands on it. */
+  margin: 28px 0;
+  /* Design's `.code` has no box-shadow at all — clips .toolbar's
+     background (below) to the border-radius, same as .pre's own
+     radius (now removed, redundant once the wrapper clips). */
+  overflow: hidden;
 }
 
 .toolbar {
+  composes: codeHeaderPanel from '../../styles/interactions.module.css';
   display: flex;
   align-items: center;
+  /* Pushes the copy button to the right whether or not a filename is
+     present — .filenameHeader's own margin-inline-end:auto already
+     does this when it renders, so flex-end (not the design's literal
+     space-between) is what correctly positions a lone copy button
+     when there's no title, which none of the design's own examples
+     show. */
   justify-content: flex-end;
-  padding: var(--space-2) var(--space-4);
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface);
 }
 
 .filenameHeader {
+  composes: codeHeaderLabel from '../../styles/text.module.css';
   font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
   margin-inline-end: auto;
@@ -25,14 +33,18 @@
 
 .pre {
   margin: 0;
-  padding: var(--space-4);
+  /* 18px 16px: matches the design's `.code pre` exactly — was a
+     symmetric var(--space-4) (16px) on every side, 2px short on the
+     vertical. */
+  padding: 18px var(--space-4);
   overflow-x: auto;
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  /* 1.7: matches the design's `.code pre` exactly — line-height-normal
+     is tuned for running body text, not code. */
+  line-height: 1.7;
   background: var(--color-surface);
   color: var(--color-text);
-  border-radius: var(--radius-lg);
 }
 
 /* Line numbers via CSS counters */
@@ -52,27 +64,37 @@
   user-select: none;
 }
 
+/* Matches the design's `.code-copy` exactly — a bordered text pill
+   ("Copy"/"Copied", set in CodeBlock.tsx) rather than an icon toggle. */
 .copyButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-1);
-  color: var(--color-text);
-  background: none;
-  border: none;
+  composes: chipHover from '../../styles/interactions.module.css';
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--tracking-meta);
+  color: var(--color-text-muted);
+  background: transparent;
+  border: var(--border-width) solid var(--color-border);
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
+  transition:
+    color var(--duration-fast) var(--easing-default),
+    border-color var(--duration-fast) var(--easing-default),
+    background var(--duration-fast) var(--easing-default);
 }
 
 .copyButton:hover {
-  opacity: 0.7;
+  background: var(--color-hover);
 }
 
-.copyIcon {
-  display: inline-flex;
-  transition: opacity 200ms var(--easing-default), transform 200ms var(--easing-default);
+.copied {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
-.copyIconCopied {
-  color: var(--color-success);
-  transform: scale(1.2);
+@media (prefers-reduced-motion: reduce) {
+  .copyButton {
+    transition: none;
+  }
 }

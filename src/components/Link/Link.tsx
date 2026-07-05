@@ -43,12 +43,17 @@ const Link: FC<LinkProps> = ({
     styles.link,
     styles[tone],
     underline ? styles.underline : '',
+    // Nudge class goes on the link itself, not the icon — the CSS is a
+    // `.nudgeX:hover .linkIcon` ancestor/descendant rule (see Link.module.css),
+    // so hovering anywhere on the link (not just the tiny icon glyph) has to
+    // trigger the icon's transform.
+    NUDGE_CLASSES[nudge],
     externalClassName,
   ]
     .filter(Boolean)
     .join(' ')
 
-  const iconClassName = [styles.icon, NUDGE_CLASSES[nudge]].filter(Boolean).join(' ')
+  const iconClassName = styles.icon
 
   const content = icon ? (
     <>

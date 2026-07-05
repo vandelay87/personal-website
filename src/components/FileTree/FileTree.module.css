@@ -3,27 +3,31 @@
   font-size: var(--font-size-sm);
   color: var(--color-text);
   background-color: var(--color-surface);
-  padding: var(--space-4);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-lg);
+  /* Keeps .title's own background from squaring off the rounded
+     corners now that .tree itself carries no padding — the design's
+     equivalent `.code` has no padding either, since its header and
+     body (`.code-head`/`pre`) each own their own padding instead. */
+  overflow: hidden;
   box-shadow: var(--shadow-md);
   margin: var(--space-4) 0;
   line-height: var(--line-height-relaxed);
 }
 
 .title {
+  composes: codeHeaderLabel from '../../styles/text.module.css';
+  composes: codeHeaderPanel from '../../styles/interactions.module.css';
   font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
-  padding-bottom: var(--space-2);
-  margin-bottom: var(--space-2);
-  margin-inline: calc(-1 * var(--space-4));
-  padding-inline: var(--space-4);
-  border-bottom: 1px solid var(--color-border);
 }
 
 .rootList {
   list-style: none;
-  padding-left: 0;
+  /* Matches the design's `.code pre` padding exactly — now that
+     .tree's own padding is gone, the root list (or .title, if
+     present) needs to supply the box's inset itself. */
+  padding: 18px var(--space-4);
   margin: 0;
 }
 

@@ -1,11 +1,69 @@
+.hero {
+  composes: pageHero from '../../styles/text.module.css';
+  /* Matches the design's Apps hero exactly (Blog's own hero wants a
+     different value here, see Blog.module.css). */
+  --page-hero-pad-end: clamp(40px, 6vw, 60px);
+}
+
+.eyebrow {
+  composes: eyebrow from '../../styles/text.module.css';
+}
+
 .heading {
-  margin-block-end: var(--space-2);
+  composes: pageHeading from '../../styles/text.module.css';
 }
 
-.description {
-  margin-block-end: var(--space-12);
+.lead {
+  composes: pageLead from '../../styles/text.module.css';
 }
 
-.social {
-  margin-block-start: var(--space-20);
+.gridSection {
+  max-width: var(--max-w-site);
+  margin-inline: auto;
+  padding-block: var(--space-6) var(--space-20);
+  padding-inline: var(--space-4);
+}
+
+.countRow {
+  composes: metaText dividerFill from '../../styles/text.module.css';
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-block-end: var(--space-6);
+}
+
+.grid {
+  list-style: none;
+  margin: 0 0 var(--space-8);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-6);
+}
+
+.inProgress {
+  border: var(--border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-xl);
+  padding: var(--space-10);
+  text-align: center;
+}
+
+.inProgressText {
+  /* 16px/1.6/muted: matches the design's "In progress" paragraph
+     exactly — distinct from Typography's shared body variant (15px,
+     text color, no measure), which this previously relied on with
+     no override. */
+  max-width: var(--max-w-prose-narrow);
+  margin-inline: auto;
+  margin-block-end: 18px;
+  font-size: var(--font-size-md);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+.readBlogLink {
+  /* Matches the design's "Read the blog" link exactly; it was
+     previously unstyled, inheriting the ambient body size/weight/color
+     instead. */
+  composes: ctaText from '../../styles/text.module.css';
 }

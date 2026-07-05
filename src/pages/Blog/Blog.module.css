@@ -1,115 +1,209 @@
+.hero {
+  composes: pageHero from '../../styles/text.module.css';
+  /* Matches the design's Blog hero exactly (Apps' own hero wants a
+     different value here, see Apps.module.css). */
+  --page-hero-pad-end: clamp(36px, 5vw, 52px);
+}
+
+.eyebrow {
+  composes: eyebrow from '../../styles/text.module.css';
+}
+
 .heading {
-  margin-block-end: var(--space-2);
+  composes: pageHeading from '../../styles/text.module.css';
 }
 
 .intro {
-  margin-block-end: var(--space-8);
+  composes: pageLead from '../../styles/text.module.css';
+}
+
+.countRow {
+  composes: metaText dividerFill from '../../styles/text.module.css';
+  max-width: var(--max-w-reading);
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-block-end: var(--space-5);
+  /* Reserves .clearLink's own rendered height (11px font-size-xs at its
+     browser-default line-height, plus --space-1 padding top/bottom and
+     --border-width top/bottom = 26px) so the row doesn't grow — and
+     push everything below it down — only when a tag filter is
+     selected. Was --space-6 (24px), 2px short of .clearLink's actual
+     height — undetectable in Chromium's overlay-scrollbar headless
+     tests, but a real, visible shift in Firefox. */
+  min-height: 26px;
+}
+
+.activeTagName {
+  color: var(--color-primary);
+}
+
+.clearLink {
+  composes: focusRing chipHover from '../../styles/interactions.module.css';
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--tracking-meta);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+  /* Native <button> defaults to cursor:default, not pointer — Tag's
+     own button variant sets this explicitly too. */
+  cursor: pointer;
+  transition:
+    color var(--duration-fast) var(--easing-default),
+    border-color var(--duration-fast) var(--easing-default);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clearLink {
+    transition: none;
+  }
+}
+
+.filterBar {
+  max-width: var(--max-w-reading);
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block-end: var(--space-10);
 }
 
 .postList {
   list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
+  max-width: var(--max-w-reading);
+  margin-inline: auto;
+  padding: var(--space-4);
 }
 
+/* Matches the design's `.post` exactly: literal clamp-based padding
+   and radius (no tokens land on either value, so shared as a custom
+   property rather than repeating the literal on .postLink below),
+   with a negative inline margin that bleeds the card back out to its
+   own padding — the hover background then spans the full column
+   width instead of sitting inset within it. Also carries
+   `nudgeUpRight` so hovering anywhere in the card (including over
+   the tag chips below, which sit outside .postLink since a button
+   can't nest inside an anchor) nudges .arrowIcon, matching the
+   design's `.post:hover .arrowx`. `surfaceHover` (from
+   interactions.module.css) supplies the hover background tint. */
 .postCard {
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-xl);
-  padding: var(--space-6);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-md);
-  transition:
-    transform var(--duration-fast) var(--easing-default),
-    box-shadow var(--duration-fast) var(--easing-default);
+  composes: nudgeUpRight surfaceHover from '../../styles/interactions.module.css';
+  --post-card-radius: 14px;
+  padding: clamp(30px, 4vw, 40px) clamp(14px, 2vw, 20px);
+  margin-inline: calc(-1 * clamp(14px, 2vw, 20px));
+  border-radius: var(--post-card-radius);
+  border-block-end: var(--border-width) solid var(--color-border);
+  transition: background var(--duration-fast) var(--easing-default);
 }
 
-.postCard:hover {
-  transform: translate(-4px, -4px);
-  box-shadow: var(--shadow-lg);
+.postList > li:last-child .postCard {
+  border-block-end: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .postCard {
     transition: none;
   }
-
-  .postCard:hover {
-    transform: none;
-  }
 }
 
-.postHeading {
-  margin-block: 0;
-}
-
-.postTitle {
+.postLink {
+  composes: focusRing from '../../styles/interactions.module.css';
   display: block;
-  color: var(--color-text-strong);
+  color: inherit;
   text-decoration: none;
-}
-
-.postTitle:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-.postTitle:hover {
-  color: var(--color-link);
+  /* Matches .postCard's own radius (via its custom property) so the
+     focus ring's corners are rounded like every other interactive
+     element's, instead of the sharp square corners an unset radius
+     leaves the outline with. */
+  border-radius: var(--post-card-radius);
 }
 
 .meta {
+  composes: metaText from '../../styles/text.module.css';
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  margin-block-start: var(--space-2);
+  margin-block-end: var(--space-3);
 }
 
-.separator {
-  font-weight: var(--font-weight-bold);
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.postTitle {
+  /* Fluid 24-29px/1.18/-0.022em: matches the design's post-title
+     exactly — distinct from Typography's shared heading3 variant
+     (21px fixed/1.08 line-height), which this previously relied on
+     with no override. */
+  font-size: clamp(24px, 3.6vw, 29px);
+  line-height: 1.18;
+  letter-spacing: -0.022em;
+  margin: 0;
+}
+
+.arrowIcon {
+  composes: linkIcon from '../../styles/interactions.module.css';
+  flex-shrink: 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-primary);
 }
 
 .description {
-  color: var(--color-text);
-  line-height: var(--line-height-normal);
-  margin-block-start: var(--space-3);
-  margin-block-end: var(--space-4);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-relaxed);
+  margin-block: var(--space-3) 0;
+  max-width: 60ch;
 }
 
 .tags {
+  list-style: none;
+  margin: var(--space-5) 0 0;
+  padding: 0;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
 }
 
-.tag {
-  padding: var(--space-1) var(--space-2);
-  font-size: var(--font-size-sm);
-  font-family: var(--font-mono);
-  font-weight: var(--font-weight-normal);
-}
-
-.tag:hover {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-}
-
-.tag[aria-pressed='true'] {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  font-weight: var(--font-weight-bold);
-}
-
 .empty {
+  max-width: var(--max-w-reading);
+  margin-inline: auto;
   text-align: center;
-  padding: var(--space-12) 0;
+  padding: var(--space-12) var(--space-4);
 }
 
-.clearLink {
-  color: var(--color-link);
-  font-weight: var(--font-weight-semibold);
+/* Matches the design's noResults message exactly: mono, 13px, and the
+   same lighter/muted treatment as Apps' own .inProgressText — distinct
+   from Typography's shared bodyLarge variant (sans-serif, full-contrast
+   --color-text), which this previously relied on with no override. */
+.emptyMessage {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0 0 10px;
+}
+
+.emptyTagName {
+  color: var(--color-text-strong);
+}
+
+/* "Show all posts" — a plain text CTA, not a bordered chip like
+   .clearLink, matching the design's `.lnk`-styled empty-state button
+   exactly (no border/background, semibold accent text). */
+.showAllLink {
+  composes: focusRing from '../../styles/interactions.module.css';
+  composes: ctaText from '../../styles/text.module.css';
+  margin-block-start: var(--space-4);
+  color: var(--color-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }

@@ -12,7 +12,16 @@
   z-index: var(--z-header);
   background-color: var(--color-bg);
   color: var(--color-text);
-  border-block-end: var(--border-width) solid var(--color-border);
+  /* Transparent, not omitted: reserves the same 1px box height as the
+     visible .admin border so nothing shifts between variants. Matches
+     the design's public-page header exactly (border-bottom:1px solid
+     transparent) — only the admin list pages (Recipes/Users/Editor)
+     get a real visible line. */
+  border-block-end: var(--border-width) solid transparent;
+}
+
+.admin {
+  border-block-end-color: var(--color-border);
 }
 
 .sticky {
@@ -51,8 +60,12 @@
 
 .brand {
   composes: focusRing from '../../styles/interactions.module.css';
+  /* Explicit size/weight/tracking — without these the brand link fell
+     back to the ambient 16px body size instead of the design's 15px. */
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.01em;
   color: var(--color-text-strong);
-  font-weight: var(--font-weight-medium);
   text-decoration: none;
   border-radius: var(--radius-sm);
 }
@@ -65,6 +78,9 @@
   display: flex;
   align-items: center;
   gap: var(--space-6);
+  /* Without this, nav links fall back to the ambient 16px body size
+     instead of the design's 14px (same fix as Footer's .linkList). */
+  font-size: var(--font-size-sm-plus);
 }
 
 .navLink {

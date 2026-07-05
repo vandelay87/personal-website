@@ -2,7 +2,7 @@
    (background, border, focus border-tint) per Textarea.jsx/prompt.md. */
 
 .field {
-  composes: focusRing from '../../styles/interactions.module.css';
+  composes: fieldFocusRing from '../../styles/interactions.module.css';
   width: 100%;
   font-family: var(--font-sans);
   font-size: var(--font-size-md);
@@ -15,13 +15,6 @@
   resize: vertical;
   min-height: var(--space-20);
   transition: border-color var(--duration-fast) var(--easing-default);
-}
-
-/* Ports .ds-field's focus border tint (design_system/components/_helpers.css)
-   onto the shared focusRing ring — :focus-visible not :focus, no !important,
-   per the PRD's explicit correction. */
-.field:focus-visible {
-  border-color: var(--color-primary);
 }
 
 .field:disabled {
