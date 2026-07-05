@@ -25,18 +25,11 @@
 }
 
 .countRow {
-  composes: metaText from '../../styles/text.module.css';
+  composes: metaText dividerFill from '../../styles/text.module.css';
   display: flex;
   align-items: baseline;
   gap: var(--space-3);
   margin-block-end: var(--space-6);
-}
-
-.countRow::after {
-  content: '';
-  flex: 1;
-  height: var(--border-width);
-  background: var(--color-border);
 }
 
 .grid {
@@ -56,11 +49,11 @@
 }
 
 .inProgressText {
-  /* 46ch/16px/1.6/muted: matches the design's "In progress" paragraph
+  /* 16px/1.6/muted: matches the design's "In progress" paragraph
      exactly — distinct from Typography's shared body variant (15px,
-     text color, no measure) and --max-w-prose (54ch), which this
-     previously relied on with no override. */
-  max-width: 46ch;
+     text color, no measure), which this previously relied on with
+     no override. */
+  max-width: var(--max-w-prose-narrow);
   margin-inline: auto;
   margin-block-end: 18px;
   font-size: var(--font-size-md);
@@ -72,6 +65,5 @@
   /* Matches the design's "Read the blog" link exactly; it was
      previously unstyled, inheriting the ambient body size/weight/color
      instead. */
-  font-size: var(--font-size-sm-plus);
-  font-weight: var(--font-weight-semibold);
+  composes: ctaText from '../../styles/text.module.css';
 }

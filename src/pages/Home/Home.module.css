@@ -75,12 +75,11 @@
 }
 
 .bio {
-  /* Matches the design's hero bio measure/line-height exactly — distinct
-     from the shared --max-w-prose (54ch) and body line-height, which
-     correctly serve other pages' own body text. */
+  /* Matches the design's hero bio line-height exactly — distinct from
+     other pages' own body line-height. */
   font-size: var(--font-size-md);
   line-height: 1.72;
-  max-width: 46ch;
+  max-width: var(--max-w-prose-narrow);
   margin: 0;
   color: var(--color-text-muted);
 }
@@ -129,16 +128,11 @@
 }
 
 .ctaOutline {
+  composes: chipHover surfaceHover from '../../styles/interactions.module.css';
   /* Design uses medium here vs. the solid button's semibold. */
   font-weight: var(--font-weight-medium);
   color: var(--color-text-strong);
   border: var(--border-width) solid var(--color-border-strong);
-}
-
-.ctaOutline:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  background: var(--color-hover);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -185,6 +179,7 @@
 }
 
 .sectionAll {
+  composes: ctaText from '../../styles/text.module.css';
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -192,8 +187,6 @@
      not a composed class here — a leftover `nudgeUpRight` composition
      used to sit on this element regardless of the icon it was paired
      with. */
-  font-size: var(--font-size-sm-plus);
-  font-weight: var(--font-weight-semibold);
   color: var(--color-primary);
   text-decoration: none;
 }
@@ -297,9 +290,7 @@ a.row {
 }
 
 .kitchenIntro {
-  /* 46ch: matches the design's kitchen-intro wrapper exactly — distinct
-     from the shared --max-w-prose (54ch) used elsewhere. */
-  max-width: 46ch;
+  max-width: var(--max-w-prose-narrow);
   margin-inline: auto;
   text-align: center;
   margin-block-end: var(--space-10);

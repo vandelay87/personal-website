@@ -151,6 +151,7 @@
   --max-w-reading: 720px;  /* index + hero reading column */
   --max-w-article: 680px;  /* long-form article column */
   --max-w-prose:   54ch;   /* hero paragraph measure */
+  --max-w-prose-narrow: 46ch; /* short paragraph measure (in-progress notes, kitchen intro) */
 
   /* ── Z-index ──────────────────────────────────────────────── */
   --z-header:  20;

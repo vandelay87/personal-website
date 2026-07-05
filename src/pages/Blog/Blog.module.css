@@ -18,7 +18,7 @@
 }
 
 .countRow {
-  composes: metaText from '../../styles/text.module.css';
+  composes: metaText dividerFill from '../../styles/text.module.css';
   max-width: var(--max-w-reading);
   margin-inline: auto;
   padding-inline: var(--space-4);
@@ -34,16 +34,6 @@
      height — undetectable in Chromium's overlay-scrollbar headless
      tests, but a real, visible shift in Firefox. */
   min-height: 26px;
-}
-
-/* Divider line filling the row's remaining width, matching the
-   design's trailing `<span style="flex:1; height:1px; ...">` exactly
-   — same pattern as Apps' own `.countRow::after` (see Apps.module.css). */
-.countRow::after {
-  content: '';
-  flex: 1;
-  height: var(--border-width);
-  background: var(--color-border);
 }
 
 .activeTagName {
@@ -210,9 +200,8 @@
    exactly (no border/background, semibold accent text). */
 .showAllLink {
   composes: focusRing from '../../styles/interactions.module.css';
+  composes: ctaText from '../../styles/text.module.css';
   margin-block-start: var(--space-4);
-  font-size: var(--font-size-sm-plus);
-  font-weight: var(--font-weight-semibold);
   color: var(--color-primary);
   background: transparent;
   border: none;

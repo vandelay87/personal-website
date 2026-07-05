@@ -65,6 +65,25 @@
   color: var(--color-text-faint);
 }
 
+/* Semibold, slightly-larger-than-body text CTA — shared by Home's
+   "All" row-section link, Apps' "Read the blog" link, and Blog's
+   "Show all posts" link. Each still sets its own color/cursor/border
+   as needed (Apps' Link component already tones its own color). */
+.ctaText {
+  font-size: var(--font-size-sm-plus);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Divider line filling a flex row's remaining width — Apps' and
+   Blog's own countRow both need this trailing rule after a count
+   label (and, on Blog, an optional active-tag name + clear button). */
+.dividerFill::after {
+  content: '';
+  flex: 1;
+  height: var(--border-width);
+  background: var(--color-border);
+}
+
 /* 12px/0.02em — the title-bar label size used by both FileTree's
    `.title` and CodeBlock's `.filenameHeader`, matching the design's
    `.code-head` exactly. Neither metaText's font-size (13px) nor
