@@ -66,8 +66,10 @@ const Blog = () => {
           Blog
         </Typography>
         <Typography variant="bodyLarge" className={styles.intro}>
-          Thoughts on building things, technical deep-dives, and lessons
-          learned along the way.
+          Thoughts on building things, technical deep-dives, and the lessons
+          you only learn the hard way. I write these mostly to document how
+          I solved a problem, in case it&apos;s useful to someone hitting the
+          same wall — or to me, six months from now.
         </Typography>
       </section>
 
@@ -99,11 +101,11 @@ const Blog = () => {
 
       {filteredPosts.length === 0 ? (
         <div className={styles.empty}>
-          <Typography variant="bodyLarge">
+          <p className={styles.emptyMessage}>
             No posts tagged <span className={styles.emptyTagName}>{activeTag}</span> yet.
-          </Typography>
-          <button type="button" onClick={clearFilter} className={styles.clearLink}>
-            Clear filter
+          </p>
+          <button type="button" onClick={clearFilter} className={styles.showAllLink}>
+            Show all posts
           </button>
         </div>
       ) : (

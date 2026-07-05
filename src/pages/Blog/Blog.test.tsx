@@ -328,15 +328,15 @@ describe('Blog', () => {
   })
 
   describe('empty states', () => {
-    it('shows "No posts tagged" with a clear filter link when tag matches nothing', () => {
+    it('shows "No posts tagged" with a "Show all posts" link when tag matches nothing', () => {
       renderBlog('/blog?tag=nonexistent')
 
       expect(
         screen.getByText((_, element) => element?.textContent === 'No posts tagged nonexistent yet.')
       ).toBeInTheDocument()
 
-      const clearLink = screen.getByRole('button', { name: /clear filter/i })
-      expect(clearLink).toBeInTheDocument()
+      const showAllLink = screen.getByRole('button', { name: /show all posts/i })
+      expect(showAllLink).toBeInTheDocument()
     })
 
     it('shows "Posts coming soon" when no posts exist', () => {
