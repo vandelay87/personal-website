@@ -190,8 +190,7 @@ describe('BlogPost', () => {
     it('excludes the current post from related posts', async () => {
       renderWithRoute('test-post')
       await screen.findByText('MDX content here')
-      const relatedHeading = screen.getByRole('heading', { name: /related posts/i })
-      const relatedSection = relatedHeading.closest('section') ?? relatedHeading.parentElement!
+      const relatedSection = screen.getByRole('region', { name: /related posts/i })
       expect(within(relatedSection).queryByText('Test Post')).not.toBeInTheDocument()
     })
 
@@ -211,7 +210,7 @@ describe('BlogPost', () => {
 
       renderWithRoute('test-post')
       await screen.findByText('MDX content here')
-      expect(screen.queryByRole('heading', { name: /related posts/i })).not.toBeInTheDocument()
+      expect(screen.queryByRole('region', { name: /related posts/i })).not.toBeInTheDocument()
 
       // Restore
       mockPosts.length = 0

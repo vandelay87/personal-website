@@ -99,7 +99,7 @@ const BlogPost = () => {
       </div>
 
       <section className={styles.shareSection} aria-label="Share this post">
-        <div className={styles.shareLabel}>Share this post</div>
+        <div className={styles.sectionLabel}>Share this post</div>
         <div className={styles.shareLinks}>
           <a
             href={twitterHref}
@@ -122,16 +122,16 @@ const BlogPost = () => {
 
       {showRelated && (
         <section className={styles.relatedSection} aria-label="Related posts">
-          <Typography variant="heading3" as="h2">Related posts</Typography>
+          <div className={styles.sectionLabel}>Related posts</div>
           <ul className={styles.relatedGrid}>
             {relatedPosts.map((rp) => (
               <li key={rp.slug}>
                 <Link to={`/blog/${rp.slug}`} className={styles.relatedCard}>
-                  <Typography variant="heading4" as="h3">{rp.title}</Typography>
-                  <Typography variant="body">
+                  <div className={styles.relatedMeta}>
                     {formatDate(rp.date)} <span aria-hidden="true">·</span>{' '}
                     {rp.readingTime} min read
-                  </Typography>
+                  </div>
+                  <div className={styles.relatedTitle}>{rp.title}</div>
                 </Link>
               </li>
             ))}
