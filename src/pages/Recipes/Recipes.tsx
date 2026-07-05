@@ -59,9 +59,11 @@ const Recipes: FC = () => {
     () =>
       (recipes ?? []).filter((recipe) => {
         const matchesTag = !activeTag || recipe.tags.includes(activeTag)
+        const query = searchQuery.toLowerCase()
         const matchesSearch =
           !searchQuery ||
-          recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
+          recipe.title.toLowerCase().includes(query) ||
+          recipe.tags.some((tag) => tag.toLowerCase().includes(query))
         return matchesTag && matchesSearch
       }),
     [recipes, activeTag, searchQuery]
