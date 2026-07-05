@@ -44,31 +44,34 @@
   transform: translate(3px, -3px);
 }
 
-/* ── Recipe card — lift + cover zoom (the signature hover) ───
-   Durations/curve are a deliberate custom easing distinct from the
-   standard --duration-fast/--duration-base scale (source: _helpers.css
-   ".ds-recipe-card", labelled "the signature hover") — not in the token
-   scale, kept literal on purpose. Apply `cardLift` to the card root and
-   `cardLiftImage` to the cover image inside it. */
+/* ── App card — lift + cover zoom (the signature hover) ──────
+   Matches docs/design/paper/pages/Apps.dc.html's `.app-card`/`.app-prev`
+   exactly (AppCard.module.css is this composable's only consumer —
+   RecipeCard has its own near-identical but not-quite-matching values
+   copied literally, since its design spec differs slightly: 4px lift,
+   not 5px). Durations/curve/shadow are a deliberate custom easing
+   distinct from the standard --duration-fast/--duration-base scale and
+   --shadow-* tokens — kept literal per the design's own spec. Apply
+   `cardLift` to the card root and `cardLiftImage` to the cover image
+   inside it. */
 .cardLift {
   transition:
-    transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1),
-    box-shadow 0.3s var(--easing-default);
+    transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.35s var(--easing-default),
+    border-color 0.35s var(--easing-default);
 }
 
 .cardLift:hover {
-  transform: translateY(-4px);
-  /* Elevation shadow doesn't match an existing --shadow-* token exactly
-     (closest is --shadow-lg); kept literal per _helpers.css spec. */
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.1);
 }
 
 .cardLiftImage {
-  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .cardLift:hover .cardLiftImage {
-  transform: scale(1.04);
+  transform: scale(1.035);
 }
 
 /* ── Surface hover wash — generic card/tag background tint ───

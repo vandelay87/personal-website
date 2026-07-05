@@ -12,20 +12,19 @@
   overflow: hidden;
   border-radius: var(--radius-xl);
   border: var(--border-width) solid var(--color-border);
-  background-color: var(--color-surface);
+  /* The design's .app-card uses the page background, not the elevated
+     "surface" tone — this isn't meant to look like a raised panel. */
+  background-color: var(--color-bg);
   text-decoration: none;
   color: inherit;
-  transition: border-color var(--duration-fast) var(--easing-default);
+  /* border-color transition lives on the composed `cardLift` (it owns
+     transform/box-shadow/border-color together, matching the design's
+     single transition declaration) — a separate one here would compete
+     with it for the same CSS property depending on bundle order. */
 }
 
 .card:hover {
   border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card {
-    transition: none;
-  }
 }
 
 .imageWrapper {
