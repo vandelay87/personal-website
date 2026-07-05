@@ -95,6 +95,32 @@ describe('Link', () => {
     expect(text.compareDocumentPosition(icon) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
+  it('has no underline by default', () => {
+    render(
+      <MemoryRouter>
+        <Link to="/apps">Apps</Link>
+      </MemoryRouter>
+    )
+
+    const linkElement = screen.getByRole('link', { name: /apps/i })
+
+    expect(linkElement).not.toHaveClass(styles.underline)
+  })
+
+  it('applies the underline class when the underline prop is set', () => {
+    render(
+      <MemoryRouter>
+        <Link to="/apps" underline>
+          Apps
+        </Link>
+      </MemoryRouter>
+    )
+
+    const linkElement = screen.getByRole('link', { name: /apps/i })
+
+    expect(linkElement).toHaveClass(styles.underline)
+  })
+
   it('applies the tone class for the given tone', () => {
     render(
       <MemoryRouter>
