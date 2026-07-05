@@ -99,39 +99,23 @@ const BlogPost = () => {
       </div>
 
       <section className={styles.shareSection} aria-label="Share this post">
-        <Typography variant="heading3" as="h2">Share this post</Typography>
+        <div className={styles.shareLabel}>Share this post</div>
         <div className={styles.shareLinks}>
           <a
             href={twitterHref}
             target="_blank"
             rel="noreferrer"
-            aria-label="Share on X"
             className={styles.shareLink}
           >
-            <svg
-              fill="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-            </svg>
+            Share on X
           </a>
           <a
             href={linkedinHref}
             target="_blank"
             rel="noreferrer"
-            aria-label="Share on LinkedIn"
             className={styles.shareLink}
           >
-            <svg
-              fill="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM2 9h6v12H2zM10 9h5.6v1.8h.1c.8-1.4 2.8-2 4.3-2 4.6 0 5.5 3 5.5 6.8V21h-6v-5.2c0-1.2 0-2.7-1.6-2.7s-1.8 1.3-1.8 2.6V21h-6z" />
-            </svg>
+            Share on LinkedIn
           </a>
         </div>
       </section>

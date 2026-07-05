@@ -129,43 +129,62 @@
   }
 }
 
+/* Matches the design's share block exactly: 56px/32px top spacing —
+   distinctly more than the related-posts section below (--space-8/6),
+   no tokens land on either literal. */
 .shareSection {
-  margin-block-start: var(--space-8);
-  padding-block-start: var(--space-6);
+  margin-block-start: 56px;
+  padding-block-start: 32px;
   border-top: var(--border-width) solid var(--color-border);
+}
+
+.shareLabel {
+  composes: metaText from '../../styles/text.module.css';
+  /* 12px/0.06em: matches the design exactly; metaText's own
+     font-size-sm (13px) and --tracking-meta (0.04em) are tuned for
+     other mono-meta contexts, not this one. */
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  margin: 0 0 var(--space-4);
 }
 
 .shareLinks {
   display: flex;
-  gap: var(--space-4);
-  margin-block-start: var(--space-3);
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
+/* Matches the design's `.share-btn` exactly: a bordered pill with a
+   visible "Share on X"/"Share on LinkedIn" label — was an icon-only
+   circle (SVG logos), same pattern already corrected on CodeBlock's
+   copy button. */
 .shareLink {
-  composes: focusRing chipHover from '../../styles/interactions.module.css';
+  composes: focusRing from '../../styles/interactions.module.css';
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: var(--space-10);
-  height: var(--space-10);
-  color: var(--color-text);
-  border: var(--border-width) solid var(--color-border);
+  font-size: 13.5px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-strong);
+  text-decoration: none;
+  border: var(--border-width) solid var(--color-border-strong);
+  padding: 9px 16px;
   border-radius: var(--radius-full);
-  background: var(--color-surface);
   transition:
     border-color var(--duration-fast) var(--easing-default),
-    color var(--duration-fast) var(--easing-default);
+    color var(--duration-fast) var(--easing-default),
+    background var(--duration-fast) var(--easing-default);
+}
+
+.shareLink:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-hover);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .shareLink {
     transition: none;
   }
-}
-
-.shareLink svg {
-  width: var(--space-6);
-  height: var(--space-6);
 }
 
 .relatedSection {
