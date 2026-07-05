@@ -127,6 +127,10 @@
   display: block;
   color: inherit;
   text-decoration: none;
+  /* Matches .postCard's own radius so the focus ring's corners are
+     rounded like every other interactive element's, instead of the
+     sharp square corners an unset radius leaves the outline with. */
+  border-radius: 14px;
 }
 
 .meta {
