@@ -3,6 +3,7 @@ import type { RecipeIndex, Tag } from '@models/recipe'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { axe } from 'vitest-axe'
 import Recipes from './Recipes'
 
 vi.mock('@api/recipes', () => ({
@@ -112,6 +113,24 @@ describe('Recipes page', () => {
     })
   })
 
+  it('searches by keyword (tag match)', async () => {
+    renderRecipes()
+
+    await waitFor(() => {
+      expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
+    })
+
+    // "Spicy" only appears as a tag (on Thai Green Curry), not in any title.
+    const searchInput = screen.getByRole('searchbox', { name: /search recipes/i })
+    fireEvent.change(searchInput, { target: { value: 'spicy' } })
+
+    await waitFor(() => {
+      expect(screen.getByText('Thai Green Curry')).toBeInTheDocument()
+      expect(screen.queryByText('Classic Margherita Pizza')).not.toBeInTheDocument()
+      expect(screen.queryByText('Italian Pasta Carbonara')).not.toBeInTheDocument()
+    })
+  })
+
   it('applies combined tag + search filtering', async () => {
     renderRecipes('/recipes?tag=Italian')
 
@@ -176,5 +195,34 @@ describe('Recipes page', () => {
 
     const liveRegion = screen.getByRole('status')
     expect(liveRegion).toHaveAttribute('aria-live', 'polite')
+  })
+
+  describe('accessibility', () => {
+    it('renders the default loaded recipe grid with no detectable axe violations', async () => {
+      const { container } = renderRecipes()
+
+      await waitFor(() => {
+        expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
+      })
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
+
+    it('renders the "no recipes found" empty state with no detectable axe violations', async () => {
+      const { container } = renderRecipes()
+
+      await waitFor(() => {
+        expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
+      })
+
+      const searchInput = screen.getByRole('searchbox', { name: /search recipes/i })
+      fireEvent.change(searchInput, { target: { value: 'nonexistent dish xyz' } })
+
+      await waitFor(() => {
+        expect(screen.getByText(/no recipes found/i)).toBeInTheDocument()
+      })
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
   })
 })
