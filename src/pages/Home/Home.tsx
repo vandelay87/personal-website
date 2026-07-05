@@ -176,7 +176,12 @@ const Home: FC = () => {
               ))}
             </ul>
             <div className={styles.browseAll}>
-              <Link to="/recipes" className={`${styles.cta} ${styles.ctaSolid}`}>
+              <Link
+                to="/recipes"
+                icon="→"
+                nudge="right"
+                className={`${styles.cta} ${styles.ctaSolid}`}
+              >
                 Browse all recipes
               </Link>
             </div>
