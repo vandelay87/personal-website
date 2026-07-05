@@ -35,16 +35,20 @@ body {
 
 /* ── Shiki dual theme toggle ─────────────────────────────── */
 
+/* No background-color here (Shiki's own --shiki-light-bg/dark-bg
+   vars go unused) — CodeBlock.module.css's `.pre` owns the code
+   block's background (--color-surface); this rule set one too,
+   at equal specificity, which is exactly what forced CodeBlock to
+   fight it with compound selectors. Color is still needed — that's
+   the actual syntax-highlighting theme. */
 .shiki,
 .shiki span {
   color: var(--shiki-light);
-  background-color: var(--shiki-light-bg);
 }
 
 [data-theme="dark"] .shiki,
 [data-theme="dark"] .shiki span {
   color: var(--shiki-dark);
-  background-color: var(--shiki-dark-bg);
 }
 
 /* ── Mermaid diagram styles ─────────────────────────────── */

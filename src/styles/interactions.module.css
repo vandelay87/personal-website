@@ -80,6 +80,18 @@
   background: var(--color-hover);
 }
 
+/* ── Code panel header chrome ─────────────────────────────────
+   Not ported from _helpers.css — shared between FileTree's `.title`
+   and CodeBlock's `.toolbar`, which both need a title-bar background
+   visibly distinct from the panel's own body (matching the design's
+   separate `--code-head` vs `--code-bg`, a token pair that doesn't
+   exist in our system) plus identical padding/border-bottom. */
+.codeHeaderPanel {
+  padding: 8px 10px 8px var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 60%, var(--color-border) 40%);
+}
+
 /* ── Chip hover — tag buttons + suggestion pills ──────────────
    ds-tag-btn and ds-suggest are identical in _helpers.css; shared here
    via one composable class. */

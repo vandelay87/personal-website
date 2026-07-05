@@ -64,3 +64,12 @@
   letter-spacing: var(--tracking-meta);
   color: var(--color-text-faint);
 }
+
+/* 12px/0.02em — the title-bar label size used by both FileTree's
+   `.title` and CodeBlock's `.filenameHeader`, matching the design's
+   `.code-head` exactly. Neither metaText's font-size (13px) nor
+   --tracking-meta (0.04em) land on this specific size. */
+.codeHeaderLabel {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}

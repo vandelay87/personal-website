@@ -16,21 +16,10 @@
 }
 
 .title {
-  /* 12px/0.02em: matches the design's `.code-head` exactly — distinct
-     from the tree body's own 13px (--font-size-sm), which this
-     previously inherited with no override. */
-  font-size: 12px;
-  letter-spacing: 0.02em;
+  composes: codeHeaderLabel from '../../styles/text.module.css';
+  composes: codeHeaderPanel from '../../styles/interactions.module.css';
   font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
-  /* A visibly different shade from the body below, matching the
-     design's separate `--code-head` vs `--code-bg` — no token pair
-     for this exists (CodeBlock's own header/body share one flat
-     --color-surface too), so derived via color-mix rather than a new
-     unlinked literal. */
-  background: color-mix(in srgb, var(--color-surface) 60%, var(--color-border) 40%);
-  padding: 8px 10px 8px var(--space-4);
-  border-bottom: var(--border-width) solid var(--color-border);
 }
 
 .rootList {

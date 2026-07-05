@@ -11,6 +11,7 @@
 }
 
 .toolbar {
+  composes: codeHeaderPanel from '../../styles/interactions.module.css';
   display: flex;
   align-items: center;
   /* Pushes the copy button to the right whether or not a filename is
@@ -20,21 +21,11 @@
      when there's no title, which none of the design's own examples
      show. */
   justify-content: flex-end;
-  padding: 8px 10px 8px var(--space-4);
-  border-bottom: var(--border-width) solid var(--color-border);
-  /* A visibly different shade from .pre's body below, matching the
-     design's separate `--code-head` vs `--code-bg` — same derivation
-     FileTree's own header uses (see FileTree.module.css), since no
-     token pair exists for this in our system. */
-  background: color-mix(in srgb, var(--color-surface) 60%, var(--color-border) 40%);
 }
 
 .filenameHeader {
+  composes: codeHeaderLabel from '../../styles/text.module.css';
   font-family: var(--font-mono);
-  /* 12px/0.02em: matches the design's `.code-head` exactly — same
-     override FileTree's own title needed (font-size-sm is 13px). */
-  font-size: 12px;
-  letter-spacing: 0.02em;
   font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
   margin-inline-end: auto;
@@ -54,26 +45,6 @@
   line-height: 1.7;
   background: var(--color-surface);
   color: var(--color-text);
-}
-
-/* Shiki (see index.css's `.shiki` rule) sets its own theme background
-   via `background-color: var(--shiki-light-bg)` on this same element,
-   at equal (single-class) specificity — a losing tie-break was
-   leaving the code block white instead of --color-surface. This
-   compound selector outranks it regardless of stylesheet order. */
-.wrapper .pre {
-  background: var(--color-surface);
-}
-
-/* index.css's `.shiki span` rule paints the *same* --shiki-light-bg
-   onto every individual token span, not just the <pre> — invisible
-   when the block's own background was white too (no visible seam),
-   but a grid of mismatched white boxes now that .pre is --color-
-   surface. No feature here relies on a per-span background (line
-   highlighting isn't wired up in vite.config.ts's Shiki transformer),
-   so this is safe to disable outright. */
-.wrapper .pre span {
-  background-color: transparent;
 }
 
 /* Line numbers via CSS counters */
@@ -96,6 +67,7 @@
 /* Matches the design's `.code-copy` exactly — a bordered text pill
    ("Copy"/"Copied", set in CodeBlock.tsx) rather than an icon toggle. */
 .copyButton {
+  composes: chipHover from '../../styles/interactions.module.css';
   flex-shrink: 0;
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
@@ -113,8 +85,6 @@
 }
 
 .copyButton:hover {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
   background: var(--color-hover);
 }
 

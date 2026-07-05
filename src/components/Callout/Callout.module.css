@@ -1,4 +1,16 @@
 .callout {
+  /* Read by BlogPost.module.css's `.prose code`'s
+     `background: var(--inline-code-bg, var(--color-surface))` —
+     inline code inside a callout needs the page background instead
+     of the shared prose default, since the callout's own background
+     is already a tinted surface color. Setting the variable here
+     (rather than a `.callout code` background rule) means .prose's
+     rule wins the cascade unconditionally and just resolves a
+     different value inside a callout — no specificity contest, no
+     `!important`, and it still works if Callout is used somewhere
+     with a differently-named local code style, as long as that
+     consumer also reads the same variable. */
+  --inline-code-bg: var(--color-bg);
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
@@ -52,18 +64,4 @@
 
 .info .label {
   color: var(--color-primary);
-}
-
-/* Matches the design exactly: inline code inside a callout uses the
-   page background, not the shared prose inline-code background
-   (BlogPost.module.css's `.prose code`) — that background is
-   --color-surface, nearly the same as this box's own tinted-surface
-   background, so it would barely read as a distinct pill. Callout is
-   also used outside blog posts (e.g. RecipeEditor), so this can't
-   reference `.prose` directly across the CSS Modules boundary; the
-   doubled class is a deliberate specificity bump (0,2,1) to reliably
-   beat `.prose code:not(pre code)` (0,1,3) regardless of stylesheet
-   load order, without `!important`. */
-.callout.callout code {
-  background: var(--color-bg);
 }
