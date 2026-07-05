@@ -59,6 +59,13 @@ const renderBlog = (initialRoute = '/blog') => {
 
 const getFilterBar = () => screen.getByRole('group', { name: /filter posts by tag/i })
 
+// The active tag name renders in its own <span>, splitting text like
+// "2 posts tagged aws" across sibling text nodes — a plain string/regex
+// matcher only matches a single node, so this checks an element's full
+// textContent instead.
+const getByExactText = (text: string) =>
+  screen.getByText((_, element) => element?.textContent === text)
+
 describe('Blog', () => {
   beforeEach(() => {
     mockPosts.value = [
@@ -316,14 +323,14 @@ describe('Blog', () => {
 
     it('announces the pluralized filtered count and active tag', () => {
       renderBlog('/blog?tag=testing')
-      expect(screen.getByText((_, element) => element?.textContent === '1 post tagged testing')).toBeInTheDocument()
+      expect(getByExactText('1 post tagged testing')).toBeInTheDocument()
     })
 
     it('updates the announced count when the filter changes', () => {
       renderBlog()
       const bar = getFilterBar()
       fireEvent.click(within(bar).getByRole('button', { name: 'aws' }))
-      expect(screen.getByText((_, element) => element?.textContent === '2 posts tagged aws')).toBeInTheDocument()
+      expect(getByExactText('2 posts tagged aws')).toBeInTheDocument()
     })
   })
 
@@ -331,9 +338,7 @@ describe('Blog', () => {
     it('shows "No posts tagged" with a "Show all posts" link when tag matches nothing', () => {
       renderBlog('/blog?tag=nonexistent')
 
-      expect(
-        screen.getByText((_, element) => element?.textContent === 'No posts tagged nonexistent yet.')
-      ).toBeInTheDocument()
+      expect(getByExactText('No posts tagged nonexistent yet.')).toBeInTheDocument()
 
       const showAllLink = screen.getByRole('button', { name: /show all posts/i })
       expect(showAllLink).toBeInTheDocument()

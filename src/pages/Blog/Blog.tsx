@@ -40,9 +40,7 @@ const Blog = () => {
 
   const clearFilter = () => setSearchParams({})
 
-  const countLabel = activeTag
-    ? pluralize(filteredPosts.length, 'post')
-    : pluralize(posts.length, 'post')
+  const countLabel = pluralize(filteredPosts.length, 'post')
 
   if (posts.length === 0) {
     return (
