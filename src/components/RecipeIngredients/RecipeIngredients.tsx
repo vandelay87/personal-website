@@ -4,6 +4,13 @@ import styles from './RecipeIngredients.module.css'
 
 export interface RecipeIngredientsProps {
   ingredients: Ingredient[]
+  /**
+   * Recipe identity used to key per-recipe checked-state persistence in
+   * localStorage (mirrors the `slug` prop on the sibling `RecipeSteps`
+   * component). Optional stub for now — checkbox/localStorage behavior is
+   * implemented separately.
+   */
+  slug?: string
 }
 
 const RecipeIngredients: FC<RecipeIngredientsProps> = ({ ingredients }) => (

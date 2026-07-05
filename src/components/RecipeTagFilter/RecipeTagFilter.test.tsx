@@ -49,4 +49,14 @@ describe('RecipeTagFilter', () => {
       'false'
     )
   })
+
+  it('exposes the tag chips as an accessible group with a descriptive label', () => {
+    render(
+      <RecipeTagFilter tags={mockTags} activeTag={null} onTagClick={vi.fn()} />
+    )
+
+    const group = screen.getByRole('group', { name: /filter by tag/i })
+    expect(group).toBeInTheDocument()
+    expect(group).toContainElement(screen.getByRole('button', { name: /Italian/i }))
+  })
 })
