@@ -75,61 +75,44 @@
   max-width: var(--max-w-reading);
   margin-inline: auto;
   padding: var(--space-4);
-  display: flex;
-  flex-direction: column;
-  /* No gap here — like Home's LinkSection `.rowList`, spacing between
-     rows comes from .postLink's own padding-block, not a container
-     gap. .tags' own bottom padding gives the tags row (which sits
-     outside .postLink, unlike LinkSection's plain rows) the matching
-     breathing room before the next divider. */
 }
 
-/* Divider between posts — a pseudo-element rather than a border on the
-   card itself, matching Home's LinkSection `.rowList > li + li::before`
-   exactly (see Home.module.css), so it insets the same 14px as
-   .postLink's own padding-inline instead of running edge-to-edge. */
-.postList > li + li::before {
-  content: '';
-  display: block;
-  height: var(--border-width);
-  margin-inline: 14px;
-  background: var(--color-border);
-}
-
-/* The whole post (date/title/description) is one clickable row, same
-   pattern as Home's LinkSection `a.row` — full-width flex link with a
-   hover background fill and a nudging icon, not just the title text.
-   Tag chips stay outside (they're their own interactive buttons — a
-   button can't nest inside an anchor). */
-.postLink {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-5);
-  width: 100%;
-  padding-block: var(--space-5);
-  padding-inline: 14px;
-  text-decoration: none;
-  color: inherit;
-  border-radius: var(--radius-md);
+/* Matches the design's `.post` exactly: literal clamp-based padding
+   and radius (no tokens land on either value), with a negative
+   inline margin that bleeds the card back out to its own padding —
+   the hover background then spans the full column width instead of
+   sitting inset within it. Also carries `nudgeUpRight` so hovering
+   anywhere in the card (including over the tag chips below, which
+   sit outside .postLink since a button can't nest inside an anchor)
+   nudges .arrowIcon, matching the design's `.post:hover .arrowx`. */
+.postCard {
+  composes: nudgeUpRight from '../../styles/interactions.module.css';
+  padding: clamp(30px, 4vw, 40px) clamp(14px, 2vw, 20px);
+  margin-inline: calc(-1 * clamp(14px, 2vw, 20px));
+  border-radius: 14px;
+  border-block-end: var(--border-width) solid var(--color-border);
   transition: background var(--duration-fast) var(--easing-default);
 }
 
-.postLink:hover {
+.postCard:hover {
   background: var(--color-hover);
 }
 
+.postList > li:last-child .postCard {
+  border-block-end: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .postLink {
+  .postCard {
     transition: none;
   }
 }
 
-/* The row's ↗ icon (Link's own internal span) — accent-colored, matching
-   LinkSection's `.row > span:last-child` exactly. */
-.postLink > span:last-child {
-  font-size: var(--font-size-base);
-  color: var(--color-primary);
+.postLink {
+  composes: focusRing from '../../styles/interactions.module.css';
+  display: block;
+  color: inherit;
+  text-decoration: none;
 }
 
 .meta {
@@ -140,20 +123,46 @@
   margin-block-end: var(--space-3);
 }
 
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
 .postTitle {
-  margin-block: 0;
+  /* Fluid 24-29px/1.18/-0.022em: matches the design's post-title
+     exactly — distinct from Typography's shared heading3 variant
+     (21px fixed/1.08 line-height), which this previously relied on
+     with no override. */
+  font-size: clamp(24px, 3.6vw, 29px);
+  line-height: 1.18;
+  letter-spacing: -0.022em;
+  margin: 0;
+}
+
+.postCard:hover .postTitle {
+  color: var(--color-primary);
+}
+
+.arrowIcon {
+  composes: linkIcon from '../../styles/interactions.module.css';
+  flex-shrink: 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-primary);
 }
 
 .description {
   color: var(--color-text-muted);
   line-height: var(--line-height-relaxed);
   margin-block: var(--space-3) 0;
+  max-width: 60ch;
 }
 
 .tags {
   list-style: none;
   margin: var(--space-5) 0 0;
-  padding: 0 14px var(--space-5);
+  padding: 0;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);

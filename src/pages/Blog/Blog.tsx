@@ -1,9 +1,8 @@
-import Link from '@components/Link'
 import Tag from '@components/Tag'
 import Typography from '@components/Typography'
 import type { FC } from 'react'
 import { useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link as RouterLink, useSearchParams } from 'react-router-dom'
 import { pluralize } from '../../utils/pluralize'
 import styles from './Blog.module.css'
 import { formatDate, posts } from './posts'
@@ -111,25 +110,23 @@ const Blog = () => {
         <ul className={styles.postList}>
           {filteredPosts.map((post) => (
             <li key={post.slug}>
-              <article>
-                <Link
-                  to={`/blog/${post.slug}`}
-                  icon="↗"
-                  nudge="up-right"
-                  className={styles.postLink}
-                >
-                  <span>
-                    <div className={styles.meta}>
-                      <span>{formatDate(post.date)}</span>
-                      <span aria-hidden="true">·</span>
-                      <span>{post.readingTime} min read</span>
-                    </div>
+              <article className={styles.postCard}>
+                <RouterLink to={`/blog/${post.slug}`} className={styles.postLink}>
+                  <div className={styles.meta}>
+                    <span>{formatDate(post.date)}</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{post.readingTime} min read</span>
+                  </div>
+                  <div className={styles.titleRow}>
                     <Typography variant="heading3" as="h2" className={styles.postTitle}>
                       {post.title}
                     </Typography>
-                    <p className={styles.description}>{post.description}</p>
-                  </span>
-                </Link>
+                    <span className={styles.arrowIcon} aria-hidden="true">
+                      ↗
+                    </span>
+                  </div>
+                  <p className={styles.description}>{post.description}</p>
+                </RouterLink>
                 <ul className={styles.tags}>
                   {post.tags.map((tag) => (
                     <li key={tag}>
