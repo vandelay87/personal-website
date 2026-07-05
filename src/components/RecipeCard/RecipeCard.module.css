@@ -113,15 +113,15 @@
   inset: 0;
 }
 
-/* Ring shows on the stretched ::after (the visual click target, which
-   already spans the whole card), not just the small title-text link,
-   so keyboard focus matches what the pointer/click target actually
-   is. Reuses the same tokens as the shared `.focusRing` composable
-   (interactions.module.css) rather than repeating its literal values.
-   A plain compound selector on the focused element's own pseudo-
-   element — not a `:has()` relational selector — so focusing/blurring
-   one card in a grid doesn't trigger ancestor re-evaluation. */
-.titleLink:focus-visible::after {
+/* Ring has to show on .card itself, not the stretched ::after — .card's
+   own `overflow: hidden` (needed to clip the image to its rounded
+   corners) clips a descendant's outline too, so putting the ring on
+   the pseudo-element (tried during a /simplify pass, to avoid :has())
+   silently made it invisible. :has() is the only way to style an
+   ancestor from a descendant's state in plain CSS. Reuses the same
+   tokens as the shared `.focusRing` composable (interactions.module.css)
+   rather than repeating its literal values. */
+.card:has(.titleLink:focus-visible) {
   outline: var(--focus-ring-outline);
   outline-offset: var(--focus-ring-outline-offset);
 }
