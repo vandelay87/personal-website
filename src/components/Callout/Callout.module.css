@@ -53,3 +53,17 @@
 .info .label {
   color: var(--color-primary);
 }
+
+/* Matches the design exactly: inline code inside a callout uses the
+   page background, not the shared prose inline-code background
+   (BlogPost.module.css's `.prose code`) — that background is
+   --color-surface, nearly the same as this box's own tinted-surface
+   background, so it would barely read as a distinct pill. Callout is
+   also used outside blog posts (e.g. RecipeEditor), so this can't
+   reference `.prose` directly across the CSS Modules boundary; the
+   doubled class is a deliberate specificity bump (0,2,1) to reliably
+   beat `.prose code:not(pre code)` (0,1,3) regardless of stylesheet
+   load order, without `!important`. */
+.callout.callout code {
+  background: var(--color-bg);
+}

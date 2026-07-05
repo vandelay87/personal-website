@@ -90,10 +90,15 @@
 }
 
 /* Inline code within running prose text — matches the design exactly.
-   Scoped to `p code` (not a blanket `.prose code`) so it doesn't also
+   `:not(pre code)` (not a blanket `.prose code`) so it doesn't also
    catch CodeBlock's own <pre><code> fenced blocks, which render
-   directly inside .prose too and have their own distinct styling. */
-.prose p code {
+   directly inside .prose too and have their own distinct styling.
+   Was scoped to `p code` specifically, but MDX doesn't wrap a
+   Callout's children in a <p> (it's inline JSX-children content, not
+   a separate markdown block) — that let inline code inside a Callout
+   render with no styling at all. Callout.module.css further
+   overrides just the background for that specific context. */
+.prose code:not(pre code) {
   font-family: var(--font-mono);
   font-size: 0.88em;
   background: var(--color-surface);
