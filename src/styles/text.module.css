@@ -10,7 +10,10 @@
    eyebrow that doubles as the section heading). */
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
+  /* 12px: matches Apps'/Blog's own hero eyebrow exactly; --font-size-xs
+     (11px) is a token tuned for other mono-eyebrow contexts (Tag,
+     Toast, StatusBadge, etc.), not this one. */
+  font-size: 12px;
   letter-spacing: var(--tracking-eyebrow);
   text-transform: uppercase;
   color: var(--color-text-faint);
@@ -18,22 +21,31 @@
 }
 
 /* Page hero/heading/lead — shared layout for the top-of-page intro block
-   used by top-level page components (e.g. Blog, Apps). */
+   used by top-level page components (e.g. Blog, Apps). Bottom padding
+   is deliberately left out — Apps' and Blog's own hero sections want
+   slightly different values there (clamp(40px,6vw,60px) vs
+   clamp(36px,5vw,52px)), set via each page's own `.hero`. */
 .pageHero {
   max-width: var(--max-w-reading);
   margin-inline: auto;
-  padding-block: var(--space-16) var(--space-6);
-  padding-inline: var(--space-4);
+  padding-block-start: clamp(64px, 11vw, 108px);
+  padding-inline: 24px;
 }
 
 .pageHeading {
   font-size: var(--font-display-hero);
   line-height: var(--line-height-tight);
   letter-spacing: var(--tracking-tight);
-  margin: 0 0 var(--space-4);
+  /* 22px: matches Apps'/Blog's own hero heading margin exactly; no
+     spacing token lands on it. */
+  margin: 0 0 22px;
 }
 
 .pageLead {
+  /* Fluid, matching Apps'/Blog's own hero lead exactly — distinct from
+     Typography's shared bodyLarge variant (18px fixed), which this
+     previously relied on with no override. */
+  font-size: clamp(17px, 2.6vw, 19px);
   max-width: var(--max-w-prose);
   color: var(--color-text-muted);
   margin: 0;

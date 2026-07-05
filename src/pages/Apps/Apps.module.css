@@ -1,5 +1,9 @@
 .hero {
   composes: pageHero from '../../styles/text.module.css';
+  /* Matches the design's Apps hero exactly; Blog's own hero wants a
+     slightly different bottom value (see Blog.module.css), which is
+     why this isn't in the shared pageHero composable. */
+  padding-block-end: clamp(40px, 6vw, 60px);
 }
 
 .eyebrow {
@@ -53,7 +57,22 @@
 }
 
 .inProgressText {
-  max-width: var(--max-w-prose);
+  /* 46ch/16px/1.6/muted: matches the design's "In progress" paragraph
+     exactly — distinct from Typography's shared body variant (15px,
+     text color, no measure) and --max-w-prose (54ch), which this
+     previously relied on with no override. */
+  max-width: 46ch;
   margin-inline: auto;
-  margin-block-end: var(--space-4);
+  margin-block-end: 18px;
+  font-size: var(--font-size-md);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+.readBlogLink {
+  /* Matches the design's "Read the blog" link exactly; it was
+     previously unstyled, inheriting the ambient body size/weight/color
+     instead. */
+  font-size: var(--font-size-sm-plus);
+  font-weight: var(--font-weight-semibold);
 }

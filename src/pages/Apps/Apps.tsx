@@ -74,7 +74,13 @@ const Apps: FC = () => {
             More experiments are in the works. If you want to follow along, I
             usually write up the interesting ones on the blog.
           </Typography>
-          <Link to="/blog" icon="→" nudge="right">
+          <Link
+            to="/blog"
+            icon="→"
+            nudge="right"
+            tone="accent"
+            className={styles.readBlogLink}
+          >
             Read the blog
           </Link>
         </aside>
