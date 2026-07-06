@@ -9,10 +9,26 @@
    load order rather than this override. */
 .wrapper .input {
   border-radius: var(--radius-full);
+  /* Input's own .field defaults to --color-field (white) — this search
+     box instead matches the design's own surface/bg swap: a tinted
+     surface at rest, lightening to the page background on focus. */
+  background-color: var(--color-surface);
+  transition: border-color var(--duration-fast) var(--easing-default),
+              background-color var(--duration-fast) var(--easing-default);
+}
+
+.wrapper .input:focus-visible {
+  background-color: var(--color-bg);
 }
 
 .wrapper .input::-webkit-search-cancel-button {
   display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wrapper .input {
+    transition: none;
+  }
 }
 
 .clearButton {
