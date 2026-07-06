@@ -1,11 +1,25 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useLocation, useNavigationType } from 'react-router-dom'
 
 export default function ScrollToTop() {
   const { pathname, hash } = useLocation()
   const navigationType = useNavigationType()
+  const prevPathnameRef = useRef<string | undefined>(undefined)
 
   useEffect(() => {
+    const isInitialMount = prevPathnameRef.current === undefined
+    const pathnameChanged = !isInitialMount && prevPathnameRef.current !== pathname
+    prevPathnameRef.current = pathname
+
+    // A search-param-only change (e.g. a filter chip's ?tag=) re-fires this
+    // effect too — navigationType flips POP -> PUSH on the first such
+    // change and then stays PUSH, so relying on navigationType alone only
+    // catches this on the first occurrence. Skip anything that isn't the
+    // initial mount or an actual route (pathname) change.
+    if (!isInitialMount && !pathnameChanged) {
+      return
+    }
+
     // Only scroll to top on new navigations (link clicks), not back/forward
     if (navigationType !== 'POP') {
       if (hash) {

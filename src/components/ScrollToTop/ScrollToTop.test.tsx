@@ -1,5 +1,5 @@
-import { render } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter, useSearchParams } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import ScrollToTop from './ScrollToTop'
 
@@ -89,6 +89,39 @@ describe('ScrollToTop', () => {
 
     expect(document.querySelector).toHaveBeenCalledWith('#nonexistent')
     expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
+  })
+
+  it('does not scroll to top when only the search string changes on the same route (e.g. a filter chip)', () => {
+    // Mirrors real router behavior: a fresh load starts as POP, and the
+    // first PUSH (e.g. a tag filter click) flips it to PUSH, where it then
+    // stays for subsequent PUSH navigations too.
+    let navType: 'POP' | 'PUSH' = 'POP'
+    mockNavigationType.mockImplementation(() => navType)
+
+    const SetTagButton = () => {
+      const [, setSearchParams] = useSearchParams()
+      return (
+        <button onClick={() => setSearchParams({ tag: 'Italian' })}>
+          set tag
+        </button>
+      )
+    }
+
+    render(
+      <MemoryRouter initialEntries={['/recipes']}>
+        <main id="main" tabIndex={-1} />
+        <SetTagButton />
+        <ScrollToTop />
+      </MemoryRouter>
+    )
+
+    expect(window.scrollTo).not.toHaveBeenCalled()
+
+    navType = 'PUSH'
+    fireEvent.click(screen.getByRole('button', { name: 'set tag' }))
+
+    expect(window.scrollTo).not.toHaveBeenCalled()
+    expect(document.activeElement).not.toBe(document.getElementById('main'))
   })
 
   it('does not scroll to anchor on POP navigation with hash', () => {
