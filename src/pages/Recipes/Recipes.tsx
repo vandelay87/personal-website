@@ -145,10 +145,10 @@ const Recipes: FC = () => {
 
       {filteredRecipes.length === 0 ? (
         <div className={styles.empty}>
-          <Typography variant="bodyLarge">No recipes found</Typography>
-          <Button variant="outline" onClick={handleClearFilters}>
-            Clear filter
-          </Button>
+          <p className={styles.emptyMessage}>Nothing in the kitchen matches that.</p>
+          <button type="button" onClick={handleClearFilters} className={styles.clearLink}>
+            ✕ clear filters
+          </button>
         </div>
       ) : (
         <Grid columns={3}>

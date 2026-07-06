@@ -147,7 +147,7 @@ describe('Recipes page', () => {
     })
   })
 
-  it('shows "No recipes found" with clear button when filter has no matches', async () => {
+  it('shows the no-results message with clear button when filter has no matches', async () => {
     renderRecipes()
 
     await waitFor(() => {
@@ -158,7 +158,7 @@ describe('Recipes page', () => {
     fireEvent.change(searchInput, { target: { value: 'nonexistent dish xyz' } })
 
     await waitFor(() => {
-      expect(screen.getByText(/no recipes found/i)).toBeInTheDocument()
+      expect(screen.getByText(/nothing in the kitchen matches that/i)).toBeInTheDocument()
     })
 
     expect(screen.getByRole('button', { name: /clear filter/i })).toBeInTheDocument()
@@ -208,7 +208,7 @@ describe('Recipes page', () => {
       expect(await axe(container)).toHaveNoViolations()
     })
 
-    it('renders the "no recipes found" empty state with no detectable axe violations', async () => {
+    it('renders the no-results empty state with no detectable axe violations', async () => {
       const { container } = renderRecipes()
 
       await waitFor(() => {
@@ -219,7 +219,7 @@ describe('Recipes page', () => {
       fireEvent.change(searchInput, { target: { value: 'nonexistent dish xyz' } })
 
       await waitFor(() => {
-        expect(screen.getByText(/no recipes found/i)).toBeInTheDocument()
+        expect(screen.getByText(/nothing in the kitchen matches that/i)).toBeInTheDocument()
       })
 
       expect(await axe(container)).toHaveNoViolations()

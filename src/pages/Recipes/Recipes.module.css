@@ -37,3 +37,34 @@
   text-align: center;
   padding: var(--space-12) 0;
 }
+
+/* Matches the design's noResults message exactly: mono, 13px, muted —
+   distinct from Typography's shared bodyLarge variant (sans-serif,
+   full-contrast text), which this previously relied on with no override. */
+.emptyMessage {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+}
+
+.clearLink {
+  composes: focusRing chipHover from '../../styles/interactions.module.css';
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--tracking-meta);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-default),
+              border-color var(--duration-fast) var(--easing-default);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clearLink {
+    transition: none;
+  }
+}
