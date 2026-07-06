@@ -59,6 +59,8 @@ const Recipes: FC = () => {
     }
   }
 
+  const handleClearTag = () => setSearchParams({})
+
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query)
   }, [])
@@ -138,6 +140,7 @@ const Recipes: FC = () => {
         tags={tags}
         activeTag={activeTag}
         onTagClick={handleTagClick}
+        onClear={handleClearTag}
       />
 
       {filteredRecipes.length === 0 ? (
