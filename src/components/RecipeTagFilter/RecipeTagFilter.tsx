@@ -1,4 +1,4 @@
-import Button from '@components/Button'
+import TagChip from '@components/Tag'
 import type { Tag } from '@models/recipe'
 import type { FC } from 'react'
 import styles from './RecipeTagFilter.module.css'
@@ -13,15 +13,14 @@ const RecipeTagFilter: FC<RecipeTagFilterProps> = ({ tags, activeTag, onTagClick
   return (
     <div className={styles.wrapper} role="group" aria-label="Filter by tag">
       {tags.map(({ tag, count }) => (
-        <Button
+        <TagChip
           key={tag}
-          variant="outline"
-          className={styles.tag}
-          ariaPressed={activeTag === tag ? 'true' : 'false'}
+          as="button"
+          active={activeTag === tag}
           onClick={() => onTagClick(tag)}
         >
           {tag} ({count})
-        </Button>
+        </TagChip>
       ))}
     </div>
   )

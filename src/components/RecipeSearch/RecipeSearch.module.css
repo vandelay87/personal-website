@@ -1,24 +1,39 @@
 .wrapper {
+  max-width: 420px;
   margin-block-end: var(--space-6);
 }
 
 .input {
-  width: 100%;
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--font-size-base);
-  font-family: var(--font-sans);
-  color: var(--color-text);
-  background: var(--color-surface);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-full);
 }
 
-.input::placeholder {
+.input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.clearButton {
+  composes: focusRing from '../../styles/interactions.module.css';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
   color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-default),
+              background var(--duration-fast) var(--easing-default);
 }
 
-.input:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-  outline-offset: 2px;
+.clearButton:hover {
+  color: var(--color-primary);
+  background: var(--color-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clearButton {
+    transition: none;
+  }
 }

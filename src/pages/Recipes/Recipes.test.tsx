@@ -161,7 +161,7 @@ describe('Recipes page', () => {
       expect(screen.getByText(/no recipes found/i)).toBeInTheDocument()
     })
 
-    expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /clear filter/i })).toBeInTheDocument()
   })
 
   it('shows "Recipes coming soon" when no recipes exist', async () => {
