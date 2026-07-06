@@ -153,7 +153,7 @@ const Recipes: FC = () => {
       ) : (
         <Grid columns={3}>
           {filteredRecipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
+            <RecipeCard key={recipe.id} recipe={recipe} hideTags />
           ))}
         </Grid>
       )}
