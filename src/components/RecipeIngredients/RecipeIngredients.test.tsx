@@ -1,6 +1,6 @@
 import type { Ingredient } from '@models/recipe'
 import { render, screen, fireEvent, cleanup } from '@testing-library/react'
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import RecipeIngredients from './RecipeIngredients'
 
 const mockIngredients: Ingredient[] = [
@@ -33,10 +33,12 @@ describe('RecipeIngredients', () => {
 })
 
 // Checked state is persisted to localStorage under the key
-// `recipe-ingredients:${slug}`, whose value is a JSON array of checked
-// ingredient keys. Each ingredient key matches the list's existing React key
-// scheme (`${item}-${idx}`) so the same identifier can be reused for both
-// the DOM key and the persistence key.
+// `recipe-ingredients:${slug}`, whose value is `{ checked: string[], expiresAt: number }`.
+// Each ingredient key matches the list's existing React key scheme
+// (`${item}-${idx}`) so the same identifier can be reused for both the DOM
+// key and the persistence key. `expiresAt` (now + 7 days, recomputed on
+// every write) treats the checklist as a single cooking session rather
+// than a durable preference — a stale entry reads back as unchecked.
 describe('RecipeIngredients checkboxes', () => {
   beforeEach(() => {
     localStorage.clear()
@@ -75,7 +77,9 @@ describe('RecipeIngredients checkboxes', () => {
 
     const stored = localStorage.getItem('recipe-ingredients:spaghetti-bolognese')
     expect(stored).not.toBeNull()
-    expect(JSON.parse(stored as string)).toContain('flour-0')
+    const parsed = JSON.parse(stored as string)
+    expect(parsed.checked).toContain('flour-0')
+    expect(parsed.expiresAt).toBeGreaterThan(Date.now())
   })
 
   it('restores checked state from localStorage when remounted with the same slug', () => {
@@ -107,6 +111,42 @@ describe('RecipeIngredients checkboxes', () => {
     expect(
       localStorage.getItem('recipe-ingredients:thai-green-curry')
     ).toBeNull()
+  })
+
+  it('treats checked state older than 7 days as expired', () => {
+    const { unmount } = render(
+      <RecipeIngredients ingredients={mockIngredients} slug="spaghetti-bolognese" />
+    )
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'flour 200 g' }))
+    unmount()
+
+    vi.useFakeTimers()
+    vi.advanceTimersByTime(7 * 24 * 60 * 60 * 1000 + 1)
+
+    render(<RecipeIngredients ingredients={mockIngredients} slug="spaghetti-bolognese" />)
+
+    expect(screen.getByRole('checkbox', { name: 'flour 200 g' })).not.toBeChecked()
+
+    vi.useRealTimers()
+  })
+
+  it('keeps checked state that has not yet expired', () => {
+    const { unmount } = render(
+      <RecipeIngredients ingredients={mockIngredients} slug="spaghetti-bolognese" />
+    )
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'flour 200 g' }))
+    unmount()
+
+    vi.useFakeTimers()
+    vi.advanceTimersByTime(7 * 24 * 60 * 60 * 1000 - 1)
+
+    render(<RecipeIngredients ingredients={mockIngredients} slug="spaghetti-bolognese" />)
+
+    expect(screen.getByRole('checkbox', { name: 'flour 200 g' })).toBeChecked()
+
+    vi.useRealTimers()
   })
 
   it('does not bleed checked state when the slug prop changes on the same instance (client-side navigation, no unmount)', () => {
