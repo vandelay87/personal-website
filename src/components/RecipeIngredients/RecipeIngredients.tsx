@@ -37,10 +37,11 @@ const loadChecked = (slug?: string): Set<string> => {
     const raw = localStorage.getItem(storageKey(slug))
     if (!raw) return new Set()
     const parsed = JSON.parse(raw) as Partial<StoredIngredientsState>
-    if (!Array.isArray(parsed.checked) || typeof parsed.expiresAt !== 'number') {
-      return new Set()
-    }
-    if (Date.now() > parsed.expiresAt) {
+    if (
+      !Array.isArray(parsed.checked) ||
+      typeof parsed.expiresAt !== 'number' ||
+      Date.now() > parsed.expiresAt
+    ) {
       return new Set()
     }
     return new Set(parsed.checked)

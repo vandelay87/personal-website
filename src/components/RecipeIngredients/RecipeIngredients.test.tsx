@@ -113,7 +113,10 @@ describe('RecipeIngredients checkboxes', () => {
     ).toBeNull()
   })
 
-  it('treats checked state older than 7 days as expired', () => {
+  it.each<[string, number, boolean]>([
+    ['treats checked state older than 7 days as expired', 7 * 24 * 60 * 60 * 1000 + 1, false],
+    ['keeps checked state that has not yet expired', 7 * 24 * 60 * 60 * 1000 - 1, true],
+  ])('%s', (_label, elapsedMs, expectStillChecked) => {
     const { unmount } = render(
       <RecipeIngredients ingredients={mockIngredients} slug="spaghetti-bolognese" />
     )
@@ -122,29 +125,15 @@ describe('RecipeIngredients checkboxes', () => {
     unmount()
 
     vi.useFakeTimers()
-    vi.advanceTimersByTime(7 * 24 * 60 * 60 * 1000 + 1)
+    vi.advanceTimersByTime(elapsedMs)
 
     render(<RecipeIngredients ingredients={mockIngredients} slug="spaghetti-bolognese" />)
 
-    expect(screen.getByRole('checkbox', { name: 'flour 200 g' })).not.toBeChecked()
-
-    vi.useRealTimers()
-  })
-
-  it('keeps checked state that has not yet expired', () => {
-    const { unmount } = render(
-      <RecipeIngredients ingredients={mockIngredients} slug="spaghetti-bolognese" />
-    )
-
-    fireEvent.click(screen.getByRole('checkbox', { name: 'flour 200 g' }))
-    unmount()
-
-    vi.useFakeTimers()
-    vi.advanceTimersByTime(7 * 24 * 60 * 60 * 1000 - 1)
-
-    render(<RecipeIngredients ingredients={mockIngredients} slug="spaghetti-bolognese" />)
-
-    expect(screen.getByRole('checkbox', { name: 'flour 200 g' })).toBeChecked()
+    if (expectStillChecked) {
+      expect(screen.getByRole('checkbox', { name: 'flour 200 g' })).toBeChecked()
+    } else {
+      expect(screen.getByRole('checkbox', { name: 'flour 200 g' })).not.toBeChecked()
+    }
 
     vi.useRealTimers()
   })
