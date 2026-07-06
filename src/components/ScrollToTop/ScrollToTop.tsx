@@ -1,25 +1,11 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { useLocation, useNavigationType } from 'react-router-dom'
 
 export default function ScrollToTop() {
   const { pathname, hash } = useLocation()
   const navigationType = useNavigationType()
-  const prevPathnameRef = useRef<string | undefined>(undefined)
 
   useEffect(() => {
-    const isInitialMount = prevPathnameRef.current === undefined
-    const pathnameChanged = !isInitialMount && prevPathnameRef.current !== pathname
-    prevPathnameRef.current = pathname
-
-    // A search-param-only change (e.g. a filter chip's ?tag=) re-fires this
-    // effect too — navigationType flips POP -> PUSH on the first such
-    // change and then stays PUSH, so relying on navigationType alone only
-    // catches this on the first occurrence. Skip anything that isn't the
-    // initial mount or an actual route (pathname) change.
-    if (!isInitialMount && !pathnameChanged) {
-      return
-    }
-
     // Only scroll to top on new navigations (link clicks), not back/forward
     if (navigationType !== 'POP') {
       if (hash) {
@@ -45,7 +31,15 @@ export default function ScrollToTop() {
       // focus target. preventScroll avoids fighting the scrollTo above.
       document.getElementById('main')?.focus({ preventScroll: true })
     }
-  }, [pathname, hash, navigationType])
+    // navigationType is read above but deliberately left out of these deps —
+    // it's consulted, not reacted to. A search-param-only change (e.g. a
+    // filter chip's ?tag=) doesn't touch pathname/hash, so this effect
+    // correctly won't re-run for it; but navigationType itself still flips
+    // POP -> PUSH on that first such change, and if it were a dependency
+    // this effect would spuriously re-run (and scroll to top) for that one
+    // change alone, even though neither pathname nor hash actually changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, hash])
 
   return null
 }
