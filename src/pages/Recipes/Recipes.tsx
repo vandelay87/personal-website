@@ -9,6 +9,7 @@ import Typography from '@components/Typography'
 import type { RecipeIndex, Tag } from '@models/recipe'
 import { useState, useEffect, useCallback, useMemo, type FC, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { pluralize } from '../../utils/pluralize'
 import styles from './Recipes.module.css'
 
 const RecipesHero: FC<{ children?: ReactNode }> = ({ children }) => (
@@ -126,17 +127,18 @@ const Recipes: FC = () => {
         </Typography>
       </RecipesHero>
 
+      <div className={styles.countRow}>
+        <span role="status" aria-live="polite">
+          {pluralize(filteredRecipes.length, 'recipe')}
+        </span>
+      </div>
+
       <RecipeSearch value={searchQuery} onSearch={handleSearch} />
       <RecipeTagFilter
         tags={tags}
         activeTag={activeTag}
         onTagClick={handleTagClick}
       />
-
-      <div role="status" aria-live="polite" className={styles.srOnly}>
-        {filteredRecipes.length}{' '}
-        {filteredRecipes.length === 1 ? 'recipe' : 'recipes'} found
-      </div>
 
       {filteredRecipes.length === 0 ? (
         <div className={styles.empty}>
