@@ -5,14 +5,15 @@ import Loading from '@components/Loading'
 import RecipeCard from '@components/RecipeCard'
 import RecipeSearch from '@components/RecipeSearch'
 import RecipeTagFilter from '@components/RecipeTagFilter'
+import Tag from '@components/Tag'
 import Typography from '@components/Typography'
-import type { RecipeIndex, Tag } from '@models/recipe'
+import type { RecipeIndex, Tag as TagModel } from '@models/recipe'
 import { useState, useEffect, useCallback, useMemo, type FC, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { pluralize } from '../../utils/pluralize'
 import styles from './Recipes.module.css'
 
-const RecipesHero: FC<{ children?: ReactNode }> = ({ children }) => (
+const RecipesHero: FC<{ intro?: ReactNode }> = ({ intro }) => (
   <section className={styles.hero}>
     <Typography variant="caption" as="p" className={styles.eyebrow}>
       From the Kitchen
@@ -20,7 +21,11 @@ const RecipesHero: FC<{ children?: ReactNode }> = ({ children }) => (
     <Typography variant="heading1" className={styles.heading}>
       Things I keep coming back to.
     </Typography>
-    {children}
+    {intro && (
+      <Typography variant="bodyLarge" className={styles.intro}>
+        {intro}
+      </Typography>
+    )}
   </section>
 )
 
@@ -29,7 +34,7 @@ const Recipes: FC = () => {
   const activeTag = searchParams.get('tag')
 
   const [recipes, setRecipes] = useState<RecipeIndex[] | null>(null)
-  const [tags, setTags] = useState<Tag[]>([])
+  const [tags, setTags] = useState<TagModel[]>([])
   const [error, setError] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -110,24 +115,20 @@ const Recipes: FC = () => {
   }
 
   if (recipes !== null && recipes.length === 0) {
-    return (
-      <RecipesHero>
-        <Typography variant="bodyLarge" className={styles.intro}>
-          Recipes coming soon.
-        </Typography>
-      </RecipesHero>
-    )
+    return <RecipesHero intro="Recipes coming soon." />
   }
 
   return (
     <div className={styles.page}>
-      <RecipesHero>
-        <Typography variant="bodyLarge" className={styles.intro}>
-          A small, growing collection of recipes I cook on repeat — written
-          down so they&apos;re easy to make again. Tried, refined, and worth
-          the effort.
-        </Typography>
-      </RecipesHero>
+      <RecipesHero
+        intro={
+          <>
+            A small, growing collection of recipes I cook on repeat — written
+            down so they&apos;re easy to make again. Tried, refined, and worth
+            the effort.
+          </>
+        }
+      />
 
       <div className={styles.countRow}>
         <span role="status" aria-live="polite">
@@ -146,9 +147,9 @@ const Recipes: FC = () => {
       {filteredRecipes.length === 0 ? (
         <div className={styles.empty}>
           <p className={styles.emptyMessage}>Nothing in the kitchen matches that.</p>
-          <button type="button" onClick={handleClearFilters} className={styles.clearLink}>
+          <Tag as="button" onClick={handleClearFilters}>
             ✕ clear filters
-          </button>
+          </Tag>
         </div>
       ) : (
         <Grid columns={3}>

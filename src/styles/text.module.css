@@ -56,6 +56,18 @@
   margin: 0;
 }
 
+/* Mono, muted, small — "no results" empty-state message text, matching the
+   design's noResults message exactly. Distinct from Typography's shared
+   bodyLarge variant (sans-serif, full-contrast text), which pages
+   previously relied on with no override. Margin is each consumer's own —
+   Blog's and Recipes' empty states each want a slightly different value. */
+.emptyStateMessage {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
 /* Mono, tracked, faint meta text — used for byline/count-row style labels
    (e.g. post date/reading time, item counts). */
 .metaText {

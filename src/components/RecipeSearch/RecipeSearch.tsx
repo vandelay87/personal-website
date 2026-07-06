@@ -7,7 +7,7 @@ export interface RecipeSearchProps {
   onSearch: (query: string) => void
 }
 
-const SearchIcon: FC = () => (
+const searchIcon = (
   <svg
     width="16"
     height="16"
@@ -46,20 +46,18 @@ const RecipeSearch: FC<RecipeSearchProps> = ({ value: controlledValue, onSearch 
         value={value}
         onChange={(e) => setValue(e.target.value)}
         className={styles.input}
-        prefixIcon={<SearchIcon />}
+        prefixIcon={searchIcon}
         suffix={
-          value
-            ? (
-              <button
-                type="button"
-                className={styles.clearButton}
-                aria-label="Clear search"
-                onClick={() => setValue('')}
-              >
-                <span aria-hidden="true">✕</span>
-              </button>
-            )
-            : undefined
+          value && (
+            <button
+              type="button"
+              className={styles.clearButton}
+              aria-label="Clear search"
+              onClick={() => setValue('')}
+            >
+              <span aria-hidden="true">✕</span>
+            </button>
+          )
         }
       />
     </form>

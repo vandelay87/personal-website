@@ -1,34 +1,17 @@
 .wrapper {
   max-width: 420px;
   margin-block-end: var(--space-6);
-}
-
-/* Descendant selector (not a bare `.input` class rule) deliberately raises
-   specificity above Input's own `.field` — `.input` alone ties with `.field`
-   (both single-class selectors), leaving the winner dependent on stylesheet
-   load order rather than this override. */
-.wrapper .input {
-  border-radius: var(--radius-full);
   /* Input's own .field defaults to --color-field (white) — this search
      box instead matches the design's own surface/bg swap: a tinted
-     surface at rest, lightening to the page background on focus. */
-  background-color: var(--color-surface);
-  transition: border-color var(--duration-fast) var(--easing-default),
-              background-color var(--duration-fast) var(--easing-default);
+     surface at rest, lightening to the page background on focus. These
+     inherit down to Input's internal .field element (see Input.module.css). */
+  --input-bg: var(--color-surface);
+  --input-bg-focus: var(--color-bg);
+  --input-radius: var(--radius-full);
 }
 
-.wrapper .input:focus-visible {
-  background-color: var(--color-bg);
-}
-
-.wrapper .input::-webkit-search-cancel-button {
+.input::-webkit-search-cancel-button {
   display: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .wrapper .input {
-    transition: none;
-  }
 }
 
 .clearButton {
