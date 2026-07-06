@@ -7,9 +7,21 @@ import RecipeSearch from '@components/RecipeSearch'
 import RecipeTagFilter from '@components/RecipeTagFilter'
 import Typography from '@components/Typography'
 import type { RecipeIndex, Tag } from '@models/recipe'
-import { useState, useEffect, useCallback, useMemo, type FC } from 'react'
+import { useState, useEffect, useCallback, useMemo, type FC, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import styles from './Recipes.module.css'
+
+const RecipesHero: FC<{ children?: ReactNode }> = ({ children }) => (
+  <section className={styles.hero}>
+    <Typography variant="caption" as="p" className={styles.eyebrow}>
+      From the Kitchen
+    </Typography>
+    <Typography variant="heading1" className={styles.heading}>
+      Things I keep coming back to.
+    </Typography>
+    {children}
+  </section>
+)
 
 const Recipes: FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -70,9 +82,7 @@ const Recipes: FC = () => {
   if (recipes === null && !error) {
     return (
       <>
-        <Typography variant="heading1" className={styles.heading}>
-          Recipes
-        </Typography>
+        <RecipesHero />
         <div className={styles.loadingWrapper}>
           <Loading />
         </div>
@@ -83,9 +93,7 @@ const Recipes: FC = () => {
   if (error) {
     return (
       <>
-        <Typography variant="heading1" className={styles.heading}>
-          Recipes
-        </Typography>
+        <RecipesHero />
         <div className={styles.empty}>
           <Typography variant="bodyLarge">
             Something went wrong loading recipes.
@@ -100,23 +108,23 @@ const Recipes: FC = () => {
 
   if (recipes !== null && recipes.length === 0) {
     return (
-      <>
-        <Typography variant="heading1" className={styles.heading}>
-          Recipes
+      <RecipesHero>
+        <Typography variant="bodyLarge" className={styles.intro}>
+          Recipes coming soon.
         </Typography>
-        <Typography variant="bodyLarge">Recipes coming soon</Typography>
-      </>
+      </RecipesHero>
     )
   }
 
   return (
     <div className={styles.page}>
-      <Typography variant="heading1" className={styles.heading}>
-        Recipes
-      </Typography>
-      <Typography variant="bodyLarge" className={styles.intro}>
-        A collection of tried-and-tested recipes from my kitchen.
-      </Typography>
+      <RecipesHero>
+        <Typography variant="bodyLarge" className={styles.intro}>
+          A small, growing collection of recipes I cook on repeat — written
+          down so they&apos;re easy to make again. Tried, refined, and worth
+          the effort.
+        </Typography>
+      </RecipesHero>
 
       <RecipeSearch value={searchQuery} onSearch={handleSearch} />
       <RecipeTagFilter

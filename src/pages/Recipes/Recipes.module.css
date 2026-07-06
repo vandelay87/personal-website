@@ -2,12 +2,21 @@
   padding-block-end: var(--space-12);
 }
 
+.hero {
+  composes: pageHero from '../../styles/text.module.css';
+  --page-hero-pad-end: clamp(36px, 5vw, 52px);
+}
+
+.eyebrow {
+  composes: eyebrow from '../../styles/text.module.css';
+}
+
 .heading {
-  margin-block-end: var(--space-2);
+  composes: pageHeading from '../../styles/text.module.css';
 }
 
 .intro {
-  margin-block-end: var(--space-8);
+  composes: pageLead from '../../styles/text.module.css';
 }
 
 .loadingWrapper {
