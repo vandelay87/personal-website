@@ -59,14 +59,17 @@ const RecipeIngredients: FC<RecipeIngredientsProps> = ({ ingredients, slug }) =>
         const key = `${ingredient.item}-${idx}`
         return (
           <li key={key} className={styles.item}>
-            <label className={styles.label}>
+            <label className={styles.row}>
               <input
                 type="checkbox"
                 className={styles.checkbox}
                 checked={checked.has(key)}
                 onChange={() => toggle(key)}
               />
-              {ingredient.quantity} {ingredient.unit} {ingredient.item}
+              <span className={styles.name}>{ingredient.item}</span>
+              <span className={styles.qty}>
+                {ingredient.quantity} {ingredient.unit}
+              </span>
             </label>
           </li>
         )

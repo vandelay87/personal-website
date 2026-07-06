@@ -2,33 +2,81 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
 }
 
-.item {
-  padding: var(--space-2) 0;
-  border-bottom: 1px solid var(--color-border);
+.item:not(:first-child) {
+  border-top: var(--border-width) solid var(--color-border);
 }
 
-.label {
+.row {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 13px;
+  width: 100%;
+  padding: 11px 4px;
   cursor: pointer;
 }
 
 .checkbox {
-  width: var(--space-4);
-  height: var(--space-4);
-  accent-color: var(--color-primary);
+  composes: focusRing from '../../styles/interactions.module.css';
+  appearance: none;
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 5px;
+  cursor: pointer;
+  position: relative;
+  transition: background var(--duration-fast) var(--easing-default),
+              border-color var(--duration-fast) var(--easing-default);
 }
 
-.quantity {
-  font-weight: var(--font-weight-bold);
+.checkbox:checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
-.unit {
+.checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Fixed white, not --color-on-primary — same rationale as Tag's own
+     .active state (design hardcodes #fff on the accent fill regardless
+     of theme). */
+  color: #fff;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.name {
+  flex: 1;
+  font-size: 15px;
+  color: var(--color-text-strong);
+  line-height: 1.35;
+}
+
+.checkbox:checked ~ .name {
+  text-decoration: line-through;
+  color: var(--color-text-faint);
+}
+
+.qty {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
+}
+
+.checkbox:checked ~ .qty {
+  color: var(--color-text-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkbox {
+    transition: none;
+  }
 }

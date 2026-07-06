@@ -13,18 +13,23 @@ export interface RecipeStepsProps {
 
 const RecipeSteps: FC<RecipeStepsProps> = ({ steps, slug }) => (
   <ol className={styles.list}>
-    {steps.map((step) => (
+    {steps.map((step, idx) => (
       <li key={step.stepId} className={styles.item}>
-        <Typography variant="body" className={styles.text}>{step.text}</Typography>
-        {step.image && (step.image.processedAt ? (
-          <Image
-            src={recipeImageUrl(slug, stepImageType(step.stepId), 'medium')}
-            alt={step.image.alt}
-            className={styles.image}
-          />
-        ) : (
-          <ProcessingPlaceholder aspectRatio="4/3" className={styles.image} />
-        ))}
+        <span className={styles.number} aria-hidden="true">
+          {idx + 1}
+        </span>
+        <div className={styles.content}>
+          <Typography variant="body" className={styles.text}>{step.text}</Typography>
+          {step.image && (step.image.processedAt ? (
+            <Image
+              src={recipeImageUrl(slug, stepImageType(step.stepId), 'medium')}
+              alt={step.image.alt}
+              className={styles.image}
+            />
+          ) : (
+            <ProcessingPlaceholder aspectRatio="4/3" className={styles.image} />
+          ))}
+        </div>
       </li>
     ))}
   </ol>
