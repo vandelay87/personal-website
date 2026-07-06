@@ -3,11 +3,15 @@
   margin-block-end: var(--space-6);
 }
 
-.input {
+/* Descendant selector (not a bare `.input` class rule) deliberately raises
+   specificity above Input's own `.field` — `.input` alone ties with `.field`
+   (both single-class selectors), leaving the winner dependent on stylesheet
+   load order rather than this override. */
+.wrapper .input {
   border-radius: var(--radius-full);
 }
 
-.input::-webkit-search-cancel-button {
+.wrapper .input::-webkit-search-cancel-button {
   display: none;
 }
 
