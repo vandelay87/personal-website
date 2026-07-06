@@ -24,6 +24,11 @@
   display: flex;
   align-items: baseline;
   gap: var(--space-3);
+  /* The design's content section (below the hero) has its own non-zero
+     top padding, clamp(12px,3vw,28px) — unlike Blog's equivalent section,
+     which uses 0. Without it, the gap below the hero is just the hero's
+     own bottom padding, short of the design. */
+  margin-block-start: clamp(12px, 3vw, 28px);
   margin-block-end: var(--space-5);
 }
 
