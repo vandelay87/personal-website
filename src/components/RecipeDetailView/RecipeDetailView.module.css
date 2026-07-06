@@ -31,7 +31,10 @@
   max-width: var(--max-w-article);
 }
 
-.title {
+/* .header .title (not a bare `.title` rule): raises specificity above
+   Typography's own `.heading1` (font-size/line-height/color) — see the
+   `.header .intro` comment below for why a bare class ties with it. */
+.header .title {
   font-size: clamp(32px, 5.4vw, 46px);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
@@ -78,7 +81,13 @@
   }
 }
 
-.intro {
+/* Descendant selector (not a bare `.intro` class rule) deliberately raises
+   specificity above Typography's own `.bodyLarge` (font-size/line-height/
+   color) — a bare `.intro` ties with `.bodyLarge` (both single-class
+   selectors on the same element), leaving the winner dependent on
+   stylesheet load order rather than this override. Same root cause fixed
+   on Input's `.field` earlier — see RecipeSearch.module.css. */
+.header .intro {
   font-size: clamp(17px, 2.6vw, 19px);
   line-height: 1.7;
   color: var(--color-text);
@@ -125,7 +134,9 @@
   margin-block-end: 6px;
 }
 
-.ingredientsHeading {
+/* .ingredientsPanel .ingredientsHeading (not bare): raises specificity
+   above Typography's own `.heading2`. */
+.ingredientsPanel .ingredientsHeading {
   font-size: 18px;
   font-weight: var(--font-weight-semibold);
   letter-spacing: -0.01em;
@@ -145,7 +156,9 @@
   margin: 0 0 var(--space-3);
 }
 
-.methodHeading {
+/* .grid .methodHeading (not bare): raises specificity above Typography's
+   own `.heading2`. */
+.grid .methodHeading {
   font-size: clamp(22px, 3vw, 26px);
   font-weight: var(--font-weight-semibold);
   letter-spacing: var(--tracking-snug);

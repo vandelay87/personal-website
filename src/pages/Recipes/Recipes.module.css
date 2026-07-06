@@ -19,6 +19,29 @@
   composes: pageLead from '../../styles/text.module.css';
 }
 
+/* `composes` can't be combined with a descendant selector (CSS Modules
+   only allows it on a plain single-class rule), so the properties that
+   tie with Typography's own variant classes (`.caption`/`.heading1`/
+   `.bodyLarge` each set their own font-size/color) need a separate,
+   higher-specificity rule here rather than living inside the `composes`
+   blocks above — a bare `.eyebrow`/`.heading`/`.intro` class ties with
+   those variants (both single-class selectors on the same element),
+   leaving the winner dependent on stylesheet load order. Same root cause
+   fixed on Input's `.field` and RecipeDetailView's headings earlier. */
+.hero .eyebrow {
+  font-size: 12px;
+  color: var(--color-text-faint);
+}
+
+.hero .heading {
+  font-size: var(--font-display-hero);
+}
+
+.hero .intro {
+  font-size: clamp(17px, 2.6vw, 19px);
+  color: var(--color-text-muted);
+}
+
 .countRow {
   composes: metaText dividerFill from '../../styles/text.module.css';
   display: flex;
