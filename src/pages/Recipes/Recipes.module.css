@@ -2,12 +2,34 @@
   padding-block-end: var(--space-12);
 }
 
+.hero {
+  composes: pageHero from '../../styles/text.module.css';
+  --page-hero-pad-end: clamp(36px, 5vw, 52px);
+}
+
+.eyebrow {
+  composes: eyebrow from '../../styles/text.module.css';
+}
+
 .heading {
-  margin-block-end: var(--space-2);
+  composes: pageHeading from '../../styles/text.module.css';
 }
 
 .intro {
-  margin-block-end: var(--space-8);
+  composes: pageLead from '../../styles/text.module.css';
+}
+
+.countRow {
+  composes: metaText dividerFill from '../../styles/text.module.css';
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  /* The design's content section (below the hero) has its own non-zero
+     top padding, clamp(12px,3vw,28px) — unlike Blog's equivalent section,
+     which uses 0. Without it, the gap below the hero is just the hero's
+     own bottom padding, short of the design. */
+  margin-block-start: clamp(12px, 3vw, 28px);
+  margin-block-end: var(--space-5);
 }
 
 .loadingWrapper {
@@ -21,14 +43,7 @@
   padding: var(--space-12) 0;
 }
 
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+.emptyMessage {
+  composes: emptyStateMessage from '../../styles/text.module.css';
+  margin-block-end: var(--space-3);
 }

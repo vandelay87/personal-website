@@ -31,7 +31,15 @@ export default function ScrollToTop() {
       // focus target. preventScroll avoids fighting the scrollTo above.
       document.getElementById('main')?.focus({ preventScroll: true })
     }
-  }, [pathname, hash, navigationType])
+    // navigationType is read above but deliberately left out of these deps —
+    // it's consulted, not reacted to. A search-param-only change (e.g. a
+    // filter chip's ?tag=) doesn't touch pathname/hash, so this effect
+    // correctly won't re-run for it; but navigationType itself still flips
+    // POP -> PUSH on that first such change, and if it were a dependency
+    // this effect would spuriously re-run (and scroll to top) for that one
+    // change alone, even though neither pathname nor hash actually changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, hash])
 
   return null
 }
