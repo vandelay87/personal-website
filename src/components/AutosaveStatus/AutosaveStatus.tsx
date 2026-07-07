@@ -20,22 +20,52 @@ const formatRelativeTime = (date: Date, now: Date): string => {
   return `${Math.floor(diffSeconds / 86_400)}d ago`
 }
 
-const cx = (...classNames: Array<string | false | undefined>): string =>
-  classNames.filter(Boolean).join(' ')
-
 const TRANSITION_TEXT: Record<AutosaveStatusValue, string> = {
   idle: '',
   saving: 'Saving…',
   saved: 'Saved',
-  error: 'Failed to save',
+  error: "Couldn't save",
 }
 
-const ICON_CLASS: Record<AutosaveStatusValue, string | undefined> = {
-  idle: undefined,
-  saving: styles.iconSaving,
-  saved: styles.iconSaved,
-  error: styles.iconError,
-}
+// Hoisted elements, not components — these never take props, so there's no
+// need to re-invoke a function (and rebuild the tree) on every render; see
+// `iconRetry` in src/pages/admin/RecipeList/RecipeList.tsx for the same
+// established pattern.
+//
+// Design: docs/design/paper/pages/Admin Recipe Editor.dc.html's rail
+// autosave-indicator markup (checkmark polyline, 15x15, stroke-width 2.4).
+const iconCheck = (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2.4}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+)
+
+// Design: same markup's error icon (circle + exclamation, 15x15, stroke-width 2).
+const iconWarning = (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+)
 
 const AutosaveStatus: FC<AutosaveStatusProps> = ({ status, lastSavedAt, onRetry }) => {
   const [now, setNow] = useState<number>(() => Date.now())
@@ -54,21 +84,28 @@ const AutosaveStatus: FC<AutosaveStatusProps> = ({ status, lastSavedAt, onRetry 
 
   const ariaLive = status === 'error' ? 'assertive' : 'polite'
   const transitionText = TRANSITION_TEXT[status]
-  const iconClass = ICON_CLASS[status]
 
   return (
     <span className={styles.container}>
       <span role="status" aria-live={ariaLive} className={styles.liveRegion}>
-        {status !== 'idle' && (
-          <>
-            <span aria-hidden="true" className={cx(styles.icon, iconClass)} />
-            <span className={styles.text}>{transitionText}</span>
-          </>
+        {status === 'saving' && (
+          <span aria-hidden="true" className={styles.spinner} />
         )}
+        {status === 'saved' && (
+          <span aria-hidden="true" className={styles.iconSaved}>
+            {iconCheck}
+          </span>
+        )}
+        {status === 'error' && (
+          <span aria-hidden="true" className={styles.iconError}>
+            {iconWarning}
+          </span>
+        )}
+        {status !== 'idle' && <span className={styles.text}>{transitionText}</span>}
       </span>
       {status === 'saved' && lastSavedAt !== null && (
         <span aria-hidden="true" className={styles.relativeTime}>
-          {`· ${formatRelativeTime(lastSavedAt, new Date(now))}`}
+          {formatRelativeTime(lastSavedAt, new Date(now))}
         </span>
       )}
       {status === 'error' && (

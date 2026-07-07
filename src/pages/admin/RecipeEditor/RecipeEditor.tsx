@@ -10,14 +10,15 @@ import {
 } from '@api/recipes'
 import AutosaveStatus from '@components/AutosaveStatus'
 import Button from '@components/Button'
-import Callout from '@components/Callout'
 import ConfirmDialog from '@components/ConfirmDialog'
 import ImageUpload from '@components/ImageUpload'
 import IngredientList from '@components/IngredientList'
 import Link from '@components/Link'
 import Loading from '@components/Loading'
+import StatusBadge from '@components/StatusBadge'
 import StepList from '@components/StepList'
 import TagInput from '@components/TagInput'
+import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import { useToast } from '@contexts/ToastContext'
 import { useAutosave } from '@hooks/useAutosave'
@@ -30,6 +31,7 @@ import type { Ingredient, Recipe, Step, Tag } from '@models/recipe'
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type FC } from 'react'
 import { useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom'
 
+import { pluralize } from '../../../utils/pluralize'
 import styles from './RecipeEditor.module.css'
 
 type EditorMode = Recipe['status']
@@ -228,6 +230,58 @@ const draftFromCreated = (id: string, slug: string): Recipe => ({
 })
 
 const NEW_PATH = '/admin/recipes/new'
+
+const iconAlertCircle = (
+  <svg
+    width="17"
+    height="17"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+)
+
+const iconLock = (
+  <svg
+    width="13"
+    height="13"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <rect x="3" y="11" width="18" height="11" rx="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+)
+
+const iconPreview = (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+)
 
 const RecipeEditor: FC = () => {
   const { id: routeId } = useParams<{ id: string }>()
@@ -520,178 +574,214 @@ const RecipeEditor: FC = () => {
   // typing into a form whose autosave cannot yet PATCH (no id).
   if (loading || (isNewPath && !form.id && !sessionExpired)) {
     return (
-      <div className={styles.loadingWrapper}>
-        <Loading />
+      <div className={styles.container}>
+        <div className={styles.loadingBox}>
+          <Loading label="Loading recipe…" />
+        </div>
       </div>
     )
   }
 
   const loginHref = `/admin/login?redirect=${encodeURIComponent(location.pathname)}`
   const recipeId = form.id || routeId
+  const isPublished = form.mode === 'published'
+  const slugResettable = !slugLocked && form.slugManuallyEdited && sluggify(form.title) !== form.slug
 
   return (
     <div className={styles.container}>
       {sessionExpired && (
         <div className={styles.sessionBanner} role="alert">
-          <span>Session expired — please log in again</span>
-          <Link to={loginHref}>Log in again</Link>
+          <span className={styles.bannerMessage}>
+            <span className={styles.bannerIcon} aria-hidden="true">
+              {iconAlertCircle}
+            </span>
+            <span>Your session has expired. Log in again to keep editing — your latest changes are saved.</span>
+          </span>
+          <Link to={loginHref} className={styles.bannerAction}>
+            Log in again
+          </Link>
         </div>
       )}
 
       {timedOut && (
         <div role="status" aria-live="polite" className={styles.timeoutBanner}>
-          Processing is taking longer than expected — try refreshing the page.
+          <span className={styles.timeoutSpinner} aria-hidden="true" />
+          <span>Processing is taking longer than expected — try refreshing the page.</span>
         </div>
       )}
 
-      <div className={styles.header}>
-        <Link to="/admin/recipes" className={styles.backLink}>
-          ← Back to recipes
-        </Link>
-        <AutosaveStatus
-          status={autosaveStatus}
-          lastSavedAt={lastSavedAt}
-          onRetry={retry}
-        />
+      <Link to="/admin/recipes" icon="←" iconSide="left" nudge="left" className={styles.backLink}>
+        Back to recipes
+      </Link>
+
+      <div className={styles.titleBar}>
+        <Typography variant="heading1" className={styles.pageHeading}>
+          {isPublished ? 'Edit recipe' : 'New recipe'}
+        </Typography>
+        <StatusBadge tone={isPublished ? 'success' : 'warning'}>
+          {isPublished ? 'Published' : 'Draft'}
+        </StatusBadge>
       </div>
 
-      <form
-        className={styles.form}
-        onSubmit={(e) => {
-          e.preventDefault()
-        }}
-      >
-        <div className={styles.section}>
-          <div className={styles.field}>
-            <label htmlFor="recipe-title">Title</label>
-            <input
-              id="recipe-title"
-              type="text"
-              value={form.title}
-              onChange={(e) => setField('title', e.target.value)}
-              className={styles.input}
-            />
-          </div>
-
-          <div className={styles.field}>
-            <label htmlFor="recipe-slug">Slug</label>
-            <input
-              id="recipe-slug"
-              type="text"
-              value={form.slug}
-              readOnly={slugLocked}
-              aria-disabled={slugLocked || undefined}
-              aria-describedby={
-                slugError ? 'recipe-slug-preview recipe-slug-error' : 'recipe-slug-preview'
-              }
-              onChange={(e) => {
-                setSlugError(null)
-                setField('slug', e.target.value)
-              }}
-              className={styles.input}
-            />
-            <p id="recipe-slug-preview" className={styles.slugPreview}>
-              Public URL: akli.dev/recipes/{form.slug}
-            </p>
-            {!slugLocked && (
-              <Button
-                onClick={() => dispatch({ type: 'RESET_SLUG_TO_TITLE' })}
-                type="button"
-                variant="outline"
-              >
-                Reset to title slug
-              </Button>
-            )}
-            {slugLocked && (
-              <p className={styles.slugLockHint}>
-                Slug is locked because images are stored under it. To use a different slug,
-                recreate the recipe and set the slug before uploading images.
-              </p>
-            )}
-            {slugError && (
-              <p id="recipe-slug-error" role="alert" className={styles.slugError}>
-                {slugError}
-              </p>
-            )}
-          </div>
-
-          <div className={styles.field}>
-            <label htmlFor="recipe-intro">Intro</label>
-            <textarea
-              id="recipe-intro"
-              value={form.intro}
-              onChange={(e) => setField('intro', e.target.value)}
-              className={styles.textarea}
-            />
-          </div>
-        </div>
-
-        <div className={styles.section}>
-          <div className={styles.field}>
-            {recipeId && (
-              <ImageUpload
-                slug={form.slug}
-                imageType="cover"
-                currentAlt={form.coverImageAlt || undefined}
-                processedAt={form.coverImageProcessedAt}
-                getToken={getAccessToken}
-                recipeId={recipeId}
-                onUploadStarted={handleCoverUploadStarted}
-                onUploadCompleted={handleCoverUploadCompleted}
-              />
-            )}
-          </div>
-
-          <div className={styles.field}>
-            <label htmlFor="recipe-cover-alt">Cover image alt text</label>
-            <input
-              id="recipe-cover-alt"
-              type="text"
-              value={form.coverImageAlt}
-              onChange={(e) => setField('coverImageAlt', e.target.value)}
-              className={styles.input}
-            />
-          </div>
-        </div>
-
-        <div className={styles.section}>
-          <div className={styles.metadataRow}>
+      <div className={styles.editorGrid}>
+        <form
+          className={styles.formColumn}
+          onSubmit={(e) => {
+            e.preventDefault()
+          }}
+        >
+          <section className={styles.basics}>
             <div className={styles.field}>
-              <label htmlFor="recipe-prep-time">Prep time (min)</label>
+              <label htmlFor="recipe-title" className={styles.fieldLabel}>
+                Title
+              </label>
               <input
-                id="recipe-prep-time"
-                type="number"
-                value={form.prepTime}
-                onChange={(e) => setField('prepTime', Number(e.target.value))}
-                className={styles.numberInput}
+                id="recipe-title"
+                type="text"
+                value={form.title}
+                onChange={(e) => setField('title', e.target.value)}
+                className={styles.input}
               />
             </div>
-            <div className={styles.field}>
-              <label htmlFor="recipe-cook-time">Cook time (min)</label>
-              <input
-                id="recipe-cook-time"
-                type="number"
-                value={form.cookTime}
-                onChange={(e) => setField('cookTime', Number(e.target.value))}
-                className={styles.numberInput}
-              />
-            </div>
-            <div className={styles.field}>
-              <label htmlFor="recipe-servings">Servings</label>
-              <input
-                id="recipe-servings"
-                type="number"
-                value={form.servings}
-                onChange={(e) => setField('servings', Number(e.target.value))}
-                className={styles.numberInput}
-              />
-            </div>
-          </div>
-        </div>
 
-        <div className={styles.section}>
-          <div className={styles.field}>
-            <label htmlFor="recipe-tags">Tags</label>
+            <div className={styles.field}>
+              <label htmlFor="recipe-slug" className={styles.fieldLabel}>
+                URL slug
+              </label>
+              <input
+                id="recipe-slug"
+                type="text"
+                value={form.slug}
+                readOnly={slugLocked}
+                aria-disabled={slugLocked || undefined}
+                aria-describedby={
+                  slugError ? 'recipe-slug-preview recipe-slug-error' : 'recipe-slug-preview'
+                }
+                onChange={(e) => {
+                  setSlugError(null)
+                  setField('slug', e.target.value)
+                }}
+                className={styles.input}
+              />
+              <div className={styles.slugHintRow}>
+                <p id="recipe-slug-preview" className={styles.hint}>
+                  Public URL: akli.dev/recipes/{form.slug}
+                </p>
+                {slugResettable && (
+                  <button
+                    type="button"
+                    onClick={() => dispatch({ type: 'RESET_SLUG_TO_TITLE' })}
+                    className={styles.textButton}
+                  >
+                    Reset to title
+                  </button>
+                )}
+              </div>
+              {slugLocked && (
+                <p className={styles.slugLockHint}>
+                  <span className={styles.slugLockIcon} aria-hidden="true">
+                    {iconLock}
+                  </span>
+                  <span>Locked — images reference this URL. Remove all images to change it.</span>
+                </p>
+              )}
+              {slugError && (
+                <p id="recipe-slug-error" role="alert" className={styles.slugError}>
+                  {slugError}
+                </p>
+              )}
+            </div>
+
+            <div className={styles.field}>
+              <label htmlFor="recipe-intro" className={styles.fieldLabel}>
+                Intro
+              </label>
+              <textarea
+                id="recipe-intro"
+                value={form.intro}
+                onChange={(e) => setField('intro', e.target.value)}
+                className={styles.textarea}
+              />
+            </div>
+          </section>
+
+          <fieldset className={styles.section}>
+            <legend className={styles.sectionLabel}>Cover image</legend>
+            <div className={styles.field}>
+              {recipeId && (
+                <ImageUpload
+                  slug={form.slug}
+                  imageType="cover"
+                  currentAlt={form.coverImageAlt || undefined}
+                  processedAt={form.coverImageProcessedAt}
+                  getToken={getAccessToken}
+                  recipeId={recipeId}
+                  onUploadStarted={handleCoverUploadStarted}
+                  onUploadCompleted={handleCoverUploadCompleted}
+                />
+              )}
+            </div>
+
+            {form.coverImageProcessedAt !== undefined && (
+              <div className={styles.field}>
+                <label htmlFor="recipe-cover-alt" className={styles.fieldLabel}>
+                  Alt text
+                </label>
+                <input
+                  id="recipe-cover-alt"
+                  type="text"
+                  value={form.coverImageAlt}
+                  onChange={(e) => setField('coverImageAlt', e.target.value)}
+                  className={styles.input}
+                />
+              </div>
+            )}
+          </fieldset>
+
+          <fieldset className={styles.sectionTight}>
+            <legend className={styles.sectionLabel}>Timing &amp; servings</legend>
+            <div className={styles.metadataRow}>
+              <div className={styles.field}>
+                <label htmlFor="recipe-prep-time" className={styles.fieldLabel}>
+                  Prep (min)
+                </label>
+                <input
+                  id="recipe-prep-time"
+                  type="number"
+                  value={form.prepTime}
+                  onChange={(e) => setField('prepTime', Number(e.target.value))}
+                  className={styles.input}
+                />
+              </div>
+              <div className={styles.field}>
+                <label htmlFor="recipe-cook-time" className={styles.fieldLabel}>
+                  Cook (min)
+                </label>
+                <input
+                  id="recipe-cook-time"
+                  type="number"
+                  value={form.cookTime}
+                  onChange={(e) => setField('cookTime', Number(e.target.value))}
+                  className={styles.input}
+                />
+              </div>
+              <div className={styles.field}>
+                <label htmlFor="recipe-servings" className={styles.fieldLabel}>
+                  Servings
+                </label>
+                <input
+                  id="recipe-servings"
+                  type="number"
+                  value={form.servings}
+                  onChange={(e) => setField('servings', Number(e.target.value))}
+                  className={styles.input}
+                />
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset className={styles.sectionTight}>
+            <legend className={styles.sectionLabel}>Tags</legend>
             <TagInput
               inputId="recipe-tags"
               tags={form.tags}
@@ -699,112 +789,156 @@ const RecipeEditor: FC = () => {
               existingTags={existingTags}
               placeholder="Add a tag and press Enter"
             />
-          </div>
-        </div>
+          </fieldset>
 
-        <div className={styles.section}>
-          <IngredientList
-            ingredients={form.ingredients}
-            onChange={setIngredients}
-            onAnnounce={announce}
-          />
-        </div>
-
-        <div className={styles.section}>
-          {recipeId && (
-            <StepList
-              steps={form.steps}
-              onChange={setSteps}
-              recipeId={recipeId}
-              slug={form.slug}
-              getToken={getAccessToken}
+          <fieldset className={styles.sectionTight}>
+            <legend className={styles.sectionLabelRow}>
+              <span className={styles.sectionLabel}>Ingredients</span>
+              <span className={styles.hint}>{pluralize(form.ingredients.length, 'item')}</span>
+            </legend>
+            <IngredientList
+              ingredients={form.ingredients}
+              onChange={setIngredients}
               onAnnounce={announce}
-              onStepUploadStarted={handleStepUploadStarted}
-              onStepUploadCompleted={handleStepUploadCompleted}
             />
-          )}
-        </div>
+          </fieldset>
 
-        <div className={styles.actions}>
-          {form.mode === 'draft' ? (
-            <>
-              <Button
-                onClick={handlePublish}
-                type="button"
-                loading={submitting}
-                disabled={!canPublish}
-                ariaDescribedBy={!canPublish ? MISSING_FIELDS_ID : undefined}
-              >
-                Publish
-              </Button>
-              <Button
-                onClick={() => setDiscardDialogOpen(true)}
-                type="button"
-                variant="outline"
-                disabled={submitting}
-              >
-                Discard draft
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button onClick={handleUpdate} type="button" loading={submitting}>
-                Update
-              </Button>
-              <Button
-                onClick={handleUnpublish}
-                type="button"
-                variant="outline"
-                disabled={submitting}
-              >
-                Unpublish
-              </Button>
-            </>
-          )}
-        </div>
+          <fieldset className={styles.sectionTight}>
+            <legend className={styles.sectionLabelRow}>
+              <span className={styles.sectionLabel}>Method</span>
+              <span className={styles.hint}>{pluralize(form.steps.length, 'step')}</span>
+            </legend>
+            {recipeId && (
+              <StepList
+                steps={form.steps}
+                onChange={setSteps}
+                recipeId={recipeId}
+                slug={form.slug}
+                getToken={getAccessToken}
+                onAnnounce={announce}
+                onStepUploadStarted={handleStepUploadStarted}
+                onStepUploadCompleted={handleStepUploadCompleted}
+              />
+            )}
+          </fieldset>
+        </form>
 
-        {form.mode === 'draft' && !canPublish && (
-          <Callout type="warning">
-            <p id={`${MISSING_FIELDS_ID}-label`}>Add the following before publishing:</p>
-            <ul
-              id={MISSING_FIELDS_ID}
-              aria-labelledby={`${MISSING_FIELDS_ID}-label`}
-              className={styles.missingFieldsList}
-            >
-              {missingFields.map((field) => (
-                <li key={field}>{field}</li>
-              ))}
-            </ul>
-          </Callout>
-        )}
-      </form>
+        <aside className={styles.rail}>
+          <div className={styles.railCard}>
+            <div className={styles.autosaveRow}>
+              <AutosaveStatus
+                status={autosaveStatus}
+                lastSavedAt={lastSavedAt}
+                onRetry={retry}
+              />
+            </div>
+
+            <div className={styles.divider} aria-hidden="true" />
+
+            {!isPublished ? (
+              <>
+                <div className={styles.actionsCol}>
+                  <Button
+                    onClick={handlePublish}
+                    type="button"
+                    loading={submitting}
+                    disabled={!canPublish}
+                    fullWidth
+                    ariaDescribedBy={!canPublish ? MISSING_FIELDS_ID : undefined}
+                  >
+                    Publish
+                  </Button>
+                  <Button
+                    onClick={() => setDiscardDialogOpen(true)}
+                    type="button"
+                    variant="outline"
+                    disabled={submitting}
+                    fullWidth
+                    className={styles.discardButton}
+                  >
+                    Discard draft
+                  </Button>
+                </div>
+
+                {!canPublish && (
+                  <div className={styles.checklistWrap}>
+                    <p id={`${MISSING_FIELDS_ID}-label`} className={styles.checklistLabel}>
+                      Before publishing
+                    </p>
+                    <ul
+                      id={MISSING_FIELDS_ID}
+                      aria-labelledby={`${MISSING_FIELDS_ID}-label`}
+                      className={styles.checklist}
+                    >
+                      {missingFields.map((field) => (
+                        <li key={field} className={styles.checklistItem}>
+                          <span className={styles.checklistIcon} aria-hidden="true" />
+                          <span>{field}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <div className={styles.actionsCol}>
+                  <Button onClick={handleUpdate} type="button" loading={submitting} fullWidth>
+                    Update
+                  </Button>
+                  <Button
+                    onClick={handleUnpublish}
+                    type="button"
+                    variant="outline"
+                    disabled={submitting}
+                    fullWidth
+                  >
+                    Unpublish
+                  </Button>
+                </div>
+
+                <div className={styles.previewWrap}>
+                  <Link
+                    to={`/recipes/${form.slug}`}
+                    icon={iconPreview}
+                    iconSide="right"
+                    nudge="right"
+                    className={styles.previewLink}
+                  >
+                    View live recipe
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
+        </aside>
+      </div>
 
       <div className="sr-only" role="status" aria-live="polite">
-        {announcement.message && `${announcement.message}${announcement.toggle ? '\u200B' : ''}`}
+        {announcement.message && `${announcement.message}${announcement.toggle ? '​' : ''}`}
       </div>
 
       <ConfirmDialog
         open={blocker.state === 'blocked'}
-        title="Unsaved changes"
-        danger
-        confirmLabel="Discard changes"
-        cancelLabel="Stay on this page"
+        title="Leave with unsaved changes?"
+        confirmLabel="Leave anyway"
+        cancelLabel="Stay"
         onConfirm={() => blocker.proceed?.()}
         onCancel={() => blocker.reset?.()}
       >
-        Are you sure you want to leave this page? Your edits will be lost.
+        Your changes are still saving. If you leave now they might not be stored.
       </ConfirmDialog>
 
       <ConfirmDialog
         open={discardDialogOpen}
-        title="Discard draft?"
+        title="Discard this draft?"
         danger
-        confirmLabel="Discard"
-        cancelLabel="Cancel"
+        confirmLabel="Discard draft"
+        cancelLabel="Keep editing"
         onConfirm={handleDiscardConfirm}
         onCancel={() => setDiscardDialogOpen(false)}
       >
-        This will permanently delete this draft recipe. This action cannot be undone.
+        This draft and everything in it will be permanently deleted. This can&rsquo;t be undone.
       </ConfirmDialog>
     </div>
   )

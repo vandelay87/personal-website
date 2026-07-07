@@ -1,5 +1,7 @@
 import Button from '@components/Button'
 import ImageUpload from '@components/ImageUpload'
+import Input from '@components/Input'
+import Textarea from '@components/Textarea'
 import { useReorderableList } from '@hooks/useReorderableList'
 import { stepImageType, type RecipeImage, type Step } from '@models/recipe'
 import { useCallback, type FC } from 'react'
@@ -16,6 +18,65 @@ export interface StepListProps {
   onStepUploadStarted?: (stepId: string) => void
   onStepUploadCompleted?: (stepId: string) => void
 }
+
+const iconChevronUp = (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="m18 15-6-6-6 6" />
+  </svg>
+)
+
+const iconChevronDown = (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+)
+
+const iconRemove = (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M18 6 6 18" />
+    <path d="m6 6 12 12" />
+  </svg>
+)
+
+const iconPlus = (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.2"
+    strokeLinecap="round"
+    aria-hidden="true"
+  >
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+)
 
 const renumber = (steps: Step[]): Step[] =>
   steps.map((step, i) => ({ ...step, order: i + 1 }))
@@ -81,69 +142,68 @@ const StepList: FC<StepListProps> = ({
     <div className={styles.container}>
       {steps.map((step, index) => (
         <div key={step.stepId} className={styles.row}>
-          <span className={styles.stepNumber}>{index + 1}</span>
-          <div className={styles.body}>
-            <textarea
-              aria-label={`Step ${index + 1} text`}
-              value={step.text}
-              onChange={(e) => handleTextChange(index, e.target.value)}
-              className={styles.textarea}
-            />
-            {getToken && (
-              <div className={styles.imageBlock}>
-                <ImageUpload
-                  recipeId={recipeId}
-                  slug={slug}
-                  imageType={stepImageType(step.stepId)}
-                  currentAlt={step.image?.alt}
-                  processedAt={step.image?.processedAt}
-                  getToken={getToken}
-                  onUploadStarted={() => onStepUploadStarted?.(step.stepId)}
-                  onUploadCompleted={() => handleStepImageUploaded(index)}
-                />
-                <input
-                  type="text"
-                  aria-label={`Step ${index + 1} image alt text`}
-                  placeholder="Image alt text"
-                  value={step.image?.alt ?? ''}
-                  onChange={(e) => updateImage(index, { alt: e.target.value })}
-                  className={styles.altInput}
-                />
-              </div>
-            )}
+          <div className={styles.header}>
+            <span className={styles.stepNumber}>{index + 1}</span>
+            <div className={styles.actions}>
+              <Button
+                onClick={() => handleMoveUp(index)}
+                ariaLabel={`Move up step ${index + 1}`}
+                variant="outline"
+                disabled={index === 0}
+                className={`${styles.actionButton} ${styles.moveAction}`}
+              >
+                {iconChevronUp}
+              </Button>
+              <Button
+                onClick={() => handleMoveDown(index)}
+                ariaLabel={`Move down step ${index + 1}`}
+                variant="outline"
+                disabled={index === steps.length - 1}
+                className={`${styles.actionButton} ${styles.moveAction}`}
+              >
+                {iconChevronDown}
+              </Button>
+              <Button
+                onClick={() => handleRemove(index)}
+                ariaLabel={`Remove step ${index + 1}`}
+                variant="outline"
+                disabled={steps.length <= 1}
+                className={`${styles.actionButton} ${styles.removeAction}`}
+              >
+                {iconRemove}
+              </Button>
+            </div>
           </div>
-          <div className={styles.actions}>
-            <Button
-              onClick={() => handleMoveUp(index)}
-              ariaLabel={`Move up step ${index + 1}`}
-              variant="outline"
-              disabled={index === 0}
-              className={styles.actionButton}
-            >
-              ↑
-            </Button>
-            <Button
-              onClick={() => handleMoveDown(index)}
-              ariaLabel={`Move down step ${index + 1}`}
-              variant="outline"
-              disabled={index === steps.length - 1}
-              className={styles.actionButton}
-            >
-              ↓
-            </Button>
-            <Button
-              onClick={() => handleRemove(index)}
-              ariaLabel={`Remove step ${index + 1}`}
-              variant="outline"
-              disabled={steps.length <= 1}
-              className={styles.actionButton}
-            >
-              Remove
-            </Button>
-          </div>
+          <Textarea
+            ariaLabel={`Step ${index + 1} text`}
+            placeholder="Describe this step…"
+            value={step.text}
+            onChange={(e) => handleTextChange(index, e.target.value)}
+            className={styles.textarea}
+          />
+          {getToken && (
+            <div className={styles.imageBlock}>
+              <ImageUpload
+                recipeId={recipeId}
+                slug={slug}
+                imageType={stepImageType(step.stepId)}
+                currentAlt={step.image?.alt}
+                processedAt={step.image?.processedAt}
+                getToken={getToken}
+                onUploadStarted={() => onStepUploadStarted?.(step.stepId)}
+                onUploadCompleted={() => handleStepImageUploaded(index)}
+              />
+              <Input
+                ariaLabel={`Step ${index + 1} image alt text`}
+                placeholder="Alt text for this image"
+                value={step.image?.alt ?? ''}
+                onChange={(e) => updateImage(index, { alt: e.target.value })}
+              />
+            </div>
+          )}
         </div>
       ))}
-      <Button onClick={handleAdd} variant="outline">
+      <Button onClick={handleAdd} variant="outline" iconLeft={iconPlus} className={styles.addButton}>
         Add step
       </Button>
     </div>

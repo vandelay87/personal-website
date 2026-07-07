@@ -1,94 +1,109 @@
+/* StepList.module.css — restyled per docs/design/paper/pages/Admin Recipe
+   Editor.dc.html's step card: bordered card, circular step-number badge
+   (mirrors RecipeSteps.module.css's `.number`, sized down for the denser
+   editor context), and the same 30x30 icon-button trio as
+   IngredientList.module.css. The icon-button geometry (~15 lines) is
+   duplicated rather than shared as a composable — only two consumers
+   exist today, each with its own `.actions` layout root, and the hover
+   *behaviors* (the part that actually risked drifting) already live in
+   the shared `iconButtonHover`/`dangerIconButtonHover` composables. */
+
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-12);
+  /* 14px: design literal (Admin Recipe Editor.dc.html's step list gap) —
+     no token lands exactly on it (--space-3 12px / --space-4 16px). */
+  gap: 14px;
 }
 
 .row {
-  display: grid;
-  grid-template-columns: 1.5rem 1fr;
-  grid-template-areas:
-    "number body"
-    ".      actions";
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  background: var(--color-field);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-2);
-  align-items: flex-start;
+  /* 10px: design literal, between --space-2 (8px) and --space-3 (12px). */
+  margin-bottom: 10px;
 }
 
 .stepNumber {
-  grid-area: number;
-  font-weight: var(--font-weight-bold);
-  padding-top: var(--space-2);
-  text-align: center;
-}
-
-.body {
-  grid-area: body;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
   display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-primary);
 }
 
-@media (min-width: 768px) {
-  .row {
-    grid-template-columns: 1.5rem 1fr auto;
-    grid-template-areas: "number body actions";
-  }
+.actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.moveAction {
+  composes: iconButtonHover from '../../styles/interactions.module.css';
+}
+
+.removeAction {
+  composes: dangerIconButtonHover from '../../styles/interactions.module.css';
+}
+
+.actions .actionButton {
+  width: 30px;
+  height: 30px;
+  min-width: 0;
+  min-height: 0;
+  flex-shrink: 0;
+  padding: 0;
+  /* 8px: design literal — --radius-sm (6px) is the nearest token but is
+     2px off. */
+  border-radius: 8px;
+  border-color: var(--color-border);
+  background: var(--color-field);
+  color: var(--color-text-muted);
+}
+
+.actions .actionButton svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.actions .actionButton:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.row .textarea {
+  /* 8rem: design/product literal carried over from #198's "taller default
+     step textareas" fix — taller than Textarea's own 5rem default so a
+     multi-sentence step doesn't scroll internally. */
+  min-height: 8rem;
 }
 
 .imageBlock {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  margin-top: 10px;
 }
 
-.altInput {
-  width: 100%;
-  box-sizing: border-box;
-  padding: var(--space-2) var(--space-3);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: var(--font-size-base);
-  font-family: var(--font-sans);
-}
-
-.altInput:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-}
-
-.textarea {
-  width: 100%;
-  box-sizing: border-box;
-  padding: var(--space-2) var(--space-3);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: var(--font-size-base);
-  font-family: var(--font-sans);
-  resize: vertical;
-  min-height: 8rem;
-}
-
-.textarea:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-}
-
-.actions {
-  grid-area: actions;
-  display: flex;
-  gap: var(--space-1);
-}
-
-@media (min-width: 768px) {
-  .actions {
-    padding-top: var(--space-2);
-  }
-}
-
-.actionButton {
-  min-width: 44px;
-  min-height: 44px;
+.container .addButton {
+  width: auto;
+  align-self: flex-start;
+  padding: 9px var(--space-4);
+  font-size: 13.5px;
+  font-weight: var(--font-weight-medium);
 }

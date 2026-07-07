@@ -106,6 +106,17 @@
   background: var(--color-hover);
 }
 
+/* ── Icon-button hover ─────────────────────────────────────────
+   Neutral hover for square icon-only buttons (reorder/move controls) —
+   pairs with `dangerIconButtonHover` below for the destructive icon
+   button in the same cluster (see IngredientList/StepList's move
+   up/down + remove trio, ported from the design's `.iconbtn:hover`). */
+.iconButtonHover:hover {
+  color: var(--color-text-strong);
+  border-color: var(--color-border-strong);
+  background: var(--color-hover);
+}
+
 /* ── Danger icon-button hover ──────────────────────────────── */
 .dangerIconButtonHover:hover {
   color: var(--color-error);
