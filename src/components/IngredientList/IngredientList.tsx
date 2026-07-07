@@ -99,68 +99,70 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
   }
 
   return (
-    <div className={styles.container}>
-      {ingredients.map((ingredient, index) => (
-        <div key={index} className={styles.row}>
-          <div className={styles.quantityField}>
-            <Input
-              ariaLabel={`Ingredient ${index + 1} quantity`}
-              placeholder="Qty"
-              value={ingredient.quantity}
-              onChange={(e) => handleFieldChange(index, 'quantity', e.target.value)}
-            />
-          </div>
-          <div className={styles.unitField}>
-            <Input
-              ariaLabel={`Ingredient ${index + 1} unit`}
-              placeholder="Unit"
-              value={ingredient.unit}
-              onChange={(e) => handleFieldChange(index, 'unit', e.target.value)}
-            />
-          </div>
-          <div className={styles.itemField}>
-            <Input
-              ariaLabel={`Ingredient ${index + 1} item`}
-              placeholder="Ingredient"
-              value={ingredient.item}
-              onChange={(e) => handleFieldChange(index, 'item', e.target.value)}
-            />
-          </div>
-          <div className={styles.actions}>
-            <Button
-              onClick={() => handleMoveUp(index)}
-              ariaLabel={`Move up ingredient ${index + 1}`}
-              variant="outline"
-              disabled={index === 0}
-              className={`${styles.actionButton} ${styles.moveAction}`}
-            >
-              {iconChevronUp}
-            </Button>
-            <Button
-              onClick={() => handleMoveDown(index)}
-              ariaLabel={`Move down ingredient ${index + 1}`}
-              variant="outline"
-              disabled={index === ingredients.length - 1}
-              className={`${styles.actionButton} ${styles.moveAction}`}
-            >
-              {iconChevronDown}
-            </Button>
-            <Button
-              onClick={() => handleRemove(index)}
-              ariaLabel={`Remove ingredient ${index + 1}`}
-              variant="outline"
-              disabled={ingredients.length <= 1}
-              className={`${styles.actionButton} ${styles.removeAction}`}
-            >
-              {iconRemove}
-            </Button>
-          </div>
-        </div>
-      ))}
+    <>
+      <ul className={styles.container}>
+        {ingredients.map((ingredient, index) => (
+          <li key={index} className={styles.row}>
+            <div className={styles.quantityField}>
+              <Input
+                ariaLabel={`Ingredient ${index + 1} quantity`}
+                placeholder="Qty"
+                value={ingredient.quantity}
+                onChange={(e) => handleFieldChange(index, 'quantity', e.target.value)}
+              />
+            </div>
+            <div className={styles.unitField}>
+              <Input
+                ariaLabel={`Ingredient ${index + 1} unit`}
+                placeholder="Unit"
+                value={ingredient.unit}
+                onChange={(e) => handleFieldChange(index, 'unit', e.target.value)}
+              />
+            </div>
+            <div className={styles.itemField}>
+              <Input
+                ariaLabel={`Ingredient ${index + 1} item`}
+                placeholder="Ingredient"
+                value={ingredient.item}
+                onChange={(e) => handleFieldChange(index, 'item', e.target.value)}
+              />
+            </div>
+            <div className={styles.actions}>
+              <Button
+                onClick={() => handleMoveUp(index)}
+                ariaLabel={`Move up ingredient ${index + 1}`}
+                variant="outline"
+                disabled={index === 0}
+                className={`${styles.actionButton} ${styles.moveAction}`}
+              >
+                {iconChevronUp}
+              </Button>
+              <Button
+                onClick={() => handleMoveDown(index)}
+                ariaLabel={`Move down ingredient ${index + 1}`}
+                variant="outline"
+                disabled={index === ingredients.length - 1}
+                className={`${styles.actionButton} ${styles.moveAction}`}
+              >
+                {iconChevronDown}
+              </Button>
+              <Button
+                onClick={() => handleRemove(index)}
+                ariaLabel={`Remove ingredient ${index + 1}`}
+                variant="outline"
+                disabled={ingredients.length <= 1}
+                className={`${styles.actionButton} ${styles.removeAction}`}
+              >
+                {iconRemove}
+              </Button>
+            </div>
+          </li>
+        ))}
+      </ul>
       <Button onClick={handleAdd} variant="outline" iconLeft={iconPlus} className={styles.addButton}>
         Add ingredient
       </Button>
-    </div>
+    </>
   )
 }
 

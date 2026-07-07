@@ -6,6 +6,9 @@
    footprint instead of literally matching the single-field width. */
 
 .container {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -92,9 +95,16 @@
   cursor: not-allowed;
 }
 
-.container .addButton {
+/* `button.addButton` (element + class, not `.container .addButton`): the
+   button is now a sibling after the `<ul>` rather than a flex child of it
+   — a `<ul>` can only contain `<li>` rows per HTML list semantics. The
+   element qualifier keeps specificity above Button's own bare `.button`/
+   `.outline` regardless of CSS import order (same fix as Tag.module.css's
+   `button.tag`). margin-top reproduces the gap the flex column used to
+   provide between the last row and this button. */
+button.addButton {
   width: auto;
-  align-self: flex-start;
+  margin-top: var(--space-3);
   padding: 9px var(--space-4);
   font-size: 13.5px;
   font-weight: var(--font-weight-medium);

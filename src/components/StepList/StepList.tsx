@@ -139,74 +139,76 @@ const StepList: FC<StepListProps> = ({
   }
 
   return (
-    <div className={styles.container}>
-      {steps.map((step, index) => (
-        <div key={step.stepId} className={styles.row}>
-          <div className={styles.header}>
-            <span className={styles.stepNumber}>{index + 1}</span>
-            <div className={styles.actions}>
-              <Button
-                onClick={() => handleMoveUp(index)}
-                ariaLabel={`Move up step ${index + 1}`}
-                variant="outline"
-                disabled={index === 0}
-                className={`${styles.actionButton} ${styles.moveAction}`}
-              >
-                {iconChevronUp}
-              </Button>
-              <Button
-                onClick={() => handleMoveDown(index)}
-                ariaLabel={`Move down step ${index + 1}`}
-                variant="outline"
-                disabled={index === steps.length - 1}
-                className={`${styles.actionButton} ${styles.moveAction}`}
-              >
-                {iconChevronDown}
-              </Button>
-              <Button
-                onClick={() => handleRemove(index)}
-                ariaLabel={`Remove step ${index + 1}`}
-                variant="outline"
-                disabled={steps.length <= 1}
-                className={`${styles.actionButton} ${styles.removeAction}`}
-              >
-                {iconRemove}
-              </Button>
+    <>
+      <ul className={styles.container}>
+        {steps.map((step, index) => (
+          <li key={step.stepId} className={styles.row}>
+            <div className={styles.header}>
+              <span className={styles.stepNumber}>{index + 1}</span>
+              <div className={styles.actions}>
+                <Button
+                  onClick={() => handleMoveUp(index)}
+                  ariaLabel={`Move up step ${index + 1}`}
+                  variant="outline"
+                  disabled={index === 0}
+                  className={`${styles.actionButton} ${styles.moveAction}`}
+                >
+                  {iconChevronUp}
+                </Button>
+                <Button
+                  onClick={() => handleMoveDown(index)}
+                  ariaLabel={`Move down step ${index + 1}`}
+                  variant="outline"
+                  disabled={index === steps.length - 1}
+                  className={`${styles.actionButton} ${styles.moveAction}`}
+                >
+                  {iconChevronDown}
+                </Button>
+                <Button
+                  onClick={() => handleRemove(index)}
+                  ariaLabel={`Remove step ${index + 1}`}
+                  variant="outline"
+                  disabled={steps.length <= 1}
+                  className={`${styles.actionButton} ${styles.removeAction}`}
+                >
+                  {iconRemove}
+                </Button>
+              </div>
             </div>
-          </div>
-          <Textarea
-            ariaLabel={`Step ${index + 1} text`}
-            placeholder="Describe this step…"
-            value={step.text}
-            onChange={(e) => handleTextChange(index, e.target.value)}
-            className={styles.textarea}
-          />
-          {getToken && (
-            <div className={styles.imageBlock}>
-              <ImageUpload
-                recipeId={recipeId}
-                slug={slug}
-                imageType={stepImageType(step.stepId)}
-                currentAlt={step.image?.alt}
-                processedAt={step.image?.processedAt}
-                getToken={getToken}
-                onUploadStarted={() => onStepUploadStarted?.(step.stepId)}
-                onUploadCompleted={() => handleStepImageUploaded(index)}
-              />
-              <Input
-                ariaLabel={`Step ${index + 1} image alt text`}
-                placeholder="Alt text for this image"
-                value={step.image?.alt ?? ''}
-                onChange={(e) => updateImage(index, { alt: e.target.value })}
-              />
-            </div>
-          )}
-        </div>
-      ))}
+            <Textarea
+              ariaLabel={`Step ${index + 1} text`}
+              placeholder="Describe this step…"
+              value={step.text}
+              onChange={(e) => handleTextChange(index, e.target.value)}
+              className={styles.textarea}
+            />
+            {getToken && (
+              <div className={styles.imageBlock}>
+                <ImageUpload
+                  recipeId={recipeId}
+                  slug={slug}
+                  imageType={stepImageType(step.stepId)}
+                  currentAlt={step.image?.alt}
+                  processedAt={step.image?.processedAt}
+                  getToken={getToken}
+                  onUploadStarted={() => onStepUploadStarted?.(step.stepId)}
+                  onUploadCompleted={() => handleStepImageUploaded(index)}
+                />
+                <Input
+                  ariaLabel={`Step ${index + 1} image alt text`}
+                  placeholder="Alt text for this image"
+                  value={step.image?.alt ?? ''}
+                  onChange={(e) => updateImage(index, { alt: e.target.value })}
+                />
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
       <Button onClick={handleAdd} variant="outline" iconLeft={iconPlus} className={styles.addButton}>
         Add step
       </Button>
-    </div>
+    </>
   )
 }
 
