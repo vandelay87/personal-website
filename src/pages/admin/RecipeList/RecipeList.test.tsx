@@ -274,8 +274,11 @@ describe('Admin RecipeList page', () => {
       expect(screen.getByText('Newest')).toBeInTheDocument()
     })
 
-    const rows = screen.getAllByRole('row').slice(1) // skip header row
-    const titles = rows.map((row) => within(row).getAllByRole('cell')[0].textContent)
+    // Row titles are the only level-2 headings on the page, so their DOM
+    // order reflects the row order rendered by the list.
+    const titles = screen
+      .getAllByRole('heading', { level: 2 })
+      .map((heading) => heading.textContent)
 
     expect(titles).toEqual(['Newest', 'Middle', 'Oldest'])
   })
@@ -287,8 +290,8 @@ describe('Admin RecipeList page', () => {
       expect(screen.getByText('Spaghetti Bolognese')).toBeInTheDocument()
     })
 
-    const draftRow = screen.getByText('Spaghetti Bolognese').closest('tr')
-    const publishedRow = screen.getByText('Thai Green Curry').closest('tr')
+    const draftRow = screen.getByText('Spaghetti Bolognese').closest('li')
+    const publishedRow = screen.getByText('Thai Green Curry').closest('li')
 
     expect(draftRow).not.toBeNull()
     expect(publishedRow).not.toBeNull()
