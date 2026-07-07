@@ -4,6 +4,7 @@ import type { AuthChallenge, AuthTokens } from '@models/auth'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { axe } from 'vitest-axe'
 
 import Login from './Login'
 
@@ -52,7 +53,7 @@ const renderLogin = (initialPath = '/admin/login') => {
     getAccessToken: vi.fn(),
   })
 
-  render(
+  const { container } = render(
     <MemoryRouter initialEntries={[initialPath]}>
       <Routes>
         <Route path="/admin/login" element={<Login />} />
@@ -63,7 +64,7 @@ const renderLogin = (initialPath = '/admin/login') => {
     </MemoryRouter>
   )
 
-  return { mockLogin }
+  return { mockLogin, container }
 }
 
 const fillAndSubmitLoginForm = (
@@ -72,7 +73,7 @@ const fillAndSubmitLoginForm = (
 ) => {
   fireEvent.change(screen.getByLabelText(/email/i), { target: { value: email } })
   fireEvent.change(screen.getByLabelText(/password/i), { target: { value: password } })
-  fireEvent.click(screen.getByRole('button', { name: /log in/i }))
+  fireEvent.click(screen.getByRole('button', { name: /sign in/i }))
 }
 
 describe('Login page', () => {
@@ -85,7 +86,7 @@ describe('Login page', () => {
 
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument()
   })
 
   it('redirects to /admin/recipes on successful login', async () => {
@@ -120,8 +121,9 @@ describe('Login page', () => {
       expect(screen.getByText('Incorrect email or password')).toBeInTheDocument()
     })
 
-    const errorMessage = screen.getByText('Incorrect email or password')
-    expect(errorMessage).toHaveAttribute('id')
+    const errorAlert = screen.getByRole('alert')
+    expect(errorAlert).toHaveAttribute('id', 'form-error')
+    expect(errorAlert).toHaveTextContent('Incorrect email or password')
   })
 
   it('disables submit button while loading', async () => {
@@ -131,7 +133,7 @@ describe('Login page', () => {
     fillAndSubmitLoginForm('admin@example.com', 'password123')
 
     await waitFor(() => {
-      const submitButton = screen.getByRole('button', { name: /loading/i })
+      const submitButton = screen.getByRole('button', { name: /signing in/i })
       expect(submitButton).toBeDisabled()
     })
   })
@@ -146,7 +148,22 @@ describe('Login page', () => {
       expect(screen.getByLabelText(/new password/i)).toBeInTheDocument()
     })
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /set new password/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /set password & continue/i })
+    ).toBeInTheDocument()
+  })
+
+  it('moves focus to the new password field when the set-password form appears', async () => {
+    const { mockLogin } = renderLogin()
+    mockLogin.mockResolvedValue(mockChallenge)
+
+    fillAndSubmitLoginForm('admin@example.com', 'temppass')
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/new password/i)).toBeInTheDocument()
+    })
+
+    expect(screen.getByLabelText(/new password/i)).toHaveFocus()
   })
 
   it('shows error when new passwords do not match', async () => {
@@ -163,7 +180,7 @@ describe('Login page', () => {
     fireEvent.change(screen.getByLabelText(/confirm password/i), {
       target: { value: 'DifferentPass456!' },
     })
-    fireEvent.click(screen.getByRole('button', { name: /set new password/i }))
+    fireEvent.click(screen.getByRole('button', { name: /set password & continue/i }))
 
     await waitFor(() => {
       expect(screen.getByText('Passwords do not match')).toBeInTheDocument()
@@ -185,7 +202,7 @@ describe('Login page', () => {
     fireEvent.change(screen.getByLabelText(/confirm password/i), {
       target: { value: 'NewPass123!' },
     })
-    fireEvent.click(screen.getByRole('button', { name: /set new password/i }))
+    fireEvent.click(screen.getByRole('button', { name: /set password & continue/i }))
 
     await waitFor(() => {
       expect(screen.getByTestId('location')).toHaveTextContent('/admin/recipes')
@@ -215,5 +232,26 @@ describe('Login page', () => {
     expect(passwordInput.tagName).toBe('INPUT')
     expect(emailInput).toHaveAttribute('type', 'email')
     expect(passwordInput).toHaveAttribute('type', 'password')
+  })
+
+  describe('accessibility', () => {
+    it('renders the default sign-in form with no detectable axe violations', async () => {
+      const { container } = renderLogin()
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
+
+    it('renders the set-password form with no detectable axe violations', async () => {
+      const { mockLogin, container } = renderLogin()
+      mockLogin.mockResolvedValue(mockChallenge)
+
+      fillAndSubmitLoginForm('admin@example.com', 'temppass')
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/new password/i)).toBeInTheDocument()
+      })
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
   })
 })

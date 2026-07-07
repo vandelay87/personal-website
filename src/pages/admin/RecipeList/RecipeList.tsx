@@ -17,7 +17,153 @@ import type { Recipe } from '@models/recipe'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
+import { pluralize } from '../../../utils/pluralize'
+import { relativeUpdatedLabel } from '../../../utils/relativeTime'
 import styles from './RecipeList.module.css'
+
+const iconPlus = (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.2"
+    strokeLinecap="round"
+    aria-hidden="true"
+  >
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+)
+
+const iconEdit = (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
+  </svg>
+)
+
+const iconPreview = (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+)
+
+const iconPublish = (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M12 19V5" />
+    <path d="m5 12 7-7 7 7" />
+  </svg>
+)
+
+const iconUnpublish = (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M3 3v18h18" />
+    <path d="m19 9-5 5-4-4-3 3" />
+  </svg>
+)
+
+const iconDelete = (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M3 6h18" />
+    <path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+  </svg>
+)
+
+const iconDocument = (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.7"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+    <path d="M14 2v5h5" />
+  </svg>
+)
+
+const iconWarning = (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+    <line x1="12" y1="9" x2="12" y2="13" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
+  </svg>
+)
+
+const iconRetry = (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+    <path d="M3 3v5h5" />
+  </svg>
+)
 
 const RecipeList = () => {
   const { getAccessToken, logout } = useAuth()
@@ -93,121 +239,150 @@ const RecipeList = () => {
     }
   }
 
-  const renderContent = () => {
+  const renderBody = () => {
     if (loading) {
       return (
-        <div className={styles.loadingWrapper}>
-          <Loading />
+        <div className={styles.loadingBox}>
+          <Loading label="Loading recipes…" />
         </div>
       )
     }
 
     if (error) {
       return (
-        <>
-          <Typography variant="body">Something went wrong.</Typography>
-          <Button onClick={loadRecipes}>Retry</Button>
-        </>
+        <div className={styles.errorBox}>
+          <div className={styles.errorIcon}>{iconWarning}</div>
+          <Typography variant="heading2" className={styles.errorHeading}>
+            Couldn&apos;t load recipes
+          </Typography>
+          <Typography variant="body" className={styles.errorBody}>
+            Something went wrong reaching the server. Check your connection and try again.
+          </Typography>
+          <Button variant="outline" onClick={loadRecipes} iconLeft={iconRetry}>
+            Retry
+          </Button>
+        </div>
       )
     }
 
-    if (recipes.length === 0) {
+    if (sortedRecipes.length === 0) {
       return (
-        <>
-          <Typography variant="heading2">Recipes</Typography>
-          <Typography variant="body">No recipes yet.</Typography>
-          <Link to="/admin/recipes/new" ariaLabel="Create your first recipe">
+        <div className={styles.emptyBox}>
+          <div className={styles.emptyIcon}>{iconDocument}</div>
+          <Typography variant="heading2" className={styles.emptyHeading}>
+            No recipes yet
+          </Typography>
+          <Typography variant="body" className={styles.emptyBody}>
+            Your kitchen is empty. Create your first recipe to start building the collection.
+          </Typography>
+          <Link to="/admin/recipes/new" className={styles.newButton}>
+            {iconPlus}
             Create your first recipe
           </Link>
-        </>
+        </div>
       )
     }
 
+    const now = new Date()
+
     return (
-      <>
-        <div className={styles.header}>
-          <Typography variant="heading2">Recipes</Typography>
-          <Link to="/admin/recipes/new" className={styles.newRecipeLink}>
-            New recipe
-          </Link>
-        </div>
-
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Status</th>
-                <th>Tags</th>
-                <th>Last updated</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedRecipes.map((recipe) => {
-                const isPublished = recipe.status === 'published'
-                return (
-                  <tr key={recipe.id}>
-                    <td>{recipe.title}</td>
-                    <td>
-                      <StatusBadge tone={isPublished ? 'success' : 'warning'}>
-                        {isPublished ? 'Published' : 'Draft'}
-                      </StatusBadge>
-                    </td>
-                    <td>{recipe.tags.join(', ')}</td>
-                    <td>{new Date(recipe.updatedAt).toLocaleDateString()}</td>
-                    <td className={styles.actions}>
-                      <div className={styles.actionsInner}>
-                        <Link
-                          to={`/admin/recipes/${recipe.id}/edit`}
-                          ariaLabel={`Edit ${recipe.title}`}
-                        >
-                          Edit
-                        </Link>
-                        <Link
-                          to={`/admin/recipes/${recipe.id}/preview`}
-                          ariaLabel={`Preview ${recipe.title}`}
-                        >
-                          Preview
-                        </Link>
-                        <button
-                          type="button"
-                          className={styles.actionLink}
-                          onClick={() => handlePublish(recipe)}
-                        >
-                          {isPublished ? 'Unpublish' : 'Publish'}
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.actionLink}
-                          onClick={() => setDeleteTarget(recipe)}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        <ConfirmDialog
-          title="Delete recipe"
-          danger
-          open={deleteTarget !== null}
-          onConfirm={handleDeleteConfirm}
-          onCancel={() => setDeleteTarget(null)}
-        >
-          Are you sure you want to delete &quot;{deleteTarget?.title ?? ''}
-          &quot;?
-        </ConfirmDialog>
-      </>
+      <ul className={styles.list}>
+        {sortedRecipes.map((recipe) => {
+          const isPublished = recipe.status === 'published'
+          return (
+            <li key={recipe.id} className={styles.row}>
+              <div className={styles.rowMain}>
+                <div className={styles.rowTop}>
+                  <StatusBadge tone={isPublished ? 'success' : 'warning'}>
+                    {isPublished ? 'Published' : 'Draft'}
+                  </StatusBadge>
+                  <Typography variant="heading2" className={styles.rowTitle}>
+                    {recipe.title}
+                  </Typography>
+                </div>
+                <ul className={styles.rowMeta}>
+                  {recipe.tags.map((tag) => (
+                    <li key={tag} className={styles.tagChip}>
+                      {tag}
+                    </li>
+                  ))}
+                  <li className={styles.updatedLabel}>
+                    {relativeUpdatedLabel(recipe.updatedAt, now)}
+                  </li>
+                </ul>
+              </div>
+              <div className={styles.rowActions}>
+                <Link
+                  to={`/admin/recipes/${recipe.id}/edit`}
+                  className={styles.actionButton}
+                  nudge="none"
+                >
+                  {iconEdit}
+                  Edit
+                </Link>
+                <Link
+                  to={`/admin/recipes/${recipe.id}/preview`}
+                  className={styles.actionButton}
+                  nudge="none"
+                >
+                  {iconPreview}
+                  Preview
+                </Link>
+                <button
+                  type="button"
+                  className={`${styles.actionButton} ${styles.publishAction}`}
+                  onClick={() => handlePublish(recipe)}
+                >
+                  {isPublished ? iconUnpublish : iconPublish}
+                  {isPublished ? 'Unpublish' : 'Publish'}
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.actionButton} ${styles.deleteAction}`}
+                  onClick={() => setDeleteTarget(recipe)}
+                >
+                  {iconDelete}
+                  Delete
+                </button>
+              </div>
+            </li>
+          )
+        })}
+      </ul>
     )
   }
 
-  return <div className={styles.page}>{renderContent()}</div>
+  return (
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <div>
+          <Typography variant="heading1" className={styles.heading}>
+            Recipes
+          </Typography>
+          <Typography variant="body" className={styles.subtitle}>
+            {pluralize(sortedRecipes.length, 'recipe')}
+          </Typography>
+        </div>
+        <Link to="/admin/recipes/new" className={styles.newButton}>
+          {iconPlus}
+          New recipe
+        </Link>
+      </div>
+
+      {renderBody()}
+
+      <ConfirmDialog
+        title="Delete recipe"
+        danger
+        open={deleteTarget !== null}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteTarget(null)}
+      >
+        Are you sure you want to delete &quot;{deleteTarget?.title ?? ''}
+        &quot;?
+      </ConfirmDialog>
+    </div>
+  )
 }
 
 export default RecipeList

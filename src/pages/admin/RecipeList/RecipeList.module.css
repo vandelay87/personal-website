@@ -1,83 +1,317 @@
+/* Matches the design's admin `<main>` column exactly (Admin Recipes.dc.html
+   line 98) — the shared AdminLayout `<main>` sets no max-width of its own,
+   each admin page supplies it. --max-w-site (1080px) is the same token
+   Header/Footer use for their own inner width. */
 .page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  max-width: 64rem;
-  margin: 0 auto;
+  max-width: var(--max-w-site);
+  margin-inline: auto;
+  padding: clamp(32px, 5vw, 52px) clamp(20px, 5vw, 28px) 64px;
   box-sizing: border-box;
-}
-
-.loadingWrapper {
-  display: flex;
-  justify-content: center;
-  padding: var(--space-12) 0;
 }
 
 .header {
   display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-end;
+  justify-content: space-between;
+  /* 30px: design literal (Admin Recipes.dc.html line 101) — --space-8
+     (32px) is the nearest token but is 2px off. */
+  margin-bottom: 30px;
+}
+
+/* .header .heading (not bare `.heading`): raises specificity above
+   Typography's own `.heading1` — see RecipeDetailView.module.css's
+   `.header .title` for the same pattern/rationale. */
+.header .heading {
+  font-size: clamp(28px, 4vw, 34px);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.025em;
+  margin: 0 0 6px;
+}
+
+/* .header .subtitle (not bare): raises specificity above Typography's own
+   `.body`. */
+.header .subtitle {
+  font-size: 14.5px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* ── "New recipe" / "Create your first recipe" primary button ──────────
+   Applied to the shared Link component (client-side routing to
+   /admin/recipes/new) rather than Button, which has no polymorphic `as`/
+   href support — see RecipeDetailView.module.css's `.backLink` for the
+   same "style Link locally" precedent. Grouped selector: reused in both
+   the page header and the empty state. A bare `.newButton` class would tie
+   in specificity with Link's own `.link` (color, gap, radius) — same
+   failure mode documented throughout this file, fixed the same way. */
+.header .newButton,
+.emptyBox .newButton {
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-btn-fg);
+  background: var(--color-btn-bg);
+  border-radius: var(--radius-md);
+  padding: 11px 18px;
+  gap: var(--space-2);
+  transition: opacity var(--duration-fast) var(--easing-default),
+    transform var(--duration-fast) var(--easing-default);
+}
+
+.header .newButton:hover,
+.emptyBox .newButton:hover {
+  color: var(--color-btn-fg);
+  opacity: 0.9;
+}
+
+.header .newButton:active,
+.emptyBox .newButton:active {
+  transform: translateY(1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header .newButton,
+  .emptyBox .newButton {
+    transition: none;
+  }
+}
+
+/* ── Recipe row list ─────────────────────────────────────────────────
+   `<ul>/<li>`, not `<table>` — the design has zero table markup (a
+   bordered container of stacked flex rows). */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--color-field);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  /* 16px/20px: design literal (row gap / column gap), no single token
+     covers both. */
+  gap: 16px 20px;
   align-items: center;
   justify-content: space-between;
+  padding: 18px clamp(16px, 2.5vw, 22px);
+  transition: background var(--duration-fast) var(--easing-default);
 }
 
-.newRecipeLink {
-  font-weight: var(--font-weight-semibold);
+.row:not(:first-child) {
+  border-top: var(--border-width) solid var(--color-border);
 }
 
-.tableWrapper {
-  overflow-x: auto;
+.row:hover {
+  background: var(--color-hover);
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  border: var(--border-width) solid var(--color-border);
-  background: var(--color-surface);
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    transition: none;
+  }
 }
 
-.table th,
-.table td {
-  padding: var(--space-3) var(--space-4);
-  text-align: left;
-  vertical-align: middle;
-  border-bottom: var(--border-width) solid var(--color-border);
-  white-space: nowrap;
+.rowMain {
+  min-width: 240px;
+  flex: 1;
 }
 
-.table td:first-child {
-  white-space: normal;
-}
-
-.table th {
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  background: var(--color-bg);
-}
-
-.actionsInner {
+.rowTop {
   display: flex;
-  gap: var(--space-2);
   align-items: center;
+  gap: 11px;
+  margin-bottom: 9px;
 }
 
-.table td.actions {
-  border-bottom: none;
+/* .rowTop .rowTitle (not bare): raises specificity above Typography's own
+   `.heading2` — same pattern as `.header .heading` above. */
+.rowTop .rowTitle {
+  font-size: 16.5px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.015em;
+  margin: 0;
+  color: var(--color-text-strong);
 }
 
-.actionLink {
-  background: none;
-  border: none;
+.rowMeta {
+  list-style: none;
+  margin: 0;
   padding: 0;
-  color: var(--color-link);
-  font: inherit;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  /* 7px: design literal, between --space-1 (4px) and --space-2 (8px). */
+  gap: 7px;
 }
 
-.actionLink:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-  outline-offset: 2px;
+.tagChip {
+  composes: tagChipBase from '../../../styles/text.module.css';
+  /* This design's chip padding (3px 8px) is smaller than
+     RecipeDetailView's tag (5px 10px) — each `tagChipBase` consumer sets
+     its own padding, per that composable's own doc comment. */
+  padding: 3px 8px;
+  display: inline-block;
+}
+
+.updatedLabel {
+  font-size: 12.5px;
+  color: var(--color-text-faint);
+  /* 4px: design literal, on top of `.rowMeta`'s own 7px gap (Admin
+     Recipes.dc.html line 126 sets this margin in addition to the flex
+     gap already separating every sibling). */
+  margin-left: 4px;
+}
+
+.rowActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+/* CSS Modules only allows `composes` on a rule with a single bare local
+   class selector, not a compound/descendant one — `composes` inside
+   `.rowActions .actionButton { ... }` fails the build entirely
+   ("composition is only allowed when selector is single :local class
+   name"). Split: the bare `.actionButton` class carries the composed
+   focusRing; the descendant-scoped rule below carries the specificity-tie
+   fix (same rationale as `.header .newButton` above) and everything else. */
+.actionButton {
+  composes: focusRing from '../../../styles/interactions.module.css';
+}
+
+.rowActions .actionButton {
+  /* display/align-items/font-family are already inherited from Link's own
+     `.link` for Edit/Preview, but the native Publish/Delete `<button>`s
+     have no such base class — set explicitly so both element types match. */
+  display: inline-flex;
+  align-items: center;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  background: transparent;
+  border: var(--border-width) solid transparent;
+  /* 8px: design literal — --radius-sm (6px) is the nearest token but is
+     2px off. */
+  border-radius: 8px;
+  padding: 6px 10px;
+  /* 6px: design literal, between --space-1 (4px) and --space-2 (8px). */
+  gap: 6px;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-default),
+    background var(--duration-fast) var(--easing-default);
+}
+
+.rowActions .actionButton svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.rowActions .actionButton:hover {
+  color: var(--color-text-strong);
+  background: var(--color-hover);
+}
+
+.rowActions .publishAction:hover {
+  color: var(--color-success);
+  background: var(--color-success-bg);
+}
+
+.rowActions .deleteAction:hover {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rowActions .actionButton {
+    transition: none;
+  }
+}
+
+/* ── Empty / loading / error states — shared box shape ────────────── */
+
+.emptyBox,
+.loadingBox,
+.errorBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border-radius: var(--radius-xl);
+}
+
+.emptyBox {
+  border: 1px dashed var(--color-border);
+  padding: clamp(48px, 8vw, 84px) 24px;
+}
+
+.loadingBox {
+  border: var(--border-width) solid var(--color-border);
+  padding: clamp(56px, 9vw, 92px) 24px;
+  gap: 18px;
+}
+
+.errorBox {
+  border: var(--border-width) solid color-mix(in srgb, var(--color-error) 30%, var(--color-border));
+  background: var(--color-error-bg);
+  padding: clamp(48px, 8vw, 80px) 24px;
+}
+
+.emptyIcon,
+.errorIcon {
+  width: 52px;
+  height: 52px;
+  /* 14px: design literal — between --radius-lg (12px) and --radius-xl
+     (16px), neither an exact match. */
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.emptyIcon {
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.errorIcon {
+  background: var(--color-field);
+  border: var(--border-width) solid color-mix(in srgb, var(--color-error) 30%, var(--color-border));
+  color: var(--color-error);
+}
+
+/* .emptyBox .emptyHeading / .errorBox .errorHeading (not bare): raise
+   specificity above Typography's own `.heading2`. */
+.emptyBox .emptyHeading,
+.errorBox .errorHeading {
+  font-size: 20px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+}
+
+/* .emptyBox .emptyBody / .errorBox .errorBody (not bare): raise
+   specificity above Typography's own `.body`. Identical apart from
+   max-width (36ch vs 38ch per the design's own two paragraphs), so the
+   shared declarations live in one rule and each box overrides just that. */
+.emptyBox .emptyBody,
+.errorBox .errorBody {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  margin: 0 0 24px;
+  max-width: 36ch;
+}
+
+.errorBox .errorBody {
+  max-width: 38ch;
 }

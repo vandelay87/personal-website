@@ -5,6 +5,7 @@ import type { Recipe } from '@models/recipe'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { axe } from 'vitest-axe'
 
 import RecipeList from './RecipeList'
 
@@ -274,8 +275,11 @@ describe('Admin RecipeList page', () => {
       expect(screen.getByText('Newest')).toBeInTheDocument()
     })
 
-    const rows = screen.getAllByRole('row').slice(1) // skip header row
-    const titles = rows.map((row) => within(row).getAllByRole('cell')[0].textContent)
+    // Row titles are the only level-2 headings on the page, so their DOM
+    // order reflects the row order rendered by the list.
+    const titles = screen
+      .getAllByRole('heading', { level: 2 })
+      .map((heading) => heading.textContent)
 
     expect(titles).toEqual(['Newest', 'Middle', 'Oldest'])
   })
@@ -287,13 +291,47 @@ describe('Admin RecipeList page', () => {
       expect(screen.getByText('Spaghetti Bolognese')).toBeInTheDocument()
     })
 
-    const draftRow = screen.getByText('Spaghetti Bolognese').closest('tr')
-    const publishedRow = screen.getByText('Thai Green Curry').closest('tr')
+    const draftRow = screen.getByText('Spaghetti Bolognese').closest('li')
+    const publishedRow = screen.getByText('Thai Green Curry').closest('li')
 
     expect(draftRow).not.toBeNull()
     expect(publishedRow).not.toBeNull()
 
     expect(within(draftRow as HTMLElement).getByText(/draft/i)).toBeInTheDocument()
     expect(within(publishedRow as HTMLElement).getByText(/^published$/i)).toBeInTheDocument()
+  })
+
+  describe('accessibility', () => {
+    it('renders the loaded recipe list with no detectable axe violations', async () => {
+      const { container } = renderRecipeList()
+
+      await waitFor(() => {
+        expect(screen.getByText('Spaghetti Bolognese')).toBeInTheDocument()
+      })
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
+
+    it('renders the empty state with no detectable axe violations', async () => {
+      vi.mocked(fetchAllRecipes).mockResolvedValue([])
+      const { container } = renderRecipeList()
+
+      await waitFor(() => {
+        expect(screen.getByText(/no recipes yet/i)).toBeInTheDocument()
+      })
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
+
+    it('renders the error state with no detectable axe violations', async () => {
+      vi.mocked(fetchAllRecipes).mockRejectedValue(new Error('500 Internal Server Error'))
+      const { container } = renderRecipeList()
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
+      })
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
   })
 })
