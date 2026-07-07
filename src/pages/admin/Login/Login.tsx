@@ -1,9 +1,11 @@
 import { completeNewPassword } from '@api/auth'
 import Button from '@components/Button'
+import Card from '@components/Card'
+import Input from '@components/Input'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import type { AuthChallenge } from '@models/auth'
-import { type FormEvent, useState } from 'react'
+import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import styles from './Login.module.css'
@@ -13,6 +15,17 @@ const isChallenge = (result: unknown): result is AuthChallenge =>
   result !== null &&
   'challengeName' in result &&
   (result as AuthChallenge).challengeName === 'NEW_PASSWORD_REQUIRED'
+
+interface FieldConfig {
+  id: string
+  name: string
+  label: string
+  type: string
+  autoComplete: string
+  placeholder: string
+  value: string
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void
+}
 
 const Login = () => {
   const { login } = useAuth()
@@ -28,7 +41,24 @@ const Login = () => {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
 
+  const formRef = useRef<HTMLFormElement>(null)
+  const hadChallengeRef = useRef(false)
+
   const redirectTo = searchParams.get('redirect') ?? '/admin/recipes'
+  const isSetPassword = Boolean(challenge)
+
+  // Moves focus to the first field of the newly-shown form when the Cognito
+  // NEW_PASSWORD_REQUIRED challenge flips the page from sign-in to
+  // set-password mode. Skipped on mount (hadChallengeRef starts aligned with
+  // the initial `challenge` state) so it only fires on the actual transition.
+  // Input doesn't forward a ref to its underlying <input> (it's a plain FC),
+  // so this queries the DOM instead of focusing a field ref directly.
+  useEffect(() => {
+    if (isSetPassword !== hadChallengeRef.current) {
+      formRef.current?.querySelector<HTMLInputElement>('input')?.focus()
+    }
+    hadChallengeRef.current = isSetPassword
+  }, [isSetPassword])
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault()
@@ -80,103 +110,122 @@ const Login = () => {
     }
   }
 
-  if (challenge) {
-    return (
-      <div className={styles.page}>
-        <form className={styles.form} onSubmit={handleNewPassword}>
-          <Typography variant="heading2" className={styles.title}>
-            Set new password
-          </Typography>
+  const heading = isSetPassword ? 'Set a new password' : 'Sign in'
+  const subheading = isSetPassword
+    ? 'Your account needs a password before you can continue.'
+    : 'Enter your credentials to access the admin.'
+  const idleLabel = isSetPassword ? 'Set password & continue' : 'Sign in'
+  const loadingLabel = isSetPassword ? 'Saving…' : 'Signing in…'
+  const submitLabel = loading ? loadingLabel : idleLabel
 
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="new-password">
-              New password
-            </label>
-            <input
-              id="new-password"
-              className={styles.input}
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              aria-describedby={error ? 'form-error' : undefined}
-            />
-          </div>
-
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="confirm-password">
-              Confirm password
-            </label>
-            <input
-              id="confirm-password"
-              className={styles.input}
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              aria-describedby={error ? 'form-error' : undefined}
-            />
-          </div>
-
-          {error && (
-            <p id="form-error" className={styles.error}>
-              {error}
-            </p>
-          )}
-
-          <Button type="submit" loading={loading}>
-            Set new password
-          </Button>
-        </form>
-      </div>
-    )
-  }
+  const fields: FieldConfig[] = isSetPassword
+    ? [
+        {
+          id: 'new-password',
+          name: 'newPassword',
+          label: 'New password',
+          type: 'password',
+          autoComplete: 'new-password',
+          placeholder: 'At least 8 characters',
+          value: newPassword,
+          onChange: (e) => setNewPassword(e.target.value),
+        },
+        {
+          id: 'confirm-password',
+          name: 'confirmPassword',
+          label: 'Confirm password',
+          type: 'password',
+          autoComplete: 'new-password',
+          placeholder: 'Re-enter your new password',
+          value: confirmPassword,
+          onChange: (e) => setConfirmPassword(e.target.value),
+        },
+      ]
+    : [
+        {
+          id: 'email',
+          name: 'email',
+          label: 'Email',
+          type: 'email',
+          autoComplete: 'username',
+          placeholder: 'you@akli.dev',
+          value: email,
+          onChange: (e) => setEmail(e.target.value),
+        },
+        {
+          id: 'password',
+          name: 'password',
+          label: 'Password',
+          type: 'password',
+          autoComplete: 'current-password',
+          placeholder: '••••••••••',
+          value: password,
+          onChange: (e) => setPassword(e.target.value),
+        },
+      ]
 
   return (
     <div className={styles.page}>
-      <form className={styles.form} onSubmit={handleLogin}>
-        <Typography variant="heading2" className={styles.title}>
-          Log in
+      <div className={styles.column}>
+        <Card fill radius="var(--radius-2xl)" padding="clamp(26px, 4vw, 34px)">
+          <header className={styles.cardHeader}>
+            <Typography variant="heading3" as="h1" className={styles.heading}>
+              {heading}
+            </Typography>
+            <Typography variant="body" as="p" className={styles.subheading}>
+              {subheading}
+            </Typography>
+          </header>
+
+          {error && (
+            <div id="form-error" role="alert" className={styles.errorBox}>
+              <span aria-hidden="true" className={styles.errorDot}>
+                ●
+              </span>
+              <span className={styles.errorText}>{error}</span>
+            </div>
+          )}
+
+          <form
+            ref={formRef}
+            className={styles.form}
+            onSubmit={isSetPassword ? handleNewPassword : handleLogin}
+            noValidate
+          >
+            {fields.map((field) => (
+              <label key={field.id} className={styles.field} htmlFor={field.id}>
+                <Typography variant="label" as="span">
+                  {field.label}
+                </Typography>
+                <Input
+                  id={field.id}
+                  name={field.name}
+                  type={field.type}
+                  autoComplete={field.autoComplete}
+                  placeholder={field.placeholder}
+                  value={field.value}
+                  onChange={field.onChange}
+                  ariaDescribedBy={error ? 'form-error' : undefined}
+                />
+              </label>
+            ))}
+
+            <Button type="submit" loading={loading} fullWidth>
+              {submitLabel}
+            </Button>
+          </form>
+
+          {isSetPassword && (
+            <Typography variant="caption" as="p" className={styles.footnote}>
+              First time signing in? Choose a password to finish setting up your account.
+            </Typography>
+          )}
+        </Card>
+
+        <Typography variant="caption" as="p" className={styles.belowCard}>
+          Authorized access only.
         </Typography>
-
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="email">
-            Email
-          </label>
-          <input
-            id="email"
-            className={styles.input}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            aria-describedby={error ? 'form-error' : undefined}
-            required
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="password">
-            Password
-          </label>
-          <input
-            id="password"
-            className={styles.input}
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            aria-describedby={error ? 'form-error' : undefined}
-            required
-          />
-        </div>
-
-        {error && (
-          <p id="form-error" className={styles.error}>
-            {error}
-          </p>
-        )}
-
-        <Button type="submit" loading={loading}>
-          Log in
-        </Button>
-      </form>
+      </div>
     </div>
   )
 }
