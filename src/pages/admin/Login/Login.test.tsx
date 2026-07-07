@@ -4,6 +4,7 @@ import type { AuthChallenge, AuthTokens } from '@models/auth'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { axe } from 'vitest-axe'
 
 import Login from './Login'
 
@@ -52,7 +53,7 @@ const renderLogin = (initialPath = '/admin/login') => {
     getAccessToken: vi.fn(),
   })
 
-  render(
+  const { container } = render(
     <MemoryRouter initialEntries={[initialPath]}>
       <Routes>
         <Route path="/admin/login" element={<Login />} />
@@ -63,7 +64,7 @@ const renderLogin = (initialPath = '/admin/login') => {
     </MemoryRouter>
   )
 
-  return { mockLogin }
+  return { mockLogin, container }
 }
 
 const fillAndSubmitLoginForm = (
@@ -231,5 +232,26 @@ describe('Login page', () => {
     expect(passwordInput.tagName).toBe('INPUT')
     expect(emailInput).toHaveAttribute('type', 'email')
     expect(passwordInput).toHaveAttribute('type', 'password')
+  })
+
+  describe('accessibility', () => {
+    it('renders the default sign-in form with no detectable axe violations', async () => {
+      const { container } = renderLogin()
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
+
+    it('renders the set-password form with no detectable axe violations', async () => {
+      const { mockLogin, container } = renderLogin()
+      mockLogin.mockResolvedValue(mockChallenge)
+
+      fillAndSubmitLoginForm('admin@example.com', 'temppass')
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/new password/i)).toBeInTheDocument()
+      })
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
   })
 })

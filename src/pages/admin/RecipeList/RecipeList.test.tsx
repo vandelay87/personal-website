@@ -5,6 +5,7 @@ import type { Recipe } from '@models/recipe'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { axe } from 'vitest-axe'
 
 import RecipeList from './RecipeList'
 
@@ -298,5 +299,39 @@ describe('Admin RecipeList page', () => {
 
     expect(within(draftRow as HTMLElement).getByText(/draft/i)).toBeInTheDocument()
     expect(within(publishedRow as HTMLElement).getByText(/^published$/i)).toBeInTheDocument()
+  })
+
+  describe('accessibility', () => {
+    it('renders the loaded recipe list with no detectable axe violations', async () => {
+      const { container } = renderRecipeList()
+
+      await waitFor(() => {
+        expect(screen.getByText('Spaghetti Bolognese')).toBeInTheDocument()
+      })
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
+
+    it('renders the empty state with no detectable axe violations', async () => {
+      vi.mocked(fetchAllRecipes).mockResolvedValue([])
+      const { container } = renderRecipeList()
+
+      await waitFor(() => {
+        expect(screen.getByText(/no recipes yet/i)).toBeInTheDocument()
+      })
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
+
+    it('renders the error state with no detectable axe violations', async () => {
+      vi.mocked(fetchAllRecipes).mockRejectedValue(new Error('500 Internal Server Error'))
+      const { container } = renderRecipeList()
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
+      })
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
   })
 })
