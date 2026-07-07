@@ -41,23 +41,21 @@ const Login = () => {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
 
-  const formRef = useRef<HTMLFormElement>(null)
-  const hadChallengeRef = useRef(false)
+  const firstFieldRef = useRef<HTMLInputElement>(null)
 
   const redirectTo = searchParams.get('redirect') ?? '/admin/recipes'
   const isSetPassword = Boolean(challenge)
 
   // Moves focus to the first field of the newly-shown form when the Cognito
   // NEW_PASSWORD_REQUIRED challenge flips the page from sign-in to
-  // set-password mode. Skipped on mount (hadChallengeRef starts aligned with
-  // the initial `challenge` state) so it only fires on the actual transition.
-  // Input doesn't forward a ref to its underlying <input> (it's a plain FC),
-  // so this queries the DOM instead of focusing a field ref directly.
+  // set-password mode. `challenge` only ever transitions null -> set (never
+  // back), so this effect's own [isSetPassword] dependency already gates it
+  // to firing once, on that transition — it can't re-fire on mount, since
+  // isSetPassword starts false there.
   useEffect(() => {
-    if (isSetPassword !== hadChallengeRef.current) {
-      formRef.current?.querySelector<HTMLInputElement>('input')?.focus()
+    if (isSetPassword) {
+      firstFieldRef.current?.focus()
     }
-    hadChallengeRef.current = isSetPassword
   }, [isSetPassword])
 
   const handleLogin = async (e: FormEvent) => {
@@ -110,13 +108,20 @@ const Login = () => {
     }
   }
 
-  const heading = isSetPassword ? 'Set a new password' : 'Sign in'
-  const subheading = isSetPassword
-    ? 'Your account needs a password before you can continue.'
-    : 'Enter your credentials to access the admin.'
-  const idleLabel = isSetPassword ? 'Set password & continue' : 'Sign in'
-  const loadingLabel = isSetPassword ? 'Saving…' : 'Signing in…'
-  const submitLabel = loading ? loadingLabel : idleLabel
+  const copy = isSetPassword
+    ? {
+        heading: 'Set a new password',
+        subheading: 'Your account needs a password before you can continue.',
+        idleLabel: 'Set password & continue',
+        loadingLabel: 'Saving…',
+      }
+    : {
+        heading: 'Sign in',
+        subheading: 'Enter your credentials to access the admin.',
+        idleLabel: 'Sign in',
+        loadingLabel: 'Signing in…',
+      }
+  const submitLabel = loading ? copy.loadingLabel : copy.idleLabel
 
   const fields: FieldConfig[] = isSetPassword
     ? [
@@ -170,10 +175,10 @@ const Login = () => {
         <Card fill radius="var(--radius-2xl)" padding="clamp(26px, 4vw, 34px)">
           <header className={styles.cardHeader}>
             <Typography variant="heading3" as="h1" className={styles.heading}>
-              {heading}
+              {copy.heading}
             </Typography>
             <Typography variant="body" as="p" className={styles.subheading}>
-              {subheading}
+              {copy.subheading}
             </Typography>
           </header>
 
@@ -187,17 +192,17 @@ const Login = () => {
           )}
 
           <form
-            ref={formRef}
             className={styles.form}
             onSubmit={isSetPassword ? handleNewPassword : handleLogin}
             noValidate
           >
-            {fields.map((field) => (
+            {fields.map((field, index) => (
               <label key={field.id} className={styles.field} htmlFor={field.id}>
                 <Typography variant="label" as="span">
                   {field.label}
                 </Typography>
                 <Input
+                  ref={index === 0 ? firstFieldRef : undefined}
                   id={field.id}
                   name={field.name}
                   type={field.type}

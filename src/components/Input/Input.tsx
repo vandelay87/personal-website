@@ -1,4 +1,4 @@
-import type { ChangeEvent, FC, KeyboardEvent, ReactNode } from 'react'
+import { forwardRef, type ChangeEvent, type KeyboardEvent, type ReactNode } from 'react'
 import styles from './Input.module.css'
 
 export interface InputProps {
@@ -23,24 +23,27 @@ export interface InputProps {
   className?: string
 }
 
-const Input: FC<InputProps> = ({
-  type = 'text',
-  value,
-  placeholder,
-  invalid = false,
-  disabled = false,
-  prefixIcon,
-  suffix,
-  onChange,
-  onKeyDown,
-  id,
-  name,
-  required,
-  autoComplete,
-  ariaLabel,
-  ariaDescribedBy,
-  className: extraClassName,
-}) => {
+const Input = forwardRef<HTMLInputElement, InputProps>((
+  {
+    type = 'text',
+    value,
+    placeholder,
+    invalid = false,
+    disabled = false,
+    prefixIcon,
+    suffix,
+    onChange,
+    onKeyDown,
+    id,
+    name,
+    required,
+    autoComplete,
+    ariaLabel,
+    ariaDescribedBy,
+    className: extraClassName,
+  },
+  ref
+) => {
   const fieldClassName = [styles.field, invalid && styles.invalid, extraClassName]
     .filter(Boolean)
     .join(' ')
@@ -53,6 +56,7 @@ const Input: FC<InputProps> = ({
         </span>
       )}
       <input
+        ref={ref}
         id={id}
         name={name}
         type={type}
@@ -71,6 +75,8 @@ const Input: FC<InputProps> = ({
       {suffix && <span className={styles.suffix}>{suffix}</span>}
     </div>
   )
-}
+})
+
+Input.displayName = 'Input'
 
 export default Input

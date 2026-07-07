@@ -1,20 +1,5 @@
 const DAY_MS = 86_400_000
 
-const MONTH_LABELS = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-]
-
 /**
  * `relativeUpdatedLabel('2026-06-27T10:00:00Z')` -> `'Updated 3 days ago'`
  * (relative to `now`, which defaults to the current time). Thresholds match
@@ -32,5 +17,5 @@ export const relativeUpdatedLabel = (isoDate: string, now: Date = new Date()): s
   if (days < 14) return 'Updated last week'
   if (days < 30) return `Updated ${Math.floor(days / 7)} weeks ago`
 
-  return `Updated ${updated.getDate()} ${MONTH_LABELS[updated.getMonth()]} ${updated.getFullYear()}`
+  return `Updated ${updated.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`
 }

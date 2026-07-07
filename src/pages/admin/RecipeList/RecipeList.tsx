@@ -165,9 +165,6 @@ const iconRetry = (
   </svg>
 )
 
-const publishActionClassName = `${styles.actionButton} ${styles.publishAction}`
-const deleteActionClassName = `${styles.actionButton} ${styles.deleteAction}`
-
 const RecipeList = () => {
   const { getAccessToken, logout } = useAuth()
   const { showToast } = useToast()
@@ -286,6 +283,8 @@ const RecipeList = () => {
       )
     }
 
+    const now = new Date()
+
     return (
       <ul className={styles.list}>
         {sortedRecipes.map((recipe) => {
@@ -308,7 +307,7 @@ const RecipeList = () => {
                     </li>
                   ))}
                   <li className={styles.updatedLabel}>
-                    {relativeUpdatedLabel(recipe.updatedAt)}
+                    {relativeUpdatedLabel(recipe.updatedAt, now)}
                   </li>
                 </ul>
               </div>
@@ -331,7 +330,7 @@ const RecipeList = () => {
                 </Link>
                 <button
                   type="button"
-                  className={publishActionClassName}
+                  className={`${styles.actionButton} ${styles.publishAction}`}
                   onClick={() => handlePublish(recipe)}
                 >
                   {isPublished ? iconUnpublish : iconPublish}
@@ -339,7 +338,7 @@ const RecipeList = () => {
                 </button>
                 <button
                   type="button"
-                  className={deleteActionClassName}
+                  className={`${styles.actionButton} ${styles.deleteAction}`}
                   onClick={() => setDeleteTarget(recipe)}
                 >
                   {iconDelete}
