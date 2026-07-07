@@ -1,15 +1,22 @@
 /* Self-hosted webfonts — Geist (sans) + JetBrains Mono (mono).
    Latin subset, weights actually used by the design system only.
-   Files vendored from the official Fontsource-distributed woff2 builds
-   (@fontsource/geist-sans, @fontsource/jetbrains-mono — used only as a
-   one-time local source for the binaries; no runtime dependency).
    OFL.txt (SIL Open Font License) ships alongside in ../assets/fonts/. */
 
 /* ── Geist (sans) ─────────────────────────────────────────── */
 
+/* Geist ships as a single variable-font file covering the whole weight
+   axis — vendored from the same file Google Fonts itself serves
+   (fonts.gstatic.com/s/geist/v5/gyByhwUxId8gMEwcGFWNOITd.woff2), which
+   also declares four separate weight-pinned @font-face blocks all
+   pointing at that one file rather than four distinct static files.
+   Mirrored here: each block below pins a specific instance from the
+   same physical file (the browser resolves the correct weight from the
+   variable axis per the declared font-weight), so there's one download
+   shared across all four instead of four separate ~29KB requests for
+   identical bytes under different filenames. */
 @font-face {
   font-family: 'Geist';
-  src: url('../assets/fonts/geist-sans-latin-400-normal.woff2') format('woff2');
+  src: url('../assets/fonts/geist-sans-latin-variable.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -17,7 +24,7 @@
 
 @font-face {
   font-family: 'Geist';
-  src: url('../assets/fonts/geist-sans-latin-500-normal.woff2') format('woff2');
+  src: url('../assets/fonts/geist-sans-latin-variable.woff2') format('woff2');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -25,7 +32,7 @@
 
 @font-face {
   font-family: 'Geist';
-  src: url('../assets/fonts/geist-sans-latin-600-normal.woff2') format('woff2');
+  src: url('../assets/fonts/geist-sans-latin-variable.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -33,7 +40,7 @@
 
 @font-face {
   font-family: 'Geist';
-  src: url('../assets/fonts/geist-sans-latin-700-normal.woff2') format('woff2');
+  src: url('../assets/fonts/geist-sans-latin-variable.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
