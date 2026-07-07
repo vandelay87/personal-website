@@ -200,13 +200,16 @@ vi.mock('@components/ImageUpload', () => ({
 }))
 
 const fillValidCoverImage = async (user: UserEvent) => {
-  await user.type(screen.getByLabelText(/cover image alt text/i), 'Cover alt text')
-  // Simulate the image processing poll detecting the uploaded cover as ready.
-  // Without this, the publish gate would consider the cover image absent
-  // (no processedAt) and Publish stays disabled.
+  // Simulate the image processing poll detecting the uploaded cover as ready
+  // first — the cover alt-text field only renders once
+  // `form.coverImageProcessedAt` is set (#228), so readiness must be
+  // signalled before the "Alt text" input exists to type into. Without this,
+  // the publish gate would also consider the cover image absent (no
+  // processedAt) and Publish would stay disabled.
   pollControls.triggerReady([
     { imageType: 'cover', processedAt: 1_700_000_000_000 },
   ])
+  await user.type(screen.getByLabelText(/^alt text$/i), 'Cover alt text')
 }
 
 const fillAllRequired = async (user: UserEvent) => {
@@ -718,7 +721,8 @@ describe('RecipeEditor page', () => {
       await user.click(screen.getByRole('button', { name: /discard draft/i }))
 
       const dialog = await screen.findByRole('dialog')
-      const cancelButton = within(dialog).getByRole('button', { name: /cancel|stay/i })
+      // Cancel label reads "Keep editing" in the paper redesign (#228).
+      const cancelButton = within(dialog).getByRole('button', { name: /cancel|stay|keep editing/i })
       await user.click(cancelButton)
 
       await waitFor(() => {
@@ -737,7 +741,13 @@ describe('RecipeEditor page', () => {
       })
 
       expect(screen.getByRole('textbox', { name: /intro/i })).toBeInTheDocument()
-      expect(screen.getByLabelText(/cover image alt text/i)).toBeInTheDocument()
+
+      // The cover alt-text field only renders once the cover image has a
+      // processedAt (#228) — simulate the poll reporting the cover ready
+      // before asserting the field appears.
+      pollControls.triggerReady([{ imageType: 'cover', processedAt: 1_700_000_000_000 }])
+
+      expect(screen.getByLabelText(/^alt text$/i)).toBeInTheDocument()
     })
 
     it('populates form from fetched recipe on edit mount', async () => {
@@ -993,7 +1003,7 @@ describe('RecipeEditor page', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText(/session expired.*please log in again/i)
+          screen.getByText(/your session has expired\. log in again to keep editing/i)
         ).toBeInTheDocument()
       })
 
@@ -1302,7 +1312,7 @@ describe('RecipeEditor page', () => {
         expect(createDraft).toHaveBeenCalled()
       })
 
-      expect(screen.getByLabelText('Slug')).toBeInTheDocument()
+      expect(screen.getByLabelText('URL slug')).toBeInTheDocument()
     })
 
     it('auto-fills the slug as sluggify(title) while typing the title', async () => {
@@ -1316,7 +1326,7 @@ describe('RecipeEditor page', () => {
       await user.type(screen.getByRole('textbox', { name: /title/i }), 'Beans on Toast')
 
       await waitFor(() => {
-        expect(screen.getByLabelText('Slug')).toHaveValue('beans-on-toast')
+        expect(screen.getByLabelText('URL slug')).toHaveValue('beans-on-toast')
       })
     })
 
@@ -1330,21 +1340,21 @@ describe('RecipeEditor page', () => {
 
       await user.type(screen.getByRole('textbox', { name: /title/i }), 'Beans on Toast')
       await waitFor(() => {
-        expect(screen.getByLabelText('Slug')).toHaveValue('beans-on-toast')
+        expect(screen.getByLabelText('URL slug')).toHaveValue('beans-on-toast')
       })
 
       // User overrides the slug.
-      const slugInput = screen.getByLabelText('Slug')
+      const slugInput = screen.getByLabelText('URL slug')
       await user.clear(slugInput)
       await user.type(slugInput, 'bot')
 
       // Further title edits must NOT touch the slug.
       await user.type(screen.getByRole('textbox', { name: /title/i }), ' Deluxe')
 
-      expect(screen.getByLabelText('Slug')).toHaveValue('bot')
+      expect(screen.getByLabelText('URL slug')).toHaveValue('bot')
     })
 
-    it('"Reset to title slug" re-derives the slug from the title and re-enables auto-fill', async () => {
+    it('"Reset to title" re-derives the slug from the title and re-enables auto-fill', async () => {
       const user = userEvent.setup()
       renderEditor('/admin/recipes/new')
 
@@ -1353,20 +1363,20 @@ describe('RecipeEditor page', () => {
       })
 
       await user.type(screen.getByRole('textbox', { name: /title/i }), 'Beans on Toast')
-      const slugInput = screen.getByLabelText('Slug')
+      const slugInput = screen.getByLabelText('URL slug')
       await user.clear(slugInput)
       await user.type(slugInput, 'bot')
 
-      await user.click(screen.getByRole('button', { name: /reset to title slug/i }))
+      await user.click(screen.getByRole('button', { name: /^reset to title$/i }))
 
       await waitFor(() => {
-        expect(screen.getByLabelText('Slug')).toHaveValue('beans-on-toast')
+        expect(screen.getByLabelText('URL slug')).toHaveValue('beans-on-toast')
       })
 
       // Auto-fill is re-enabled: a further title edit updates the slug again.
       await user.type(screen.getByRole('textbox', { name: /title/i }), ' Deluxe')
       await waitFor(() => {
-        expect(screen.getByLabelText('Slug')).toHaveValue('beans-on-toast-deluxe')
+        expect(screen.getByLabelText('URL slug')).toHaveValue('beans-on-toast-deluxe')
       })
     })
 
@@ -1395,14 +1405,14 @@ describe('RecipeEditor page', () => {
         expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
       })
 
-      const slugInput = screen.getByLabelText('Slug')
+      const slugInput = screen.getByLabelText('URL slug')
       // draftRecipe's cover has processedAt → slug is locked.
       expect(slugInput).toHaveAttribute('readonly')
       expect(slugInput).toHaveAttribute('aria-disabled', 'true')
 
       // A visible lock hint is shown, and the reset button is hidden.
-      expect(screen.getByText(/slug is locked/i)).toBeInTheDocument()
-      expect(screen.queryByRole('button', { name: /reset to title slug/i })).not.toBeInTheDocument()
+      expect(screen.getByText(/images reference this url/i)).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /^reset to title$/i })).not.toBeInTheDocument()
     })
 
     it('locks the slug input while an image upload is in flight (uploadingStepIds / cover)', async () => {
@@ -1416,21 +1426,21 @@ describe('RecipeEditor page', () => {
       })
 
       // Not locked initially.
-      expect(screen.getByLabelText('Slug')).not.toHaveAttribute('readonly')
+      expect(screen.getByLabelText('URL slug')).not.toHaveAttribute('readonly')
 
       // Fire the cover upload-started callback through the ImageUpload stub.
       await user.click(screen.getByRole('button', { name: /start upload cover image/i }))
 
       await waitFor(() => {
-        expect(screen.getByLabelText('Slug')).toHaveAttribute('aria-disabled', 'true')
+        expect(screen.getByLabelText('URL slug')).toHaveAttribute('aria-disabled', 'true')
       })
-      expect(screen.getByLabelText('Slug')).toHaveAttribute('readonly')
+      expect(screen.getByLabelText('URL slug')).toHaveAttribute('readonly')
 
       // Completing the upload clears the in-flight lock.
       await user.click(screen.getByRole('button', { name: /complete upload cover image/i }))
 
       await waitFor(() => {
-        expect(screen.getByLabelText('Slug')).not.toHaveAttribute('readonly')
+        expect(screen.getByLabelText('URL slug')).not.toHaveAttribute('readonly')
       })
     })
 
@@ -1449,7 +1459,7 @@ describe('RecipeEditor page', () => {
       })
 
       // Type an invalid slug (leading hyphen fails ^[a-z0-9]...).
-      const slugInput = screen.getByLabelText('Slug')
+      const slugInput = screen.getByLabelText('URL slug')
       await user.clear(slugInput)
       await user.type(slugInput, '-bad-slug')
 
@@ -1477,7 +1487,7 @@ describe('RecipeEditor page', () => {
       // The server's slug_taken message is surfaced INLINE, associated with the
       // slug field via aria-describedby (not merely as a transient toast).
       await waitFor(() => {
-        const slugInput = screen.getByLabelText('Slug')
+        const slugInput = screen.getByLabelText('URL slug')
         const describedBy = slugInput.getAttribute('aria-describedby') ?? ''
         const describerText = describedBy
           .split(/\s+/)
@@ -1520,7 +1530,7 @@ describe('RecipeEditor page', () => {
         expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
       })
 
-      const slugInput = screen.getByLabelText('Slug')
+      const slugInput = screen.getByLabelText('URL slug')
       await user.clear(slugInput)
       await user.type(slugInput, 'spaghetti-supreme')
 
@@ -1550,7 +1560,7 @@ describe('RecipeEditor page', () => {
         expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
       })
 
-      const slugInput = screen.getByLabelText('Slug')
+      const slugInput = screen.getByLabelText('URL slug')
       await user.clear(slugInput)
       await user.type(slugInput, 'Bad Slug!')
 

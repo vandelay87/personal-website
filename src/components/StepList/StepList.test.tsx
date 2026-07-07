@@ -85,7 +85,10 @@ describe('StepList', () => {
         />
       )
 
-      await user.click(screen.getByRole('button', { name: /add step/i }))
+      // Tightened to an exact match: with a getToken prop, each row also
+      // renders ImageUpload's own "+ Add step image" button, whose
+      // accessible name is otherwise also matched by a loose /add step/i.
+      await user.click(screen.getByRole('button', { name: /^add step$/i }))
 
       expect(onChange).toHaveBeenCalledWith([
         ...twoSteps,
@@ -194,7 +197,9 @@ describe('StepList', () => {
         />
       )
 
-      const uploadButtons = screen.getAllByRole('button', { name: /^upload$/i })
+      // ImageUpload's step-image control now has an accessible name of
+      // "Add step image" rather than a generic "Upload".
+      const uploadButtons = screen.getAllByRole('button', { name: /^add step image$/i })
       expect(uploadButtons).toHaveLength(2)
 
       expect(screen.getByLabelText('Step 1 image alt text')).toBeInTheDocument()
@@ -234,7 +239,12 @@ describe('StepList', () => {
         />
       )
 
-      expect(screen.getByText(/processing image/i)).toBeInTheDocument()
+      // NEW (#228): without a prior upload attempt in this session, an
+      // unset processedAt now renders the empty "Add step image" control
+      // rather than the processing placeholder — see ImageUpload's own
+      // render-branch tests for the case where the placeholder legitimately
+      // shows (an upload genuinely in flight).
+      expect(screen.getByRole('button', { name: /^add step image$/i })).toBeInTheDocument()
       expect(screen.queryByRole('img')).not.toBeInTheDocument()
 
       const readyStep: Step = {
@@ -254,7 +264,9 @@ describe('StepList', () => {
       )
 
       expect(screen.getByRole('img')).toBeInTheDocument()
-      expect(screen.queryByText(/processing image/i)).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole('button', { name: /^add step image$/i })
+      ).not.toBeInTheDocument()
     })
 
     it('typing in the alt-text input calls onChange with the updated step (no key field)', async () => {
