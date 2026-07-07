@@ -194,12 +194,14 @@ const StepList: FC<StepListProps> = ({
                   onUploadStarted={() => onStepUploadStarted?.(step.stepId)}
                   onUploadCompleted={() => handleStepImageUploaded(index)}
                 />
-                <Input
-                  ariaLabel={`Step ${index + 1} image alt text`}
-                  placeholder="Alt text for this image"
-                  value={step.image?.alt ?? ''}
-                  onChange={(e) => updateImage(index, { alt: e.target.value })}
-                />
+                {step.image?.processedAt !== undefined && (
+                  <Input
+                    ariaLabel={`Step ${index + 1} image alt text`}
+                    placeholder="Alt text for this image"
+                    value={step.image?.alt ?? ''}
+                    onChange={(e) => updateImage(index, { alt: e.target.value })}
+                  />
+                )}
               </div>
             )}
           </li>

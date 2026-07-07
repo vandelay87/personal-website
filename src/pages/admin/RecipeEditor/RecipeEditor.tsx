@@ -206,6 +206,9 @@ const computeMissingFields = (form: FormState): string[] => {
     if (step.image && step.image.processedAt === undefined) {
       missing.push(`Step ${index + 1} image still processing`)
     }
+    if (step.image?.processedAt !== undefined && !step.image.alt?.trim()) {
+      missing.push(`Step ${index + 1} image alt text`)
+    }
   })
   return missing
 }

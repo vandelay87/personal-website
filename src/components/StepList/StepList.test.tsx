@@ -185,7 +185,7 @@ describe('StepList', () => {
   })
 
   describe('per-step image upload (when getToken is provided)', () => {
-    it('renders an image upload control and an alt-text input per step', () => {
+    it('renders an image upload control per step, with no alt-text input until the image is ready', () => {
       const onChange = vi.fn()
       render(
         <StepList
@@ -201,6 +201,29 @@ describe('StepList', () => {
       // "Add step image" rather than a generic "Upload".
       const uploadButtons = screen.getAllByRole('button', { name: /^add step image$/i })
       expect(uploadButtons).toHaveLength(2)
+
+      // NEW (#228): mirrors the cover image's alt field — the alt-text input
+      // only appears once the step image has finished processing (imgReady),
+      // never alongside the "Add step image" ghost button (imgEmpty).
+      expect(screen.queryByLabelText('Step 1 image alt text')).not.toBeInTheDocument()
+      expect(screen.queryByLabelText('Step 2 image alt text')).not.toBeInTheDocument()
+    })
+
+    it('renders the alt-text input per step once each step image is ready', () => {
+      const onChange = vi.fn()
+      const readySteps: Step[] = [
+        { stepId: STEP_ID_1, order: 1, text: 'Preheat oven', image: { alt: '', processedAt: 111 } },
+        { stepId: STEP_ID_2, order: 2, text: 'Mix ingredients', image: { alt: '', processedAt: 222 } },
+      ]
+      render(
+        <StepList
+          steps={readySteps}
+          onChange={onChange}
+          getToken={mockGetToken}
+          recipeId="test-recipe-id"
+          slug="beans-on-toast"
+        />
+      )
 
       expect(screen.getByLabelText('Step 1 image alt text')).toBeInTheDocument()
       expect(screen.getByLabelText('Step 2 image alt text')).toBeInTheDocument()
@@ -272,9 +295,15 @@ describe('StepList', () => {
     it('typing in the alt-text input calls onChange with the updated step (no key field)', async () => {
       const user = userEvent.setup()
       const onChange = vi.fn()
+      const step: Step = {
+        stepId: STEP_ID_1,
+        order: 1,
+        text: 'Preheat oven',
+        image: { alt: '', processedAt: 111 },
+      }
       render(
         <StepList
-          steps={[makeStep(STEP_ID_1, 1, 'Preheat oven')]}
+          steps={[step]}
           onChange={onChange}
           getToken={mockGetToken}
           recipeId="test-recipe-id"
