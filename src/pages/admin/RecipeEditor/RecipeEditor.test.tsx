@@ -1051,6 +1051,25 @@ describe('RecipeEditor page', () => {
       ],
     }
 
+    // A recipe where the step image has finished processing (ready) but the
+    // user never filled in alt text — the readiness gate and the alt-text
+    // gate are independent checks, so this must trip the latter even though
+    // the former is satisfied.
+    const recipeWithStepImageMissingAlt: Recipe = {
+      ...draftRecipe,
+      steps: [
+        {
+          stepId: STEP_ID,
+          order: 1,
+          text: 'Boil pasta',
+          image: {
+            alt: '   ',
+            processedAt: 1_700_000_000_000,
+          },
+        },
+      ],
+    }
+
     it('disables Publish when the cover image is not yet processed (no processedAt) (AC 6, 7)', async () => {
       vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithUnreadyCover])
       vi.mocked(fetchAllRecipes).mockResolvedValue([recipeWithUnreadyCover])
@@ -1106,6 +1125,47 @@ describe('RecipeEditor page', () => {
       await waitFor(() => {
         expect(screen.getByRole('button', { name: /^publish$/i })).not.toBeDisabled()
       })
+    })
+
+    it('disables Publish when a step image is ready but its alt text is empty', async () => {
+      vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithStepImageMissingAlt])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([recipeWithStepImageMissingAlt])
+
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      const publishButton = screen.getByRole('button', { name: /^publish$/i })
+      expect(publishButton).toBeDisabled()
+
+      const describedBy = publishButton.getAttribute('aria-describedby')
+      const missingList = document.getElementById(describedBy as string)
+      expect(missingList?.textContent ?? '').toMatch(/step 1 image alt text/i)
+    })
+
+    it('re-enables Publish once the step image alt text is filled in', async () => {
+      const user = userEvent.setup()
+      vi.mocked(fetchMyRecipes).mockResolvedValue([recipeWithStepImageMissingAlt])
+      vi.mocked(fetchAllRecipes).mockResolvedValue([recipeWithStepImageMissingAlt])
+
+      renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      const publishButton = screen.getByRole('button', { name: /^publish$/i })
+      expect(publishButton).toBeDisabled()
+
+      await user.type(screen.getByLabelText('Step 1 image alt text'), 'Boiling pasta')
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /^publish$/i })).not.toBeDisabled()
+      })
+
+      expect(document.getElementById('publish-missing-fields')).not.toBeInTheDocument()
     })
 
     it('flips the publish gate when onReady reports the matching key is ready (AC 4, 1, 5)', async () => {
@@ -1378,6 +1438,62 @@ describe('RecipeEditor page', () => {
       await waitFor(() => {
         expect(screen.getByLabelText('URL slug')).toHaveValue('beans-on-toast-deluxe')
       })
+    })
+
+    it('does not show "Reset to title" while the slug is still auto-deriving from the title', async () => {
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(createDraft).toHaveBeenCalled()
+      })
+
+      // Slug auto-follows the title — resetting it would be a no-op, so the
+      // button has nothing useful to do yet.
+      await user.type(screen.getByRole('textbox', { name: /title/i }), 'Beans on Toast')
+      await waitFor(() => {
+        expect(screen.getByLabelText('URL slug')).toHaveValue('beans-on-toast')
+      })
+
+      expect(screen.queryByRole('button', { name: /^reset to title$/i })).not.toBeInTheDocument()
+    })
+
+    it('shows "Reset to title" once a manual slug edit diverges from sluggify(title)', async () => {
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(createDraft).toHaveBeenCalled()
+      })
+
+      await user.type(screen.getByRole('textbox', { name: /title/i }), 'Beans on Toast')
+      const slugInput = screen.getByLabelText('URL slug')
+      await user.clear(slugInput)
+      await user.type(slugInput, 'bot')
+
+      expect(screen.getByRole('button', { name: /^reset to title$/i })).toBeInTheDocument()
+    })
+
+    it('hides "Reset to title" again once a manual edit happens to match sluggify(title)', async () => {
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(createDraft).toHaveBeenCalled()
+      })
+
+      await user.type(screen.getByRole('textbox', { name: /title/i }), 'Beans on Toast')
+      const slugInput = screen.getByLabelText('URL slug')
+      await user.clear(slugInput)
+      await user.type(slugInput, 'bot')
+      expect(screen.getByRole('button', { name: /^reset to title$/i })).toBeInTheDocument()
+
+      // Manually retyping the exact auto-derived value makes resetting a
+      // no-op again, even though the edit was manual (slugManuallyEdited).
+      await user.clear(slugInput)
+      await user.type(slugInput, 'beans-on-toast')
+
+      expect(screen.queryByRole('button', { name: /^reset to title$/i })).not.toBeInTheDocument()
     })
 
     it('renders a live URL preview containing akli.dev/recipes/<slug>', async () => {

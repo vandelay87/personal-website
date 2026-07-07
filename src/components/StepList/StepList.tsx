@@ -105,7 +105,7 @@ const StepList: FC<StepListProps> = ({
     const existing = steps[index].image
     update(index, {
       ...steps[index],
-      image: { alt: existing?.alt ?? '', ...patch },
+      image: { ...existing, alt: existing?.alt ?? '', ...patch },
     })
   }
 

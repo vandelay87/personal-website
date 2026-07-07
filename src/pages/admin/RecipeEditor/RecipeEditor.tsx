@@ -199,7 +199,7 @@ const computeMissingFields = (form: FormState): string[] => {
   if (!form.title.trim()) missing.push('Title')
   if (!form.intro.trim()) missing.push('Intro')
   if (form.coverImageProcessedAt === undefined) missing.push('Cover image')
-  if (!form.coverImageAlt.trim()) missing.push('Cover image alt text')
+  if (!form.coverImageAlt.trim()) missing.push('Alt text')
   if (!form.ingredients.some((ing) => ing.item.trim())) missing.push('At least one ingredient')
   if (!form.steps.some((s) => s.text.trim())) missing.push('At least one step')
   form.steps.forEach((step, index) => {

@@ -292,7 +292,7 @@ describe('StepList', () => {
       ).not.toBeInTheDocument()
     })
 
-    it('typing in the alt-text input calls onChange with the updated step (no key field)', async () => {
+    it('typing in the alt-text input calls onChange with the updated step, preserving processedAt', async () => {
       const user = userEvent.setup()
       const onChange = vi.fn()
       const step: Step = {
@@ -315,7 +315,7 @@ describe('StepList', () => {
       await user.type(altInput, 'A')
 
       expect(onChange).toHaveBeenCalledWith([
-        { stepId: STEP_ID_1, order: 1, text: 'Preheat oven', image: { alt: 'A' } },
+        { stepId: STEP_ID_1, order: 1, text: 'Preheat oven', image: { alt: 'A', processedAt: 111 } },
       ])
     })
   })
