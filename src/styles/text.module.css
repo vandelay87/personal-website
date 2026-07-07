@@ -77,6 +77,22 @@
   color: var(--color-text-faint);
 }
 
+/* Mono, bordered chip "look" — shared by BlogPost's and RecipeDetailView's
+   own tag-link chips (both otherwise hand-wrote the same declarations).
+   Pair with `composes: focusRing chipHover from interactions.module.css`
+   for the interactive hover/focus behavior; each consumer still sets its
+   own padding (Blog and Recipe use slightly different design literals). */
+.tagChipBase {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--tracking-meta);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+}
+
 /* Semibold, slightly-larger-than-body text CTA — shared by Home's
    "All" row-section link, Apps' "Read the blog" link, and Blog's
    "Show all posts" link. Each still sets its own color/cursor/border
