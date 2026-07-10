@@ -170,13 +170,13 @@
 .servesLabel {
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
-  color: var(--ingredients-panel-faint-fg);
+  color: var(--ingredients-panel-faint-fg, var(--color-text-faint));
   white-space: nowrap;
 }
 
 .ingredientsHint {
   font-size: var(--font-size-xs);
-  color: var(--ingredients-panel-faint-fg);
+  color: var(--ingredients-panel-faint-fg, var(--color-text-faint));
   margin: 0 0 var(--space-3);
 }
 
