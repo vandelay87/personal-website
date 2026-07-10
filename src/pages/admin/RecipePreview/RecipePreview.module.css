@@ -3,50 +3,169 @@
   flex-direction: column;
 }
 
+/* ── Status banner ─────────────────────────────────────────────────
+   Matches Admin Recipe Preview.dc.html's sticky status region (lines
+   71-107): tinted amber (draft) / green (published), back link + status
+   icon/text on the left, Edit + Publish/View-public-page on the right.
+
+   `top: var(--space-16)` (not `top:0`, as the design's own literal has
+   it): the design's isolated mockup has no persistent app chrome of its
+   own, so its status region doubles as a de-facto page header pinned at
+   the viewport top. This app already has a real sticky admin Header
+   (Header.module.css `.sticky`) supplied by AdminLayout above this page's
+   content — this banner sticks just below it instead. `--space-16` (64px)
+   is the same header-height offset already established for this purpose
+   by AdminLayout.module.css's `.content` and Layout.module.css's `.main`
+   (both `scroll-margin-block-start: var(--space-16)`, sized off Header's
+   own `.inner` padding + content height).
+
+   No `backdrop-filter`: the design system explicitly reserves that
+   treatment for the one sticky Header (docs/design/paper/design_system/
+   readme.md: "Transparency / blur. Only the sticky header…") — see
+   ConfirmDialog.module.css's `.dialog::backdrop` comment for the same
+   precedent elsewhere in this codebase. A flat tinted background is used
+   instead, matching RecipeEditor.module.css's `.sessionBanner`/
+   `.timeoutBanner` (also amber/error `-bg` tokens, also no blur). */
 .banner {
+  position: sticky;
+  top: var(--space-16);
+  border-block-end: var(--border-width) solid;
+}
+
+.draft {
+  background: var(--color-warning-bg);
+  border-block-end-color: color-mix(in srgb, var(--color-warning) 30%, var(--color-border));
+}
+
+.published {
+  background: var(--color-success-bg);
+  border-block-end-color: color-mix(in srgb, var(--color-success) 30%, var(--color-border));
+}
+
+.bannerInner {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-3) var(--space-4);
   max-width: var(--max-w-site);
-  margin: var(--space-6) auto 0;
-  padding: var(--space-4);
-  border: var(--border-width) solid var(--color-border);
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
+  margin-inline: auto;
+  /* 13px: design literal (Admin Recipe Preview.dc.html line 73), no
+     --space-* token lands on it. */
+  padding: 13px clamp(20px, 5vw, 28px);
 }
 
-.bannerMessage {
+.bannerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+/* .bannerLeft .backLink (not bare): raises specificity above the shared
+   Link component's own `.link` (color: var(--color-link)) — a bare
+   `.backLink` ties with it, same root cause as the Typography fixes
+   throughout this epic (see RecipeDetailView.module.css's `.article
+   .backLink`). */
+.bannerLeft .backLink {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.bannerDivider {
+  width: var(--border-width);
+  height: 16px;
+  background: var(--color-border-strong);
+}
+
+.statusIcon {
+  display: inline-flex;
+}
+
+.draft .statusIcon {
+  color: var(--color-warning);
+}
+
+.published .statusIcon {
+  color: var(--color-success);
+}
+
+/* .bannerLeft .bannerMessage (not bare): raises specificity above
+   Typography's own `.body` (font-size/font-weight/color) — same tie-fix
+   pattern as `.backLink` above. */
+.bannerLeft .bannerMessage {
   margin: 0;
-  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm-plus);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-strong);
 }
 
 .bannerActions {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
-.actionLink {
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--color-link);
-  font: inherit;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+/* .bannerActions .editLink (not bare): raises specificity above Link's
+   own `.link` — styled to look like the design's small ghost button
+   (`.banner-btn.banner-ghost`), same "style Link locally" precedent as
+   RecipeEditor.module.css's `.sessionBanner .bannerAction`. */
+.bannerActions .editLink {
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  border: var(--border-width) solid var(--color-border-strong);
+  /* 9px: design literal — --radius-md (10px) is the nearest token but is
+     1px off. */
+  border-radius: 9px;
+  padding: 8px 15px;
+  gap: 7px;
+  transition: border-color var(--duration-fast) var(--easing-default),
+    color var(--duration-fast) var(--easing-default);
 }
 
-.actionLink:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-  outline-offset: 2px;
+.bannerActions .editLink:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
-.actionLink:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+/* .bannerActions .publishButton (not bare): raises specificity above the
+   shared Button component's own `.button`/`.sm` padding, font-size and
+   border-radius (Button's `solid` variant colors already match the
+   design's `.banner-solid` exactly, so only sizing needs overriding
+   here). */
+.bannerActions .publishButton {
+  padding: 8px 15px;
+  border-radius: 9px;
+  font-size: 13px;
+  gap: 7px;
+}
+
+/* .bannerActions .viewLink (not bare): raises specificity above Link's
+   own `.link` — styled to look like the design's solid button
+   (`.banner-btn.banner-solid`), same "style Link locally" precedent as
+   RecipeList.module.css's `.header .newButton`. */
+.bannerActions .viewLink {
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-btn-fg);
+  background: var(--color-btn-bg);
+  border-radius: 9px;
+  padding: 8px 15px;
+  gap: 7px;
+  transition: opacity var(--duration-fast) var(--easing-default);
+}
+
+.bannerActions .viewLink:hover {
+  color: var(--color-btn-fg);
+  opacity: 0.9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bannerActions .editLink,
+  .bannerActions .viewLink {
+    transition: none;
+  }
 }
 
 .stateWrapper {
