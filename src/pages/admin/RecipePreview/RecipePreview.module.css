@@ -27,6 +27,7 @@
 .banner {
   position: sticky;
   top: 0;
+  z-index: var(--z-header);
   border-block-end: var(--border-width) solid;
 }
 
