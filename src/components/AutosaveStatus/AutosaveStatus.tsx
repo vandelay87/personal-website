@@ -1,5 +1,6 @@
+import { IconAlertCircle } from '@components/icons'
 import type { AutosaveStatus as AutosaveStatusValue } from '@hooks/useAutosave'
-import type { FC } from 'react'
+import type { FC, ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 import styles from './AutosaveStatus.module.css'
 
@@ -49,23 +50,18 @@ const iconCheck = (
   </svg>
 )
 
-// Design: same markup's error icon (circle + exclamation, 15x15, stroke-width 2).
-const iconWarning = (
-  <svg
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="12" cy="12" r="10" />
-    <line x1="12" y1="8" x2="12" y2="12" />
-    <line x1="12" y1="16" x2="12.01" y2="16" />
-  </svg>
-)
+// `saving` has no entry — it renders the CSS-only spinner span, which has no
+// child icon, so it stays a distinct render branch rather than joining this
+// lookup. `idle` has no entry either — it renders nothing.
+const STATUS_ICON: Partial<Record<AutosaveStatusValue, ReactNode>> = {
+  saved: iconCheck,
+  error: <IconAlertCircle size={15} />,
+}
+
+const ICON_CLASS: Partial<Record<AutosaveStatusValue, string>> = {
+  saved: styles.iconSaved,
+  error: styles.iconError,
+}
 
 const AutosaveStatus: FC<AutosaveStatusProps> = ({ status, lastSavedAt, onRetry }) => {
   const [now, setNow] = useState<number>(() => Date.now())
@@ -84,6 +80,7 @@ const AutosaveStatus: FC<AutosaveStatusProps> = ({ status, lastSavedAt, onRetry 
 
   const ariaLive = status === 'error' ? 'assertive' : 'polite'
   const transitionText = TRANSITION_TEXT[status]
+  const statusIcon = STATUS_ICON[status]
 
   return (
     <span className={styles.container}>
@@ -91,14 +88,9 @@ const AutosaveStatus: FC<AutosaveStatusProps> = ({ status, lastSavedAt, onRetry 
         {status === 'saving' && (
           <span aria-hidden="true" className={styles.spinner} />
         )}
-        {status === 'saved' && (
-          <span aria-hidden="true" className={styles.iconSaved}>
-            {iconCheck}
-          </span>
-        )}
-        {status === 'error' && (
-          <span aria-hidden="true" className={styles.iconError}>
-            {iconWarning}
+        {statusIcon && (
+          <span aria-hidden="true" className={ICON_CLASS[status]}>
+            {statusIcon}
           </span>
         )}
         {status !== 'idle' && <span className={styles.text}>{transitionText}</span>}

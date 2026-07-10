@@ -11,6 +11,7 @@ import {
 import AutosaveStatus from '@components/AutosaveStatus'
 import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
+import { IconAlertCircle } from '@components/icons'
 import ImageUpload from '@components/ImageUpload'
 import IngredientList from '@components/IngredientList'
 import Link from '@components/Link'
@@ -233,24 +234,6 @@ const draftFromCreated = (id: string, slug: string): Recipe => ({
 })
 
 const NEW_PATH = '/admin/recipes/new'
-
-const iconAlertCircle = (
-  <svg
-    width="17"
-    height="17"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <circle cx="12" cy="12" r="10" />
-    <line x1="12" y1="8" x2="12" y2="12" />
-    <line x1="12" y1="16" x2="12.01" y2="16" />
-  </svg>
-)
 
 const iconLock = (
   <svg
@@ -596,7 +579,7 @@ const RecipeEditor: FC = () => {
         <div className={styles.sessionBanner} role="alert">
           <span className={styles.bannerMessage}>
             <span className={styles.bannerIcon} aria-hidden="true">
-              {iconAlertCircle}
+              <IconAlertCircle size={17} ariaHidden />
             </span>
             <span>Your session has expired. Log in again to keep editing — your latest changes are saved.</span>
           </span>

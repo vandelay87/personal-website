@@ -1,4 +1,5 @@
 import Button from '@components/Button'
+import { iconChevronDown, iconChevronUp, iconPlus, iconRemove } from '@components/icons'
 import Input from '@components/Input'
 import { useReorderableList } from '@hooks/useReorderableList'
 import type { Ingredient } from '@models/recipe'
@@ -11,65 +12,6 @@ export interface IngredientListProps {
   onChange: (ingredients: Ingredient[]) => void
   onAnnounce?: (message: string) => void
 }
-
-const iconChevronUp = (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d="m18 15-6-6-6 6" />
-  </svg>
-)
-
-const iconChevronDown = (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d="m6 9 6 6 6-6" />
-  </svg>
-)
-
-const iconRemove = (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d="M18 6 6 18" />
-    <path d="m6 6 12 12" />
-  </svg>
-)
-
-const iconPlus = (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.2"
-    strokeLinecap="round"
-    aria-hidden="true"
-  >
-    <line x1="12" y1="5" x2="12" y2="19" />
-    <line x1="5" y1="12" x2="19" y2="12" />
-  </svg>
-)
 
 const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnnounce }) => {
   const { add, remove, update, moveUp, moveDown } = useReorderableList(ingredients, onChange)
