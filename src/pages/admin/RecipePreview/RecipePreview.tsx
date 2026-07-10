@@ -105,6 +105,27 @@ const iconViewPublic = (
   </svg>
 )
 
+// Search-with-exclamation glyph — matches Admin Recipe Preview.dc.html's
+// not-found icon (lines 123) exactly.
+const iconNotFound = (
+  <svg
+    width="25"
+    height="25"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.7"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="11" cy="11" r="8" />
+    <path d="m21 21-3.5-3.5" />
+    <path d="M11 8v3" />
+    <path d="M11 14h.01" />
+  </svg>
+)
+
 const mergeReadiness = (recipe: Recipe, updates: ImageReadyUpdate[]): Recipe => {
   const byImageType = new Map(updates.map((u) => [u.imageType, u.processedAt]))
   if (byImageType.size === 0) return recipe
@@ -204,8 +225,23 @@ const RecipePreview: FC = () => {
 
   if (notFound || !recipe) {
     return (
-      <div className={styles.stateWrapper}>
-        <Typography variant="body">Recipe not found.</Typography>
+      <div className={styles.notFoundBox}>
+        <div className={styles.notFoundIcon}>{iconNotFound}</div>
+        <Typography variant="heading1" className={styles.notFoundHeading}>
+          Recipe not found
+        </Typography>
+        <Typography variant="body" className={styles.notFoundBody}>
+          This recipe may have been deleted, or the link is incorrect.
+        </Typography>
+        <Link
+          to="/admin/recipes"
+          icon="←"
+          iconSide="left"
+          nudge="left"
+          className={styles.notFoundBackLink}
+        >
+          Back to recipes
+        </Link>
       </div>
     )
   }

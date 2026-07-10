@@ -186,7 +186,7 @@ const UserManagement = () => {
   const emailValid = isValidEmail(inviteEmail)
   const submitDisabled = !emailValid || inviteSubmitting
 
-  const renderContent = () => {
+  const renderBody = () => {
     if (loading) {
       return (
         <div className={styles.loadingBox}>
@@ -212,29 +212,8 @@ const UserManagement = () => {
       )
     }
 
-    // "person"/"people" is an irregular plural pluralize.ts can't produce
-    // (it only appends "s" to the singular) — spelled out directly here.
-    const subtitle =
-      users.length === 1 ? '1 person has access' : `${users.length} people have access`
-
     return (
       <>
-        <div className={styles.header}>
-          <div>
-            <Typography variant="heading1" className={styles.heading}>
-              Users
-            </Typography>
-            <Typography variant="body" className={styles.subtitle}>
-              {subtitle}
-            </Typography>
-          </div>
-          {!inviteFormOpen && (
-            <Button onClick={() => setInviteFormOpen(true)} iconLeft={iconInvite}>
-              Invite user
-            </Button>
-          )}
-        </div>
-
         {inviteFormOpen && (
           <div className={styles.inviteCard}>
             <div className={styles.inviteCardHeader}>
@@ -388,7 +367,34 @@ const UserManagement = () => {
     )
   }
 
-  return <div className={styles.page}>{renderContent()}</div>
+  // "person"/"people" is an irregular plural pluralize.ts can't produce
+  // (it only appends "s" to the singular) — spelled out directly here.
+  const subtitle =
+    users.length === 1 ? '1 person has access' : `${users.length} people have access`
+
+  return (
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <div>
+          <Typography variant="heading1" className={styles.heading}>
+            Users
+          </Typography>
+          {!loading && !error && (
+            <Typography variant="body" className={styles.subtitle}>
+              {subtitle}
+            </Typography>
+          )}
+        </div>
+        {!loading && !error && !inviteFormOpen && (
+          <Button onClick={() => setInviteFormOpen(true)} iconLeft={iconInvite}>
+            Invite user
+          </Button>
+        )}
+      </div>
+
+      {renderBody()}
+    </div>
+  )
 }
 
 export default UserManagement
