@@ -80,10 +80,24 @@
   color: var(--color-text-muted);
 }
 
+/* WCAG AA override (issue #272): --color-success on --color-success-bg,
+   composited over this Toast's own --color-bg backdrop, computes to
+   ~3.68:1 (fails AA's 4.5:1 for normal text) — the glyph is text content,
+   not decorative, so this is a live failure, not just a hover-state blind
+   spot. Same failing token pairing StatusBadge (#267) hit; reusing its
+   exact override color here (~4.83:1 against this backdrop) rather than
+   tuning a new one, for visual consistency across "success text on its
+   own tint" everywhere in the app. Dark mode already passes (~6.87:1), so
+   it resets to the shared token. */
 .success::before {
   content: '✓';
   background: var(--color-success-bg);
-  color: var(--color-success);
+  --toast-success-fg: #1a754d; /* ~4.83:1 */
+  color: var(--toast-success-fg);
+}
+
+[data-theme="dark"] .success::before {
+  --toast-success-fg: var(--color-success);
 }
 
 .error::before {

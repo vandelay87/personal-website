@@ -219,9 +219,21 @@
   background: var(--color-hover);
 }
 
+/* WCAG AA override (issue #272): --color-success on --color-success-bg,
+   composited over this row's --color-field backdrop, computes to ~3.83:1
+   (fails AA's 4.5:1) — axe doesn't probe :hover states, which is likely
+   why this wasn't already flagged. Same failing pairing as StatusBadge
+   (#267); reusing its exact override color (~5.01:1 against this
+   backdrop) for consistency. Dark mode already passes (~6.40:1), so it
+   resets to the shared token. */
 .rowActions .publishAction:hover {
-  color: var(--color-success);
+  --publish-action-fg: #1a754d; /* ~5.01:1 */
+  color: var(--publish-action-fg);
   background: var(--color-success-bg);
+}
+
+[data-theme="dark"] .rowActions .publishAction:hover {
+  --publish-action-fg: var(--color-success);
 }
 
 .rowActions .deleteAction:hover {
