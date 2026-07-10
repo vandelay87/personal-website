@@ -4,6 +4,7 @@ import Button from '@components/Button'
 import Link from '@components/Link'
 import Loading from '@components/Loading'
 import RecipeDetailView from '@components/RecipeDetailView'
+import ThemeToggle from '@components/ThemeToggle'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import {
@@ -217,32 +218,36 @@ const RecipePreview: FC = () => {
 
   if (loading) {
     return (
-      <div className={styles.stateWrapper}>
-        <Loading />
-      </div>
+      <main id="main" tabIndex={-1} className={styles.main}>
+        <div className={styles.stateWrapper}>
+          <Loading />
+        </div>
+      </main>
     )
   }
 
   if (notFound || !recipe) {
     return (
-      <div className={styles.notFoundBox}>
-        <div className={styles.notFoundIcon}>{iconNotFound}</div>
-        <Typography variant="heading1" className={styles.notFoundHeading}>
-          Recipe not found
-        </Typography>
-        <Typography variant="body" className={styles.notFoundBody}>
-          This recipe may have been deleted, or the link is incorrect.
-        </Typography>
-        <Link
-          to="/admin/recipes"
-          icon="←"
-          iconSide="left"
-          nudge="left"
-          className={styles.notFoundBackLink}
-        >
-          Back to recipes
-        </Link>
-      </div>
+      <main id="main" tabIndex={-1} className={styles.main}>
+        <div className={styles.notFoundBox}>
+          <div className={styles.notFoundIcon}>{iconNotFound}</div>
+          <Typography variant="heading1" className={styles.notFoundHeading}>
+            Recipe not found
+          </Typography>
+          <Typography variant="body" className={styles.notFoundBody}>
+            This recipe may have been deleted, or the link is incorrect.
+          </Typography>
+          <Link
+            to="/admin/recipes"
+            icon="←"
+            iconSide="left"
+            nudge="left"
+            className={styles.notFoundBackLink}
+          >
+            Back to recipes
+          </Link>
+        </div>
+      </main>
     )
   }
 
@@ -309,11 +314,18 @@ const RecipePreview: FC = () => {
                 View public page
               </Link>
             )}
+            <ThemeToggle />
           </div>
         </div>
       </div>
 
-      <RecipeDetailView recipe={recipe} />
+      <main
+        id="main"
+        tabIndex={-1}
+        className={[styles.main, styles.mainWithBanner].join(' ')}
+      >
+        <RecipeDetailView recipe={recipe} />
+      </main>
     </div>
   )
 }

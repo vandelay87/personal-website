@@ -6,30 +6,40 @@
 /* ── Status banner ─────────────────────────────────────────────────
    Matches Admin Recipe Preview.dc.html's sticky status region (lines
    71-107): tinted amber (draft) / green (published), back link + status
-   icon/text on the left, Edit + Publish/View-public-page on the right.
+   icon/text on the left, Edit + Publish/View-public-page + theme-toggle
+   on the right.
 
-   `top: var(--space-16)` (not `top:0`, as the design's own literal has
-   it): the design's isolated mockup has no persistent app chrome of its
-   own, so its status region doubles as a de-facto page header pinned at
-   the viewport top. This app already has a real sticky admin Header
-   (Header.module.css `.sticky`) supplied by AdminLayout above this page's
-   content — this banner sticks just below it instead. `--space-16` (64px)
-   is the same header-height offset already established for this purpose
-   by AdminLayout.module.css's `.content` and Layout.module.css's `.main`
-   (both `scroll-margin-block-start: var(--space-16)`, sized off Header's
-   own `.inner` padding + content height).
+   `top: 0`: this route no longer renders inside AdminLayout/AdminRootLayout
+   (RecipePreviewLayout has no Header at all — see routeLayouts.tsx) —
+   the design's own isolated mockup has no persistent app chrome above this
+   status region either, and its footer is the public-style footer, not
+   the admin one, confirming the page is meant to read as the public
+   Recipe page with just this admin-only banner overlaid. This banner is
+   therefore this route's own topmost sticky element, exactly like
+   Header.module.css's `.sticky`, not an offset below one.
 
-   No `backdrop-filter`: the design system explicitly reserves that
-   treatment for the one sticky Header (docs/design/paper/design_system/
-   readme.md: "Transparency / blur. Only the sticky header…") — see
-   ConfirmDialog.module.css's `.dialog::backdrop` comment for the same
-   precedent elsewhere in this codebase. A flat tinted background is used
-   instead, matching RecipeEditor.module.css's `.sessionBanner`/
-   `.timeoutBanner` (also amber/error `-bg` tokens, also no blur). */
+   `backdrop-filter`: re-enabled below (gated behind the same `@supports`
+   pattern as Header.module.css's `.sticky`) for the same reason — the
+   design system's "only the one sticky header gets blur" reservation
+   assumed a persistent admin Header would sit above this banner. With no
+   such header on this route, this banner functionally *is* the one sticky
+   header, so it gets the full treatment. */
 .banner {
   position: sticky;
-  top: var(--space-16);
+  top: 0;
   border-block-end: var(--border-width) solid;
+}
+
+@supports (backdrop-filter: blur(1px)) and (color: color-mix(in srgb, red 50%, transparent)) {
+  .draft {
+    background: color-mix(in srgb, var(--color-warning-bg) 84%, transparent);
+    backdrop-filter: saturate(140%) blur(10px);
+  }
+
+  .published {
+    background: color-mix(in srgb, var(--color-success-bg) 84%, transparent);
+    backdrop-filter: saturate(140%) blur(10px);
+  }
 }
 
 .draft {
@@ -185,6 +195,39 @@
   .notFoundBox .notFoundBackLink {
     transition: none;
   }
+}
+
+/* ── Main landmark ─────────────────────────────────────────────────────
+   This route no longer renders inside AdminLayout (which previously
+   supplied `<main id="main" tabIndex={-1}>` via its own `.content`), so
+   RecipePreview.tsx now provides the landmark itself, matching the public
+   site's equivalent wrapper (Layout.module.css's `.main`) exactly — this
+   page reads as the public Recipe page with an admin-only banner overlaid,
+   not an admin-shell page, so it gets the public shell's own sizing. */
+.main {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  padding-inline: var(--space-6);
+  max-width: var(--max-w-site);
+  margin-inline: auto;
+}
+
+/* Applied only to the loaded-recipe state's `.main`, where the sticky
+   status banner precedes it in normal flow. SC 2.4.11: reserves room
+   above the landmark roughly equal to the banner's own rendered height
+   (measured ~64.5px: 13px block padding either side + the 32px
+   ThemeToggle icon-button plus border), so the banner — pinned via
+   `position: sticky` — never fully covers focus/scroll landing here or
+   on a near-top descendant. `--space-16` (64px) is the same token
+   Layout.module.css/AdminLayout.module.css already use for this exact
+   purpose, sized for Header instead — coincidentally near-identical here.
+   The loading/not-found states render no banner above them at all (Admin
+   Recipe Preview.dc.html gates the banner behind the same `isRecipe`
+   check as the loaded article), so plain `.main` alone is correct there —
+   there is nothing sticky left to obscure. */
+.mainWithBanner {
+  scroll-margin-block-start: var(--space-16);
 }
 
 .stateWrapper {
