@@ -61,7 +61,14 @@
 
 .checkbox:checked ~ .name {
   text-decoration: line-through;
-  color: var(--color-text-faint);
+  /* WCAG AA override: --color-text-faint fails 4.5:1 against this
+     panel's --color-surface (4.35:1 light / 4.40:1 dark) — see
+     RecipeDetailView.module.css's .ingredientsPanel comment. Reuses
+     the same panel-scoped custom property (inherited down the DOM
+     tree from the .ingredientsPanel ancestor this always renders
+     inside), falling back to the original token if ever rendered
+     without that ancestor. */
+  color: var(--ingredients-panel-faint-fg, var(--color-text-faint));
 }
 
 .qty {
@@ -72,7 +79,7 @@
 }
 
 .checkbox:checked ~ .qty {
-  color: var(--color-text-faint);
+  color: var(--ingredients-panel-faint-fg, var(--color-text-faint));
 }
 
 @media (prefers-reduced-motion: reduce) {
