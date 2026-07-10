@@ -223,11 +223,14 @@
    composited over this row's --color-field backdrop, computes to ~3.83:1
    (fails AA's 4.5:1) — axe doesn't probe :hover states, which is likely
    why this wasn't already flagged. Same failing pairing as StatusBadge
-   (#267); reusing its exact override color (~5.01:1 against this
-   backdrop) for consistency. Dark mode already passes (~6.40:1), so it
-   resets to the shared token. */
+   (#267); reusing its exact override color for consistency. Note
+   .row:hover also fires here (hovering a child hovers its ancestor),
+   layering --color-hover under this button's own background, which
+   brings the real margin to ~4.80:1 (not the ~5.01:1 you'd get against
+   --color-field alone) — still comfortably passes. Dark mode already
+   passes (~6.40:1), so it resets to the shared token. */
 .rowActions .publishAction:hover {
-  --publish-action-fg: #1a754d; /* ~5.01:1 */
+  --publish-action-fg: #1a754d; /* ~4.80:1, accounting for stacked .row:hover */
   color: var(--publish-action-fg);
   background: var(--color-success-bg);
 }
