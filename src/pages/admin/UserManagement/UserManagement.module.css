@@ -169,16 +169,43 @@
   line-height: 1.5;
 }
 
-/* margin-top (25px = 18px spacer + 7px label margin, design literal) aligns
-   the Cancel/Send row with the email/role fields' input row rather than
-   their labels, replicating the design's own invisible-spacer markup
-   without the extra wrapper element. */
+/* Real (aria-hidden, empty) spacer matching `.label`'s own rendered box —
+   not a guessed margin-top — so the Cancel/Send row's top is structurally
+   guaranteed to line up with the Email/Role columns' input row instead of
+   their labels, same technique as the design's own invisible-spacer markup
+   (Admin Users.dc.html line 139-140). */
+.actionsField {
+  display: flex;
+  flex-direction: column;
+}
+
+.actionsSpacer {
+  display: block;
+  font-size: 13px;
+  line-height: var(--line-height-normal);
+  margin-bottom: 7px;
+}
+
 .formActions {
   display: flex;
   /* 10px: design literal, between --space-2 (8px) and --space-3 (12px). */
   gap: 10px;
   flex-wrap: wrap;
-  margin-top: 25px;
+}
+
+/* Sizing-only override — the shared Button component's own `.button`
+   padding/font-size default to a taller size (`size="md"`, ~48.5px) than
+   this row needs; neither of Button's two existing sizes matches the
+   design's Cancel/Send-invite buttons (Admin Users.dc.html line 45/48:
+   `padding:11px 18px`/`padding:10px 16px`, `font-size:14px`), which sit at
+   roughly the same height as the role-toggle segmented control (~41px).
+   Values below are empirically tuned against the actual rendered
+   font metrics (see PR #271 review notes), not copied blindly from the
+   design's literal px — same "sizing-only override" pattern as
+   RecipePreview.module.css's `.bannerActions .publishButton`. */
+.formActions .formActionButton {
+  padding: 9px 18px;
+  font-size: 14px;
 }
 
 .sendSpinner {

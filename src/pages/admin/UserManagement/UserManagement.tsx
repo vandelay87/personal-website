@@ -283,21 +283,31 @@ const UserManagement = () => {
                 </div>
               </fieldset>
 
-              <div className={styles.formActions}>
-                <Button onClick={resetInviteForm} variant="outline">
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={submitDisabled}
-                  iconLeft={
-                    inviteSubmitting ? (
-                      <span className={styles.sendSpinner} aria-hidden="true" />
-                    ) : undefined
-                  }
-                >
-                  {inviteSubmitting ? 'Sending…' : 'Send invite'}
-                </Button>
+              <div className={styles.actionsField}>
+                <span className={styles.actionsSpacer} aria-hidden="true">
+                  &nbsp;
+                </span>
+                <div className={styles.formActions}>
+                  <Button
+                    onClick={resetInviteForm}
+                    variant="outline"
+                    className={styles.formActionButton}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={submitDisabled}
+                    className={styles.formActionButton}
+                    iconLeft={
+                      inviteSubmitting ? (
+                        <span className={styles.sendSpinner} aria-hidden="true" />
+                      ) : undefined
+                    }
+                  >
+                    {inviteSubmitting ? 'Sending…' : 'Send invite'}
+                  </Button>
+                </div>
               </div>
             </form>
 
