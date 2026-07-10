@@ -52,7 +52,7 @@
     "eslint-plugin-vitest": "^0.5.4",
     "glob": "^13.0.6",
     "globals": "^17.7.0",
-    "jsdom": "^26.0.0",
+    "jsdom": "^29.1.1",
     "playwright": "^1.61.1",
     "prettier": "^3.9.4",
     "rehype-mermaid": "^3.0.0",
