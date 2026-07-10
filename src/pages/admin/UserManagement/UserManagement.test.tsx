@@ -216,12 +216,18 @@ describe('Admin UserManagement page', () => {
       })
 
       await user.click(screen.getByRole('button', { name: /invite user/i }))
-      await user.type(screen.getByLabelText(/email/i), 'contrib@akli.dev')
+      const emailInput = screen.getByLabelText(/email/i)
+      await user.type(emailInput, 'contrib@akli.dev')
       await user.click(screen.getByRole('button', { name: /send invite/i }))
 
-      expect(await screen.findByText(/user already exists/i)).toBeInTheDocument()
+      const alert = await screen.findByRole('alert')
+      expect(alert).toHaveTextContent(/user already exists/i)
       // No success toast
       expect(screen.queryByText(/invite sent to/i)).not.toBeInTheDocument()
+
+      // Email errors wire up aria-invalid + aria-describedby (AC: role="alert" + aria-invalid/aria-describedby)
+      expect(emailInput).toHaveAttribute('aria-invalid', 'true')
+      expect(emailInput).toHaveAttribute('aria-describedby', alert.id)
     })
   })
 
