@@ -136,7 +136,7 @@ describe('Admin UserManagement page', () => {
   })
 
   describe('invite flow (AC3, AC4, AC5, AC6)', () => {
-    it('opens an invite form with email input and role select when the Invite button is clicked', async () => {
+    it('opens an invite form with email input and role toggle when the Invite button is clicked', async () => {
       const user = userEvent.setup()
       renderUserManagement()
 
@@ -147,7 +147,9 @@ describe('Admin UserManagement page', () => {
       await user.click(screen.getByRole('button', { name: /invite user/i }))
 
       expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/role/i)).toBeInTheDocument()
+      expect(screen.getByRole('group', { name: /role/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Admin' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Contributor' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /send invite/i })).toBeInTheDocument()
     })
 
@@ -184,11 +186,19 @@ describe('Admin UserManagement page', () => {
       await user.click(screen.getByRole('button', { name: /invite user/i }))
 
       await user.type(screen.getByLabelText(/email/i), 'new@akli.dev')
-      await user.selectOptions(screen.getByLabelText(/role/i), 'contributor')
+
+      const adminRoleButton = screen.getByRole('button', { name: 'Admin' })
+      const contributorRoleButton = screen.getByRole('button', { name: 'Contributor' })
+      expect(contributorRoleButton).toHaveAttribute('aria-pressed', 'true')
+
+      await user.click(adminRoleButton)
+      expect(adminRoleButton).toHaveAttribute('aria-pressed', 'true')
+      expect(contributorRoleButton).toHaveAttribute('aria-pressed', 'false')
+
       await user.click(screen.getByRole('button', { name: /send invite/i }))
 
       await waitFor(() => {
-        expect(inviteUser).toHaveBeenCalledWith('token-123', 'new@akli.dev', 'contributor')
+        expect(inviteUser).toHaveBeenCalledWith('token-123', 'new@akli.dev', 'admin')
       })
 
       const toast = await screen.findByRole('button', { name: /invite sent to new@akli\.dev/i })
@@ -223,7 +233,7 @@ describe('Admin UserManagement page', () => {
         expect(screen.getByText('admin@akli.dev')).toBeInTheDocument()
       })
 
-      const adminRow = screen.getByText('admin@akli.dev').closest('tr')
+      const adminRow = screen.getByText('admin@akli.dev').closest('li')
       expect(adminRow).not.toBeNull()
 
       const removeButton = within(adminRow as HTMLElement).queryByRole('button', {
@@ -240,7 +250,7 @@ describe('Admin UserManagement page', () => {
         expect(screen.getByText('contrib@akli.dev')).toBeInTheDocument()
       })
 
-      const contribRow = screen.getByText('contrib@akli.dev').closest('tr')
+      const contribRow = screen.getByText('contrib@akli.dev').closest('li')
       const removeButton = within(contribRow as HTMLElement).getByRole('button', {
         name: /remove/i,
       })
@@ -258,7 +268,7 @@ describe('Admin UserManagement page', () => {
         expect(screen.getByText('contrib@akli.dev')).toBeInTheDocument()
       })
 
-      const contribRow = screen.getByText('contrib@akli.dev').closest('tr')
+      const contribRow = screen.getByText('contrib@akli.dev').closest('li')
       const removeButton = within(contribRow as HTMLElement).getByRole('button', {
         name: /remove/i,
       })
