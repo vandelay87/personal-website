@@ -1,6 +1,5 @@
-import Button from '@components/Button'
+import Tag from '@components/Tag'
 import { useId, useState, type FC, type KeyboardEvent } from 'react'
-
 
 import styles from './TagInput.module.css'
 
@@ -54,17 +53,9 @@ const TagInput: FC<TagInputProps> = ({
     <div className={styles.container}>
       <div className={styles.chips}>
         {tags.map((tag, i) => (
-          <span key={tag} className={styles.chip}>
+          <Tag key={tag} removable onRemove={() => removeTag(i)} className={styles.chip}>
             {tag}
-            <Button
-              onClick={() => removeTag(i)}
-              ariaLabel={`Remove ${tag}`}
-              variant="outline"
-              className={styles.removeBtn}
-            >
-              &times;
-            </Button>
-          </span>
+          </Tag>
         ))}
       </div>
 

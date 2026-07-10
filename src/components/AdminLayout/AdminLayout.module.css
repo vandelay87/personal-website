@@ -2,13 +2,13 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .content {
   flex: 1;
   min-width: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
   /* SC 2.4.11: reserves room above the main landmark roughly equal to a
      single-row sticky header's height, so the header — pinned via
      position: sticky — never fully covers focus/scroll landing here or

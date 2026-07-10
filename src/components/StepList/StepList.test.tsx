@@ -85,7 +85,10 @@ describe('StepList', () => {
         />
       )
 
-      await user.click(screen.getByRole('button', { name: /add step/i }))
+      // Tightened to an exact match: with a getToken prop, each row also
+      // renders ImageUpload's own "+ Add step image" button, whose
+      // accessible name is otherwise also matched by a loose /add step/i.
+      await user.click(screen.getByRole('button', { name: /^add step$/i }))
 
       expect(onChange).toHaveBeenCalledWith([
         ...twoSteps,
@@ -182,7 +185,7 @@ describe('StepList', () => {
   })
 
   describe('per-step image upload (when getToken is provided)', () => {
-    it('renders an image upload control and an alt-text input per step', () => {
+    it('renders an image upload control per step, with no alt-text input until the image is ready', () => {
       const onChange = vi.fn()
       render(
         <StepList
@@ -194,8 +197,33 @@ describe('StepList', () => {
         />
       )
 
-      const uploadButtons = screen.getAllByRole('button', { name: /^upload$/i })
+      // ImageUpload's step-image control now has an accessible name of
+      // "Add step image" rather than a generic "Upload".
+      const uploadButtons = screen.getAllByRole('button', { name: /^add step image$/i })
       expect(uploadButtons).toHaveLength(2)
+
+      // NEW (#228): mirrors the cover image's alt field — the alt-text input
+      // only appears once the step image has finished processing (imgReady),
+      // never alongside the "Add step image" ghost button (imgEmpty).
+      expect(screen.queryByLabelText('Step 1 image alt text')).not.toBeInTheDocument()
+      expect(screen.queryByLabelText('Step 2 image alt text')).not.toBeInTheDocument()
+    })
+
+    it('renders the alt-text input per step once each step image is ready', () => {
+      const onChange = vi.fn()
+      const readySteps: Step[] = [
+        { stepId: STEP_ID_1, order: 1, text: 'Preheat oven', image: { alt: '', processedAt: 111 } },
+        { stepId: STEP_ID_2, order: 2, text: 'Mix ingredients', image: { alt: '', processedAt: 222 } },
+      ]
+      render(
+        <StepList
+          steps={readySteps}
+          onChange={onChange}
+          getToken={mockGetToken}
+          recipeId="test-recipe-id"
+          slug="beans-on-toast"
+        />
+      )
 
       expect(screen.getByLabelText('Step 1 image alt text')).toBeInTheDocument()
       expect(screen.getByLabelText('Step 2 image alt text')).toBeInTheDocument()
@@ -234,7 +262,12 @@ describe('StepList', () => {
         />
       )
 
-      expect(screen.getByText(/processing image/i)).toBeInTheDocument()
+      // NEW (#228): without a prior upload attempt in this session, an
+      // unset processedAt now renders the empty "Add step image" control
+      // rather than the processing placeholder — see ImageUpload's own
+      // render-branch tests for the case where the placeholder legitimately
+      // shows (an upload genuinely in flight).
+      expect(screen.getByRole('button', { name: /^add step image$/i })).toBeInTheDocument()
       expect(screen.queryByRole('img')).not.toBeInTheDocument()
 
       const readyStep: Step = {
@@ -254,15 +287,23 @@ describe('StepList', () => {
       )
 
       expect(screen.getByRole('img')).toBeInTheDocument()
-      expect(screen.queryByText(/processing image/i)).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole('button', { name: /^add step image$/i })
+      ).not.toBeInTheDocument()
     })
 
-    it('typing in the alt-text input calls onChange with the updated step (no key field)', async () => {
+    it('typing in the alt-text input calls onChange with the updated step, preserving processedAt', async () => {
       const user = userEvent.setup()
       const onChange = vi.fn()
+      const step: Step = {
+        stepId: STEP_ID_1,
+        order: 1,
+        text: 'Preheat oven',
+        image: { alt: '', processedAt: 111 },
+      }
       render(
         <StepList
-          steps={[makeStep(STEP_ID_1, 1, 'Preheat oven')]}
+          steps={[step]}
           onChange={onChange}
           getToken={mockGetToken}
           recipeId="test-recipe-id"
@@ -274,7 +315,7 @@ describe('StepList', () => {
       await user.type(altInput, 'A')
 
       expect(onChange).toHaveBeenCalledWith([
-        { stepId: STEP_ID_1, order: 1, text: 'Preheat oven', image: { alt: 'A' } },
+        { stepId: STEP_ID_1, order: 1, text: 'Preheat oven', image: { alt: 'A', processedAt: 111 } },
       ])
     })
   })

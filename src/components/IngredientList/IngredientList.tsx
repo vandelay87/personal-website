@@ -1,4 +1,6 @@
 import Button from '@components/Button'
+import { iconChevronDown, iconChevronUp, iconPlus, iconRemove } from '@components/icons'
+import Input from '@components/Input'
 import { useReorderableList } from '@hooks/useReorderableList'
 import type { Ingredient } from '@models/recipe'
 import type { FC } from 'react'
@@ -39,77 +41,70 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
   }
 
   return (
-    <div className={styles.container}>
-      {ingredients.map((ingredient, index) => (
-        <div key={index} className={styles.row}>
-          <label className={styles.quantityInput}>
-            <span className="sr-only">Quantity</span>
-            <input
-              type="text"
-              aria-label={`Ingredient ${index + 1} quantity`}
-              placeholder="Qty"
-              value={ingredient.quantity}
-              onChange={(e) => handleFieldChange(index, 'quantity', e.target.value)}
-              className={[styles.input, styles.quantityInput].join(' ')}
-            />
-          </label>
-          <label className={styles.unitInput}>
-            <span className="sr-only">Unit</span>
-            <input
-              type="text"
-              aria-label={`Ingredient ${index + 1} unit`}
-              placeholder="Unit"
-              value={ingredient.unit}
-              onChange={(e) => handleFieldChange(index, 'unit', e.target.value)}
-              className={[styles.input, styles.unitInput].join(' ')}
-            />
-          </label>
-          <label className={styles.itemInput}>
-            <span className="sr-only">Item</span>
-            <input
-              type="text"
-              aria-label={`Ingredient ${index + 1} item`}
-              placeholder="Ingredient"
-              value={ingredient.item}
-              onChange={(e) => handleFieldChange(index, 'item', e.target.value)}
-              className={[styles.input, styles.itemInput].join(' ')}
-            />
-          </label>
-          <div className={styles.actions}>
-            <Button
-              onClick={() => handleMoveUp(index)}
-              ariaLabel={`Move up ingredient ${index + 1}`}
-              variant="outline"
-              disabled={index === 0}
-              className={styles.actionButton}
-            >
-              ↑
-            </Button>
-            <Button
-              onClick={() => handleMoveDown(index)}
-              ariaLabel={`Move down ingredient ${index + 1}`}
-              variant="outline"
-              disabled={index === ingredients.length - 1}
-              className={styles.actionButton}
-            >
-              ↓
-            </Button>
-            <Button
-              onClick={() => handleRemove(index)}
-              ariaLabel={`Remove ingredient ${index + 1}`}
-              variant="outline"
-              disabled={ingredients.length <= 1}
-              className={styles.actionButton}
-            >
-              Remove
-            </Button>
-          </div>
-        </div>
-      ))}
-      <Button onClick={handleAdd} variant="outline">
+    <>
+      <ul className={styles.container}>
+        {ingredients.map((ingredient, index) => (
+          <li key={index} className={styles.row}>
+            <div className={styles.quantityField}>
+              <Input
+                ariaLabel={`Ingredient ${index + 1} quantity`}
+                placeholder="Qty"
+                value={ingredient.quantity}
+                onChange={(e) => handleFieldChange(index, 'quantity', e.target.value)}
+              />
+            </div>
+            <div className={styles.unitField}>
+              <Input
+                ariaLabel={`Ingredient ${index + 1} unit`}
+                placeholder="Unit"
+                value={ingredient.unit}
+                onChange={(e) => handleFieldChange(index, 'unit', e.target.value)}
+              />
+            </div>
+            <div className={styles.itemField}>
+              <Input
+                ariaLabel={`Ingredient ${index + 1} item`}
+                placeholder="Ingredient"
+                value={ingredient.item}
+                onChange={(e) => handleFieldChange(index, 'item', e.target.value)}
+              />
+            </div>
+            <div className={styles.actions}>
+              <Button
+                onClick={() => handleMoveUp(index)}
+                ariaLabel={`Move up ingredient ${index + 1}`}
+                variant="outline"
+                disabled={index === 0}
+                className={`${styles.actionButton} ${styles.moveAction}`}
+              >
+                {iconChevronUp}
+              </Button>
+              <Button
+                onClick={() => handleMoveDown(index)}
+                ariaLabel={`Move down ingredient ${index + 1}`}
+                variant="outline"
+                disabled={index === ingredients.length - 1}
+                className={`${styles.actionButton} ${styles.moveAction}`}
+              >
+                {iconChevronDown}
+              </Button>
+              <Button
+                onClick={() => handleRemove(index)}
+                ariaLabel={`Remove ingredient ${index + 1}`}
+                variant="outline"
+                disabled={ingredients.length <= 1}
+                className={`${styles.actionButton} ${styles.removeAction}`}
+              >
+                {iconRemove}
+              </Button>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <Button onClick={handleAdd} variant="outline" iconLeft={iconPlus} className={styles.addButton}>
         Add ingredient
       </Button>
-    </div>
+    </>
   )
 }
 
