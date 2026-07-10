@@ -63,3 +63,21 @@ export const AdminRootLayout = () => (
     <Outlet />
   </AdminLayout>
 )
+
+/**
+ * Recipe Preview sits outside the admin shell entirely — no admin Header nav
+ * chrome (see Admin Recipe Preview.dc.html: no persistent app header, just
+ * its own sticky status banner pinned at the true viewport top). The page
+ * should read like the public Recipe page an actual visitor sees, with only
+ * an admin-only status banner overlaid, so it gets the public Footer too
+ * (the design's own footer at the bottom is the public "Elsewhere" nav, not
+ * "Signed in as {{email}}").
+ */
+export const RecipePreviewLayout = () => (
+  <>
+    <SkipLink />
+    <ScrollToTop />
+    <Outlet />
+    <Footer variant="public" />
+  </>
+)

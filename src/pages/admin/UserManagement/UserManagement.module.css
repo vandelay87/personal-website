@@ -1,137 +1,468 @@
+/* Matches the design's admin `<main>` column exactly (Admin Users.dc.html
+   line 98) — the shared AdminLayout `<main>` sets no max-width of its own,
+   each admin page supplies it, same as RecipeList.module.css's `.page`. */
 .page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  max-width: 64rem;
-  margin: 0 auto;
+  max-width: var(--max-w-site);
+  margin-inline: auto;
+  padding: clamp(32px, 5vw, 52px) clamp(20px, 5vw, 28px) 64px;
   box-sizing: border-box;
-}
-
-.loadingWrapper {
-  display: flex;
-  justify-content: center;
-  padding: var(--space-12) 0;
 }
 
 .header {
   display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-end;
+  justify-content: space-between;
+  /* 30px: design literal (Admin Users.dc.html line 101) — --space-8 (32px)
+     is the nearest token but is 2px off. */
+  margin-bottom: 30px;
+}
+
+/* .header .heading (not bare `.heading`): raises specificity above
+   Typography's own `.heading1` — see RecipeList.module.css's `.header
+   .heading` for the same pattern/rationale. */
+.header .heading {
+  font-size: clamp(28px, 4vw, 34px);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.025em;
+  margin: 0 0 6px;
+}
+
+.header .subtitle {
+  font-size: 14.5px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* ── Invite form card ─────────────────────────────────────────────── */
+
+.inviteCard {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  padding: clamp(18px, 3vw, 24px);
+  margin-bottom: var(--space-6);
+}
+
+.inviteCardHeader {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.inviteCardHeader .inviteHeading {
+  font-size: 17px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+
+.closeButton {
+  composes: focusRing from '../../../styles/interactions.module.css';
+  background: transparent;
+  border: none;
+  color: var(--color-text-faint);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 4px;
+  transition: color var(--duration-fast) var(--easing-default);
+}
+
+.closeButton:hover {
+  color: var(--color-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .closeButton {
+    transition: none;
+  }
 }
 
 .inviteForm {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-start;
 }
 
 .field {
+  flex: 1;
+  min-width: 240px;
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
 }
 
 .label {
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
-}
-
-.input {
-  padding: var(--space-2) var(--space-3);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg);
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
   color: var(--color-text);
-  font: inherit;
-  min-height: 44px;
-}
-
-.input:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-.input[aria-invalid='true'] {
-  border-color: var(--color-error);
+  display: block;
+  margin-bottom: 7px;
+  padding: 0;
+  border: none;
 }
 
 .fieldError {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  font-size: 13px;
   color: var(--color-error);
+}
+
+/* ── Role segmented control (AC: <fieldset><legend> + aria-pressed) ── */
+
+.roleField {
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.roleSeg {
+  display: inline-flex;
+  background: var(--color-field);
+  border: var(--border-width) solid var(--color-border);
+  /* 9px: design literal, between --radius-sm (6px) and --radius-md (10px). */
+  border-radius: 9px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.roleOption {
+  composes: focusRing from '../../../styles/interactions.module.css';
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-default),
+    color var(--duration-fast) var(--easing-default);
+}
+
+.roleOption[aria-pressed='true'] {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roleOption {
+    transition: none;
+  }
+}
+
+.roleHint {
+  display: block;
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  margin: 14px 0 0;
+  line-height: 1.5;
+}
+
+/* Real (aria-hidden, empty) spacer matching `.label`'s own rendered box —
+   not a guessed margin-top — so the Cancel/Send row's top is structurally
+   guaranteed to line up with the Email/Role columns' input row instead of
+   their labels, same technique as the design's own invisible-spacer markup
+   (Admin Users.dc.html line 139-140). */
+.actionsField {
+  display: flex;
+  flex-direction: column;
+}
+
+.actionsSpacer {
+  display: block;
+  font-size: 13px;
+  line-height: var(--line-height-normal);
+  margin-bottom: 7px;
 }
 
 .formActions {
   display: flex;
-  gap: var(--space-2);
-  justify-content: flex-end;
+  /* 10px: design literal, between --space-2 (8px) and --space-3 (12px). */
+  gap: 10px;
   flex-wrap: wrap;
 }
 
-.tableWrapper {
-  overflow-x: auto;
+/* Sizing-only override — the shared Button component's own `.button`
+   padding/font-size default to a taller size (`size="md"`, ~48.5px) than
+   this row needs; neither of Button's two existing sizes matches the
+   design's Cancel/Send-invite buttons (Admin Users.dc.html line 45/48:
+   `padding:11px 18px`/`padding:10px 16px`, `font-size:14px`), which sit at
+   roughly the same height as the role-toggle segmented control (~41px).
+   Values below are empirically tuned against the actual rendered
+   font metrics (see PR #271 review notes), not copied blindly from the
+   design's literal px — same "sizing-only override" pattern as
+   RecipePreview.module.css's `.bannerActions .publishButton`. */
+.formActions .formActionButton {
+  padding: 9px 18px;
+  font-size: 14px;
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
+.sendSpinner {
+  composes: spinner spinnerSm from '../../../styles/interactions.module.css';
+}
+
+/* ── User row list ────────────────────────────────────────────────
+   `<ul>/<li>`, not `<table>` — matches the established pattern from
+   RecipeList.module.css's `.list`/`.row` (bordered/rounded outer
+   container, each row `border-top` except the first, hover wash). */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--color-field);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 18px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px clamp(16px, 2.5vw, 22px);
+  transition: background var(--duration-fast) var(--easing-default);
+}
+
+.row:not(:first-child) {
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.row:hover {
+  background: var(--color-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    transition: none;
+  }
+}
+
+.rowMain {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
   background: var(--color-surface);
-}
-
-.table th,
-.table td {
-  padding: var(--space-3) var(--space-4);
-  text-align: left;
-  vertical-align: middle;
-  border-bottom: var(--border-width) solid var(--color-border);
-  white-space: nowrap;
-}
-
-.table th {
+  border: var(--border-width) solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
   font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.rowIdentity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.rowEmail {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-strong);
+  word-break: break-word;
+}
+
+/* Static "You" label — composes the shared mono-chip look (not the
+   interactive Tag component, which carries button/active/removable
+   machinery this static badge doesn't need) exactly like RecipeList
+   .module.css's own `.tagChip` does. */
+.selfTag {
+  composes: tagChipBase from '../../../styles/text.module.css';
+  font-size: 10px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  background: var(--color-bg);
+  padding: 2px 7px;
+  border-radius: 5px;
+  display: inline-block;
 }
 
-.badge {
-  display: inline-block;
-  padding: var(--space-1) var(--space-2);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+.rowMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px 18px;
+  flex-wrap: wrap;
+}
+
+/* Role pill — built on StatusBadge (dot={false}, tone="neutral" for its
+   font-mono/padding/base-color shape) with a specificity-tie override for
+   the two properties the design's pill needs that no StatusBadge tone
+   provides: no border, and a full pill radius instead of --radius-sm.
+   `.rowMeta .rolePill` (not bare `.rolePill`): raises specificity above
+   StatusBadge's own `.badge`/`.neutral` regardless of CSS import order —
+   same specificity-tie fix documented throughout this epic (see
+   `.header .heading`). Status, by contrast, has no chip/background at all
+   in the design (just a dot + plain text) — that shape doesn't fit
+   StatusBadge, so it stays hand-rolled below. */
+.rowMeta .rolePill {
+  border: none;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  font-size: 10.5px;
+  padding: 4px 10px;
+}
+
+.rowMeta .rolePillAdmin {
+  /* 10%: matches the design's --accent-bg (rgba(31,102,224,0.10)) exactly —
+     same color-mix(...transparent) shape as the --ring token. StatusBadge
+     has no "accent" tone, so this is applied as a second override class
+     rather than a tone value. */
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+}
+
+.statusCell {
+  display: inline-flex;
+  align-items: center;
+  /* 6px: design literal, between --space-1 (4px) and --space-2 (8px). */
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  min-width: 96px;
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-text-muted);
+}
+
+.statusCell[data-status='confirmed'] .statusDot {
+  background: var(--color-success);
+}
+
+.statusCell[data-status='pending'] .statusDot {
+  background: var(--color-warning);
+}
+
+/* 84px: design literal — fixed-width slot so rows without a Remove button
+   (the current user's own row) keep the same right-edge alignment as rows
+   that have one. */
+.rowActionSlot {
+  width: 84px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Matches RecipeList.module.css's `.rowActions .actionButton`/
+   `.deleteAction` ("act" button) pattern exactly — small icon+text button,
+   neutral by default, danger tint on hover. */
+.removeAction {
+  composes: focusRing from '../../../styles/interactions.module.css';
+}
+
+.rowActionSlot .removeAction {
+  display: inline-flex;
+  align-items: center;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  background: transparent;
+  border: var(--border-width) solid transparent;
+  border-radius: 8px;
+  padding: 6px 11px;
+  gap: 6px;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-default),
+    background var(--duration-fast) var(--easing-default);
+}
+
+.rowActionSlot .removeAction svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.rowActionSlot .removeAction:hover {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rowActionSlot .removeAction {
+    transition: none;
+  }
+}
+
+/* ── Loading / error states — shared box shape, matches
+   RecipeList.module.css's `.loadingBox`/`.errorBox` exactly (this is the
+   third page in the epic to need this treatment). ─────────────────── */
+
+.loadingBox,
+.errorBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border-radius: var(--radius-xl);
+}
+
+.loadingBox {
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-sm);
+  padding: clamp(56px, 9vw, 92px) 24px;
+  gap: 18px;
 }
 
-.badge[data-role='admin'] {
-  background: var(--color-surface);
-  color: var(--color-text);
-  border-color: var(--color-primary);
+/* --error-border: derived once here and inherited down to .errorIcon (a
+   direct child, per the markup in UserManagement.tsx) instead of repeating
+   the same color-mix() expression on both rules. */
+.errorBox {
+  --error-border: color-mix(in srgb, var(--color-error) 30%, var(--color-border));
+  border: var(--border-width) solid var(--error-border);
+  background: var(--color-error-bg);
+  padding: clamp(48px, 8vw, 80px) 24px;
 }
 
-.badge[data-role='contributor'] {
-  background: var(--color-surface);
+.errorIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  background: var(--color-field);
+  border: var(--border-width) solid var(--error-border);
+  color: var(--color-error);
+}
+
+.errorBox .errorHeading {
+  font-size: 20px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+}
+
+.errorBox .errorBody {
+  font-size: 14.5px;
+  line-height: 1.6;
   color: var(--color-text-muted);
-}
-
-.status {
-  display: inline-block;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-}
-
-.status[data-status='confirmed'] {
-  color: var(--color-text);
-}
-
-.actions {
-  text-align: right;
+  margin: 0 0 24px;
+  max-width: 38ch;
 }

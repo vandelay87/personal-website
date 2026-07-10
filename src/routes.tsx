@@ -8,7 +8,13 @@ import RecipeDetail from '@pages/RecipeDetail'
 import Recipes from '@pages/Recipes'
 import { lazy } from 'react'
 import { type RouteObject } from 'react-router-dom'
-import { AdminRootLayout, AdminSuspense, LoginLayout, RootLayout } from './routeLayouts'
+import {
+  AdminRootLayout,
+  AdminSuspense,
+  LoginLayout,
+  RecipePreviewLayout,
+  RootLayout,
+} from './routeLayouts'
 
 const Login = lazy(() => import('@pages/admin/Login'))
 const RecipeList = lazy(() => import('@pages/admin/RecipeList'))
@@ -75,20 +81,29 @@ export const routes: RouteObject[] = [
         ),
       },
       {
-        path: '/admin/recipes/:id/preview',
-        element: (
-          <AdminSuspense>
-            <RecipePreview />
-          </AdminSuspense>
-        ),
-      },
-      {
         path: '/admin/users',
         element: (
           <AdminSuspense>
             <ProtectedRoute requiredRole="admin">
               <UserManagement />
             </ProtectedRoute>
+          </AdminSuspense>
+        ),
+      },
+    ],
+  },
+  {
+    element: (
+      <ProtectedRoute>
+        <RecipePreviewLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        path: '/admin/recipes/:id/preview',
+        element: (
+          <AdminSuspense>
+            <RecipePreview />
           </AdminSuspense>
         ),
       },

@@ -1,8 +1,10 @@
 import { isSessionError } from '@api/auth'
 import { fetchRecipeByIdAdmin, publishRecipe } from '@api/recipes'
+import Button from '@components/Button'
 import Link from '@components/Link'
 import Loading from '@components/Loading'
 import RecipeDetailView from '@components/RecipeDetailView'
+import ThemeToggle from '@components/ThemeToggle'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import {
@@ -14,6 +16,116 @@ import { useCallback, useEffect, useMemo, useState, type FC } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import styles from './RecipePreview.module.css'
+
+// Hoisted elements, not components — these never take props, so there's no
+// need to re-invoke a function (and rebuild the tree) on every render. Same
+// established pattern as `iconRetry` in RecipeList.tsx / `iconLock` in
+// RecipeEditor.tsx. Paths match Admin Recipe Preview.dc.html's inline SVGs
+// (lines 76, 81-82, 88, 93, 100) exactly.
+const iconStatusPublished = (
+  <svg
+    width="17"
+    height="17"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2.2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M20 6 9 17l-5-5" />
+  </svg>
+)
+
+const iconStatusDraft = (
+  <svg
+    width="17"
+    height="17"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+)
+
+const iconEdit = (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
+  </svg>
+)
+
+const iconPublish = (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M12 19V5" />
+    <path d="m5 12 7-7 7 7" />
+  </svg>
+)
+
+const iconViewPublic = (
+  <svg
+    width="13"
+    height="13"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M7 17 17 7" />
+    <path d="M7 7h10v10" />
+  </svg>
+)
+
+// Search-with-exclamation glyph — matches Admin Recipe Preview.dc.html's
+// not-found icon (lines 123) exactly.
+const iconNotFound = (
+  <svg
+    width="25"
+    height="25"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.7"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="11" cy="11" r="8" />
+    <path d="m21 21-3.5-3.5" />
+    <path d="M11 8v3" />
+    <path d="M11 14h.01" />
+  </svg>
+)
 
 const mergeReadiness = (recipe: Recipe, updates: ImageReadyUpdate[]): Recipe => {
   const byImageType = new Map(updates.map((u) => [u.imageType, u.processedAt]))
@@ -106,57 +218,114 @@ const RecipePreview: FC = () => {
 
   if (loading) {
     return (
-      <div className={styles.stateWrapper}>
-        <Loading />
-      </div>
+      <main id="main" tabIndex={-1} className={styles.main}>
+        <div className={styles.stateWrapper}>
+          <Loading />
+        </div>
+      </main>
     )
   }
 
   if (notFound || !recipe) {
     return (
-      <div className={styles.stateWrapper}>
-        <Typography variant="body">Recipe not found.</Typography>
-      </div>
+      <main id="main" tabIndex={-1} className={styles.main}>
+        <div className={styles.notFoundBox}>
+          <div className={styles.notFoundIcon}>{iconNotFound}</div>
+          <Typography variant="heading1" className={styles.notFoundHeading}>
+            Recipe not found
+          </Typography>
+          <Typography variant="body" className={styles.notFoundBody}>
+            This recipe may have been deleted, or the link is incorrect.
+          </Typography>
+          <Link
+            to="/admin/recipes"
+            icon="←"
+            iconSide="left"
+            nudge="left"
+            className={styles.notFoundBackLink}
+          >
+            Back to recipes
+          </Link>
+        </div>
+      </main>
     )
   }
 
   const editHref = `/admin/recipes/${recipe.id}/edit`
   const isDraft = recipe.status !== 'published'
+  const bannerToneClassName = isDraft ? styles.draft : styles.published
 
   return (
     <div className={styles.container}>
-      <div className={styles.banner} role="status" aria-live="polite">
-        {isDraft ? (
-          <>
+      <div
+        className={[styles.banner, bannerToneClassName].join(' ')}
+        role="status"
+        aria-live="polite"
+      >
+        <div className={styles.bannerInner}>
+          <div className={styles.bannerLeft}>
+            <Link
+              to="/admin/recipes"
+              icon="←"
+              iconSide="left"
+              nudge="left"
+              className={styles.backLink}
+            >
+              Recipes
+            </Link>
+            <span aria-hidden="true" className={styles.bannerDivider} />
+            <span aria-hidden="true" className={styles.statusIcon}>
+              {isDraft ? iconStatusDraft : iconStatusPublished}
+            </span>
             <Typography variant="body" className={styles.bannerMessage}>
-              Preview — this recipe is not yet published
+              {isDraft
+                ? 'Preview — this recipe is not yet published.'
+                : 'This recipe is published.'}
             </Typography>
-            <div className={styles.bannerActions}>
-              <Link to={editHref}>Edit</Link>
-              <button
-                type="button"
-                className={styles.actionLink}
+          </div>
+          <div className={styles.bannerActions}>
+            <Link
+              to={editHref}
+              icon={iconEdit}
+              iconSide="left"
+              nudge="none"
+              className={styles.editLink}
+            >
+              Edit
+            </Link>
+            {isDraft ? (
+              <Button
                 onClick={handlePublish}
-                disabled={publishing}
+                size="sm"
+                loading={publishing}
+                iconLeft={iconPublish}
+                className={styles.publishButton}
               >
-                {publishing ? 'Publishing…' : 'Publish'}
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <Typography variant="body" className={styles.bannerMessage}>
-              This recipe is published
-            </Typography>
-            <div className={styles.bannerActions}>
-              <Link to={editHref}>Edit</Link>
-              <Link to={`/recipes/${recipe.slug}`}>View public page</Link>
-            </div>
-          </>
-        )}
+                Publish
+              </Button>
+            ) : (
+              <Link
+                to={`/recipes/${recipe.slug}`}
+                icon={iconViewPublic}
+                iconSide="right"
+                nudge="up-right"
+                className={styles.viewLink}
+              >
+                View public page
+              </Link>
+            )}
+            <ThemeToggle />
+          </div>
+        </div>
       </div>
 
-      <RecipeDetailView recipe={recipe} />
+      <main
+        id="main"
+        tabIndex={-1}
+        className={[styles.main, styles.mainWithBanner].join(' ')}
+      >
+        <RecipeDetailView recipe={recipe} />
+      </main>
     </div>
   )
 }
