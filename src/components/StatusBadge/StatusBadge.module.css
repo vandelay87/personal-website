@@ -23,13 +23,31 @@
 }
 
 .success {
-  color: var(--color-success);
+  /* WCAG AA override (issue #267): --color-success (#1F8A5B) on this pill's
+     composited background is only ~3.68:1 (fails AA's 4.5:1 for normal text).
+     Darkened to #1A754D (~4.83:1) for this component only — see issue for why
+     the shared token isn't changed. Dark mode already passes (~6.86:1), so it
+     resets to the token below. */
+  color: #1a754d;
   background: var(--color-success-bg);
 }
 
+[data-theme="dark"] .success {
+  color: var(--color-success);
+}
+
 .warning {
-  color: var(--color-warning);
+  /* WCAG AA override (issue #267): --color-warning (#A66E0A) on this pill's
+     composited background is only ~3.66:1 (fails AA's 4.5:1 for normal text).
+     Darkened to #8C5A08 (~4.96:1) for this component only — see issue for why
+     the shared token isn't changed. Dark mode already passes (~6.85:1), so it
+     resets to the token below. */
+  color: #8c5a08;
   background: var(--color-warning-bg);
+}
+
+[data-theme="dark"] .warning {
+  color: var(--color-warning);
 }
 
 .error {
