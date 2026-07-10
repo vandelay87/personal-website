@@ -91,6 +91,11 @@ const iconRetry = (
 
 const ROLE_OPTIONS: AdminRole[] = ['contributor', 'admin']
 
+const ROLE_LABEL: Record<AdminRole, string> = {
+  admin: 'Admin',
+  contributor: 'Contributor',
+}
+
 const ROLE_HINT: Record<AdminRole, string> = {
   admin:
     'Admins can manage recipes and users, including inviting and removing people.',
@@ -272,7 +277,7 @@ const UserManagement = () => {
                       aria-pressed={inviteRole === role}
                       onClick={() => setInviteRole(role)}
                     >
-                      {role === 'admin' ? 'Admin' : 'Contributor'}
+                      {ROLE_LABEL[role]}
                     </button>
                   ))}
                 </div>
@@ -321,13 +326,14 @@ const UserManagement = () => {
                   <StatusBadge
                     dot={false}
                     tone="neutral"
-                    className={
-                      userRow.role === 'admin'
-                        ? `${styles.rolePill} ${styles.rolePillAdmin}`
-                        : styles.rolePill
-                    }
+                    className={[
+                      styles.rolePill,
+                      userRow.role === 'admin' && styles.rolePillAdmin,
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
                   >
-                    {userRow.role === 'admin' ? 'Admin' : 'Contributor'}
+                    {ROLE_LABEL[userRow.role]}
                   </StatusBadge>
                   <span className={styles.statusCell} data-status={userRow.status}>
                     <span className={styles.statusDot} aria-hidden="true" />
