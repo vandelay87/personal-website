@@ -22,32 +22,29 @@
   background: currentcolor;
 }
 
+/* WCAG AA override (issue #267): --color-success/--color-warning on their
+   pill backgrounds compute to ~3.68:1/~3.66:1 (fail AA's 4.5:1 for normal
+   text). Each is darkened via a component-local custom property, scoped to
+   StatusBadge only — see issue for why the shared tokens aren't changed.
+   Dark mode already passes for both, so it resets to the shared token. */
 .success {
-  /* WCAG AA override (issue #267): --color-success (#1F8A5B) on this pill's
-     composited background is only ~3.68:1 (fails AA's 4.5:1 for normal text).
-     Darkened to #1A754D (~4.83:1) for this component only — see issue for why
-     the shared token isn't changed. Dark mode already passes (~6.86:1), so it
-     resets to the token below. */
-  color: #1a754d;
+  --status-success-fg: #1a754d; /* ~4.83:1 */
+  color: var(--status-success-fg);
   background: var(--color-success-bg);
 }
 
 [data-theme="dark"] .success {
-  color: var(--color-success);
+  --status-success-fg: var(--color-success);
 }
 
 .warning {
-  /* WCAG AA override (issue #267): --color-warning (#A66E0A) on this pill's
-     composited background is only ~3.66:1 (fails AA's 4.5:1 for normal text).
-     Darkened to #8C5A08 (~4.96:1) for this component only — see issue for why
-     the shared token isn't changed. Dark mode already passes (~6.85:1), so it
-     resets to the token below. */
-  color: #8c5a08;
+  --status-warning-fg: #8c5a08; /* ~4.96:1 */
+  color: var(--status-warning-fg);
   background: var(--color-warning-bg);
 }
 
 [data-theme="dark"] .warning {
-  color: var(--color-warning);
+  --status-warning-fg: var(--color-warning);
 }
 
 .error {
