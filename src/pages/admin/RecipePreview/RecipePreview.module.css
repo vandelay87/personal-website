@@ -32,23 +32,29 @@
 
 @supports (backdrop-filter: blur(1px)) and (color: color-mix(in srgb, red 50%, transparent)) {
   .draft {
-    background: color-mix(in srgb, var(--color-warning-bg) 84%, transparent);
     backdrop-filter: saturate(140%) blur(10px);
   }
 
   .published {
-    background: color-mix(in srgb, var(--color-success-bg) 84%, transparent);
     backdrop-filter: saturate(140%) blur(10px);
   }
 }
 
+/* Background formula matches Admin Recipe Preview.dc.html's `renderVals()`
+   `bannerBg` exactly (nested color-mix: page background tinted mostly-opaque
+   first, then lightly blended with warning/success) — NOT the generic
+   --color-warning-bg/--color-success-bg tokens, which are a different,
+   much-lower-opacity wash meant for other surfaces. 14%/13% (draft/published)
+   is the design's own literal split, not a typo. This is identical whether
+   or not backdrop-filter is supported, so it stays out of the @supports
+   block above, which now only adds the blur itself. */
 .draft {
-  background: var(--color-warning-bg);
+  background: color-mix(in srgb, var(--color-warning) 14%, color-mix(in srgb, var(--color-bg) 78%, transparent));
   border-block-end-color: color-mix(in srgb, var(--color-warning) 30%, var(--color-border));
 }
 
 .published {
-  background: var(--color-success-bg);
+  background: color-mix(in srgb, var(--color-success) 13%, color-mix(in srgb, var(--color-bg) 78%, transparent));
   border-block-end-color: color-mix(in srgb, var(--color-success) 30%, var(--color-border));
 }
 
