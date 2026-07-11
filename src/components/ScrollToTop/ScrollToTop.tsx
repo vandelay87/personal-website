@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { useLocation, useNavigationType } from 'react-router-dom'
 
+import { MAIN_LANDMARK_ID } from '../../constants/mainLandmark'
+
 export default function ScrollToTop() {
   const { pathname, hash } = useLocation()
   const navigationType = useNavigationType()
@@ -29,7 +31,7 @@ export default function ScrollToTop() {
       // <h1>) after a client-side route change, so keyboard/screen-reader
       // users get the new page's context instead of staying on the old
       // focus target. preventScroll avoids fighting the scrollTo above.
-      document.getElementById('main')?.focus({ preventScroll: true })
+      document.getElementById(MAIN_LANDMARK_ID)?.focus({ preventScroll: true })
     }
     // navigationType is read above but deliberately left out of these deps —
     // it's consulted, not reacted to. A search-param-only change (e.g. a

@@ -147,6 +147,10 @@
   --focus-ring-outline-offset: 3px;
 
   /* ── Layout ───────────────────────────────────────────────── */
+  /* Pre-JS/no-JS fallback for scroll-margin-block-start consumers (PageShell,
+     AdminLayout) — Header.tsx's ResizeObserver overwrites this with the
+     real rendered height (single- or wrapped-row) on mount. */
+  --header-height: var(--space-16);
   --max-w-site:    1080px; /* shell / header / footer width */
   --max-w-reading: 720px;  /* index + hero reading column */
   --max-w-article: 680px;  /* long-form article column */

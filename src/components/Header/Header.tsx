@@ -1,6 +1,7 @@
 import Button from '@components/Button'
 import ThemeToggle from '@components/ThemeToggle'
 import type { FC } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link as RouterLink, useLocation } from 'react-router-dom'
 import styles from './Header.module.css'
 
@@ -39,6 +40,28 @@ const Header: FC<HeaderProps> = ({
   className: extraClassName,
 }) => {
   const { pathname } = useLocation()
+  const headerRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const element = headerRef.current
+    if (!element) return
+
+    // getBoundingClientRect(), not entry.contentRect/borderBoxSize — the
+    // header's border-block-end is part of its visual footprint, and only
+    // getBoundingClientRect() includes border in the measured height. Also
+    // re-fires on wrap (single row -> two rows on narrow viewports), so
+    // --header-height stays accurate for consumers like PageShell/AdminLayout's
+    // scroll-margin-block-start without them needing wrap-aware media queries.
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const height = entry.target.getBoundingClientRect().height
+        document.documentElement.style.setProperty('--header-height', `${height}px`)
+      }
+    })
+    observer.observe(element)
+
+    return () => observer.disconnect()
+  }, [])
 
   const className = [
     styles.header,
@@ -67,7 +90,7 @@ const Header: FC<HeaderProps> = ({
   )
 
   return (
-    <header className={className}>
+    <header ref={headerRef} className={className}>
       <div className={styles.inner}>
         <div className={styles.left}>
           <RouterLink to={brandTo} className={styles.brand}>

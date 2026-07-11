@@ -15,6 +15,7 @@ import { applyStepReadiness, type Recipe } from '@models/recipe'
 import { useCallback, useEffect, useMemo, useState, type FC } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import { MAIN_LANDMARK_ID } from '../../../constants/mainLandmark'
 import styles from './RecipePreview.module.css'
 
 // Hoisted elements, not components — these never take props, so there's no
@@ -218,7 +219,7 @@ const RecipePreview: FC = () => {
 
   if (loading) {
     return (
-      <main id="main" tabIndex={-1} className={styles.main}>
+      <main id={MAIN_LANDMARK_ID} tabIndex={-1} className={styles.main}>
         <div className={styles.stateWrapper}>
           <Loading />
         </div>
@@ -228,7 +229,7 @@ const RecipePreview: FC = () => {
 
   if (notFound || !recipe) {
     return (
-      <main id="main" tabIndex={-1} className={styles.main}>
+      <main id={MAIN_LANDMARK_ID} tabIndex={-1} className={styles.main}>
         <div className={styles.notFoundBox}>
           <div className={styles.notFoundIcon}>{iconNotFound}</div>
           <Typography variant="heading1" className={styles.notFoundHeading}>
@@ -320,7 +321,7 @@ const RecipePreview: FC = () => {
       </div>
 
       <main
-        id="main"
+        id={MAIN_LANDMARK_ID}
         tabIndex={-1}
         className={[styles.main, styles.mainWithBanner].join(' ')}
       >
