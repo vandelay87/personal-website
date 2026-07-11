@@ -1,6 +1,6 @@
 import Footer from '@components/Footer'
 import Header, { type HeaderLink } from '@components/Header'
-import SkipLink from '@components/SkipLink'
+import PageShell from '@components/PageShell'
 import { useAuth } from '@contexts/AuthContext'
 import type { FC, ReactNode } from 'react'
 
@@ -24,12 +24,13 @@ const AdminLayout: FC<AdminLayoutProps> = ({ children }) => {
 
   return (
     <div className={styles.layout}>
-      <SkipLink />
-      <Header variant="admin" links={links} email={user?.email} onLogout={logout} />
-      <main id="main" tabIndex={-1} className={styles.content}>
+      <PageShell
+        header={<Header variant="admin" links={links} email={user?.email} onLogout={logout} />}
+        footer={<Footer variant="admin" email={user?.email} />}
+        mainClassName={styles.content}
+      >
         {children}
-      </main>
-      <Footer variant="admin" email={user?.email} />
+      </PageShell>
     </div>
   )
 }
