@@ -1,13 +1,7 @@
 import Link from '@components/Link'
 import { useId, type FC } from 'react'
+import { SOCIAL_LINKS } from '../../constants/socialLinks'
 import styles from './Footer.module.css'
-
-/** Reuses the same three links as SocialCard (GitHub / LinkedIn / Email). */
-const ELSEWHERE_LINKS: { label: string; href: string }[] = [
-  { label: 'GitHub', href: 'https://github.com/vandelay87' },
-  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/akli-aissat-b08119115/' },
-  { label: 'Email', href: 'mailto:akliaissat@outlook.com' },
-]
 
 export interface FooterProps {
   /** @default 'public' */
@@ -36,9 +30,9 @@ const Footer: FC<FooterProps> = ({ variant = 'public', email, className: extraCl
                 Elsewhere
               </span>
               <ul className={styles.linkList}>
-                {ELSEWHERE_LINKS.map((link) => (
+                {SOCIAL_LINKS.map((link) => (
                   <li key={link.href}>
-                    <Link to={link.href}>{link.label}</Link>
+                    <Link to={link.href}>{link.name}</Link>
                   </li>
                 ))}
               </ul>
