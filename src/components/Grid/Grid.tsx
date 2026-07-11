@@ -1,9 +1,10 @@
-import { FC, ReactNode } from 'react'
+import { CSSProperties, FC, ReactNode } from 'react'
 import styles from './Grid.module.css'
 
 interface GridProps {
   children: ReactNode
   columns?: 1 | 2 | 3 | 4
+  minWidth?: string
 }
 
 const columnClassMap: Record<NonNullable<GridProps['columns']>, string> = {
@@ -13,10 +14,18 @@ const columnClassMap: Record<NonNullable<GridProps['columns']>, string> = {
   4: styles.cols4,
 }
 
-const Grid: FC<GridProps> = ({ children, columns = 3 }) => {
+const Grid: FC<GridProps> = ({ children, columns = 3, minWidth }) => {
+  const gridClassName = minWidth
+    ? `${styles.grid} ${styles.autoFit}`
+    : `${styles.grid} ${columnClassMap[columns]}`
+
+  const gridStyle = minWidth
+    ? ({ '--grid-min-width': minWidth } as CSSProperties)
+    : undefined
+
   return (
     // eslint-disable-next-line jsx-a11y/no-redundant-roles -- .grid sets list-style: none, which drops implicit list semantics in Safari/VoiceOver; role="list" (paired with role="listitem" on each <li>) restores it
-    <ul className={`${styles.grid} ${columnClassMap[columns]}`} role="list">
+    <ul className={gridClassName} style={gridStyle} role="list">
       {Array.isArray(children) ? (
         children.map((child, index) => (
           // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above
