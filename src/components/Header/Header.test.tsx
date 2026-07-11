@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import type { ReactElement } from 'react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import Header from './Header'
 
 const renderWithRouter = (ui: ReactElement, { route = '/' } = {}) => {
@@ -83,6 +83,21 @@ describe('Header', () => {
       expect(screen.queryByRole('navigation')).not.toBeInTheDocument()
       expect(screen.queryByRole('link', { name: 'Recipes' })).not.toBeInTheDocument()
       expect(screen.queryByRole('button', { name: /log out/i })).not.toBeInTheDocument()
+    })
+  })
+
+  describe('--header-height custom property', () => {
+    afterEach(() => {
+      document.documentElement.style.removeProperty('--header-height')
+    })
+
+    it('sets --header-height on the document root after mount', () => {
+      renderWithRouter(<Header />)
+
+      const headerHeight = document.documentElement.style.getPropertyValue('--header-height')
+
+      expect(headerHeight).not.toBe('')
+      expect(headerHeight).toMatch(/^\d+(\.\d+)?px$/)
     })
   })
 })

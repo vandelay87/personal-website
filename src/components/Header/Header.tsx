@@ -1,6 +1,7 @@
 import Button from '@components/Button'
 import ThemeToggle from '@components/ThemeToggle'
 import type { FC } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link as RouterLink, useLocation } from 'react-router-dom'
 import styles from './Header.module.css'
 
@@ -39,6 +40,38 @@ const Header: FC<HeaderProps> = ({
   className: extraClassName,
 }) => {
   const { pathname } = useLocation()
+  const headerRef = useRef<HTMLElement>(null)
+  const lastHeightRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    const element = headerRef.current
+    if (!element) return
+
+    // entry.borderBoxSize, not getBoundingClientRect() — borderBoxSize is by
+    // definition the content+padding+border box, so it already includes the
+    // header's border-block-end without forcing a synchronous layout read on
+    // every firing (getBoundingClientRect() falls back for the handful of
+    // older engines that don't support borderBoxSize). Also re-fires on wrap
+    // (single row -> two rows on narrow viewports), so --header-height stays
+    // accurate for consumers like PageShell/AdminLayout's
+    // scroll-margin-block-start without them needing wrap-aware media
+    // queries. The rounded height is cached so sub-pixel jitter mid-resize
+    // doesn't trigger redundant writes — every setProperty ripples a
+    // style/layout recalc out to those consumers, not just the header.
+    const observer = new ResizeObserver((entries) => {
+      const [entry] = entries
+      const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.target.getBoundingClientRect().height
+      const roundedHeight = Math.round(height)
+
+      if (roundedHeight === lastHeightRef.current) return
+
+      lastHeightRef.current = roundedHeight
+      document.documentElement.style.setProperty('--header-height', `${roundedHeight}px`)
+    })
+    observer.observe(element)
+
+    return () => observer.disconnect()
+  }, [])
 
   const className = [
     styles.header,
@@ -67,7 +100,7 @@ const Header: FC<HeaderProps> = ({
   )
 
   return (
-    <header className={className}>
+    <header ref={headerRef} className={className}>
       <div className={styles.inner}>
         <div className={styles.left}>
           <RouterLink to={brandTo} className={styles.brand}>

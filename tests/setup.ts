@@ -36,6 +36,22 @@ if (typeof window !== 'undefined') {
   window.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver
 }
 
+export class MockResizeObserver {
+  observe: ReturnType<typeof vi.fn>
+  unobserve = vi.fn()
+  disconnect = vi.fn()
+
+  constructor(callback: ResizeObserverCallback) {
+    this.observe = vi.fn((element: Element) => {
+      callback([{ target: element } as ResizeObserverEntry], {} as ResizeObserver)
+    })
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver
+}
+
 // jsdom does not implement the native <dialog> element's `showModal`/`close`
 // behaviour. This minimal polyfill toggles the `open` attribute and dispatches
 // a `close` event so components built on native <dialog> (e.g. a future
