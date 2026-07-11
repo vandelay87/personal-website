@@ -135,11 +135,7 @@
    prop alone (RecipePreview.tsx) — no `composes:` needed here, this local
    class only supplies this consumer's own size/shape deltas as a plain
    unlayered override. */
-.editLink {
-  font-size: 13px;
-  padding: 8px 15px;
-}
-
+.editLink,
 .viewLink {
   font-size: 13px;
   padding: 8px 15px;

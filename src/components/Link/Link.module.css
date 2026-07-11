@@ -29,12 +29,16 @@
      of plain Link — border/bg, radius, hover color-swap, transition, all
      re-derived per file (issue #270). Centralized here so consumers only
      need to override their own size/spacing deltas via `composes:`. */
-  .ghost {
+  .ghost,
+  .solid {
     font-weight: var(--font-weight-semibold);
-    color: var(--color-text);
-    border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius-md);
     padding: var(--space-2) var(--space-4);
+  }
+
+  .ghost {
+    color: var(--color-text);
+    border: var(--border-width) solid var(--color-border-strong);
     transition: border-color var(--duration-fast) var(--easing-default),
       color var(--duration-fast) var(--easing-default);
   }
@@ -45,16 +49,12 @@
   }
 
   .solid {
-    font-weight: var(--font-weight-semibold);
     color: var(--color-btn-fg);
     background: var(--color-btn-bg);
-    border-radius: var(--radius-md);
-    padding: var(--space-2) var(--space-4);
     transition: opacity var(--duration-fast) var(--easing-default);
   }
 
   .solid:hover {
-    color: var(--color-btn-fg);
     opacity: 0.9;
   }
 
