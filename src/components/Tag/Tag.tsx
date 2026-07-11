@@ -47,8 +47,6 @@ const Tag: FC<TagProps> = (props) => {
     .filter(Boolean)
     .join(' ')
 
-  const removeButtonClassName = [styles.remove, removeClassName].filter(Boolean).join(' ')
-
   if (props.as === 'button') {
     return (
       <button
@@ -90,6 +88,7 @@ const Tag: FC<TagProps> = (props) => {
     )
   }
 
+  const removeButtonClassName = [styles.remove, removeClassName].filter(Boolean).join(' ')
   const removeLabel = typeof children === 'string' ? `Remove ${children}` : 'Remove tag'
 
   return (
