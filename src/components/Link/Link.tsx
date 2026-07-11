@@ -14,6 +14,8 @@ export interface LinkProps {
   iconSide?: 'left' | 'right'
   /** Direction the icon nudges on hover. @default 'right' */
   nudge?: 'left' | 'right' | 'up-right' | 'none'
+  /** Button/pill shape. Omit for a plain link (default, unchanged). */
+  variant?: 'ghost' | 'solid'
   ariaLabel?: string
   className?: string
 }
@@ -33,6 +35,7 @@ const Link: FC<LinkProps> = ({
   icon,
   iconSide = 'right',
   nudge = 'right',
+  variant,
   ariaLabel,
   className: externalClassName,
 }) => {
@@ -41,13 +44,18 @@ const Link: FC<LinkProps> = ({
 
   const className = [
     styles.link,
-    styles[tone],
+    // Tone and variant are mutually exclusive color sources: tone is a
+    // plain-link text color, variant is a button shape with its own
+    // definitive colors. When variant is set it fully owns color, so the
+    // tone class is skipped to avoid it clobbering the variant's color.
+    variant ? undefined : styles[tone],
     underline ? styles.underline : '',
     // Nudge class goes on the link itself, not the icon — the CSS is a
     // `.nudgeX:hover .linkIcon` ancestor/descendant rule (see Link.module.css),
     // so hovering anywhere on the link (not just the tiny icon glyph) has to
     // trigger the icon's transform.
     NUDGE_CLASSES[nudge],
+    variant && styles[variant],
     externalClassName,
   ]
     .filter(Boolean)

@@ -300,13 +300,8 @@ const UserManagement = () => {
                 <div className={styles.rowMeta}>
                   <StatusBadge
                     dot={false}
-                    tone="neutral"
-                    className={[
-                      styles.rolePill,
-                      userRow.role === 'admin' && styles.rolePillAdmin,
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
+                    tone={userRow.role === 'admin' ? 'accent' : 'neutral'}
+                    shape="pill"
                   >
                     {ROLE_LABEL[userRow.role]}
                   </StatusBadge>

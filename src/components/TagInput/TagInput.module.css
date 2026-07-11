@@ -117,8 +117,8 @@
    hover read as the same visual weight, plus a tinted background so the
    *persistent* keyboard-selected state stays visible even without the
    pointer sitting on it. The 10% color-mix background matches this
-   project's established "accent" fill (see UserManagement.module.css's
-   `.rolePillAdmin`, same color-mix(...transparent) shape as the --ring
+   project's established "accent" fill (see StatusBadge.module.css's
+   `.accent` tone, same color-mix(...transparent) shape as the --ring
    token — the design's --accent-bg is rgba(31,102,224,0.10)). */
 .option[aria-selected='true'] {
   border-color: var(--color-primary);

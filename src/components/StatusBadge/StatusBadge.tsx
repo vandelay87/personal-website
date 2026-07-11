@@ -4,9 +4,11 @@ import styles from './StatusBadge.module.css'
 
 export interface StatusBadgeProps {
   /** @default 'neutral' */
-  tone?: 'success' | 'warning' | 'error' | 'neutral'
+  tone?: 'success' | 'warning' | 'error' | 'neutral' | 'accent'
   /** Show the leading dot. @default true */
   dot?: boolean
+  /** @default 'chip' */
+  shape?: 'chip' | 'pill'
   children?: ReactNode
   className?: string
   style?: CSSProperties
@@ -15,11 +17,14 @@ export interface StatusBadgeProps {
 const StatusBadge: FC<StatusBadgeProps> = ({
   tone = 'neutral',
   dot = true,
+  shape = 'chip',
   children,
   className: extraClassName,
   style,
 }) => {
-  const className = [styles.badge, styles[tone], extraClassName].filter(Boolean).join(' ')
+  const className = [styles.badge, styles[tone], shape === 'pill' && styles.pill, extraClassName]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <span className={className} style={style}>

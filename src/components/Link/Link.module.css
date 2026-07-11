@@ -25,8 +25,43 @@
     color: var(--color-primary);
   }
 
+  /* Button/pill shapes several admin pages independently hand-rolled on top
+     of plain Link — border/bg, radius, hover color-swap, transition, all
+     re-derived per file (issue #270). Centralized here so consumers only
+     need to override their own size/spacing deltas via `composes:`. */
+  .ghost,
+  .solid {
+    font-weight: var(--font-weight-semibold);
+    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-4);
+  }
+
+  .ghost {
+    color: var(--color-text);
+    border: var(--border-width) solid var(--color-border-strong);
+    transition: border-color var(--duration-fast) var(--easing-default),
+      color var(--duration-fast) var(--easing-default);
+  }
+
+  .ghost:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  .solid {
+    color: var(--color-btn-fg);
+    background: var(--color-btn-bg);
+    transition: opacity var(--duration-fast) var(--easing-default);
+  }
+
+  .solid:hover {
+    opacity: 0.9;
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .link {
+    .link,
+    .ghost,
+    .solid {
       transition: none;
     }
   }

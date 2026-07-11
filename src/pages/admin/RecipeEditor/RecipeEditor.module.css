@@ -71,32 +71,22 @@
 /* Bare `.bannerAction` override: Link's own `.link` (color:
    var(--color-link)) now lives in `@layer component-defaults`
    (Link.module.css, #263), so this plain unlayered class deterministically
-   wins without needing the old descendant-selector trick. Styled to look
-   like the design's small ghost button, same "style Link locally"
-   precedent as RecipeList's `.newButton`. */
+   wins without needing the old descendant-selector trick. Border/color/
+   transition/hover already come from Link's own `.ghost` via the
+   `variant="ghost"` prop alone — no `composes:` needed, sizing, the extra
+   hover background wash (`.ghost` itself has none), and font-weight (this
+   banner link keeps its original `medium` weight, overriding `.ghost`'s
+   `semibold` default) stay local. */
 .bannerAction {
   flex-shrink: 0;
   width: auto;
   font-size: 13px;
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text);
-  border: var(--border-width) solid var(--color-border-strong);
-  border-radius: var(--radius-md);
   padding: 7px 14px;
-  transition: border-color var(--duration-fast) var(--easing-default),
-    color var(--duration-fast) var(--easing-default);
+  font-weight: var(--font-weight-medium);
 }
 
 .bannerAction:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
   background: var(--color-hover);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .bannerAction {
-    transition: none;
-  }
 }
 
 /* ── Back link ───────────────────────────────────────────────────── */
