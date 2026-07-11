@@ -19,6 +19,8 @@ const TagInput: FC<TagInputProps> = ({
   placeholder,
 }) => {
   const [inputValue, setInputValue] = useState('')
+  const [highlightedIndex, setHighlightedIndex] = useState(-1)
+  const [suggestionsClosed, setSuggestionsClosed] = useState(false)
   const listboxId = useId()
 
   const filtered = inputValue
@@ -27,25 +29,49 @@ const TagInput: FC<TagInputProps> = ({
       )
     : []
 
-  const isExpanded = filtered.length > 0
+  const isExpanded = filtered.length > 0 && !suggestionsClosed
 
   const addTag = (tag: string) => {
     if (tag.trim() && !tags.includes(tag.trim())) {
       onChange([...tags, tag.trim()])
     }
     setInputValue('')
+    setHighlightedIndex(-1)
+    setSuggestionsClosed(false)
   }
 
   const removeTag = (index: number) => {
     onChange(tags.filter((_, i) => i !== index))
   }
 
+  const handleInputChange = (value: string) => {
+    setInputValue(value)
+    setHighlightedIndex(-1)
+    setSuggestionsClosed(false)
+  }
+
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'ArrowDown') {
+      if (!isExpanded) return
       e.preventDefault()
-      if (inputValue.trim()) {
+      setHighlightedIndex((i) => Math.min(i + 1, filtered.length - 1))
+    } else if (e.key === 'ArrowUp') {
+      if (!isExpanded) return
+      e.preventDefault()
+      setHighlightedIndex((i) => Math.max(i - 1, 0))
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      const highlighted = isExpanded ? filtered[highlightedIndex] : undefined
+      if (highlighted) {
+        addTag(highlighted)
+      } else if (inputValue.trim()) {
         addTag(inputValue)
       }
+    } else if (e.key === 'Escape') {
+      if (!isExpanded) return
+      e.preventDefault()
+      setSuggestionsClosed(true)
+      setHighlightedIndex(-1)
     }
   }
 
@@ -66,7 +92,7 @@ const TagInput: FC<TagInputProps> = ({
           aria-expanded={isExpanded}
           aria-controls={listboxId}
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={(e) => handleInputChange(e.target.value)}
           onKeyDown={handleKeyDown}
           className={styles.input}
           placeholder={placeholder}
@@ -74,15 +100,19 @@ const TagInput: FC<TagInputProps> = ({
 
         {isExpanded && (
           <ul id={listboxId} role="listbox" className={styles.listbox}>
-            {filtered.map((tag) => (
-              // Arrow-key highlight + Enter-to-select keyboard nav tracked in #237.
-              // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+            {filtered.map((tag, index) => (
               <li
                 key={tag}
                 role="option"
-                aria-selected="false"
+                aria-selected={index === highlightedIndex}
                 className={styles.option}
                 onClick={() => addTag(tag)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    addTag(tag)
+                  }
+                }}
               >
                 {tag}
               </li>
