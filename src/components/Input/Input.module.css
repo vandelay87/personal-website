@@ -15,12 +15,15 @@
    className the way two same-specificity classes on this element would
    have (whichever landed later in the compiled stylesheet would win).
    The core declaration block (width/font/color/background/border/
-   radius/padding/transition, shared byte-for-byte with Textarea and
-   TagInput) lives in the shared `field` composable — see
-   src/styles/formField.module.css for the full rationale (issue #244). */
+   radius/padding, shared byte-for-byte with Textarea and TagInput)
+   lives in the shared `field` composable — see
+   src/styles/formField.module.css for the full rationale (issue #244).
+   transition stays local (see that file's comment for why). */
 .field {
   composes: field from '../../styles/formField.module.css';
   composes: fieldFocusRing from '../../styles/interactions.module.css';
+  transition: border-color var(--duration-fast) var(--easing-default),
+              background-color var(--duration-fast) var(--easing-default);
 }
 
 .field:focus-visible {
@@ -29,6 +32,12 @@
 
 .field:disabled {
   background-color: var(--color-surface);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field {
+    transition: none;
+  }
 }
 
 /* Invalid: error border always on, plus an error-tinted ring on focus

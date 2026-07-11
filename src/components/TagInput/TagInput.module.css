@@ -54,12 +54,20 @@
 }
 
 /* The core field-chrome block (width/font/color/background/border/
-   radius/padding/transition) is shared byte-for-byte with Input and
-   Textarea's `.field` via the `field` composable — see
-   src/styles/formField.module.css for the full rationale (issue #244). */
+   radius/padding) is shared byte-for-byte with Input and Textarea's
+   `.field` via the `field` composable — see
+   src/styles/formField.module.css for the full rationale (issue #244),
+   including why transition stays local. */
 .input {
   composes: field from '../../styles/formField.module.css';
   composes: fieldFocusRing from '../../styles/interactions.module.css';
+  transition: border-color var(--duration-fast) var(--easing-default);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .input {
+    transition: none;
+  }
 }
 
 .listbox {

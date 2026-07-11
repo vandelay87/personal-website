@@ -1,8 +1,17 @@
 /* formField.module.css — shared base "field" chrome for form-field-style
    inputs (Input, Textarea, TagInput). These three components render
-   visually identical field chrome (background, border, radius, padding,
-   transition) and previously duplicated the same declaration block
-   verbatim across their own `.module.css` files (see issue #244).
+   visually identical field chrome (background, border, radius, padding)
+   and previously duplicated the same declaration block verbatim across
+   their own `.module.css` files (see issue #244).
+
+   `transition` deliberately stays OUT of this shared block and out of
+   this file's own scope: Input transitions both border-color and
+   background-color (it has a `:focus-visible` background swap),
+   Textarea/TagInput only ever transition border-color — unifying them
+   would make Textarea's `:disabled` background-color change animate
+   when it doesn't today, a real (if subtle) behavior change caught in
+   review. Each consumer keeps its own `transition` declaration (and
+   `prefers-reduced-motion` override) locally.
 
    Consumers `composes: field from '../../styles/formField.module.css';`
    here alongside their own separate
@@ -10,8 +19,9 @@
    (CSS Modules `composes` supports multiple sources) plus whatever stays
    genuinely per-consumer (line-height/resize/min-height for Textarea,
    :focus-visible/:disabled overrides for Input, its own :disabled for
-   Textarea, etc.) — see each component's own Input.module.css /
-   Textarea.module.css / TagInput.module.css for what stays local and why.
+   Textarea, its own transition, etc.) — see each component's own
+   Input.module.css / Textarea.module.css / TagInput.module.css for what
+   stays local and why.
 
    `--input-bg`/`--input-radius` let a consumer re-theme a specific field
    (e.g. RecipeSearch's surface-tinted pill) by setting custom properties on
@@ -29,12 +39,4 @@
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--input-radius, var(--radius-md));
   padding: var(--space-3);
-  transition: border-color var(--duration-fast) var(--easing-default),
-              background-color var(--duration-fast) var(--easing-default);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .field {
-    transition: none;
-  }
 }

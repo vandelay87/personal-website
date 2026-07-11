@@ -2,9 +2,9 @@
    (background, border, focus border-tint) per Textarea.jsx/prompt.md. */
 
 /* The core field-chrome block (width/font/color/background/border/
-   radius/padding/transition) is shared byte-for-byte with Input and
-   TagInput via the `field` composable — see
-   src/styles/formField.module.css for the full rationale (issue #244).
+   radius/padding) is shared byte-for-byte with Input and TagInput via
+   the `field` composable — see src/styles/formField.module.css for the
+   full rationale (issue #244), including why transition stays local.
    line-height/resize/min-height stay here — genuinely Textarea-only. */
 .field {
   composes: field from '../../styles/formField.module.css';
@@ -12,8 +12,15 @@
   line-height: var(--line-height-relaxed);
   resize: vertical;
   min-height: var(--space-20);
+  transition: border-color var(--duration-fast) var(--easing-default);
 }
 
 .field:disabled {
   background-color: var(--color-surface);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field {
+    transition: none;
+  }
 }
