@@ -308,33 +308,6 @@
   flex-wrap: wrap;
 }
 
-/* Role pill — built on StatusBadge (dot={false}, tone="neutral" for its
-   font-mono/padding/base-color shape) with a specificity-tie override for
-   the two properties the design's pill needs that no StatusBadge tone
-   provides: no border, and a full pill radius instead of --radius-sm.
-   `.rowMeta .rolePill` (not bare `.rolePill`): raises specificity above
-   StatusBadge's own `.badge`/`.neutral` regardless of CSS import order —
-   same specificity-tie fix documented throughout this epic (see
-   `.header .heading`). Status, by contrast, has no chip/background at all
-   in the design (just a dot + plain text) — that shape doesn't fit
-   StatusBadge, so it stays hand-rolled below. */
-.rowMeta .rolePill {
-  border: none;
-  border-radius: var(--radius-full);
-  text-transform: uppercase;
-  font-size: 10.5px;
-  padding: 4px 10px;
-}
-
-.rowMeta .rolePillAdmin {
-  /* 10%: matches the design's --accent-bg (rgba(31,102,224,0.10)) exactly —
-     same color-mix(...transparent) shape as the --ring token. StatusBadge
-     has no "accent" tone, so this is applied as a second override class
-     rather than a tone value. */
-  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
-  color: var(--color-primary);
-}
-
 .statusCell {
   display: inline-flex;
   align-items: center;

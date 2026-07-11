@@ -56,3 +56,18 @@
   color: var(--color-text-muted);
   background: var(--color-surface);
 }
+
+.accent {
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+}
+
+/* Full-pill shape (role badges etc.) — extracted verbatim from
+   UserManagement.module.css's former `.rolePill` override (issue #270). */
+.pill {
+  border: none;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  font-size: 10.5px;
+  padding: 4px 10px;
+}

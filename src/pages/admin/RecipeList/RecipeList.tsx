@@ -196,7 +196,7 @@ const RecipeList = () => {
           <Typography variant="body" className={styles.emptyBody}>
             Your kitchen is empty. Create your first recipe to start building the collection.
           </Typography>
-          <Link to="/admin/recipes/new" className={styles.newButton}>
+          <Link to="/admin/recipes/new" variant="solid" className={styles.newButton}>
             {iconPlus}
             Create your first recipe
           </Link>
@@ -284,7 +284,7 @@ const RecipeList = () => {
             {pluralize(sortedRecipes.length, 'recipe')}
           </Typography>
         </div>
-        <Link to="/admin/recipes/new" className={styles.newButton}>
+        <Link to="/admin/recipes/new" variant="solid" className={styles.newButton}>
           {iconPlus}
           New recipe
         </Link>

@@ -566,7 +566,7 @@ const RecipeEditor: FC = () => {
             </span>
             <span>Your session has expired. Log in again to keep editing — your latest changes are saved.</span>
           </span>
-          <Link to={loginHref} className={styles.bannerAction}>
+          <Link to={loginHref} variant="ghost" className={styles.bannerAction}>
             Log in again
           </Link>
         </div>

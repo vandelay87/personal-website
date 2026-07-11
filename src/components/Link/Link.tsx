@@ -14,6 +14,8 @@ export interface LinkProps {
   iconSide?: 'left' | 'right'
   /** Direction the icon nudges on hover. @default 'right' */
   nudge?: 'left' | 'right' | 'up-right' | 'none'
+  /** Button/pill shape. Omit for a plain link (default, unchanged). */
+  variant?: 'ghost' | 'solid'
   ariaLabel?: string
   className?: string
 }
@@ -33,6 +35,7 @@ const Link: FC<LinkProps> = ({
   icon,
   iconSide = 'right',
   nudge = 'right',
+  variant,
   ariaLabel,
   className: externalClassName,
 }) => {
@@ -48,6 +51,7 @@ const Link: FC<LinkProps> = ({
     // so hovering anywhere on the link (not just the tiny icon glyph) has to
     // trigger the icon's transform.
     NUDGE_CLASSES[nudge],
+    variant && styles[variant],
     externalClassName,
   ]
     .filter(Boolean)

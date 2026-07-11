@@ -126,13 +126,29 @@
 /* ── Pill buttons ──────────────────────────────────────────────────
    .editLink / .viewLink / .publishButton (below) and .notFoundBackLink
    (further down) are four small action buttons sharing the same pill
-   shape (9px radius, 7px icon/label gap). Each is still selected via its
-   own compound selector (`.bannerActions .editLink`, not bare `.editLink`)
-   to raise specificity above the shared Link/Button components' own base
-   classes — same specificity-tie fix documented throughout this epic (see
-   `.bannerLeft .backLink` above). Only the shared shape is grouped here;
-   coloring (ghost vs solid), sizing and transition stay per-consumer
-   where they genuinely differ. */
+   shape (9px radius, 7px icon/label gap) — grouped via its own compound
+   selector (`.bannerActions .editLink`, not bare `.editLink`) to raise
+   specificity above the shared Link/Button components' own base classes —
+   same specificity-tie fix documented throughout this epic (see
+   `.bannerLeft .backLink` above). Ghost/solid coloring, transition and
+   hover are now centralized in Link.module.css's `.ghost`/`.solid`
+   (issue #270, pulled in via `composes:` below and applied via the
+   `variant` prop in RecipePreview.tsx, since Link's own layered defaults
+   always lose to these unlayered overrides regardless of specificity) —
+   only the shape/sizing deltas that genuinely differ per consumer stay
+   local here. */
+.editLink {
+  composes: ghost from '../../../components/Link/Link.module.css';
+  font-size: 13px;
+  padding: 8px 15px;
+}
+
+.viewLink {
+  composes: solid from '../../../components/Link/Link.module.css';
+  font-size: 13px;
+  padding: 8px 15px;
+}
+
 .bannerActions .editLink,
 .bannerActions .viewLink,
 .bannerActions .publishButton,
@@ -141,31 +157,6 @@
      1px off. */
   border-radius: 9px;
   gap: 7px;
-}
-
-/* Ghost pill look (bordered, transparent, primary-tinted on hover) shared
-   by .editLink and .notFoundBackLink — styled to look like the design's
-   small ghost button (`.banner-btn.banner-ghost`), same "style Link
-   locally" precedent as RecipeEditor.module.css's `.sessionBanner
-   .bannerAction`. */
-.bannerActions .editLink,
-.notFoundBox .notFoundBackLink {
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text);
-  border: var(--border-width) solid var(--color-border-strong);
-  transition: border-color var(--duration-fast) var(--easing-default),
-    color var(--duration-fast) var(--easing-default);
-}
-
-.bannerActions .editLink:hover,
-.notFoundBox .notFoundBackLink:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-.bannerActions .editLink {
-  font-size: 13px;
-  padding: 8px 15px;
 }
 
 /* Sizing-only override — the shared Button component's own `.button`/
@@ -177,31 +168,6 @@
 .bannerActions .publishButton {
   padding: 8px 15px;
   font-size: 13px;
-}
-
-/* Solid pill look — styled to look like the design's solid button
-   (`.banner-btn.banner-solid`), same "style Link locally" precedent as
-   RecipeList.module.css's `.header .newButton`. */
-.bannerActions .viewLink {
-  font-size: 13px;
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-btn-fg);
-  background: var(--color-btn-bg);
-  padding: 8px 15px;
-  transition: opacity var(--duration-fast) var(--easing-default);
-}
-
-.bannerActions .viewLink:hover {
-  color: var(--color-btn-fg);
-  opacity: 0.9;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .bannerActions .editLink,
-  .bannerActions .viewLink,
-  .notFoundBox .notFoundBackLink {
-    transition: none;
-  }
 }
 
 /* ── Main landmark ─────────────────────────────────────────────────────
@@ -284,10 +250,11 @@
   max-width: 38ch;
 }
 
-/* Shape, ghost coloring, transition and hover are shared with
-   `.bannerActions .editLink` in the "Pill buttons" group above — only the
-   size differs here. */
-.notFoundBox .notFoundBackLink {
+/* Ghost coloring/transition/hover come from Link's own `.ghost` (composed
+   below), same as `.editLink` in the "Pill buttons" group above — only the
+   shape/size differ here. */
+.notFoundBackLink {
+  composes: ghost from '../../../components/Link/Link.module.css';
   font-size: 14px;
   padding: 10px 18px;
 }

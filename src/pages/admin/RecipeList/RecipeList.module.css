@@ -42,27 +42,21 @@
    Applied to the shared Link component (client-side routing to
    /admin/recipes/new) rather than Button, which has no polymorphic `as`/
    href support — see RecipeDetailView.module.css's `.backLink` for the
-   same "style Link locally" precedent. Grouped selector: reused in both
-   the page header and the empty state. A bare `.newButton` class would tie
-   in specificity with Link's own `.link` (color, gap, radius) — same
-   failure mode documented throughout this file, fixed the same way. */
-.header .newButton,
-.emptyBox .newButton {
+   same "style Link locally" precedent. Solid coloring/hover now come from
+   Link's own `.solid` (issue #270, via `composes:` + the `variant="solid"`
+   prop) — only sizing and the `:active` press effect (genuinely
+   RecipeList-specific, `.solid` has none) stay local. The opacity leg of
+   the transition is re-declared here alongside transform: `.solid`'s own
+   transition lives in Link.module.css's `@layer`, and an unlayered
+   `transition` on this class would otherwise replace it wholesale rather
+   than merge, silently dropping the hover fade. */
+.newButton {
+  composes: solid from '../../../components/Link/Link.module.css';
   font-size: 14px;
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-btn-fg);
-  background: var(--color-btn-bg);
-  border-radius: var(--radius-md);
   padding: 11px 18px;
   gap: var(--space-2);
   transition: opacity var(--duration-fast) var(--easing-default),
     transform var(--duration-fast) var(--easing-default);
-}
-
-.header .newButton:hover,
-.emptyBox .newButton:hover {
-  color: var(--color-btn-fg);
-  opacity: 0.9;
 }
 
 .header .newButton:active,
@@ -71,8 +65,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .header .newButton,
-  .emptyBox .newButton {
+  .newButton {
     transition: none;
   }
 }

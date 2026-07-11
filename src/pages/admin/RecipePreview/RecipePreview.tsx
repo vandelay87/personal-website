@@ -210,6 +210,7 @@ const RecipePreview: FC = () => {
             icon="←"
             iconSide="left"
             nudge="left"
+            variant="ghost"
             className={styles.notFoundBackLink}
           >
             Back to recipes
@@ -257,6 +258,7 @@ const RecipePreview: FC = () => {
               icon={iconEdit}
               iconSide="left"
               nudge="none"
+              variant="ghost"
               className={styles.editLink}
             >
               Edit
@@ -277,6 +279,7 @@ const RecipePreview: FC = () => {
                 icon={iconViewPublic}
                 iconSide="right"
                 nudge="up-right"
+                variant="solid"
                 className={styles.viewLink}
               >
                 View public page
