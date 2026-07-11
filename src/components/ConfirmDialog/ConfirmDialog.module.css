@@ -4,9 +4,8 @@
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-xl);
   padding: var(--space-6);
-  /* No paper max-w token fits a dialog; see token-migration.md §3c — kept
-     as a literal, capped against the viewport for small screens. */
-  inline-size: min(92vw, 24rem);
+  /* --max-w-sm capped against the viewport for small screens. */
+  inline-size: min(92vw, var(--max-w-sm));
   color: var(--color-text);
 }
 

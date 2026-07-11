@@ -152,6 +152,7 @@
   --max-w-article: 680px;  /* long-form article column */
   --max-w-prose:   54ch;   /* hero paragraph measure */
   --max-w-prose-narrow: 46ch; /* short paragraph measure (in-progress notes, kitchen intro) */
+  --max-w-sm:      24rem;  /* compact component box — dialogs, cards, toasts */
 
   /* ── Z-index ──────────────────────────────────────────────── */
   --z-header:  20;
