@@ -68,13 +68,13 @@
   border-top-color: var(--color-warning);
 }
 
-/* .sessionBanner .bannerAction (not bare `.bannerAction`): raises
-   specificity above the shared Link component's own `.link` — same
-   specificity-tie fix documented throughout this epic (see
-   RecipeDetailView.module.css's `.article .backLink`). Styled to look
+/* Bare `.bannerAction` override: Link's own `.link` (color:
+   var(--color-link)) now lives in `@layer component-defaults`
+   (Link.module.css, #263), so this plain unlayered class deterministically
+   wins without needing the old descendant-selector trick. Styled to look
    like the design's small ghost button, same "style Link locally"
    precedent as RecipeList's `.newButton`. */
-.sessionBanner .bannerAction {
+.bannerAction {
   flex-shrink: 0;
   width: auto;
   font-size: 13px;
@@ -87,14 +87,14 @@
     color var(--duration-fast) var(--easing-default);
 }
 
-.sessionBanner .bannerAction:hover {
+.bannerAction:hover {
   border-color: var(--color-primary);
   color: var(--color-primary);
   background: var(--color-hover);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sessionBanner .bannerAction {
+  .bannerAction {
     transition: none;
   }
 }

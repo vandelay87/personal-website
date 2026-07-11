@@ -1,25 +1,34 @@
 /* Link component styles */
 
-.link {
-  composes: focusRing from '../../styles/interactions.module.css';
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  color: var(--color-link);
-  font-weight: inherit;
-  text-decoration: none;
-  width: fit-content;
-  border-radius: var(--radius-sm);
-  transition: color var(--duration-fast) var(--easing-default);
-}
-
-.link:hover {
-  color: var(--color-primary);
-}
-
-@media (prefers-reduced-motion: reduce) {
+/* Base `.link` rule (+ :hover + reduced-motion reset) lives in a low-
+   priority @layer so a consumer's plain (unlayered) className always wins
+   over it, regardless of source/bundle order or matching specificity — see
+   issue #263 (same mechanism as Typography.module.css). Modifier/utility
+   classes below (tone/underline/icon/nudge) stay unlayered — those are
+   selected via Link's own props, not something a raw className collides
+   with. */
+@layer component-defaults {
   .link {
-    transition: none;
+    composes: focusRing from '../../styles/interactions.module.css';
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--color-link);
+    font-weight: inherit;
+    text-decoration: none;
+    width: fit-content;
+    border-radius: var(--radius-sm);
+    transition: color var(--duration-fast) var(--easing-default);
+  }
+
+  .link:hover {
+    color: var(--color-primary);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .link {
+      transition: none;
+    }
   }
 }
 
