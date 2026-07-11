@@ -38,4 +38,54 @@ describe('Grid', () => {
     const item = screen.getByRole('listitem')
     expect(item).toHaveTextContent('Only Child')
   })
+
+  it('applies the auto-fit class and no fixed column class when minWidth is set', () => {
+    render(
+      <Grid minWidth="320px">
+        <div>Item</div>
+      </Grid>
+    )
+
+    const list = screen.getByRole('list')
+    expect(list.className).toContain('autoFit')
+    expect(list.className).not.toContain('cols1')
+    expect(list.className).not.toContain('cols2')
+    expect(list.className).not.toContain('cols3')
+    expect(list.className).not.toContain('cols4')
+  })
+
+  it('sets the --grid-min-width custom property from minWidth', () => {
+    render(
+      <Grid minWidth="320px">
+        <div>Item</div>
+      </Grid>
+    )
+
+    const list = screen.getByRole('list')
+    expect(list.style.getPropertyValue('--grid-min-width')).toBe('320px')
+  })
+
+  it('lets minWidth override an explicit columns prop entirely', () => {
+    render(
+      <Grid minWidth="320px" columns={4}>
+        <div>Item</div>
+      </Grid>
+    )
+
+    const list = screen.getByRole('list')
+    expect(list.className).toContain('autoFit')
+    expect(list.className).not.toContain('cols4')
+  })
+
+  it('does not apply the auto-fit class when minWidth is omitted (regression guard)', () => {
+    render(
+      <Grid>
+        <div>Item</div>
+      </Grid>
+    )
+
+    const list = screen.getByRole('list')
+    expect(list.className).not.toContain('autoFit')
+    expect(list.className).toContain('cols3')
+  })
 })
