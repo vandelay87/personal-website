@@ -14,12 +14,16 @@
   margin-block-end: 28px;
 }
 
-/* Bare `.backLink` override: Link's own `.link` (color: var(--color-link))
-   now lives in `@layer component-defaults` (Link.module.css, #263), so
-   this plain unlayered class deterministically wins without needing the
-   old descendant-selector trick. Still overrides metaText's own baked-in
-   font-size (13px/faint) — this back link wants 12px/muted instead. */
-.backLink {
+/* .article .backLink (not bare): the descendant-selector specificity
+   boost is no longer needed to beat Link's own `.link` (color:
+   var(--color-link)) — that's now handled by `@layer component-defaults`
+   (Link.module.css, #263). But it's still needed to beat this same
+   rule's own composed `metaText` class (text.module.css), which bakes in
+   its own font-size (13px) and color (faint) at equal, single-class
+   specificity — a separate, pre-existing tie outside #263's scope
+   (Typography-variant/Link.link only). This back link wants 12px/muted,
+   not metaText's 13px/faint. */
+.article .backLink {
   font-size: 12px;
   color: var(--color-text-muted);
 }
