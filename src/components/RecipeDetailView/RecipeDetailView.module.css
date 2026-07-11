@@ -14,15 +14,12 @@
   margin-block-end: 28px;
 }
 
-/* .article .backLink (not bare): raises specificity above the shared
-   Link component's own `.link` (color: var(--color-link), an accent
-   blue) — a bare `.backLink` ties with it, same root cause as the
-   Typography fixes below (a plain className merge onto Link's own
-   variant class), and would otherwise leave this link's color
-   non-deterministic between the design's intended muted tone and
-   Link's default accent. Also overrides metaText's own baked-in
+/* Bare `.backLink` override: Link's own `.link` (color: var(--color-link))
+   now lives in `@layer component-defaults` (Link.module.css, #263), so
+   this plain unlayered class deterministically wins without needing the
+   old descendant-selector trick. Still overrides metaText's own baked-in
    font-size (13px/faint) — this back link wants 12px/muted instead. */
-.article .backLink {
+.backLink {
   font-size: 12px;
   color: var(--color-text-muted);
 }
@@ -41,10 +38,11 @@
   max-width: var(--max-w-article);
 }
 
-/* .header .title (not a bare `.title` rule): raises specificity above
-   Typography's own `.heading1` (font-size/line-height/color) — see the
-   `.header .intro` comment below for why a bare class ties with it. */
-.header .title {
+/* Bare `.title` override: Typography's own `.heading1` now lives in
+   `@layer component-defaults` (Typography.module.css, #263), so this
+   plain unlayered class deterministically wins without needing the old
+   descendant-selector trick. */
+.title {
   font-size: clamp(32px, 5.4vw, 46px);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
