@@ -255,4 +255,89 @@ describe('TagInput', () => {
     expect(input).toHaveValue('')
     expect(mockOnChange).not.toHaveBeenCalled()
   })
+
+  // aria-activedescendant tracking (#237)
+
+  it('has no aria-activedescendant on initial render', () => {
+    render(<TagInput tags={[]} onChange={mockOnChange} existingTags={['Italian']} />)
+
+    const input = screen.getByRole('combobox')
+
+    expect(input).not.toHaveAttribute('aria-activedescendant')
+  })
+
+  it('has no aria-activedescendant after typing, before any arrow key press', () => {
+    render(
+      <TagInput
+        tags={[]}
+        onChange={mockOnChange}
+        existingTags={['Italian', 'Indian', 'Irish']}
+      />
+    )
+
+    const input = screen.getByRole('combobox')
+    fireEvent.change(input, { target: { value: 'I' } })
+
+    expect(screen.getByRole('listbox')).toBeInTheDocument()
+    expect(input).not.toHaveAttribute('aria-activedescendant')
+  })
+
+  it('sets aria-activedescendant to the highlighted option id and updates it as ArrowDown moves', () => {
+    render(
+      <TagInput
+        tags={[]}
+        onChange={mockOnChange}
+        existingTags={['Italian', 'Indian', 'Irish']}
+      />
+    )
+
+    const input = screen.getByRole('combobox')
+    fireEvent.change(input, { target: { value: 'I' } })
+
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+
+    let options = screen.getAllByRole('option')
+    expect(input.getAttribute('aria-activedescendant')).toBe(options[0].id)
+
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+
+    options = screen.getAllByRole('option')
+    expect(input.getAttribute('aria-activedescendant')).toBe(options[1].id)
+  })
+
+  it('has no aria-activedescendant after Escape resets the highlight', () => {
+    render(
+      <TagInput
+        tags={[]}
+        onChange={mockOnChange}
+        existingTags={['Italian', 'Indian', 'Irish']}
+      />
+    )
+
+    const input = screen.getByRole('combobox')
+    fireEvent.change(input, { target: { value: 'I' } })
+
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+    fireEvent.keyDown(input, { key: 'Escape' })
+
+    expect(input).not.toHaveAttribute('aria-activedescendant')
+  })
+
+  it('has no aria-activedescendant after Enter adds the highlighted tag', () => {
+    render(
+      <TagInput
+        tags={[]}
+        onChange={mockOnChange}
+        existingTags={['Italian', 'Indian', 'Irish']}
+      />
+    )
+
+    const input = screen.getByRole('combobox')
+    fireEvent.change(input, { target: { value: 'I' } })
+
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    expect(input).not.toHaveAttribute('aria-activedescendant')
+  })
 })

@@ -91,6 +91,11 @@ const TagInput: FC<TagInputProps> = ({
           role="combobox"
           aria-expanded={isExpanded}
           aria-controls={listboxId}
+          aria-activedescendant={
+            isExpanded && highlightedIndex >= 0
+              ? `${listboxId}-option-${highlightedIndex}`
+              : undefined
+          }
           value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -101,18 +106,17 @@ const TagInput: FC<TagInputProps> = ({
         {isExpanded && (
           <ul id={listboxId} role="listbox" className={styles.listbox}>
             {filtered.map((tag, index) => (
+              // Keyboard selection is handled by the input's own onKeyDown (Enter
+              // selects filtered[highlightedIndex] via the same addTag call); DOM
+              // focus never leaves the input, per the WAI-ARIA combobox pattern.
+              // eslint-disable-next-line jsx-a11y/click-events-have-key-events
               <li
                 key={tag}
+                id={`${listboxId}-option-${index}`}
                 role="option"
                 aria-selected={index === highlightedIndex}
                 className={styles.option}
                 onClick={() => addTag(tag)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    addTag(tag)
-                  }
-                }}
               >
                 {tag}
               </li>
