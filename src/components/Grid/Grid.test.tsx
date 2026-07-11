@@ -88,4 +88,17 @@ describe('Grid', () => {
     expect(list.className).not.toContain('autoFit')
     expect(list.className).toContain('cols3')
   })
+
+  it('merges a passed className onto the list alongside its own classes', () => {
+    render(
+      <Grid className="custom-spacing">
+        <div>Item</div>
+      </Grid>
+    )
+
+    const list = screen.getByRole('list')
+    expect(list.className).toContain('custom-spacing')
+    expect(list.className).toContain('grid')
+    expect(list.className).toContain('cols3')
+  })
 })

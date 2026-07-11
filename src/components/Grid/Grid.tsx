@@ -5,6 +5,7 @@ interface GridProps {
   children: ReactNode
   columns?: 1 | 2 | 3 | 4
   minWidth?: string
+  className?: string
 }
 
 const columnClassMap: Record<NonNullable<GridProps['columns']>, string> = {
@@ -14,10 +15,19 @@ const columnClassMap: Record<NonNullable<GridProps['columns']>, string> = {
   4: styles.cols4,
 }
 
-const Grid: FC<GridProps> = ({ children, columns = 3, minWidth }) => {
-  const gridClassName = minWidth
-    ? `${styles.grid} ${styles.autoFit}`
-    : `${styles.grid} ${columnClassMap[columns]}`
+const Grid: FC<GridProps> = ({
+  children,
+  columns = 3,
+  minWidth,
+  className: extraClassName,
+}) => {
+  const gridClassName = [
+    styles.grid,
+    minWidth ? styles.autoFit : columnClassMap[columns],
+    extraClassName,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   const gridStyle = minWidth
     ? ({ '--grid-min-width': minWidth } as CSSProperties)

@@ -314,7 +314,7 @@ a.row {
   color: var(--color-text-muted);
 }
 
-.recipeGridWrapper {
+.recipeGridSpacing {
   margin-block-end: var(--space-10);
 }
 

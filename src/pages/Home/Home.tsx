@@ -169,13 +169,11 @@ const Home: FC = () => {
                 written down so they&apos;re easy to make again.
               </Typography>
             </div>
-            <div className={styles.recipeGridWrapper}>
-              <Grid minWidth="220px">
-                {recipes.map((recipe) => (
-                  <RecipeCard key={recipe.id} recipe={recipe} eager hideTags />
-                ))}
-              </Grid>
-            </div>
+            <Grid minWidth="220px" className={styles.recipeGridSpacing}>
+              {recipes.map((recipe) => (
+                <RecipeCard key={recipe.id} recipe={recipe} eager hideTags />
+              ))}
+            </Grid>
             <div className={styles.browseAll}>
               <Link
                 to="/recipes"

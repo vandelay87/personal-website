@@ -61,13 +61,11 @@ const Apps: FC = () => {
         <div className={styles.countRow}>
           <span>{APPS_COUNT_LABEL}</span>
         </div>
-        <div className={styles.gridWrapper}>
-          <Grid minWidth="320px">
-            {APPS.map((app) => (
-              <AppCard key={app.href} {...app} />
-            ))}
-          </Grid>
-        </div>
+        <Grid minWidth="320px" className={styles.gridSpacing}>
+          {APPS.map((app) => (
+            <AppCard key={app.href} {...app} />
+          ))}
+        </Grid>
 
         <aside className={styles.inProgress} aria-labelledby="in-progress-heading">
           <Typography variant="caption" as="p" id="in-progress-heading" className={styles.eyebrow}>
