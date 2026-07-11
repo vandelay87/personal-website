@@ -5,7 +5,7 @@
    future tweak. See issue #269.
 
    Split across two layers, both registered in order in `src/index.css`
-   (`@layer component-defaults, state-box-heading;`):
+   (`@layer component-defaults, composed-overrides;`):
 
    - `.box`/`.loading`/`.error`/`.icon`/`.iconError` live in
      `@layer component-defaults` (same mechanism as Typography.module.css /
@@ -18,7 +18,7 @@
      regardless of which named layer they're up against.
 
    - `.heading`/`.body` live in the separate, higher-priority
-     `@layer state-box-heading` instead. Unlike the classes above, these
+     `@layer composed-overrides` instead. Unlike the classes above, these
      two are also applied (via Typography's own `variant` prop) to
      elements already carrying `Typography.module.css`'s `.heading2`/
      `.body` classes — which are themselves in `@layer component-defaults`.
@@ -26,8 +26,11 @@
      layer, so two same-named-layer rules on the same element fall back to
      plain stylesheet/bundle order with no priority guarantee — exactly
      the ambiguity a named, ordered layer is meant to resolve. Giving
-     `.heading`/`.body` their own explicitly-higher-priority layer makes
-     them deterministically beat the Typography variant regardless of
+     `.heading`/`.body` a shared, explicitly-higher-priority layer (named
+     generically — any other shared/composed pattern needing the same
+     guarantee over a `component-defaults` variant class can reuse it
+     rather than inventing its own one-off layer) makes them
+     deterministically beat the Typography variant regardless of
      import/bundle order, while still losing (correctly) to any fully
      unlayered consumer override. */
 @layer component-defaults {
@@ -80,7 +83,7 @@
   }
 }
 
-@layer state-box-heading {
+@layer composed-overrides {
   .heading {
     font-size: 20px;
     font-weight: var(--font-weight-semibold);
