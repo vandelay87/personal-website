@@ -1,8 +1,8 @@
 import AdminLayout from '@components/AdminLayout'
 import Footer from '@components/Footer'
 import Header, { type HeaderLink } from '@components/Header'
-import Layout from '@components/Layout'
 import Loading from '@components/Loading'
+import PageShell from '@components/PageShell'
 import ScrollToTop from '@components/ScrollToTop'
 import SkipLink from '@components/SkipLink'
 import { Suspense, type ReactNode } from 'react'
@@ -28,15 +28,10 @@ const PUBLIC_LINKS: HeaderLink[] = [
 
 /** Public site shell: Home/Apps/Blog/Recipes/etc. */
 export const RootLayout = () => (
-  <>
-    <SkipLink />
-    <Header variant="public" links={PUBLIC_LINKS} />
+  <PageShell header={<Header variant="public" links={PUBLIC_LINKS} />} footer={<Footer variant="public" />}>
     <ScrollToTop />
-    <Layout>
-      <Outlet />
-    </Layout>
-    <Footer variant="public" />
-  </>
+    <Outlet />
+  </PageShell>
 )
 
 /**
@@ -45,15 +40,10 @@ export const RootLayout = () => (
  * the admin-shell Footer too, so no `email` (no authenticated user yet).
  */
 export const LoginLayout = () => (
-  <>
-    <SkipLink />
-    <Header variant="logged-out" />
+  <PageShell header={<Header variant="logged-out" />} footer={<Footer variant="admin" />}>
     <ScrollToTop />
-    <Layout>
-      <Outlet />
-    </Layout>
-    <Footer variant="admin" />
-  </>
+    <Outlet />
+  </PageShell>
 )
 
 /** Admin site shell: AdminLayout composes the admin Header/Footer + skip link. */

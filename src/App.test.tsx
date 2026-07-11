@@ -6,10 +6,6 @@ vi.mock('@components/Header', () => ({
   default: () => <div data-testid="header-mock">Header</div>,
 }))
 
-vi.mock('@components/Layout', () => ({
-  default: ({ children }: { children: import('react').ReactNode }) => <div>{children}</div>,
-}))
-
 vi.mock('@pages/Home', () => ({
   default: () => <div>Home page</div>,
 }))
