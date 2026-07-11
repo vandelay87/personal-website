@@ -8,22 +8,20 @@
   width: 100%;
 }
 
+/* --input-bg/-radius let a consumer re-theme a specific field (e.g.
+   RecipeSearch's surface-tinted pill) by setting custom properties on
+   an ancestor — they inherit through this wrapper's own internal .field
+   element, so there's no specificity fight with a consumer's own
+   className the way two same-specificity classes on this element would
+   have (whichever landed later in the compiled stylesheet would win).
+   The core declaration block (width/font/color/background/border/
+   radius/padding, shared byte-for-byte with Textarea and TagInput)
+   lives in the shared `field` composable — see
+   src/styles/formField.module.css for the full rationale (issue #244).
+   transition stays local (see that file's comment for why). */
 .field {
+  composes: field from '../../styles/formField.module.css';
   composes: fieldFocusRing from '../../styles/interactions.module.css';
-  width: 100%;
-  font-family: var(--font-sans);
-  font-size: var(--font-size-md);
-  color: var(--color-text-strong);
-  /* --input-bg/-radius let a consumer re-theme a specific field (e.g.
-     RecipeSearch's surface-tinted pill) by setting custom properties on
-     an ancestor — they inherit through this wrapper's own internal .field
-     element, so there's no specificity fight with a consumer's own
-     className the way two same-specificity classes on this element would
-     have (whichever landed later in the compiled stylesheet would win). */
-  background-color: var(--input-bg, var(--color-field));
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--input-radius, var(--radius-md));
-  padding: var(--space-3);
   transition: border-color var(--duration-fast) var(--easing-default),
               background-color var(--duration-fast) var(--easing-default);
 }
