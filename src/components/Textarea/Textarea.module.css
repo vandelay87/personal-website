@@ -1,28 +1,19 @@
 /* Textarea.module.css — shares Input's `.ds-field` styling language
    (background, border, focus border-tint) per Textarea.jsx/prompt.md. */
 
+/* The core field-chrome block (width/font/color/background/border/
+   radius/padding/transition) is shared byte-for-byte with Input and
+   TagInput via the `field` composable — see
+   src/styles/formField.module.css for the full rationale (issue #244).
+   line-height/resize/min-height stay here — genuinely Textarea-only. */
 .field {
+  composes: field from '../../styles/formField.module.css';
   composes: fieldFocusRing from '../../styles/interactions.module.css';
-  width: 100%;
-  font-family: var(--font-sans);
-  font-size: var(--font-size-md);
   line-height: var(--line-height-relaxed);
-  color: var(--color-text-strong);
-  background-color: var(--color-field);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
   resize: vertical;
   min-height: var(--space-20);
-  transition: border-color var(--duration-fast) var(--easing-default);
 }
 
 .field:disabled {
   background-color: var(--color-surface);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .field {
-    transition: none;
-  }
 }
