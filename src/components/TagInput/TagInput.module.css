@@ -47,7 +47,8 @@
    don't want a red tint), so both the faint resting color and the
    hover-to-error tint are supplied here. */
 .chipRemove {
-  color: var(--color-text-faint);
+  /* Renders on Tag's --color-surface background (issue #274). */
+  color: var(--color-text-faint-on-surface);
 }
 
 .chipRemove:hover {

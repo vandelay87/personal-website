@@ -151,7 +151,8 @@
 
 .updatedLabel {
   font-size: 12.5px;
-  color: var(--color-text-faint);
+  /* .list has a --color-field background (issue #274). */
+  color: var(--color-text-faint-on-field);
   /* 4px: design literal, on top of `.rowMeta`'s own 7px gap (Admin
      Recipes.dc.html line 126 sets this margin in addition to the flex
      gap already separating every sibling). */

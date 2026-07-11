@@ -197,7 +197,8 @@
 
 .input::placeholder,
 .textarea::placeholder {
-  color: var(--color-text-faint);
+  /* .field (shared) has a --color-field background (issue #274). */
+  color: var(--color-text-faint-on-field);
 }
 
 .input[readonly] {

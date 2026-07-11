@@ -66,6 +66,16 @@
   /* WCAG AA override: the design's faint #9A938A is ~2.9:1 on paper
      (fails AA). Darkened to #767066 (~4.5:1) for eyebrow/caption/meta. */
   --color-text-faint:    #767066;   /* eyebrows, captions, placeholders */
+  /* WCAG AA override: --color-text-faint (#767066) is tuned against
+     --color-bg only (see its own comment above) — reused against
+     --color-surface it's ~4.35:1 (fails). Darkened for that specific
+     pairing (issue #274). */
+  --color-text-faint-on-surface: #706A60;   /* ~4.75:1 on --color-surface */
+  /* --color-text-faint already passes 4.5:1 against --color-field in light
+     mode (~4.91:1) — this token exists so consumers on --color-field can
+     reference one semantic name across both themes without knowing which
+     theme needs correction (dark mode does, see below). */
+  --color-text-faint-on-field: var(--color-text-faint);
 
   /* Borders */
   --color-border:        #ECE6DA;   /* hairlines, dividers, card edges */
@@ -190,6 +200,14 @@
      (fails AA — the PRD flagged this value for a manual check). Raised the
      lightness to #877F73 (~4.7:1) to pass. */
   --color-text-faint:    #877F73;
+  /* WCAG AA override: --color-text-faint (#877F73) reused against
+     --color-surface is ~4.40:1 (fails). Lightened for that pairing
+     (issue #274). */
+  --color-text-faint-on-surface: #8C8478;   /* ~4.71:1 on --color-surface */
+  /* --color-text-faint fails 4.5:1 against --color-field in dark mode too
+     (~4.44:1, previously unflagged — narrowly under threshold). Lightened
+     for that specific pairing. */
+  --color-text-faint-on-field: #898276;     /* ~4.61:1 on --color-field */
 
   --color-border:        #2A2823;
   --color-border-strong: #36342C;
