@@ -2,6 +2,19 @@
 @import './styles/tokens.css';
 @import './styles/animations.css';
 
+/* Cascade layer order (higher-priority layers later): `component-defaults`
+   (Typography/Link/Tag's own base styles, issue #263) is beaten by
+   `composed-overrides` (any shared/composed-pattern module's classes that
+   must win over a `component-defaults`-layered variant class applied to
+   the same element — e.g. stateBox.module.css's heading/body classes,
+   issue #269) — both still lose to any fully unlayered rule (any plain
+   consumer className, which is how every actual page-level override in
+   this codebase works). Declaring this order once, here, means it holds
+   regardless of which file's `@layer` block is parsed first at runtime,
+   and lets any future shared pattern opt into `composed-overrides`
+   without inventing another bespoke layer name. */
+@layer component-defaults, composed-overrides;
+
 /* ── Global base styles ────────────────────────────────────── */
 
 /* Design's Home.dc.html uses a bare `* { box-sizing: border-box }` —
