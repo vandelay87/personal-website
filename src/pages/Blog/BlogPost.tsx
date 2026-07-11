@@ -3,11 +3,12 @@ import CodeBlock from '@components/CodeBlock'
 import FileTree from '@components/FileTree'
 import Image from '@components/Image'
 import Link from '@components/Link'
+import Tag from '@components/Tag'
 import Typography from '@components/Typography'
 import NotFound from '@pages/NotFound'
 import type { AnchorHTMLAttributes } from 'react'
 import { Suspense, useMemo } from 'react'
-import { Link as RouterLink, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import styles from './BlogPost.module.css'
 import { formatDate, getLazyPost, getPost, posts } from './posts'
 import type { PostMeta } from './posts'
@@ -84,9 +85,9 @@ const BlogPost = () => {
         <ul className={styles.tags}>
           {post.tags.map((tag) => (
             <li key={tag}>
-              <RouterLink to={`/blog?tag=${tag}`} className={styles.tag}>
+              <Tag as="a" to={`/blog?tag=${tag}`}>
                 {tag}
-              </RouterLink>
+              </Tag>
             </li>
           ))}
         </ul>

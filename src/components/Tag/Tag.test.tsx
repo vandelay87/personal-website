@@ -1,6 +1,7 @@
 import Tag from '@components/Tag'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 
 describe('Tag', () => {
   it('as="button" exposes aria-pressed reflecting `active` and toggles via click', async () => {
@@ -50,5 +51,34 @@ describe('Tag', () => {
     await user.click(removeControl)
 
     expect(handleRemove).toHaveBeenCalledTimes(1)
+  })
+
+  it('as="a" with an internal "to" renders a router link with the correct href', () => {
+    render(
+      <MemoryRouter>
+        <Tag as="a" to="/blog?tag=italian">
+          Italian
+        </Tag>
+      </MemoryRouter>
+    )
+
+    const link = screen.getByRole('link', { name: 'Italian' })
+    expect(link).toHaveAttribute('href', '/blog?tag=italian')
+    expect(link).not.toHaveAttribute('target')
+  })
+
+  it('as="a" with an external "to" opens in a new tab safely', () => {
+    render(
+      <MemoryRouter>
+        <Tag as="a" to="https://example.com">
+          Italian
+        </Tag>
+      </MemoryRouter>
+    )
+
+    const link = screen.getByRole('link', { name: 'Italian' })
+    expect(link).toHaveAttribute('href', 'https://example.com')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noreferrer')
   })
 })

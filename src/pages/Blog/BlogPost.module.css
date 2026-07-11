@@ -110,29 +110,6 @@
   border-radius: var(--radius-sm);
 }
 
-.tag {
-  composes: focusRing chipHover from '../../styles/interactions.module.css';
-  display: inline-block;
-  padding: var(--space-1) var(--space-2);
-  font-size: var(--font-size-xs);
-  font-family: var(--font-mono);
-  letter-spacing: var(--tracking-meta);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text-muted);
-  text-decoration: none;
-  transition:
-    border-color var(--duration-fast) var(--easing-default),
-    color var(--duration-fast) var(--easing-default);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tag {
-    transition: none;
-  }
-}
-
 /* Matches the design's share block exactly: 56px/32px top spacing —
    distinctly more than the related-posts section below (--space-8/6),
    no tokens land on either literal. */
