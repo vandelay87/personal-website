@@ -31,13 +31,17 @@ const TagInput: FC<TagInputProps> = ({
 
   const isExpanded = filtered.length > 0 && !suggestionsClosed
 
+  const resetHighlight = () => {
+    setHighlightedIndex(-1)
+    setSuggestionsClosed(false)
+  }
+
   const addTag = (tag: string) => {
     if (tag.trim() && !tags.includes(tag.trim())) {
       onChange([...tags, tag.trim()])
     }
     setInputValue('')
-    setHighlightedIndex(-1)
-    setSuggestionsClosed(false)
+    resetHighlight()
   }
 
   const removeTag = (index: number) => {
@@ -46,20 +50,11 @@ const TagInput: FC<TagInputProps> = ({
 
   const handleInputChange = (value: string) => {
     setInputValue(value)
-    setHighlightedIndex(-1)
-    setSuggestionsClosed(false)
+    resetHighlight()
   }
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'ArrowDown') {
-      if (!isExpanded) return
-      e.preventDefault()
-      setHighlightedIndex((i) => Math.min(i + 1, filtered.length - 1))
-    } else if (e.key === 'ArrowUp') {
-      if (!isExpanded) return
-      e.preventDefault()
-      setHighlightedIndex((i) => Math.max(i - 1, 0))
-    } else if (e.key === 'Enter') {
+    if (e.key === 'Enter') {
       e.preventDefault()
       const highlighted = isExpanded ? filtered[highlightedIndex] : undefined
       if (highlighted) {
@@ -67,8 +62,18 @@ const TagInput: FC<TagInputProps> = ({
       } else if (inputValue.trim()) {
         addTag(inputValue)
       }
+      return
+    }
+
+    if (!isExpanded) return
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setHighlightedIndex((i) => Math.min(i + 1, filtered.length - 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setHighlightedIndex((i) => Math.max(i - 1, 0))
     } else if (e.key === 'Escape') {
-      if (!isExpanded) return
       e.preventDefault()
       setSuggestionsClosed(true)
       setHighlightedIndex(-1)
