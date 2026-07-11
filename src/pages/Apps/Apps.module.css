@@ -32,13 +32,8 @@
   margin-block-end: var(--space-6);
 }
 
-.grid {
-  list-style: none;
-  margin: 0 0 var(--space-8);
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: var(--space-6);
+.gridSpacing {
+  margin-block-end: var(--space-8);
 }
 
 .inProgress {

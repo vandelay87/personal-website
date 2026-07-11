@@ -314,13 +314,8 @@ a.row {
   color: var(--color-text-muted);
 }
 
-.recipeGrid {
-  list-style: none;
-  margin: 0 0 var(--space-10);
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--space-6);
+.recipeGridSpacing {
+  margin-block-end: var(--space-10);
 }
 
 .browseAll {

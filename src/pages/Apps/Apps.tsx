@@ -1,5 +1,6 @@
 import AppCard from '@components/AppCard'
 import type { AppCardProps } from '@components/AppCard'
+import Grid from '@components/Grid'
 import Link from '@components/Link'
 import Typography from '@components/Typography'
 import type { FC } from 'react'
@@ -60,13 +61,11 @@ const Apps: FC = () => {
         <div className={styles.countRow}>
           <span>{APPS_COUNT_LABEL}</span>
         </div>
-        <ul className={styles.grid}>
+        <Grid minWidth="320px" className={styles.gridSpacing}>
           {APPS.map((app) => (
-            <li key={app.href}>
-              <AppCard {...app} />
-            </li>
+            <AppCard key={app.href} {...app} />
           ))}
-        </ul>
+        </Grid>
 
         <aside className={styles.inProgress} aria-labelledby="in-progress-heading">
           <Typography variant="caption" as="p" id="in-progress-heading" className={styles.eyebrow}>

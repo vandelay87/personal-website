@@ -1,4 +1,5 @@
 import { fetchRecipes } from '@api/recipes'
+import Grid from '@components/Grid'
 import Image from '@components/Image'
 import Link from '@components/Link'
 import RecipeCard from '@components/RecipeCard'
@@ -168,13 +169,11 @@ const Home: FC = () => {
                 written down so they&apos;re easy to make again.
               </Typography>
             </div>
-            <ul className={styles.recipeGrid}>
+            <Grid minWidth="220px" className={styles.recipeGridSpacing}>
               {recipes.map((recipe) => (
-                <li key={recipe.id}>
-                  <RecipeCard recipe={recipe} eager hideTags />
-                </li>
+                <RecipeCard key={recipe.id} recipe={recipe} eager hideTags />
               ))}
-            </ul>
+            </Grid>
             <div className={styles.browseAll}>
               <Link
                 to="/recipes"
