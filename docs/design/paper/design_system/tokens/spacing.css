@@ -44,6 +44,7 @@
   --max-w-reading: 720px;  /* index + hero reading column */
   --max-w-article: 680px;  /* long-form article column */
   --max-w-prose:   54ch;   /* hero paragraph measure */
+  --max-w-sm:      24rem;  /* compact component box — dialogs, cards, toasts */
 
   /* Z-index */
   --z-header:  20;

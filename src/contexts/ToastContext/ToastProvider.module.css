@@ -3,7 +3,7 @@
   inset-block-end: var(--space-4);
   inset-inline-end: var(--space-4);
   z-index: var(--z-toast);
-  max-width: min(24rem, calc(100vw - 2 * var(--space-4)));
+  max-width: min(var(--max-w-sm), calc(100vw - 2 * var(--space-4)));
 }
 
 .list {

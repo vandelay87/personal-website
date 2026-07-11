@@ -129,16 +129,20 @@ with text measure. Each usage was evaluated on its own layout role:
 | Consumer | Old | Role | Resolution |
 |---|---|---|---|
 | `AppsCta.module.css` `.inner`, `CVDownload.module.css` `.inner` | `--max-w-2xl` (672px) | Centered CTA text section | **Clean fit** → `--max-w-article` (680px, 1% off). Semantically right (a text-centered content block) and numerically almost exact. |
-| `ConfirmDialog.module.css` `.dialog` | `--max-w-sm` (384px) | Modal dialog width | **No fit** — smallest new token (680px) is ~1.8× this box; forcing it would nearly double every confirm dialog's width. Kept as a commented literal `24rem`, flagged for a possible future `--max-w-dialog`/`--max-w-sm` re-add to the design system. |
-| `SocialCard.module.css` `.card` | `--max-w-sm` (384px) | Compact footer card | Same reasoning as `ConfirmDialog` — literal `24rem`, flagged. |
-| `FullPageHeader.module.css` `.imageWrapper` (3 responsive tiers) | `--max-w-xs`/`--max-w-md`/`--max-w-lg` (320/448/512px) | Portrait image width cap, not a text column | Same reasoning — literals `20rem`/`28rem`/`32rem` preserving the exact prior px-equivalent values, flagged. In practice this cap is usually dominated by the 50%-flex-column width at typical viewports, so the visual impact of *not* forcing a token here is minimal, but the value itself has no honest semantic home in the current 4-token max-w scale. |
+| `ConfirmDialog.module.css` `.dialog`, `SocialCard.module.css` `.card`, `ToastProvider.module.css` `.container` | `--max-w-sm` (384px) | Modal dialog / compact footer card / toast stack width | **Resolved (issue #233):** the design system gained a `--max-w-sm` (24rem / 384px) compact-component-box tier, added alongside the reading-column scale specifically for non-text boxes. All three consumers, previously kept as commented `24rem` literals, now reference `var(--max-w-sm)`. |
 
-**Deviation from the "always use the nearest existing token" instruction:** for the three
-component-box cases above, using the nearest available token (`--max-w-article`, 680px)
-would visibly break the component (dialog/card nearly doubling in width, hero portrait
-overshooting its column). This is flagged explicitly rather than silently forced — if the
-design system later adds a smaller max-width step (e.g. `--max-w-sm` ~24rem for
-dialogs/cards), these three literals should switch to it.
+`FullPageHeader.module.css` no longer exists in the codebase (the hero portrait now lives in
+`Home.module.css` `.photo`, sized with a `clamp()`, not a breakpoint-tiered max-width), so the
+`20rem`/`28rem`/`32rem` literals this section originally described have nothing left to
+migrate. `Login.module.css` `.column` uses `max-width: 392px`, not `24rem` — a different value,
+not this token's consumer — so it was left untouched by #233 (swapping in `--max-w-sm` would
+shrink it by 8px, a real visual change, not a refactor).
+
+**Deviation from the "always use the nearest existing token" instruction (historical, #218):**
+before #233 added `--max-w-sm`, using the nearest available token (`--max-w-article`, 680px)
+for the cases above would have visibly broken the component (dialog/card nearly doubling in
+width). That's why they were kept as flagged literals rather than forced onto `--max-w-article`
+at the time — #233 is the "later" this note referred to.
 
 ## 4. Meaning flips (name unchanged, semantics changed)
 

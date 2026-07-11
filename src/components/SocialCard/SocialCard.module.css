@@ -9,8 +9,7 @@
   margin-inline: auto;
   padding-block: var(--space-6);
   padding-inline: var(--space-6);
-  /* No paper max-w token fits; see token-migration.md §3c. */
-  max-width: 24rem;
+  max-width: var(--max-w-sm);
 }
 
 .heading {
