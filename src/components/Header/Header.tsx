@@ -41,22 +41,32 @@ const Header: FC<HeaderProps> = ({
 }) => {
   const { pathname } = useLocation()
   const headerRef = useRef<HTMLElement>(null)
+  const lastHeightRef = useRef<number | null>(null)
 
   useEffect(() => {
     const element = headerRef.current
     if (!element) return
 
-    // getBoundingClientRect(), not entry.contentRect/borderBoxSize — the
-    // header's border-block-end is part of its visual footprint, and only
-    // getBoundingClientRect() includes border in the measured height. Also
-    // re-fires on wrap (single row -> two rows on narrow viewports), so
-    // --header-height stays accurate for consumers like PageShell/AdminLayout's
-    // scroll-margin-block-start without them needing wrap-aware media queries.
+    // entry.borderBoxSize, not getBoundingClientRect() — borderBoxSize is by
+    // definition the content+padding+border box, so it already includes the
+    // header's border-block-end without forcing a synchronous layout read on
+    // every firing (getBoundingClientRect() falls back for the handful of
+    // older engines that don't support borderBoxSize). Also re-fires on wrap
+    // (single row -> two rows on narrow viewports), so --header-height stays
+    // accurate for consumers like PageShell/AdminLayout's
+    // scroll-margin-block-start without them needing wrap-aware media
+    // queries. The rounded height is cached so sub-pixel jitter mid-resize
+    // doesn't trigger redundant writes — every setProperty ripples a
+    // style/layout recalc out to those consumers, not just the header.
     const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const height = entry.target.getBoundingClientRect().height
-        document.documentElement.style.setProperty('--header-height', `${height}px`)
-      }
+      const [entry] = entries
+      const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.target.getBoundingClientRect().height
+      const roundedHeight = Math.round(height)
+
+      if (roundedHeight === lastHeightRef.current) return
+
+      lastHeightRef.current = roundedHeight
+      document.documentElement.style.setProperty('--header-height', `${roundedHeight}px`)
     })
     observer.observe(element)
 
