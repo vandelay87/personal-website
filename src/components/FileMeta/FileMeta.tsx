@@ -22,14 +22,18 @@ const FileMeta: FC<FileMetaProps> = ({ fileInfo, hasError }) => {
     const { type, size, date } = fileInfo
 
     return (
-      <ul className={styles.list}>
-        <li>{`${type} format`}</li>
+      // eslint-disable-next-line jsx-a11y/no-redundant-roles -- .list sets list-style: none, which drops implicit list semantics in Safari/VoiceOver; role="list" (paired with role="listitem" on each <li>) restores it
+      <ul className={styles.list} role="list">
+        {/* eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above */}
+        <li role="listitem">{`${type} format`}</li>
         <li aria-hidden="true">•</li>
-        <li>{size}</li>
+        {/* eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above */}
+        <li role="listitem">{size}</li>
         {date && (
           <>
             <li aria-hidden="true">•</li>
-            <li>Updated {date}</li>
+            {/* eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above */}
+            <li role="listitem">Updated {date}</li>
           </>
         )}
       </ul>

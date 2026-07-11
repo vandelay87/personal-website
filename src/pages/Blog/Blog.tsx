@@ -107,9 +107,11 @@ const Blog = () => {
           </button>
         </div>
       ) : (
-        <ul className={styles.postList}>
+        // eslint-disable-next-line jsx-a11y/no-redundant-roles -- .postList sets list-style: none, which drops implicit list semantics in Safari/VoiceOver; role="list" (paired with role="listitem" on each <li>) restores it
+        <ul className={styles.postList} role="list">
           {filteredPosts.map((post) => (
-            <li key={post.slug}>
+            // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above
+            <li key={post.slug} role="listitem">
               <article className={styles.postCard}>
                 <RouterLink to={`/blog/${post.slug}`} className={styles.postLink}>
                   <div className={styles.meta}>
@@ -127,9 +129,11 @@ const Blog = () => {
                   </div>
                   <p className={styles.description}>{post.description}</p>
                 </RouterLink>
-                <ul className={styles.tags}>
+                {/* eslint-disable-next-line jsx-a11y/no-redundant-roles -- .tags sets list-style: none, which drops implicit list semantics in Safari/VoiceOver; role="list" (paired with role="listitem" below) restores it */}
+                <ul className={styles.tags} role="list">
                   {post.tags.map((tag) => (
-                    <li key={tag}>
+                    // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above
+                    <li key={tag} role="listitem">
                       <TagChip tag={tag} activeTag={activeTag} onSelect={handleTagClick} />
                     </li>
                   ))}
