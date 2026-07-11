@@ -16,24 +16,32 @@
   color: var(--color-text-muted);
 }
 
-button.tag {
+button.tag,
+a.tag {
   cursor: pointer;
   transition: border-color var(--duration-fast) var(--easing-default),
               color var(--duration-fast) var(--easing-default);
 }
 
+a.tag {
+  text-decoration: none;
+}
+
 /* Mirrors interactions.module.css's chipHover (border-color/color → accent
    on hover) — can't `composes` it here since composition only applies to a
    simple single-class selector, and this hover must be scoped to
-   interactive (button) tags only, not static display spans. Guarded against
-   .active so the hover tint doesn't fight the selected-filter fill. */
-button.tag:hover:not(.active) {
+   interactive (button/anchor) tags only, not static display spans. Guarded
+   against .active so the hover tint doesn't fight the selected-filter
+   fill. */
+button.tag:hover:not(.active),
+a.tag:hover:not(.active) {
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  button.tag {
+  button.tag,
+  a.tag {
     transition: none;
   }
 }

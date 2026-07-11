@@ -1,9 +1,12 @@
 import type { CSSProperties, FC, MouseEvent, ReactNode } from 'react'
+import { Link as RouterLink } from 'react-router-dom'
 import styles from './Tag.module.css'
 
 export interface TagProps {
-  /** `span` for display, `button` for an interactive filter chip. @default 'span' */
-  as?: 'span' | 'button'
+  /** `span` for display, `button` for an interactive filter chip, `a` for a navigable link. @default 'span' */
+  as?: 'span' | 'button' | 'a'
+  /** Destination for `as="a"`; ignored otherwise. */
+  to?: string
   /** Selected filter state (accent fill). @default false */
   active?: boolean
   /** Adds a remove control (editor tag input). @default false */
@@ -17,6 +20,7 @@ export interface TagProps {
 
 const Tag: FC<TagProps> = ({
   as = 'span',
+  to,
   active = false,
   removable = false,
   onRemove,
@@ -40,6 +44,26 @@ const Tag: FC<TagProps> = ({
       >
         {children}
       </button>
+    )
+  }
+
+  if (as === 'a') {
+    const href = to ?? ''
+    const isExternal =
+      /^https?:\/\//.test(href) || href.startsWith('mailto:') || href.startsWith('tel:')
+
+    if (isExternal) {
+      return (
+        <a href={href} className={className} style={style} onClick={onClick}>
+          {children}
+        </a>
+      )
+    }
+
+    return (
+      <RouterLink to={href} className={className} style={style} onClick={onClick}>
+        {children}
+      </RouterLink>
     )
   }
 
