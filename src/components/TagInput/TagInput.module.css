@@ -95,7 +95,8 @@
   cursor: pointer;
   transition:
     border-color var(--duration-fast) var(--easing-default),
-    color var(--duration-fast) var(--easing-default);
+    color var(--duration-fast) var(--easing-default),
+    background-color var(--duration-fast) var(--easing-default);
 }
 
 /* Decorative "+" affordance from the design (TagInput.jsx renders "+ {tag}")
@@ -103,6 +104,23 @@
    labels aren't meaningfully different without it (purely visual). */
 .option::before {
   content: '+ ';
+}
+
+/* Arrow-key highlight — the ARIA state set via `aria-selected` on the
+   option already carries the semantics, so this keys off the attribute
+   directly rather than duplicating it as a second CSS Modules class.
+   Reuses `chipHover`'s own border/text treatment (border-color + color
+   swapped to --color-primary) so keyboard arrow-highlight and mouse
+   hover read as the same visual weight, plus a tinted background so the
+   *persistent* keyboard-selected state stays visible even without the
+   pointer sitting on it. The 10% color-mix background matches this
+   project's established "accent" fill (see UserManagement.module.css's
+   `.rolePillAdmin`, same color-mix(...transparent) shape as the --ring
+   token — the design's --accent-bg is rgba(31,102,224,0.10)). */
+.option[aria-selected='true'] {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
