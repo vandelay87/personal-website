@@ -1,5 +1,7 @@
+export type SocialLinkName = 'GitHub' | 'LinkedIn' | 'Email'
+
 export interface SocialLink {
-  name: string
+  name: SocialLinkName
   href: string
 }
 
