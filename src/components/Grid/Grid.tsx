@@ -15,10 +15,7 @@ const columnClassMap: Record<NonNullable<GridProps['columns']>, string> = {
 
 const Grid: FC<GridProps> = ({ children, columns = 3 }) => {
   return (
-    // Safari/VoiceOver drops list semantics from a <ul>/<li> pair once
-    // `list-style: none` is applied anywhere in it; role="list" (paired
-    // with role="listitem" below) restores it explicitly.
-    // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment above
+    // eslint-disable-next-line jsx-a11y/no-redundant-roles -- .grid sets list-style: none, which drops implicit list semantics in Safari/VoiceOver; role="list" (paired with role="listitem" on each <li>) restores it
     <ul className={`${styles.grid} ${columnClassMap[columns]}`} role="list">
       {Array.isArray(children) ? (
         children.map((child, index) => (
