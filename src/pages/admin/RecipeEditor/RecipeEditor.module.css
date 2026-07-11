@@ -72,13 +72,12 @@
    var(--color-link)) now lives in `@layer component-defaults`
    (Link.module.css, #263), so this plain unlayered class deterministically
    wins without needing the old descendant-selector trick. Border/color/
-   transition/hover now come from Link's own `.ghost` (issue #270, via
-   `composes:` + the `variant="ghost"` prop) — sizing, the extra hover
-   background wash (`.ghost` itself has none), and font-weight (this
+   transition/hover already come from Link's own `.ghost` via the
+   `variant="ghost"` prop alone — no `composes:` needed, sizing, the extra
+   hover background wash (`.ghost` itself has none), and font-weight (this
    banner link keeps its original `medium` weight, overriding `.ghost`'s
    `semibold` default) stay local. */
 .bannerAction {
-  composes: ghost from '../../../components/Link/Link.module.css';
   flex-shrink: 0;
   width: auto;
   font-size: 13px;

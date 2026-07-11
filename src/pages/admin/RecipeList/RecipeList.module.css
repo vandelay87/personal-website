@@ -42,16 +42,15 @@
    Applied to the shared Link component (client-side routing to
    /admin/recipes/new) rather than Button, which has no polymorphic `as`/
    href support — see RecipeDetailView.module.css's `.backLink` for the
-   same "style Link locally" precedent. Solid coloring/hover now come from
-   Link's own `.solid` (issue #270, via `composes:` + the `variant="solid"`
-   prop) — only sizing and the `:active` press effect (genuinely
-   RecipeList-specific, `.solid` has none) stay local. The opacity leg of
-   the transition is re-declared here alongside transform: `.solid`'s own
-   transition lives in Link.module.css's `@layer`, and an unlayered
-   `transition` on this class would otherwise replace it wholesale rather
-   than merge, silently dropping the hover fade. */
+   same "style Link locally" precedent. Solid coloring/hover already come
+   from Link's own `.solid` via the `variant="solid"` prop alone — no
+   `composes:` needed, only sizing and the `:active` press effect
+   (genuinely RecipeList-specific, `.solid` has none) stay local. The
+   opacity leg of the transition is re-declared here alongside transform:
+   `.solid`'s own transition lives in Link.module.css's `@layer`, and an
+   unlayered `transition` on this class would otherwise replace it
+   wholesale rather than merge, silently dropping the hover fade. */
 .newButton {
-  composes: solid from '../../../components/Link/Link.module.css';
   font-size: 14px;
   padding: 11px 18px;
   gap: var(--space-2);
@@ -59,8 +58,7 @@
     transform var(--duration-fast) var(--easing-default);
 }
 
-.header .newButton:active,
-.emptyBox .newButton:active {
+.newButton:active {
   transform: translateY(1px);
 }
 
