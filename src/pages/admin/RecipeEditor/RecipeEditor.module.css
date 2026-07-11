@@ -385,6 +385,10 @@
 .checklistLabel {
   composes: sectionLabel;
   margin-bottom: var(--space-2);
+  /* .railCard has a --color-surface background (issue #274) — sectionLabel's
+     own faint color is tuned for --color-bg, the bare <legend> usage's
+     actual context. */
+  color: var(--color-text-faint-on-surface);
 }
 
 .checklist {
