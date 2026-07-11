@@ -15,15 +15,21 @@ const columnClassMap: Record<NonNullable<GridProps['columns']>, string> = {
 
 const Grid: FC<GridProps> = ({ children, columns = 3 }) => {
   return (
-    <ul className={`${styles.grid} ${columnClassMap[columns]}`}>
+    // Safari/VoiceOver drops list semantics from a <ul>/<li> pair once
+    // `list-style: none` is applied anywhere in it; role="list" (paired
+    // with role="listitem" below) restores it explicitly.
+    // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment above
+    <ul className={`${styles.grid} ${columnClassMap[columns]}`} role="list">
       {Array.isArray(children) ? (
         children.map((child, index) => (
-          <li key={index} className={styles.item}>
+          // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above
+          <li key={index} className={styles.item} role="listitem">
             {child}
           </li>
         ))
       ) : (
-        <li className={styles.item}>{children}</li>
+        // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above
+        <li className={styles.item} role="listitem">{children}</li>
       )}
     </ul>
   )

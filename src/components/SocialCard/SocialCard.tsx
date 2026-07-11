@@ -65,9 +65,14 @@ const SocialCard: FC = () => {
       <Typography variant="heading3" as="h2" id="social-heading" className={styles.heading}>
         Get in touch
       </Typography>
-      <ul className={styles.list}>
+      {/* Safari/VoiceOver drops list semantics from a <ul>/<li> pair once
+          `list-style: none` is applied anywhere in it; role="list" (paired
+          with role="listitem" below) restores it explicitly. */}
+      {/* eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment above */}
+      <ul className={styles.list} role="list">
         {SOCIAL_CARD_PROPS.map(({ name, url, icon }) => (
-          <li key={name}>
+          // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above
+          <li key={name} role="listitem">
             <a
               href={url}
               target="_blank"

@@ -43,9 +43,15 @@ const renderNodes = (nodes: TreeNode[], isRoot: boolean): ReactNode => {
   if (nodes.length === 0) return null
 
   return (
-    <ul className={isRoot ? styles.rootList : styles.list}>
+    // Safari/VoiceOver drops list semantics from a <ul>/<li> pair once
+    // `list-style: none` is applied anywhere in it (both .rootList and
+    // .list here); role="list" (paired with role="listitem" below)
+    // restores it explicitly.
+    // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment above
+    <ul className={isRoot ? styles.rootList : styles.list} role="list">
       {nodes.map((node, index) => (
-        <li key={`${node.name}-${index}`} className={styles.item}>
+        // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above
+        <li key={`${node.name}-${index}`} className={styles.item} role="listitem">
           <span><span aria-hidden="true">{node.isFolder ? '📁 ' : '📄 '}</span>{node.name}</span>
           {node.children.length > 0 && renderNodes(node.children, false)}
         </li>

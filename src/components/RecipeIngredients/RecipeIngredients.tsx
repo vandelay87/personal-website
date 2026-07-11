@@ -87,11 +87,16 @@ const RecipeIngredients: FC<RecipeIngredientsProps> = ({ ingredients, slug }) =>
   }
 
   return (
-    <ul className={styles.list}>
+    // Safari/VoiceOver drops list semantics from a <ul>/<li> pair once
+    // `list-style: none` is applied anywhere in it; role="list" (paired
+    // with role="listitem" below) restores it explicitly.
+    // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment above
+    <ul className={styles.list} role="list">
       {ingredients.map((ingredient, idx) => {
         const key = `${ingredient.item}-${idx}`
         return (
-          <li key={key} className={styles.item}>
+          // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above
+          <li key={key} className={styles.item} role="listitem">
             <label className={styles.row}>
               <input
                 type="checkbox"
