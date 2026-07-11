@@ -1,6 +1,7 @@
 import { isSessionError } from '@api/auth'
 import { fetchRecipeByIdAdmin, publishRecipe } from '@api/recipes'
 import Button from '@components/Button'
+import { iconEdit, iconPublish } from '@components/icons'
 import Link from '@components/Link'
 import Loading from '@components/Loading'
 import RecipeDetailView from '@components/RecipeDetailView'
@@ -20,7 +21,7 @@ import styles from './RecipePreview.module.css'
 
 // Hoisted elements, not components — these never take props, so there's no
 // need to re-invoke a function (and rebuild the tree) on every render. Same
-// established pattern as `iconRetry` in RecipeList.tsx / `iconLock` in
+// established pattern as `iconRetry` in icons.tsx / `iconLock` in
 // RecipeEditor.tsx. Paths match Admin Recipe Preview.dc.html's inline SVGs
 // (lines 76, 81-82, 88, 93, 100) exactly.
 const iconStatusPublished = (
@@ -53,40 +54,6 @@ const iconStatusDraft = (
   >
     <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
     <circle cx="12" cy="12" r="3" />
-  </svg>
-)
-
-const iconEdit = (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-    <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
-  </svg>
-)
-
-const iconPublish = (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d="M12 19V5" />
-    <path d="m5 12 7-7 7 7" />
   </svg>
 )
 

@@ -56,20 +56,27 @@ a.tag:hover:not(.active) {
   border-color: var(--color-primary);
 }
 
-.remove {
-  composes: focusRing from '../../styles/interactions.module.css';
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  /* SC 2.5.8 Target size (minimum) — the glyph alone renders well under
-     24x24 CSS px at --font-size-xs; give the control an explicit minimum
-     hit area. */
-  min-width: 24px;
-  min-height: 24px;
-  border: none;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
+/* `.remove` lives in a low-priority @layer so a consumer's plain (unlayered)
+   `removeClassName` always wins over it, regardless of source/bundle order
+   or matching specificity — same mechanism as Typography.module.css /
+   Link.module.css (issue #263), applied here to close out #265's own AC on
+   TagInput's former element-type-selector workaround for this exact rule. */
+@layer component-defaults {
+  .remove {
+    composes: focusRing from '../../styles/interactions.module.css';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* SC 2.5.8 Target size (minimum) — the glyph alone renders well under
+       24x24 CSS px at --font-size-xs; give the control an explicit minimum
+       hit area. */
+    min-width: 24px;
+    min-height: 24px;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+  }
 }

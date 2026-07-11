@@ -32,20 +32,25 @@
   border-radius: 8px;
 }
 
-/* Targets Tag's internally-rendered remove `<button>` by element type,
-   not by class — Tag.module.css's `.remove` class name is scoped to that
-   module and isn't reachable from here, but plain type selectors aren't
-   hashed by CSS Modules. Mirrors the design's own `.chip button` /
-   `.chip button:hover` rules exactly (Admin Recipe Editor.dc.html's
-   `.chip` styles). Tag's default `.remove { color: inherit }` has no
-   hover treatment of its own (most Tag consumers don't want a red tint),
-   so both the faint resting color and the hover-to-error tint are
-   supplied here. */
-.chips .chip button {
+/* Tag exposes its remove button via the `removeClassName` prop (issue #265),
+   so this styles it directly by class rather than reaching into Tag's
+   internal markup with a bare element-type selector — that old approach
+   would silently break or over-match if Tag's internal markup ever changed.
+   Bare class, not scoped under `.chips .chip`: Tag.module.css's own
+   `.remove` rule now lives in `@layer component-defaults` (same mechanism
+   as Typography/Link, #263), so this plain unlayered class deterministically
+   outranks it without needing the old descendant-selector trick — same
+   pattern RecipeDetailView.module.css's `.title` already uses. Mirrors the
+   design's own `.chip button` / `.chip button:hover` rules exactly (Admin
+   Recipe Editor.dc.html's `.chip` styles). Tag's default `.remove
+   { color: inherit }` has no hover treatment of its own (most Tag consumers
+   don't want a red tint), so both the faint resting color and the
+   hover-to-error tint are supplied here. */
+.chipRemove {
   color: var(--color-text-faint);
 }
 
-.chips .chip button:hover {
+.chipRemove:hover {
   color: var(--color-error);
 }
 

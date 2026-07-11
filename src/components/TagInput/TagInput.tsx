@@ -84,7 +84,13 @@ const TagInput: FC<TagInputProps> = ({
     <div className={styles.container}>
       <div className={styles.chips}>
         {tags.map((tag, i) => (
-          <Tag key={tag} removable onRemove={() => removeTag(i)} className={styles.chip}>
+          <Tag
+            key={tag}
+            removable
+            onRemove={() => removeTag(i)}
+            className={styles.chip}
+            removeClassName={styles.chipRemove}
+          >
             {tag}
           </Tag>
         ))}

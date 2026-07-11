@@ -8,6 +8,8 @@ interface TagBaseProps {
   /** Adds a remove control (editor tag input). @default false */
   removable?: boolean
   onRemove?: (e: MouseEvent) => void
+  /** Extra className merged onto the remove button — only meaningful with `removable`. */
+  removeClassName?: string
   onClick?: (e: MouseEvent) => void
   children?: ReactNode
   className?: string
@@ -37,6 +39,7 @@ const Tag: FC<TagProps> = (props) => {
     onClick,
     children,
     className: extraClassName,
+    removeClassName,
     style,
   } = props
 
@@ -85,13 +88,14 @@ const Tag: FC<TagProps> = (props) => {
     )
   }
 
+  const removeButtonClassName = [styles.remove, removeClassName].filter(Boolean).join(' ')
   const removeLabel = typeof children === 'string' ? `Remove ${children}` : 'Remove tag'
 
   return (
     <span className={className} style={style}>
       {children}
       {removable && (
-        <button type="button" className={styles.remove} aria-label={removeLabel} onClick={onRemove}>
+        <button type="button" className={removeButtonClassName} aria-label={removeLabel} onClick={onRemove}>
           <span aria-hidden="true">&times;</span>
         </button>
       )}
