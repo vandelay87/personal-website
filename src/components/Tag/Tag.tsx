@@ -2,11 +2,7 @@ import type { CSSProperties, FC, MouseEvent, ReactNode } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import styles from './Tag.module.css'
 
-export interface TagProps {
-  /** `span` for display, `button` for an interactive filter chip, `a` for a navigable link. @default 'span' */
-  as?: 'span' | 'button' | 'a'
-  /** Destination for `as="a"`; ignored otherwise. */
-  to?: string
+interface TagBaseProps {
   /** Selected filter state (accent fill). @default false */
   active?: boolean
   /** Adds a remove control (editor tag input). @default false */
@@ -18,22 +14,37 @@ export interface TagProps {
   style?: CSSProperties
 }
 
-const Tag: FC<TagProps> = ({
-  as = 'span',
-  to,
-  active = false,
-  removable = false,
-  onRemove,
-  onClick,
-  children,
-  className: extraClassName,
-  style,
-}) => {
+export type TagProps = TagBaseProps &
+  (
+    | {
+        /** `a` for a navigable link. */
+        as: 'a'
+        /** Destination for `as="a"`; required. */
+        to: string
+      }
+    | {
+        /** `span` for display, `button` for an interactive filter chip. @default 'span' */
+        as?: 'span' | 'button'
+        to?: never
+      }
+  )
+
+const Tag: FC<TagProps> = (props) => {
+  const {
+    active = false,
+    removable = false,
+    onRemove,
+    onClick,
+    children,
+    className: extraClassName,
+    style,
+  } = props
+
   const className = [styles.tag, active && styles.active, extraClassName]
     .filter(Boolean)
     .join(' ')
 
-  if (as === 'button') {
+  if (props.as === 'button') {
     return (
       <button
         type="button"
@@ -47,14 +58,21 @@ const Tag: FC<TagProps> = ({
     )
   }
 
-  if (as === 'a') {
-    const href = to ?? ''
+  if (props.as === 'a') {
+    const href = props.to
     const isExternal =
       /^https?:\/\//.test(href) || href.startsWith('mailto:') || href.startsWith('tel:')
 
     if (isExternal) {
       return (
-        <a href={href} className={className} style={style} onClick={onClick}>
+        <a
+          href={href}
+          className={className}
+          style={style}
+          onClick={onClick}
+          target="_blank"
+          rel="noreferrer"
+        >
           {children}
         </a>
       )
