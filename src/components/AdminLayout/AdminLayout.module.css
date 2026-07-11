@@ -12,6 +12,6 @@
   /* SC 2.4.11: reserves room above the main landmark roughly equal to a
      single-row sticky header's height, so the header — pinned via
      position: sticky — never fully covers focus/scroll landing here or
-     on a near-top descendant. Mirrors Layout.module.css .main. */
+     on a near-top descendant. Mirrors PageShell.module.css .main. */
   scroll-margin-block-start: var(--space-16);
 }
