@@ -67,7 +67,8 @@
   inset-block-start: 50%;
   transform: translateY(-50%);
   display: flex;
-  color: var(--color-text-faint);
+  /* .field has a --color-field background (issue #274). */
+  color: var(--color-text-faint-on-field);
   pointer-events: none;
 }
 

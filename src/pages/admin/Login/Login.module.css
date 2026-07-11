@@ -97,7 +97,8 @@
 .column .footnote {
   font-size: 12.5px; /* no token lands between --font-size-xs (11px) and --font-size-sm (13px) */
   line-height: var(--line-height-normal);
-  color: var(--color-text-faint);
+  /* Renders inside <Card fill>, whose .fill sets --color-surface (issue #274). */
+  color: var(--color-text-faint-on-surface);
   margin: 18px 0 0; /* no --space-* token lands on 18px (--space-4=16px, --space-5=20px) */
   text-align: center;
 }

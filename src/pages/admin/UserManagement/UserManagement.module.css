@@ -64,7 +64,8 @@
   composes: focusRing from '../../../styles/interactions.module.css';
   background: transparent;
   border: none;
-  color: var(--color-text-faint);
+  /* .inviteCard has a --color-surface background (issue #274). */
+  color: var(--color-text-faint-on-surface);
   cursor: pointer;
   font-size: 14px;
   line-height: 1;
