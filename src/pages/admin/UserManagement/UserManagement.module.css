@@ -410,9 +410,10 @@
   }
 }
 
-/* ── Loading / error states — shared box shape, matches
-   RecipeList.module.css's `.loadingBox`/`.errorBox` exactly (this is the
-   third page in the epic to need this treatment). ─────────────────── */
+/* ── Loading / error states — composes the shared box shape from
+   stateBox.module.css, matching RecipeList.module.css's `.loadingBox`/
+   `.errorBox` exactly (this is the third page in the epic to need this
+   treatment). ──────────────────────────────────────────────────────── */
 
 .loadingBox {
   composes: box loading from '../../../styles/stateBox.module.css';

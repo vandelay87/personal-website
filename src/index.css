@@ -2,6 +2,16 @@
 @import './styles/tokens.css';
 @import './styles/animations.css';
 
+/* Cascade layer order (higher-priority layers later): `component-defaults`
+   (Typography/Link/Tag's own base styles, issue #263) is beaten by
+   `state-box-heading` (stateBox.module.css's heading/body classes, issue
+   #269, which must win over a Typography variant applied to the same
+   element) — both still lose to any fully unlayered rule (any plain
+   consumer className, which is how every actual page-level override in
+   this codebase works). Declaring this order once, here, means it holds
+   regardless of which file's `@layer` block is parsed first at runtime. */
+@layer component-defaults, state-box-heading;
+
 /* ── Global base styles ────────────────────────────────────── */
 
 /* Design's Home.dc.html uses a bare `* { box-sizing: border-box }` —
