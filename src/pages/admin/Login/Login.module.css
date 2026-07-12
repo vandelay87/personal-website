@@ -25,15 +25,11 @@
   margin-bottom: var(--space-6);
 }
 
-/* .cardHeader .heading / .cardHeader .subheading (not bare classes):
-   Typography's own `heading3`/`body` variants each set their own
-   font-size/line-height/color, which ties in CSS specificity with a bare
-   override class on the same element (both single-class selectors) —
-   the winner depends on stylesheet load order, non-deterministic across
-   builds. Raising specificity via a parent-scoped descendant selector is
-   the established fix throughout this epic (see RecipeDetailView.module.css's
-   `.header .title`/`.header .intro`). */
-.cardHeader .heading {
+/* Bare `.heading` override: Typography's own `.heading3` now lives in
+   `@layer component-defaults` (Typography.module.css, #263), so this
+   plain unlayered class deterministically wins without needing the old
+   descendant-selector trick. */
+.heading {
   /* 22px: between --font-size-xl (21px) and --font-size-2xl (24px); no
      token lands on it exactly. */
   font-size: 22px;
@@ -43,7 +39,11 @@
   margin: 0 0 6px;
 }
 
-.cardHeader .subheading {
+/* Bare `.subheading` override: Typography's own `.body` now lives in
+   `@layer component-defaults` (Typography.module.css, #263), so this
+   plain unlayered class deterministically wins without needing the old
+   descendant-selector trick. Same mechanism as `.heading` above. */
+.subheading {
   font-size: var(--font-size-sm-plus);
   /* 1.55: between --line-height-normal (1.5) and --line-height-relaxed
      (1.65); no token lands on it exactly. */
@@ -90,10 +90,13 @@
   gap: 7px; /* no --space-* token lands on 7px (--space-1=4px, --space-2=8px) */
 }
 
-/* .column .footnote / .column .belowCard (not bare classes): same
-   specificity-tie fix as .cardHeader .heading above — both compose
-   Typography's `caption` variant (own font-size/color), which ties with
-   a bare override class. */
+/* .column .footnote / .column .belowCard (not bare classes): both compose
+   Typography's `caption` variant, which is also layered in
+   `@layer component-defaults` (Typography.module.css) same as `.heading3`/
+   `.body` above. These two weren't de-scoped to bare `.footnote`/
+   `.belowCard` in this pass — out of #326's stated scope, which covers
+   only `.cardHeader .heading`/`.subheading` — so they still use the
+   parent-scoped descendant-selector fix for now. */
 .column .footnote {
   font-size: 12.5px; /* no token lands between --font-size-xs (11px) and --font-size-sm (13px) */
   line-height: var(--line-height-normal);
