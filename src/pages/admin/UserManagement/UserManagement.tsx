@@ -4,7 +4,7 @@ import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
 import { IconAlertCircle, iconRetry, iconWarning } from '@components/icons'
 import Input from '@components/Input'
-import Loading from '@components/Loading'
+import StateBox from '@components/StateBox'
 import StatusBadge from '@components/StatusBadge'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
@@ -14,7 +14,6 @@ import { useCallback, useEffect, useId, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import interactions from '../../../styles/interactions.module.css'
-import stateBox from '../../../styles/stateBox.module.css'
 import text from '../../../styles/text.module.css'
 import styles from './UserManagement.module.css'
 
@@ -161,27 +160,18 @@ const UserManagement = () => {
 
   const renderBody = () => {
     if (loading) {
-      return (
-        <div className={`${stateBox.box} ${stateBox.loading}`}>
-          <Loading label="Loading users…" />
-        </div>
-      )
+      return <StateBox variant="loading" label="Loading users…" />
     }
 
     if (error) {
       return (
-        <div className={`${stateBox.box} ${stateBox.error}`}>
-          <div className={`${stateBox.icon} ${stateBox.iconError}`}>{iconWarning}</div>
-          <Typography variant="heading2" className={stateBox.heading}>
-            Couldn&apos;t load users
-          </Typography>
-          <Typography variant="body" className={`${stateBox.body} ${styles.errorBody}`}>
-            Something went wrong reaching the server. Check your connection and try again.
-          </Typography>
-          <Button variant="outline" onClick={loadUsers} iconLeft={iconRetry}>
-            Retry
-          </Button>
-        </div>
+        <StateBox
+          variant="error"
+          icon={iconWarning}
+          heading="Couldn't load users"
+          body="Something went wrong reaching the server. Check your connection and try again."
+          action={{ label: 'Retry', onClick: loadUsers, icon: iconRetry }}
+        />
       )
     }
 

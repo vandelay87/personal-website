@@ -1,0 +1,7 @@
+/* RecipeList's and UserManagement's error body was independently widened
+   to 38ch (vs. stateBox.module.css's own 36ch default) in both source
+   files before this extraction — folded into one rule here so both
+   page-local overrides can be deleted. See issue #304. */
+.errorBody {
+  max-width: 38ch;
+}

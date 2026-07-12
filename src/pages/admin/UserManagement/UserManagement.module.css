@@ -388,13 +388,6 @@
   }
 }
 
-/* ── Loading / error states — uses the shared box shape from
-   stateBox.module.css, matching RecipeList.module.css's `.loadingBox`/
-   `.errorBox` exactly (this is the third page in the epic to need this
-   treatment). stateBox is imported directly in UserManagement.tsx and
-   composed in JS rather than via `composes:` here, so Rollup can dedupe
-   the shared rules across lazy admin chunks. ──────────────────────────── */
-
-.errorBody {
-  max-width: 38ch;
-}
+/* Loading/error states are handled by the shared StateBox component
+   (src/components/StateBox) — see issue #304. No page-local CSS is
+   needed here anymore. */
