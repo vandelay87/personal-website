@@ -108,11 +108,11 @@
 
 /* .bannerLeft .bannerMessage (not bare): raises specificity above
    Typography's own `.body` (font-size/font-weight/color) — a bare
-   `.bannerMessage` would tie with it. Unlike `.backLink` above (now a
-   bare override against Link's already-layered `.link`), Typography's
-   `.body` isn't in `@layer component-defaults` yet, so this rule still
-   needs the descendant-selector specificity bump; tracked as separate
-   follow-up work. */
+   `.bannerMessage` would tie with it. Typography's `.body` is already
+   layered in `@layer component-defaults` too (same mechanism as
+   `.backLink` above), so this selector is equally eligible for the same
+   de-scoping — left untouched here since this issue is scoped to
+   Link-backed selectors only; tracked in #334. */
 .bannerLeft .bannerMessage {
   margin: 0;
   font-size: var(--font-size-sm-plus);
