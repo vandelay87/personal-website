@@ -1,4 +1,4 @@
-import SemanticList, { SemanticListItem } from '@components/SemanticList'
+import List, { ListItem } from '@components/List'
 import { CSSProperties, FC, ReactNode } from 'react'
 import styles from './Grid.module.css'
 
@@ -35,17 +35,17 @@ const Grid: FC<GridProps> = ({
     : undefined
 
   return (
-    <SemanticList className={gridClassName} style={gridStyle}>
+    <List className={gridClassName} style={gridStyle}>
       {Array.isArray(children) ? (
         children.map((child, index) => (
-          <SemanticListItem key={index} className={styles.item}>
+          <ListItem key={index} className={styles.item}>
             {child}
-          </SemanticListItem>
+          </ListItem>
         ))
       ) : (
-        <SemanticListItem className={styles.item}>{children}</SemanticListItem>
+        <ListItem className={styles.item}>{children}</ListItem>
       )}
-    </SemanticList>
+    </List>
   )
 }
 

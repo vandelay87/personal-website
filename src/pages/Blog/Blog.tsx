@@ -1,4 +1,4 @@
-import SemanticList, { SemanticListItem } from '@components/SemanticList'
+import List, { ListItem } from '@components/List'
 import Tag from '@components/Tag'
 import Typography from '@components/Typography'
 import type { FC } from 'react'
@@ -108,9 +108,9 @@ const Blog = () => {
           </button>
         </div>
       ) : (
-        <SemanticList className={styles.postList}>
+        <List className={styles.postList}>
           {filteredPosts.map((post) => (
-            <SemanticListItem key={post.slug}>
+            <ListItem key={post.slug}>
               <article className={styles.postCard}>
                 <RouterLink to={`/blog/${post.slug}`} className={styles.postLink}>
                   <div className={styles.meta}>
@@ -128,17 +128,17 @@ const Blog = () => {
                   </div>
                   <p className={styles.description}>{post.description}</p>
                 </RouterLink>
-                <SemanticList className={styles.tags}>
+                <List className={styles.tags}>
                   {post.tags.map((tag) => (
-                    <SemanticListItem key={tag}>
+                    <ListItem key={tag}>
                       <TagChip tag={tag} activeTag={activeTag} onSelect={handleTagClick} />
-                    </SemanticListItem>
+                    </ListItem>
                   ))}
-                </SemanticList>
+                </List>
               </article>
-            </SemanticListItem>
+            </ListItem>
           ))}
-        </SemanticList>
+        </List>
       )}
     </>
   )

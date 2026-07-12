@@ -1,4 +1,4 @@
-import SemanticList, { SemanticListItem } from '@components/SemanticList'
+import List, { ListItem } from '@components/List'
 import type { Ingredient } from '@models/recipe'
 import { useState, type FC } from 'react'
 import styles from './RecipeIngredients.module.css'
@@ -88,11 +88,11 @@ const RecipeIngredients: FC<RecipeIngredientsProps> = ({ ingredients, slug }) =>
   }
 
   return (
-    <SemanticList className={styles.list}>
+    <List className={styles.list}>
       {ingredients.map((ingredient, idx) => {
         const key = `${ingredient.item}-${idx}`
         return (
-          <SemanticListItem key={key} className={styles.item}>
+          <ListItem key={key} className={styles.item}>
             <label className={styles.row}>
               <input
                 type="checkbox"
@@ -105,10 +105,10 @@ const RecipeIngredients: FC<RecipeIngredientsProps> = ({ ingredients, slug }) =>
                 {ingredient.quantity} {ingredient.unit}
               </span>
             </label>
-          </SemanticListItem>
+          </ListItem>
         )
       })}
-    </SemanticList>
+    </List>
   )
 }
 

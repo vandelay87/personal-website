@@ -1,5 +1,5 @@
+import List, { ListItem } from '@components/List'
 import Loading from '@components/Loading'
-import SemanticList, { SemanticListItem } from '@components/SemanticList'
 import { FC } from 'react'
 import styles from './FileMeta.module.css'
 
@@ -23,17 +23,17 @@ const FileMeta: FC<FileMetaProps> = ({ fileInfo, hasError }) => {
     const { type, size, date } = fileInfo
 
     return (
-      <SemanticList className={styles.list}>
-        <SemanticListItem>{`${type} format`}</SemanticListItem>
+      <List className={styles.list}>
+        <ListItem>{`${type} format`}</ListItem>
         <li aria-hidden="true">•</li>
-        <SemanticListItem>{size}</SemanticListItem>
+        <ListItem>{size}</ListItem>
         {date && (
           <>
             <li aria-hidden="true">•</li>
-            <SemanticListItem>Updated {date}</SemanticListItem>
+            <ListItem>Updated {date}</ListItem>
           </>
         )}
-      </SemanticList>
+      </List>
     )
   }
 

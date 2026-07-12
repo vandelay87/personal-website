@@ -1,4 +1,4 @@
-import SemanticList, { SemanticListItem } from '@components/SemanticList'
+import List, { ListItem } from '@components/List'
 import Typography from '@components/Typography'
 import { FC, JSX } from 'react'
 import { SOCIAL_LINKS_WITH_EMAIL_SUBJECT, type SocialLinkName } from '../../constants/socialLinks'
@@ -31,9 +31,9 @@ const SocialCard: FC = () => {
       <Typography variant="heading3" as="h2" id="social-heading" className={styles.heading}>
         Get in touch
       </Typography>
-      <SemanticList className={styles.list}>
+      <List className={styles.list}>
         {SOCIAL_LINKS_WITH_EMAIL_SUBJECT.map(({ name, href }) => (
-          <SemanticListItem key={name}>
+          <ListItem key={name}>
             <a
               href={href}
               target="_blank"
@@ -45,9 +45,9 @@ const SocialCard: FC = () => {
               <span className="sr-only">{name}</span>
               {ICONS_BY_NAME[name]}
             </a>
-          </SemanticListItem>
+          </ListItem>
         ))}
-      </SemanticList>
+      </List>
     </article>
   )
 }

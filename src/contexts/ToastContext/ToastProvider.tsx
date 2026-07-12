@@ -1,4 +1,4 @@
-import SemanticList from '@components/SemanticList'
+import List from '@components/List'
 import Toast, { type ToastTone } from '@components/Toast'
 import {
   useCallback,
@@ -60,13 +60,13 @@ export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
         aria-live={hasError ? 'assertive' : 'polite'}
         aria-atomic="false"
       >
-        <SemanticList className={styles.list}>
+        <List className={styles.list}>
           {toasts.map((toast) => (
             <Toast key={toast.id} tone={toast.tone} onDismiss={() => dismissToast(toast.id)}>
               {toast.message}
             </Toast>
           ))}
-        </SemanticList>
+        </List>
       </div>
     </ToastContext.Provider>
   )

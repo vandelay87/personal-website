@@ -1,4 +1,4 @@
-import { SemanticListItem } from '@components/SemanticList'
+import { ListItem } from '@components/List'
 import type { FC, ReactNode } from 'react'
 
 import styles from './Toast.module.css'
@@ -15,7 +15,7 @@ export interface ToastProps {
 
 const Toast: FC<ToastProps> = ({ tone = 'info', children, onDismiss }) => {
   return (
-    <SemanticListItem className={styles.item}>
+    <ListItem className={styles.item}>
       <button
         type="button"
         className={[styles.toast, styles[tone]].filter(Boolean).join(' ')}
@@ -26,7 +26,7 @@ const Toast: FC<ToastProps> = ({ tone = 'info', children, onDismiss }) => {
           &times;
         </span>
       </button>
-    </SemanticListItem>
+    </ListItem>
   )
 }
 

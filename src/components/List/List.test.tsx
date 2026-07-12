@@ -1,13 +1,13 @@
-import SemanticList, { SemanticListItem } from '@components/SemanticList'
+import List, { ListItem } from '@components/List'
 import { render, screen } from '@testing-library/react'
 import type { CSSProperties } from 'react'
 
-describe('SemanticList', () => {
+describe('List', () => {
   it('renders its children inside an element with role list', () => {
     render(
-      <SemanticList>
-        <SemanticListItem>Item one</SemanticListItem>
-      </SemanticList>
+      <List>
+        <ListItem>Item one</ListItem>
+      </List>
     )
 
     const list = screen.getByRole('list')
@@ -17,19 +17,19 @@ describe('SemanticList', () => {
   })
 
   it('passes className through to the list element', () => {
-    render(<SemanticList className="custom-list">Content</SemanticList>)
+    render(<List className="custom-list">Content</List>)
 
     expect(screen.getByRole('list')).toHaveClass('custom-list')
   })
 
   it('passes other props such as style and arbitrary attributes through to the list element', () => {
     render(
-      <SemanticList
+      <List
         style={{ '--grid-min-width': '200px' } as CSSProperties}
         data-testid="grid-list"
       >
         Content
-      </SemanticList>
+      </List>
     )
 
     const list = screen.getByRole('list')
@@ -39,18 +39,18 @@ describe('SemanticList', () => {
   })
 
   it('keeps role="list" even if a caller passes a conflicting role prop', () => {
-    render(<SemanticList role="presentation">Content</SemanticList>)
+    render(<List role="presentation">Content</List>)
 
     expect(screen.getByRole('list')).toBeInTheDocument()
   })
 })
 
-describe('SemanticListItem', () => {
+describe('ListItem', () => {
   it('renders its children inside an element with role listitem', () => {
     render(
-      <SemanticList>
-        <SemanticListItem>Item content</SemanticListItem>
-      </SemanticList>
+      <List>
+        <ListItem>Item content</ListItem>
+      </List>
     )
 
     const item = screen.getByRole('listitem')
@@ -61,9 +61,9 @@ describe('SemanticListItem', () => {
 
   it('passes className through to the list item element', () => {
     render(
-      <SemanticList>
-        <SemanticListItem className="custom-item">Content</SemanticListItem>
-      </SemanticList>
+      <List>
+        <ListItem className="custom-item">Content</ListItem>
+      </List>
     )
 
     expect(screen.getByRole('listitem')).toHaveClass('custom-item')
@@ -71,9 +71,9 @@ describe('SemanticListItem', () => {
 
   it('passes other props such as arbitrary attributes through to the list item element', () => {
     render(
-      <SemanticList>
-        <SemanticListItem data-testid="grid-item">Content</SemanticListItem>
-      </SemanticList>
+      <List>
+        <ListItem data-testid="grid-item">Content</ListItem>
+      </List>
     )
 
     expect(screen.getByRole('listitem')).toHaveAttribute('data-testid', 'grid-item')
