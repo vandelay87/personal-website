@@ -19,17 +19,22 @@
   margin-bottom: 30px;
 }
 
-/* .header .heading (not bare `.heading`): raises specificity above
-   Typography's own `.heading1` — see RecipeList.module.css's `.header
-   .heading` for the same pattern/rationale. */
-.header .heading {
+/* Bare `.heading` override: Typography's own `.heading1` now lives in
+   `@layer component-defaults` (Typography.module.css, #263), so this plain
+   unlayered class deterministically wins without needing the old
+   descendant-selector trick — same de-scoping as RecipeList.module.css's
+   `.heading`. */
+.heading {
   font-size: clamp(28px, 4vw, 34px);
   font-weight: var(--font-weight-semibold);
   letter-spacing: -0.025em;
   margin: 0 0 6px;
 }
 
-.header .subtitle {
+/* Bare `.subtitle` override: Typography's own `.body` now lives in
+   `@layer component-defaults` (Typography.module.css, #263), same
+   de-scoping as `.heading` above. */
+.subtitle {
   font-size: 14.5px;
   color: var(--color-text-muted);
   margin: 0;
@@ -53,7 +58,10 @@
   margin-bottom: 18px;
 }
 
-.inviteCardHeader .inviteHeading {
+/* Bare `.inviteHeading` override: Typography's own `.heading2` now lives
+   in `@layer component-defaults` (Typography.module.css, #263), same
+   de-scoping as `.heading` above. */
+.inviteHeading {
   font-size: 17px;
   font-weight: var(--font-weight-semibold);
   letter-spacing: -0.015em;

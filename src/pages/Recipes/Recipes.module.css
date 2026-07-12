@@ -7,37 +7,26 @@
   --page-hero-pad-end: clamp(36px, 5vw, 52px);
 }
 
+/* `text.module.css`'s `.eyebrow`/`.pageHeading`/`.pageLead` variants now
+   live in `@layer component-defaults` (text.module.css, #263), so these
+   bare `composes:`-based classes deterministically win the tie against
+   the composed variant's own font-size/color without needing a separate,
+   higher-specificity descendant-selector rule — same de-scoping already
+   applied elsewhere in this epic (Input's `.field`, RecipeDetailView's
+   headings). */
 .eyebrow {
   composes: eyebrow from '../../styles/text.module.css';
-}
-
-.heading {
-  composes: pageHeading from '../../styles/text.module.css';
-}
-
-.intro {
-  composes: pageLead from '../../styles/text.module.css';
-}
-
-/* `composes` can't be combined with a descendant selector (CSS Modules
-   only allows it on a plain single-class rule), so the properties that
-   tie with Typography's own variant classes (`.caption`/`.heading1`/
-   `.bodyLarge` each set their own font-size/color) need a separate,
-   higher-specificity rule here rather than living inside the `composes`
-   blocks above — a bare `.eyebrow`/`.heading`/`.intro` class ties with
-   those variants (both single-class selectors on the same element),
-   leaving the winner dependent on stylesheet load order. Same root cause
-   fixed on Input's `.field` and RecipeDetailView's headings earlier. */
-.hero .eyebrow {
   font-size: 12px;
   color: var(--color-text-faint);
 }
 
-.hero .heading {
+.heading {
+  composes: pageHeading from '../../styles/text.module.css';
   font-size: var(--font-display-hero);
 }
 
-.hero .intro {
+.intro {
+  composes: pageLead from '../../styles/text.module.css';
   font-size: clamp(17px, 2.6vw, 19px);
   color: var(--color-text-muted);
 }
