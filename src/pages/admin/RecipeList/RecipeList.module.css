@@ -242,7 +242,10 @@
   }
 }
 
-/* ── Empty / loading / error states — shared box shape ────────────── */
+/* ── Empty / loading / error states — shared box shape from
+   stateBox.module.css. stateBox is imported directly in RecipeList.tsx
+   and composed in JS rather than via `composes:` here, so Rollup can
+   dedupe the shared rules across lazy admin chunks. ─────────────────── */
 
 .emptyBox {
   border: 1px dashed var(--color-border);

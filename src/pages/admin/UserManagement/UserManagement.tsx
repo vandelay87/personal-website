@@ -160,7 +160,7 @@ const UserManagement = () => {
   const renderBody = () => {
     if (loading) {
       return (
-        <div className={[stateBox.box, stateBox.loading].filter(Boolean).join(' ')}>
+        <div className={`${stateBox.box} ${stateBox.loading}`}>
           <Loading label="Loading users…" />
         </div>
       )
@@ -168,17 +168,12 @@ const UserManagement = () => {
 
     if (error) {
       return (
-        <div className={[stateBox.box, stateBox.error].filter(Boolean).join(' ')}>
-          <div className={[stateBox.icon, stateBox.iconError].filter(Boolean).join(' ')}>
-            {iconWarning}
-          </div>
+        <div className={`${stateBox.box} ${stateBox.error}`}>
+          <div className={`${stateBox.icon} ${stateBox.iconError}`}>{iconWarning}</div>
           <Typography variant="heading2" className={stateBox.heading}>
             Couldn&apos;t load users
           </Typography>
-          <Typography
-            variant="body"
-            className={[stateBox.body, styles.errorBody].filter(Boolean).join(' ')}
-          >
+          <Typography variant="body" className={`${stateBox.body} ${styles.errorBody}`}>
             Something went wrong reaching the server. Check your connection and try again.
           </Typography>
           <Button variant="outline" onClick={loadUsers} iconLeft={iconRetry}>

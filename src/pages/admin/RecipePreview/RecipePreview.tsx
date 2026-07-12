@@ -198,20 +198,12 @@ const RecipePreview: FC = () => {
   if (notFound || !recipe) {
     return (
       <main id={MAIN_LANDMARK_ID} tabIndex={-1} className={styles.main}>
-        <div className={[stateBox.box, styles.notFoundBox].filter(Boolean).join(' ')}>
-          <div className={[stateBox.icon, styles.notFoundIcon].filter(Boolean).join(' ')}>
-            {iconNotFound}
-          </div>
-          <Typography
-            variant="heading1"
-            className={[stateBox.heading, styles.notFoundHeading].filter(Boolean).join(' ')}
-          >
+        <div className={`${stateBox.box} ${styles.notFoundBox}`}>
+          <div className={`${stateBox.icon} ${styles.notFoundIcon}`}>{iconNotFound}</div>
+          <Typography variant="heading1" className={`${stateBox.heading} ${styles.notFoundHeading}`}>
             Recipe not found
           </Typography>
-          <Typography
-            variant="body"
-            className={[stateBox.body, styles.notFoundBody].filter(Boolean).join(' ')}
-          >
+          <Typography variant="body" className={`${stateBox.body} ${styles.notFoundBody}`}>
             This recipe may have been deleted, or the link is incorrect.
           </Typography>
           <Link
