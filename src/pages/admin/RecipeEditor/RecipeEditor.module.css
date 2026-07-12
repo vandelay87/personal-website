@@ -94,11 +94,12 @@
 
 /* Bare `.backLink` override: Link's own `.link` now lives in
    `@layer component-defaults` (Link.module.css, #263), so this plain
-   unlayered class deterministically wins without needing the old
-   descendant-selector trick — same mechanism as `.bannerAction` above.
-   `focusRing` (interactions.module.css) and `metaText` (text.module.css)
-   are composed in JS rather than via `composes:` here — see
-   `.timeoutSpinner` above for the shared-across-lazy-chunks rationale. */
+   unlayered class deterministically wins — same mechanism as
+   `.bannerAction` above.
+
+   Separately: `focusRing`/`metaText` are composed in JS rather than via
+   `composes:` here — see `.timeoutSpinner` above for the
+   shared-across-lazy-chunks rationale. */
 .backLink {
   margin-bottom: 20px;
   font-size: 12px;
