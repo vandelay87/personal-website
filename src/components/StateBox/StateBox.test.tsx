@@ -25,7 +25,7 @@ describe('StateBox', () => {
 
       expect(screen.getByTestId('error-icon')).toBeInTheDocument()
       expect(
-        screen.getByRole('heading', { name: "Couldn't load recipes" })
+        screen.getByRole('heading', { level: 2, name: "Couldn't load recipes" })
       ).toBeInTheDocument()
       expect(
         screen.getByText('Something went wrong reaching the server.')

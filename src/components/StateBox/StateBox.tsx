@@ -4,7 +4,6 @@ import Typography from '@components/Typography'
 import type { FC, ReactNode } from 'react'
 
 import stateBox from '../../styles/stateBox.module.css'
-import styles from './StateBox.module.css'
 
 export interface StateBoxAction {
   label: string
@@ -39,7 +38,7 @@ const StateBox: FC<StateBoxProps> = (props) => {
       <Typography variant="heading2" className={stateBox.heading}>
         {heading}
       </Typography>
-      <Typography variant="body" className={`${stateBox.body} ${styles.errorBody}`}>
+      <Typography variant="body" className={stateBox.body}>
         {body}
       </Typography>
       {action && (
