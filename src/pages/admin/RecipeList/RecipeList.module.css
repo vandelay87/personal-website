@@ -173,9 +173,18 @@
 /* `.actionButton` carries no CSS of its own — `focusRing`
    (interactions.module.css) is composed in JS instead of via
    `composes:` — see interactions.module.css's own header comment for
-   why. The descendant-scoped rule below carries the
-   specificity-tie fix (same rationale as `.header .newButton` above)
-   and everything else. */
+   why. This class is applied to both `<Link>` (Edit/Preview, no
+   `variant` prop) and native `<button>` (Publish/Delete) elements.
+   Unlike the rest of this epic's `@layer component-defaults`
+   de-scoping (#263/#326/#328/#330/#333/#334), this one genuinely still
+   needs the `.rowActions`-scoped compound selector: Link's own default
+   `tone="inherit"` class (`.inherit`, Link.module.css) is deliberately
+   left UNLAYERED (only `.link`/`.ghost`/`.solid` are layered), so a
+   bare `.actionButton` would tie in specificity with `.inherit` — both
+   unlayered, single-class selectors — leaving the color winner
+   dependent on unguaranteed source/bundle order. The compound form's
+   higher specificity is what reliably wins here; it's not a leftover
+   of the old pre-#263 convention. */
 .rowActions .actionButton {
   /* display/align-items/font-family are already inherited from Link's own
      `.link` for Edit/Preview, but the native Publish/Delete `<button>`s
