@@ -45,6 +45,22 @@ describe('StepList', () => {
     expect(textareas[1]).toHaveValue('Mix ingredients')
   })
 
+  it('exposes list/listitem roles for the rendered rows (Safari/VoiceOver list semantics)', () => {
+    const onChange = vi.fn()
+    render(
+      <StepList
+        steps={twoSteps}
+        onChange={onChange}
+        getToken={mockGetToken}
+        recipeId="test-recipe-id"
+        slug="beans-on-toast"
+      />
+    )
+
+    expect(screen.getByRole('list')).toBeInTheDocument()
+    expect(screen.getAllByRole('listitem')).toHaveLength(2)
+  })
+
   it('step numbers auto-update', () => {
     const onChange = vi.fn()
     render(

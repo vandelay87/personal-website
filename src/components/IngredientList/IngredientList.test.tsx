@@ -33,6 +33,14 @@ describe('IngredientList', () => {
     expect(itemInputs[1]).toHaveValue('Sugar')
   })
 
+  it('exposes list/listitem roles for the rendered rows (Safari/VoiceOver list semantics)', () => {
+    const onChange = vi.fn()
+    render(<IngredientList ingredients={twoIngredients} onChange={onChange} />)
+
+    expect(screen.getByRole('list')).toBeInTheDocument()
+    expect(screen.getAllByRole('listitem')).toHaveLength(2)
+  })
+
   it('"Add ingredient" button adds a new empty row', async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
