@@ -37,6 +37,12 @@ describe('SemanticList', () => {
     expect(list).toHaveStyle('--grid-min-width: 200px')
     expect(list).toHaveAttribute('data-testid', 'grid-list')
   })
+
+  it('keeps role="list" even if a caller passes a conflicting role prop', () => {
+    render(<SemanticList role="presentation">Content</SemanticList>)
+
+    expect(screen.getByRole('list')).toBeInTheDocument()
+  })
 })
 
 describe('SemanticListItem', () => {
