@@ -79,12 +79,11 @@
   flex-wrap: wrap;
 }
 
-/* .bannerLeft .backLink (not bare): raises specificity above the shared
-   Link component's own `.link` (color: var(--color-link)) — a bare
-   `.backLink` ties with it, same root cause as the Typography fixes
-   throughout this epic (see RecipeDetailView.module.css's `.article
-   .backLink`). */
-.bannerLeft .backLink {
+/* Bare `.backLink` override: Link's own `.link` now lives in
+   `@layer component-defaults` (Link.module.css, #263), so this plain
+   unlayered class deterministically wins without needing the old
+   descendant-selector trick. */
+.backLink {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
@@ -108,8 +107,12 @@
 }
 
 /* .bannerLeft .bannerMessage (not bare): raises specificity above
-   Typography's own `.body` (font-size/font-weight/color) — same tie-fix
-   pattern as `.backLink` above. */
+   Typography's own `.body` (font-size/font-weight/color) — a bare
+   `.bannerMessage` would tie with it. Unlike `.backLink` above (now a
+   bare override against Link's already-layered `.link`), Typography's
+   `.body` isn't in `@layer component-defaults` yet, so this rule still
+   needs the descendant-selector specificity bump; tracked as separate
+   follow-up work. */
 .bannerLeft .bannerMessage {
   margin: 0;
   font-size: var(--font-size-sm-plus);
@@ -130,11 +133,13 @@
    selector (`.bannerActions .editLink`, not bare `.editLink`) to raise
    specificity above the shared Link/Button components' own base classes —
    same specificity-tie fix documented throughout this epic (see
-   `.bannerLeft .backLink` above). Ghost/solid coloring, transition and
-   hover already come from Link's own `.ghost`/`.solid` via the `variant`
-   prop alone (RecipePreview.tsx) — no `composes:` needed here, this local
-   class only supplies this consumer's own size/shape deltas as a plain
-   unlayered override. */
+   `.bannerLeft .bannerMessage` above; `.backLink` no longer needs this
+   trick now that Link's `.link` lives in `@layer component-defaults`, but
+   Button's own base classes here are still unlayered). Ghost/solid
+   coloring, transition and hover already come from Link's own
+   `.ghost`/`.solid` via the `variant` prop alone (RecipePreview.tsx) — no
+   `composes:` needed here, this local class only supplies this consumer's
+   own size/shape deltas as a plain unlayered override. */
 .editLink,
 .viewLink {
   font-size: 13px;
