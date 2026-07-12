@@ -12,8 +12,9 @@ import {
   useImageProcessingPoll,
   type ImageReadyUpdate,
 } from '@hooks/useImageProcessingPoll'
+import { useMeasuredHeightVar } from '@hooks/useMeasuredHeightVar'
 import { applyStepReadiness, type Recipe } from '@models/recipe'
-import { useCallback, useEffect, useMemo, useState, type FC } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type FC } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import { MAIN_LANDMARK_ID } from '../../../constants/mainLandmark'
@@ -121,6 +122,9 @@ const RecipePreview: FC = () => {
   const { id } = useParams<{ id: string }>()
   const { getAccessToken, logout } = useAuth()
   const navigate = useNavigate()
+  const bannerRef = useRef<HTMLDivElement>(null)
+
+  useMeasuredHeightVar(bannerRef, '--banner-height')
 
   const [recipe, setRecipe] = useState<Recipe | undefined>()
   const [loading, setLoading] = useState(true)
@@ -228,6 +232,7 @@ const RecipePreview: FC = () => {
   return (
     <div className={styles.container}>
       <div
+        ref={bannerRef}
         className={[styles.banner, bannerToneClassName].join(' ')}
         role="status"
         aria-live="polite"
