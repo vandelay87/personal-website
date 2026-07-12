@@ -33,13 +33,11 @@
   padding-block-start: 3px;
 }
 
-/* .content .text (not a bare `.text` rule): raises specificity above
-   Typography's own `.body` variant (font-size/line-height/color) — a
-   bare `.text` ties with it (both single-class selectors on the same
-   element via Typography's `variant="body" className={styles.text}`),
-   leaving the winner dependent on stylesheet load order. Same root
-   cause as the fixes in RecipeDetailView.module.css. */
-.content .text {
+/* Bare `.text` override: Typography's own `.body` now lives in
+   `@layer component-defaults` (Typography.module.css, #263), so this plain
+   unlayered class deterministically wins without needing the old
+   descendant-selector trick. */
+.text {
   font-size: 16.5px;
   line-height: 1.7;
   color: var(--color-text);

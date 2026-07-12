@@ -106,14 +106,10 @@
   color: var(--color-success);
 }
 
-/* .bannerLeft .bannerMessage (not bare): raises specificity above
-   Typography's own `.body` (font-size/font-weight/color) — a bare
-   `.bannerMessage` would tie with it. Typography's `.body` is already
-   layered in `@layer component-defaults` too (same mechanism as
-   `.backLink` above), so this selector is equally eligible for the same
-   de-scoping — left untouched here since this issue is scoped to
-   Link-backed selectors only; tracked in #334. */
-.bannerLeft .bannerMessage {
+/* Bare `.bannerMessage` override: Typography's own `.body` now lives in
+   `@layer component-defaults` (Typography.module.css, #263), same
+   de-scoping already applied to `.backLink` above. */
+.bannerMessage {
   margin: 0;
   font-size: var(--font-size-sm-plus);
   font-weight: var(--font-weight-medium);
@@ -141,8 +137,9 @@
    `.bannerActions .publishButton` stays compound (`.bannerActions`-
    prefixed, not bare) because Button.module.css has no `@layer` of its
    own — its base classes are still unlayered, so this selector still
-   needs the extra specificity to win the tie (same trick documented for
-   `.bannerLeft .bannerMessage` above).
+   needs the extra specificity to win the tie (the same descendant-
+   selector trick `.bannerMessage` above needed before Typography's
+   `.body` was layered in #263).
 
    Ghost/solid coloring, transition and hover already come from Link's
    own `.ghost`/`.solid` via the `variant` prop alone (RecipePreview.tsx)
