@@ -1,6 +1,7 @@
 import Tag from '@components/Tag'
 import { useId, useState, type FC, type KeyboardEvent } from 'react'
 
+import interactions from '../../styles/interactions.module.css'
 import styles from './TagInput.module.css'
 
 export interface TagInputProps {
@@ -110,7 +111,7 @@ const TagInput: FC<TagInputProps> = ({
           value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          className={styles.input}
+          className={`${interactions.fieldFocusRing} ${styles.input}`}
           placeholder={placeholder}
         />
 
@@ -126,7 +127,7 @@ const TagInput: FC<TagInputProps> = ({
                 id={`${listboxId}-option-${index}`}
                 role="option"
                 aria-selected={index === highlightedIndex}
-                className={styles.option}
+                className={`${interactions.chipHover} ${styles.option}`}
                 onClick={() => addTag(tag)}
               >
                 {tag}

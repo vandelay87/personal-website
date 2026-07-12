@@ -12,8 +12,10 @@
   background-color: var(--color-surface);
 }
 
+/* `surfaceHover`/`focusRing` (interactions.module.css) are composed in
+   JS (see Card.tsx) rather than via `composes:` here — see
+   interactions.module.css's own header comment for why. */
 .hover {
-  composes: surfaceHover from '../../styles/interactions.module.css';
   transition: background-color var(--duration-fast) var(--easing-default);
 }
 
@@ -24,7 +26,6 @@
 }
 
 .asButton {
-  composes: focusRing from '../../styles/interactions.module.css';
   width: 100%;
   font: inherit;
   color: inherit;

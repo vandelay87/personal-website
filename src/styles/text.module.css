@@ -3,7 +3,14 @@
    `composes: x from '../../styles/interactions.module.css'` pattern used
    for interaction utilities (see interactions.module.css) — consuming
    files `composes` from here (relative path from a page two levels down
-   in src/pages/<Name>/) rather than duplicating the declarations. */
+   in src/pages/<Name>/) rather than duplicating the declarations.
+
+   Same lazy-chunk-duplication caveat as interactions.module.css: when a
+   new consumer is one of two or more independently `lazy()`-loaded
+   chunks with no eager common ancestor, `composes` here duplicates this
+   file's rules per chunk instead of sharing them — import this file
+   directly as a JS module and compose classNames in JS instead. See
+   interactions.module.css's own header comment for the full rationale. */
 
 /* Mono, uppercase, tracked, faint — section/hero kicker text. Pair with
    `Typography` (e.g. `variant="caption" as="p"` or `as="h2"` for an

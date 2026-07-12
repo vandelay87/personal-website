@@ -11,9 +11,10 @@
 }
 
 /* ── Empty state — cover (large dropzone) ─────────────────────── */
+/* `focusRing`/`uploadHover` (interactions.module.css) are composed in JS
+   (see ImageUpload.tsx) rather than via `composes:` here — see
+   interactions.module.css's own header comment for why. */
 .dropzone {
-  composes: focusRing from '../../styles/interactions.module.css';
-  composes: uploadHover from '../../styles/interactions.module.css';
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -93,8 +94,8 @@
    top-right icon-button position/shape, kept non-destructive in tone
    (not the design's literal danger/trash treatment, since it doesn't
    delete anything). */
+/* `focusRing` composed in JS — see `.dropzone` above for rationale. */
 .replaceButton {
-  composes: focusRing from '../../styles/interactions.module.css';
   position: absolute;
   top: 10px;
   right: 10px;

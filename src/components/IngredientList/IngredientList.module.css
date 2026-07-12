@@ -50,20 +50,14 @@
   gap: var(--space-2);
 }
 
-/* Bare single-class rules carrying `composes` — CSS Modules only allows
-   `composes` on a plain single local-class selector, not a compound/
-   descendant one. `.moveAction`/`.removeAction` are additive classes
-   (joined with `.actionButton` in the component) so each icon button
-   picks up exactly one hover treatment: reordering buttons get the
-   neutral hover, remove gets the danger hover — never both on the same
-   element, so there's no same-specificity `:hover` rule to referee. */
-.moveAction {
-  composes: iconButtonHover from '../../styles/interactions.module.css';
-}
-
-.removeAction {
-  composes: dangerIconButtonHover from '../../styles/interactions.module.css';
-}
+/* `iconButtonHover`/`dangerIconButtonHover` (interactions.module.css)
+   are composed directly in JS (see IngredientList.tsx) instead of via
+   local `.moveAction`/`.removeAction` classes — see
+   interactions.module.css's own header comment for why. Each icon
+   button still picks up exactly one hover treatment: reordering buttons
+   get the neutral hover, remove gets the danger hover — never both on
+   the same element, so there's no same-specificity `:hover` rule to
+   referee. */
 
 /* Descendant-scoped (not a bare `.actionButton` rule) to safely out-rank
    Button's own `.button`/`.outline` single-class selectors regardless of

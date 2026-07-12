@@ -7,7 +7,11 @@ import { useReorderableList } from '@hooks/useReorderableList'
 import { stepImageType, type RecipeImage, type Step } from '@models/recipe'
 import { useCallback, type FC } from 'react'
 
+import interactions from '../../styles/interactions.module.css'
 import styles from './StepList.module.css'
+
+const moveActionClassName = `${interactions.iconButtonHover} ${styles.actionButton}`
+const removeActionClassName = `${interactions.dangerIconButtonHover} ${styles.actionButton}`
 
 export interface StepListProps {
   steps: Step[]
@@ -93,7 +97,7 @@ const StepList: FC<StepListProps> = ({
                   ariaLabel={`Move up step ${index + 1}`}
                   variant="outline"
                   disabled={index === 0}
-                  className={`${styles.actionButton} ${styles.moveAction}`}
+                  className={moveActionClassName}
                 >
                   {iconChevronUp}
                 </Button>
@@ -102,7 +106,7 @@ const StepList: FC<StepListProps> = ({
                   ariaLabel={`Move down step ${index + 1}`}
                   variant="outline"
                   disabled={index === steps.length - 1}
-                  className={`${styles.actionButton} ${styles.moveAction}`}
+                  className={moveActionClassName}
                 >
                   {iconChevronDown}
                 </Button>
@@ -111,7 +115,7 @@ const StepList: FC<StepListProps> = ({
                   ariaLabel={`Remove step ${index + 1}`}
                   variant="outline"
                   disabled={steps.length <= 1}
-                  className={`${styles.actionButton} ${styles.removeAction}`}
+                  className={removeActionClassName}
                 >
                   {iconRemove}
                 </Button>

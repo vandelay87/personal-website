@@ -63,10 +63,11 @@
    radius/padding) is shared byte-for-byte with Input and Textarea's
    `.field` via the `field` composable — see
    src/styles/formField.module.css for the full rationale (issue #244),
-   including why transition stays local. */
+   including why transition stays local. `fieldFocusRing`
+   (interactions.module.css) is composed in JS instead (see TagInput.tsx)
+   — see interactions.module.css's own header comment for why. */
 .input {
   composes: field from '../../styles/formField.module.css';
-  composes: fieldFocusRing from '../../styles/interactions.module.css';
   transition: border-color var(--duration-fast) var(--easing-default);
 }
 
@@ -86,8 +87,9 @@
   list-style: none;
 }
 
+/* `chipHover` (interactions.module.css) composed in JS — see `.input`
+   above for rationale. */
 .option {
-  composes: chipHover from '../../styles/interactions.module.css';
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
   letter-spacing: var(--tracking-meta);

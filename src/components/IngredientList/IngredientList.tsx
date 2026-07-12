@@ -5,7 +5,11 @@ import { useReorderableList } from '@hooks/useReorderableList'
 import type { Ingredient } from '@models/recipe'
 import type { FC } from 'react'
 
+import interactions from '../../styles/interactions.module.css'
 import styles from './IngredientList.module.css'
+
+const moveActionClassName = `${interactions.iconButtonHover} ${styles.actionButton}`
+const removeActionClassName = `${interactions.dangerIconButtonHover} ${styles.actionButton}`
 
 export interface IngredientListProps {
   ingredients: Ingredient[]
@@ -75,7 +79,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
                 ariaLabel={`Move up ingredient ${index + 1}`}
                 variant="outline"
                 disabled={index === 0}
-                className={`${styles.actionButton} ${styles.moveAction}`}
+                className={moveActionClassName}
               >
                 {iconChevronUp}
               </Button>
@@ -84,7 +88,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
                 ariaLabel={`Move down ingredient ${index + 1}`}
                 variant="outline"
                 disabled={index === ingredients.length - 1}
-                className={`${styles.actionButton} ${styles.moveAction}`}
+                className={moveActionClassName}
               >
                 {iconChevronDown}
               </Button>
@@ -93,7 +97,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
                 ariaLabel={`Remove ingredient ${index + 1}`}
                 variant="outline"
                 disabled={ingredients.length <= 1}
-                className={`${styles.actionButton} ${styles.removeAction}`}
+                className={removeActionClassName}
               >
                 {iconRemove}
               </Button>
