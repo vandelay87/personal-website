@@ -1,6 +1,7 @@
 import Button from '@components/Button'
 import { iconChevronDown, iconChevronUp, iconPlus, iconRemove } from '@components/icons'
 import Input from '@components/Input'
+import List, { ListItem } from '@components/List'
 import { useReorderableList } from '@hooks/useReorderableList'
 import type { Ingredient } from '@models/recipe'
 import type { FC } from 'react'
@@ -46,9 +47,9 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
 
   return (
     <>
-      <ul className={styles.container}>
+      <List className={styles.container}>
         {ingredients.map((ingredient, index) => (
-          <li key={index} className={styles.row}>
+          <ListItem key={index} className={styles.row}>
             <div className={styles.quantityField}>
               <Input
                 ariaLabel={`Ingredient ${index + 1} quantity`}
@@ -102,9 +103,9 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
                 {iconRemove}
               </Button>
             </div>
-          </li>
+          </ListItem>
         ))}
-      </ul>
+      </List>
       <Button onClick={handleAdd} variant="outline" iconLeft={iconPlus} className={styles.addButton}>
         Add ingredient
       </Button>
