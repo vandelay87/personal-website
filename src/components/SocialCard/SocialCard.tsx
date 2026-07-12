@@ -1,3 +1,4 @@
+import List, { ListItem } from '@components/List'
 import Typography from '@components/Typography'
 import { FC, JSX } from 'react'
 import { SOCIAL_LINKS_WITH_EMAIL_SUBJECT, type SocialLinkName } from '../../constants/socialLinks'
@@ -30,11 +31,9 @@ const SocialCard: FC = () => {
       <Typography variant="heading3" as="h2" id="social-heading" className={styles.heading}>
         Get in touch
       </Typography>
-      {/* eslint-disable-next-line jsx-a11y/no-redundant-roles -- .list sets list-style: none, which drops implicit list semantics in Safari/VoiceOver; role="list" (paired with role="listitem" on each <li>) restores it */}
-      <ul className={styles.list} role="list">
+      <List className={styles.list}>
         {SOCIAL_LINKS_WITH_EMAIL_SUBJECT.map(({ name, href }) => (
-          // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above
-          <li key={name} role="listitem">
+          <ListItem key={name}>
             <a
               href={href}
               target="_blank"
@@ -46,9 +45,9 @@ const SocialCard: FC = () => {
               <span className="sr-only">{name}</span>
               {ICONS_BY_NAME[name]}
             </a>
-          </li>
+          </ListItem>
         ))}
-      </ul>
+      </List>
     </article>
   )
 }

@@ -1,3 +1,4 @@
+import List, { ListItem } from '@components/List'
 import Loading from '@components/Loading'
 import { FC } from 'react'
 import styles from './FileMeta.module.css'
@@ -22,21 +23,17 @@ const FileMeta: FC<FileMetaProps> = ({ fileInfo, hasError }) => {
     const { type, size, date } = fileInfo
 
     return (
-      // eslint-disable-next-line jsx-a11y/no-redundant-roles -- .list sets list-style: none, which drops implicit list semantics in Safari/VoiceOver; role="list" (paired with role="listitem" on each <li>) restores it
-      <ul className={styles.list} role="list">
-        {/* eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above */}
-        <li role="listitem">{`${type} format`}</li>
+      <List className={styles.list}>
+        <ListItem>{`${type} format`}</ListItem>
         <li aria-hidden="true">•</li>
-        {/* eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above */}
-        <li role="listitem">{size}</li>
+        <ListItem>{size}</ListItem>
         {date && (
           <>
             <li aria-hidden="true">•</li>
-            {/* eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above */}
-            <li role="listitem">Updated {date}</li>
+            <ListItem>Updated {date}</ListItem>
           </>
         )}
-      </ul>
+      </List>
     )
   }
 

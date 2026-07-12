@@ -1,3 +1,4 @@
+import List, { ListItem } from '@components/List'
 import type { FC, ReactNode } from 'react'
 
 import styles from './FileTree.module.css'
@@ -43,16 +44,14 @@ const renderNodes = (nodes: TreeNode[], isRoot: boolean): ReactNode => {
   if (nodes.length === 0) return null
 
   return (
-    // eslint-disable-next-line jsx-a11y/no-redundant-roles -- .rootList/.list set list-style: none, which drops implicit list semantics in Safari/VoiceOver; role="list" (paired with role="listitem" on each <li>) restores it
-    <ul className={isRoot ? styles.rootList : styles.list} role="list">
+    <List className={isRoot ? styles.rootList : styles.list}>
       {nodes.map((node, index) => (
-        // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above
-        <li key={`${node.name}-${index}`} className={styles.item} role="listitem">
+        <ListItem key={`${node.name}-${index}`} className={styles.item}>
           <span><span aria-hidden="true">{node.isFolder ? '📁 ' : '📄 '}</span>{node.name}</span>
           {node.children.length > 0 && renderNodes(node.children, false)}
-        </li>
+        </ListItem>
       ))}
-    </ul>
+    </List>
   )
 }
 

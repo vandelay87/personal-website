@@ -1,3 +1,4 @@
+import List, { ListItem } from '@components/List'
 import type { Ingredient } from '@models/recipe'
 import { useState, type FC } from 'react'
 import styles from './RecipeIngredients.module.css'
@@ -87,13 +88,11 @@ const RecipeIngredients: FC<RecipeIngredientsProps> = ({ ingredients, slug }) =>
   }
 
   return (
-    // eslint-disable-next-line jsx-a11y/no-redundant-roles -- .list sets list-style: none, which drops implicit list semantics in Safari/VoiceOver; role="list" (paired with role="listitem" on each <li>) restores it
-    <ul className={styles.list} role="list">
+    <List className={styles.list}>
       {ingredients.map((ingredient, idx) => {
         const key = `${ingredient.item}-${idx}`
         return (
-          // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above
-          <li key={key} className={styles.item} role="listitem">
+          <ListItem key={key} className={styles.item}>
             <label className={styles.row}>
               <input
                 type="checkbox"
@@ -106,10 +105,10 @@ const RecipeIngredients: FC<RecipeIngredientsProps> = ({ ingredients, slug }) =>
                 {ingredient.quantity} {ingredient.unit}
               </span>
             </label>
-          </li>
+          </ListItem>
         )
       })}
-    </ul>
+    </List>
   )
 }
 

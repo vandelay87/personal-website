@@ -1,3 +1,4 @@
+import List, { ListItem } from '@components/List'
 import Tag from '@components/Tag'
 import Typography from '@components/Typography'
 import type { FC } from 'react'
@@ -107,11 +108,9 @@ const Blog = () => {
           </button>
         </div>
       ) : (
-        // eslint-disable-next-line jsx-a11y/no-redundant-roles -- .postList sets list-style: none, which drops implicit list semantics in Safari/VoiceOver; role="list" (paired with role="listitem" on each <li>) restores it
-        <ul className={styles.postList} role="list">
+        <List className={styles.postList}>
           {filteredPosts.map((post) => (
-            // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above
-            <li key={post.slug} role="listitem">
+            <ListItem key={post.slug}>
               <article className={styles.postCard}>
                 <RouterLink to={`/blog/${post.slug}`} className={styles.postLink}>
                   <div className={styles.meta}>
@@ -129,19 +128,17 @@ const Blog = () => {
                   </div>
                   <p className={styles.description}>{post.description}</p>
                 </RouterLink>
-                {/* eslint-disable-next-line jsx-a11y/no-redundant-roles -- .tags sets list-style: none, which drops implicit list semantics in Safari/VoiceOver; role="list" (paired with role="listitem" below) restores it */}
-                <ul className={styles.tags} role="list">
+                <List className={styles.tags}>
                   {post.tags.map((tag) => (
-                    // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above
-                    <li key={tag} role="listitem">
+                    <ListItem key={tag}>
                       <TagChip tag={tag} activeTag={activeTag} onSelect={handleTagClick} />
-                    </li>
+                    </ListItem>
                   ))}
-                </ul>
+                </List>
               </article>
-            </li>
+            </ListItem>
           ))}
-        </ul>
+        </List>
       )}
     </>
   )
