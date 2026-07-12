@@ -127,29 +127,31 @@
 }
 
 /* ── Pill buttons ──────────────────────────────────────────────────
-   .editLink / .viewLink / .publishButton (below) and .notFoundBackLink
-   (further down) are four small action buttons sharing the same pill
-   shape (9px radius, 7px icon/label gap) — grouped via its own compound
-   selector (`.bannerActions .editLink`, not bare `.editLink`) to raise
-   specificity above the shared Link/Button components' own base classes —
-   same specificity-tie fix documented throughout this epic (see
-   `.bannerLeft .bannerMessage` above; `.backLink` no longer needs this
-   trick now that Link's `.link` lives in `@layer component-defaults`, but
-   Button's own base classes here are still unlayered). Ghost/solid
-   coloring, transition and hover already come from Link's own
-   `.ghost`/`.solid` via the `variant` prop alone (RecipePreview.tsx) — no
-   `composes:` needed here, this local class only supplies this consumer's
-   own size/shape deltas as a plain unlayered override. */
+   .editLink / .viewLink (below) and .notFoundBackLink (further down)
+   are Link-backed ghost/solid pill buttons; .publishButton (below) is
+   the one Button-backed pill among them. All four share the same pill
+   shape (9px radius, 7px icon/label gap).
+
+   .editLink/.viewLink/.notFoundBackLink are bare, unlayered overrides
+   now: Link's own `.link`/`.ghost`/`.solid` base classes already live in
+   `@layer component-defaults` (Link.module.css, #263), so a bare class
+   here deterministically wins without the old descendant-selector
+   trick — same de-scoping already applied to `.backLink` above.
+
+   `.bannerActions .publishButton` stays compound (`.bannerActions`-
+   prefixed, not bare) because Button.module.css has no `@layer` of its
+   own — its base classes are still unlayered, so this selector still
+   needs the extra specificity to win the tie (same trick documented for
+   `.bannerLeft .bannerMessage` above).
+
+   Ghost/solid coloring, transition and hover already come from Link's
+   own `.ghost`/`.solid` via the `variant` prop alone (RecipePreview.tsx)
+   — no `composes:` needed here, these local classes only supply each
+   consumer's own size/shape deltas as plain overrides. */
 .editLink,
 .viewLink {
   font-size: 13px;
   padding: 8px 15px;
-}
-
-.bannerActions .editLink,
-.bannerActions .viewLink,
-.bannerActions .publishButton,
-.notFoundBox .notFoundBackLink {
   /* 9px: design literal — --radius-md (10px) is the nearest token but is
      1px off. */
   border-radius: 9px;
@@ -160,11 +162,14 @@
    `.sm` padding, font-size and border-radius are replaced here; Button's
    `solid` variant colors already match the design's `.banner-solid`
    exactly, and its own transition (Button.module.css's `.button`) is left
-   untouched, so this rule stays out of the ghost-pill transition group
-   above. */
+   untouched, so this rule stays out of the ghost-pill group above. */
 .bannerActions .publishButton {
   padding: 8px 15px;
   font-size: 13px;
+  /* 9px: design literal — --radius-md (10px) is the nearest token but is
+     1px off. */
+  border-radius: 9px;
+  gap: 7px;
 }
 
 /* ── Main landmark ─────────────────────────────────────────────────────
@@ -243,10 +248,13 @@
   margin: 0 0 26px;
 }
 
-/* Ghost coloring/transition/hover come from Link's own `.ghost` via the
-   `variant="ghost"` prop alone, same as `.editLink` in the "Pill buttons"
+/* Bare `.notFoundBackLink` override: Link's own `.link`/`.ghost` base
+   classes already live in `@layer component-defaults` (Link.module.css,
+   #263), same de-scoping as `.editLink`/`.viewLink` in the "Pill buttons"
    group above — no `composes:` needed, only the shape/size differ here. */
 .notFoundBackLink {
   font-size: 14px;
   padding: 10px 18px;
+  border-radius: 9px;
+  gap: 7px;
 }
