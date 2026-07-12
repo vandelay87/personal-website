@@ -14,6 +14,7 @@
     "build:prod": "cp public/robots.prod.txt public/robots.txt && pnpm build:client && pnpm build:server && cp dist/client/index.html dist/server/index.html",
     "build:dev": "cp public/robots.dev.txt public/robots.txt && vite build",
     "lint": "eslint .",
+    "check:descendant-selectors": "node scripts/check-descendant-selectors.ts",
     "preview": "vite preview",
     "format": "prettier --write . && eslint --fix .",
     "test": "vitest run",

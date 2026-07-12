@@ -31,6 +31,10 @@ To write a new PRD, copy `docs/prds/template.md` and fill it in.
 - Site images (cards, hero) live in `src/assets/` — imported via Vite, get hashed filenames and responsive srcSet
 - Blog post images live in `public/images/blog/` — referenced by URL string in MDX, served as-is, no Vite processing. Optimise manually before adding.
 
+## Greppable gates
+
+- `pnpm check:descendant-selectors` (`scripts/check-descendant-selectors.ts`, runs in CI after Lint) — flags stale `.parent .child` CSS descendant-selector specificity workarounds against Typography/Link's `variant` prop. These were only ever needed to out-specificity a bare override className before the variant's base rule moved into `@layer component-defaults` (an unlayered rule always beats a layered one, so the extra specificity buys nothing once that happens) — manually rediscovered and fixed across issues #263–#336. JSX-aware: only flags a `.foo .Y` selector when the same JSX tag actually applies both `variant="X"` and `className={styles.Y}` and `X` is confirmed inside the layer, so it doesn't false-positive on coincidental class-name collisions (e.g. Callout's own `.label`) or on Link's default `tone` classes (deliberately unlayered, no `variant` prop passed). Scoped to the `variant`-prop pattern only — the `composes:`-based tie in `text.module.css` is a known gap, not handled.
+
 ## Workflow
 
 - When completing issues that involve CSS, styling, or visual changes, use the `frontend-design` skill for implementation.
