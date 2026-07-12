@@ -5,7 +5,7 @@ import styles from './Grid.module.css'
 interface GridProps {
   children: ReactNode
   columns?: 1 | 2 | 3 | 4
-  minWidth?: string
+  minWidth?: 'sm' | 'md'
   className?: string
 }
 
@@ -14,6 +14,11 @@ const columnClassMap: Record<NonNullable<GridProps['columns']>, string> = {
   2: styles.cols2,
   3: styles.cols3,
   4: styles.cols4,
+}
+
+const minWidthVarMap: Record<NonNullable<GridProps['minWidth']>, string> = {
+  sm: 'var(--grid-min-sm)',
+  md: 'var(--grid-min-md)',
 }
 
 const Grid: FC<GridProps> = ({
@@ -31,7 +36,7 @@ const Grid: FC<GridProps> = ({
     .join(' ')
 
   const gridStyle = minWidth
-    ? ({ '--grid-min-width': minWidth } as CSSProperties)
+    ? ({ '--grid-min-width': minWidthVarMap[minWidth] } as CSSProperties)
     : undefined
 
   return (
