@@ -90,7 +90,7 @@
   gap: 7px; /* no --space-* token lands on 7px (--space-1=4px, --space-2=8px) */
 }
 
-/* Bare `.footnote` override: Typography's own `caption` variant now lives in
+/* Bare `.footnote` override: Typography's own `.caption` now lives in
    `@layer component-defaults` (Typography.module.css, #263), so this plain
    unlayered class deterministically wins without needing the old
    descendant-selector trick. Same mechanism as `.heading`/`.subheading`
@@ -104,7 +104,7 @@
   text-align: center;
 }
 
-/* Bare `.belowCard` override: Typography's own `caption` variant now lives in
+/* Bare `.belowCard` override: Typography's own `.caption` now lives in
    `@layer component-defaults` (Typography.module.css, #263), so this plain
    unlayered class deterministically wins without needing the old
    descendant-selector trick. Same mechanism as `.heading`/`.subheading`
