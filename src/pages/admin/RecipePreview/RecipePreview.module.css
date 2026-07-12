@@ -180,19 +180,17 @@
 
 /* Applied only to the loaded-recipe state's `.main`, where the sticky
    status banner precedes it in normal flow. SC 2.4.11: reserves room
-   above the landmark roughly equal to the banner's own rendered height
-   (measured ~64.5px: 13px block padding either side + the 32px
-   ThemeToggle icon-button plus border), so the banner — pinned via
-   `position: sticky` — never fully covers focus/scroll landing here or
-   on a near-top descendant. `--space-16` (64px) is the same token
-   Layout.module.css/AdminLayout.module.css already use for this exact
-   purpose, sized for Header instead — coincidentally near-identical here.
-   The loading/not-found states render no banner above them at all (Admin
+   above the landmark equal to the banner's live-measured rendered height
+   (`--banner-height`, kept in sync by a ResizeObserver on the banner
+   element — same live-measurement pattern as Header's --header-height),
+   so the banner — pinned via `position: sticky` — never fully covers
+   focus/scroll landing here or on a near-top descendant. The
+   loading/not-found states render no banner above them at all (Admin
    Recipe Preview.dc.html gates the banner behind the same `isRecipe`
    check as the loaded article), so plain `.main` alone is correct there —
    there is nothing sticky left to obscure. */
 .mainWithBanner {
-  scroll-margin-block-start: var(--space-16);
+  scroll-margin-block-start: var(--banner-height);
 }
 
 .stateWrapper {
