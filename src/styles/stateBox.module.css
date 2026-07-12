@@ -104,14 +104,6 @@
     line-height: 1.6;
     color: var(--color-text-muted);
     margin: 0 0 24px;
-    max-width: 36ch;
-  }
-
-  /* RecipeList's and UserManagement's error state both independently
-     widened past the 36ch default — folded into StateBox's only
-     consumer of `.error`, scoped so other `.body` usages (e.g. the
-     `.loading` state) keep the 36ch default. */
-  .error .body {
     max-width: 38ch;
   }
 }

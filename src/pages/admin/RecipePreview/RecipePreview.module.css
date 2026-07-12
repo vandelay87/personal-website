@@ -236,7 +236,6 @@
 .notFoundBody {
   font-size: 15px;
   margin: 0 0 26px;
-  max-width: 38ch;
 }
 
 /* Ghost coloring/transition/hover come from Link's own `.ghost` via the
