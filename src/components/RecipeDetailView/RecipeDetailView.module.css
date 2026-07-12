@@ -138,18 +138,6 @@
   border-radius: var(--radius-xl);
   background: var(--color-surface);
   padding: 22px 22px 14px;
-  /* WCAG AA override: --color-text-faint is tuned against --color-bg
-     (#FBFAF7), not this panel's --color-surface (#F4F1EA), so it falls
-     short here — #767066 on #F4F1EA is ~4.35:1 (fails 4.5:1). Darkened
-     locally to #706A60 (~4.75:1) for text inside this panel. */
-  --ingredients-panel-faint-fg: #706A60;
-}
-
-[data-theme="dark"] .ingredientsPanel {
-  /* Same shortfall in dark mode: --color-text-faint (#877F73) on this
-     panel's dark --color-surface (#1C1A15) is ~4.40:1 (fails 4.5:1).
-     Lightened locally to #8C8478 (~4.71:1). */
-  --ingredients-panel-faint-fg: #8C8478;
 }
 
 .ingredientsHead {
@@ -172,13 +160,13 @@
 .servesLabel {
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
-  color: var(--ingredients-panel-faint-fg, var(--color-text-faint));
+  color: var(--color-text-faint-on-surface);
   white-space: nowrap;
 }
 
 .ingredientsHint {
   font-size: var(--font-size-xs);
-  color: var(--ingredients-panel-faint-fg, var(--color-text-faint));
+  color: var(--color-text-faint-on-surface);
   margin: 0 0 var(--space-3);
 }
 
