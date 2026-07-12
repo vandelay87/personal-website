@@ -1,3 +1,4 @@
+import SemanticList, { SemanticListItem } from '@components/SemanticList'
 import { CSSProperties, FC, ReactNode } from 'react'
 import styles from './Grid.module.css'
 
@@ -34,20 +35,17 @@ const Grid: FC<GridProps> = ({
     : undefined
 
   return (
-    // eslint-disable-next-line jsx-a11y/no-redundant-roles -- .grid sets list-style: none, which drops implicit list semantics in Safari/VoiceOver; role="list" (paired with role="listitem" on each <li>) restores it
-    <ul className={gridClassName} style={gridStyle} role="list">
+    <SemanticList className={gridClassName} style={gridStyle}>
       {Array.isArray(children) ? (
         children.map((child, index) => (
-          // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above
-          <li key={index} className={styles.item} role="listitem">
+          <SemanticListItem key={index} className={styles.item}>
             {child}
-          </li>
+          </SemanticListItem>
         ))
       ) : (
-        // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment on the <ul> above
-        <li className={styles.item} role="listitem">{children}</li>
+        <SemanticListItem className={styles.item}>{children}</SemanticListItem>
       )}
-    </ul>
+    </SemanticList>
   )
 }
 

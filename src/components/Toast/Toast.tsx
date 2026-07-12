@@ -1,3 +1,4 @@
+import { SemanticListItem } from '@components/SemanticList'
 import type { FC, ReactNode } from 'react'
 
 import styles from './Toast.module.css'
@@ -14,11 +15,7 @@ export interface ToastProps {
 
 const Toast: FC<ToastProps> = ({ tone = 'info', children, onDismiss }) => {
   return (
-    // Safari/VoiceOver drops list semantics from a <ul>/<li> pair once
-    // `list-style: none` is applied anywhere in it; role="listitem" (paired
-    // with role="list" on the <ul> in ToastProvider) restores it explicitly.
-    // eslint-disable-next-line jsx-a11y/no-redundant-roles -- not redundant, see comment above
-    <li className={styles.item} role="listitem">
+    <SemanticListItem className={styles.item}>
       <button
         type="button"
         className={[styles.toast, styles[tone]].filter(Boolean).join(' ')}
@@ -29,7 +26,7 @@ const Toast: FC<ToastProps> = ({ tone = 'info', children, onDismiss }) => {
           &times;
         </span>
       </button>
-    </li>
+    </SemanticListItem>
   )
 }
 

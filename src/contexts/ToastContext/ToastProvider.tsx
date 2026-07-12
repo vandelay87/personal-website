@@ -1,3 +1,4 @@
+import SemanticList from '@components/SemanticList'
 import Toast, { type ToastTone } from '@components/Toast'
 import {
   useCallback,
@@ -59,14 +60,13 @@ export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
         aria-live={hasError ? 'assertive' : 'polite'}
         aria-atomic="false"
       >
-        {/* eslint-disable-next-line jsx-a11y/no-redundant-roles -- Toast's .item sets list-style: none, which drops implicit list semantics in Safari/VoiceOver; role="list" (paired with role="listitem" in Toast) restores it */}
-        <ul className={styles.list} role="list">
+        <SemanticList className={styles.list}>
           {toasts.map((toast) => (
             <Toast key={toast.id} tone={toast.tone} onDismiss={() => dismissToast(toast.id)}>
               {toast.message}
             </Toast>
           ))}
-        </ul>
+        </SemanticList>
       </div>
     </ToastContext.Provider>
   )
