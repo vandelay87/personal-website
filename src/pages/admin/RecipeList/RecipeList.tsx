@@ -5,11 +5,10 @@ import {
   publishRecipe,
   unpublishRecipe,
 } from '@api/recipes'
-import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
 import { iconEdit, iconPreview, iconPublish, iconRetry, iconWarning } from '@components/icons'
 import Link from '@components/Link'
-import Loading from '@components/Loading'
+import StateBox from '@components/StateBox'
 import StatusBadge from '@components/StatusBadge'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
@@ -165,27 +164,18 @@ const RecipeList = () => {
 
   const renderBody = () => {
     if (loading) {
-      return (
-        <div className={`${stateBox.box} ${stateBox.loading}`}>
-          <Loading label="Loading recipes…" />
-        </div>
-      )
+      return <StateBox variant="loading" label="Loading recipes…" />
     }
 
     if (error) {
       return (
-        <div className={`${stateBox.box} ${stateBox.error}`}>
-          <div className={`${stateBox.icon} ${stateBox.iconError}`}>{iconWarning}</div>
-          <Typography variant="heading2" className={stateBox.heading}>
-            Couldn&apos;t load recipes
-          </Typography>
-          <Typography variant="body" className={`${stateBox.body} ${styles.errorBody}`}>
-            Something went wrong reaching the server. Check your connection and try again.
-          </Typography>
-          <Button variant="outline" onClick={loadRecipes} iconLeft={iconRetry}>
-            Retry
-          </Button>
-        </div>
+        <StateBox
+          variant="error"
+          icon={iconWarning}
+          heading="Couldn't load recipes"
+          body="Something went wrong reaching the server. Check your connection and try again."
+          action={{ label: 'Retry', onClick: loadRecipes, icon: iconRetry }}
+        />
       )
     }
 
