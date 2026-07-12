@@ -90,14 +90,12 @@
   gap: 7px; /* no --space-* token lands on 7px (--space-1=4px, --space-2=8px) */
 }
 
-/* .column .footnote / .column .belowCard (not bare classes): both compose
-   Typography's `caption` variant, which is also layered in
-   `@layer component-defaults` (Typography.module.css) same as `.heading3`/
-   `.body` above. These two weren't de-scoped to bare `.footnote`/
-   `.belowCard` in this pass — out of #326's stated scope, which covers
-   only `.cardHeader .heading`/`.subheading` — so they still use the
-   parent-scoped descendant-selector fix for now. */
-.column .footnote {
+/* Bare `.footnote` override: Typography's own `caption` variant now lives in
+   `@layer component-defaults` (Typography.module.css, #263), so this plain
+   unlayered class deterministically wins without needing the old
+   descendant-selector trick. Same mechanism as `.heading`/`.subheading`
+   above. */
+.footnote {
   font-size: 12.5px; /* no token lands between --font-size-xs (11px) and --font-size-sm (13px) */
   line-height: var(--line-height-normal);
   /* Renders inside <Card fill>, whose .fill sets --color-surface (issue #274). */
@@ -106,7 +104,12 @@
   text-align: center;
 }
 
-.column .belowCard {
+/* Bare `.belowCard` override: Typography's own `caption` variant now lives in
+   `@layer component-defaults` (Typography.module.css, #263), so this plain
+   unlayered class deterministically wins without needing the old
+   descendant-selector trick. Same mechanism as `.heading`/`.subheading`
+   above. */
+.belowCard {
   text-align: center;
   font-size: 12px; /* no --font-size-* token lands on 12px (--font-size-xs=11px, --font-size-sm=13px) */
   color: var(--color-text-faint);
