@@ -92,17 +92,15 @@
 
 /* ── Back link ───────────────────────────────────────────────────── */
 
-/* `focusRing` (interactions.module.css) and `metaText` (text.module.css)
+/* Bare `.backLink` override: Link's own `.link` now lives in
+   `@layer component-defaults` (Link.module.css, #263), so this plain
+   unlayered class deterministically wins without needing the old
+   descendant-selector trick — same mechanism as `.bannerAction` above.
+   `focusRing` (interactions.module.css) and `metaText` (text.module.css)
    are composed in JS rather than via `composes:` here — see
    `.timeoutSpinner` above for the shared-across-lazy-chunks rationale. */
 .backLink {
   margin-bottom: 20px;
-}
-
-/* .container .backLink (not bare): raises specificity above the shared
-   Link component's own `.link` — see RecipeDetailView.module.css's
-   `.article .backLink` for the same pattern/rationale. */
-.container .backLink {
   font-size: 12px;
   color: var(--color-text-muted);
 }
@@ -425,9 +423,10 @@
   padding-top: 14px;
 }
 
-/* .previewWrap .previewLink (not bare): raises specificity above Link's
-   own `.link` — see `.container .backLink` above for the same pattern. */
-.previewWrap .previewLink {
+/* Bare `.previewLink` override: Link's own `.link` now lives in
+   `@layer component-defaults` (Link.module.css, #263) — same mechanism
+   as `.backLink` above. */
+.previewLink {
   font-size: 13px;
   color: var(--color-text-muted);
 }
