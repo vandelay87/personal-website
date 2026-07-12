@@ -61,7 +61,7 @@ const Apps: FC = () => {
         <div className={styles.countRow}>
           <span>{APPS_COUNT_LABEL}</span>
         </div>
-        <Grid minWidth="320px" className={styles.gridSpacing}>
+        <Grid minWidth="md" className={styles.gridSpacing}>
           {APPS.map((app) => (
             <AppCard key={app.href} {...app} />
           ))}

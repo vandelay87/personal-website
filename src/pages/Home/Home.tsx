@@ -169,7 +169,7 @@ const Home: FC = () => {
                 written down so they&apos;re easy to make again.
               </Typography>
             </div>
-            <Grid minWidth="220px" className={styles.recipeGridSpacing}>
+            <Grid minWidth="sm" className={styles.recipeGridSpacing}>
               {recipes.map((recipe) => (
                 <RecipeCard key={recipe.id} recipe={recipe} eager hideTags />
               ))}

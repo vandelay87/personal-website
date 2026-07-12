@@ -41,7 +41,7 @@ describe('Grid', () => {
 
   it('applies the auto-fit class and no fixed column class when minWidth is set', () => {
     render(
-      <Grid minWidth="320px">
+      <Grid minWidth="md">
         <div>Item</div>
       </Grid>
     )
@@ -56,18 +56,33 @@ describe('Grid', () => {
 
   it('sets the --grid-min-width custom property from minWidth', () => {
     render(
-      <Grid minWidth="320px">
+      <Grid minWidth="md">
         <div>Item</div>
       </Grid>
     )
 
     const list = screen.getByRole('list')
-    expect(list.style.getPropertyValue('--grid-min-width')).toBe('320px')
+    expect(list.style.getPropertyValue('--grid-min-width')).toBe(
+      'var(--grid-min-md)'
+    )
+  })
+
+  it('maps minWidth="sm" to the sm CSS custom property', () => {
+    render(
+      <Grid minWidth="sm">
+        <div>Item</div>
+      </Grid>
+    )
+
+    const list = screen.getByRole('list')
+    expect(list.style.getPropertyValue('--grid-min-width')).toBe(
+      'var(--grid-min-sm)'
+    )
   })
 
   it('lets minWidth override an explicit columns prop entirely', () => {
     render(
-      <Grid minWidth="320px" columns={4}>
+      <Grid minWidth="md" columns={4}>
         <div>Item</div>
       </Grid>
     )
