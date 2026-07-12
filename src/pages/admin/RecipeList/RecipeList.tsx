@@ -18,6 +18,7 @@ import type { Recipe } from '@models/recipe'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
+import stateBox from '../../../styles/stateBox.module.css'
 import { pluralize } from '../../../utils/pluralize'
 import { relativeUpdatedLabel } from '../../../utils/relativeTime'
 import styles from './RecipeList.module.css'
@@ -163,7 +164,7 @@ const RecipeList = () => {
   const renderBody = () => {
     if (loading) {
       return (
-        <div className={styles.loadingBox}>
+        <div className={[stateBox.box, stateBox.loading].filter(Boolean).join(' ')}>
           <Loading label="Loading recipes…" />
         </div>
       )
@@ -171,12 +172,17 @@ const RecipeList = () => {
 
     if (error) {
       return (
-        <div className={styles.errorBox}>
-          <div className={styles.errorIcon}>{iconWarning}</div>
-          <Typography variant="heading2" className={styles.errorHeading}>
+        <div className={[stateBox.box, stateBox.error].filter(Boolean).join(' ')}>
+          <div className={[stateBox.icon, stateBox.iconError].filter(Boolean).join(' ')}>
+            {iconWarning}
+          </div>
+          <Typography variant="heading2" className={stateBox.heading}>
             Couldn&apos;t load recipes
           </Typography>
-          <Typography variant="body" className={styles.errorBody}>
+          <Typography
+            variant="body"
+            className={[stateBox.body, styles.errorBody].filter(Boolean).join(' ')}
+          >
             Something went wrong reaching the server. Check your connection and try again.
           </Typography>
           <Button variant="outline" onClick={loadRecipes} iconLeft={iconRetry}>
@@ -188,12 +194,14 @@ const RecipeList = () => {
 
     if (sortedRecipes.length === 0) {
       return (
-        <div className={styles.emptyBox}>
-          <div className={styles.emptyIcon}>{iconDocument}</div>
-          <Typography variant="heading2" className={styles.emptyHeading}>
+        <div className={[stateBox.box, styles.emptyBox].filter(Boolean).join(' ')}>
+          <div className={[stateBox.icon, styles.emptyIcon].filter(Boolean).join(' ')}>
+            {iconDocument}
+          </div>
+          <Typography variant="heading2" className={stateBox.heading}>
             No recipes yet
           </Typography>
-          <Typography variant="body" className={styles.emptyBody}>
+          <Typography variant="body" className={stateBox.body}>
             Your kitchen is empty. Create your first recipe to start building the collection.
           </Typography>
           <Link to="/admin/recipes/new" variant="solid" className={styles.newButton}>

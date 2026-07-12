@@ -245,43 +245,16 @@
 /* ── Empty / loading / error states — shared box shape ────────────── */
 
 .emptyBox {
-  composes: box from '../../../styles/stateBox.module.css';
   border: 1px dashed var(--color-border);
   padding: clamp(48px, 8vw, 84px) 24px;
 }
 
-.loadingBox {
-  composes: box loading from '../../../styles/stateBox.module.css';
-}
-
-.errorBox {
-  composes: box error from '../../../styles/stateBox.module.css';
-}
-
 .emptyIcon {
-  composes: icon from '../../../styles/stateBox.module.css';
   background: var(--color-surface);
   border: var(--border-width) solid var(--color-border);
   color: var(--color-text-muted);
 }
 
-.errorIcon {
-  composes: icon iconError from '../../../styles/stateBox.module.css';
-}
-
-.emptyHeading {
-  composes: heading from '../../../styles/stateBox.module.css';
-}
-
-.errorHeading {
-  composes: heading from '../../../styles/stateBox.module.css';
-}
-
-.emptyBody {
-  composes: body from '../../../styles/stateBox.module.css';
-}
-
 .errorBody {
-  composes: body from '../../../styles/stateBox.module.css';
   max-width: 38ch;
 }
