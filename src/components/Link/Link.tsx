@@ -1,5 +1,6 @@
 import { FC, ReactNode } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
+import { isExternalHref } from '../../utils/url'
 import styles from './Link.module.css'
 
 export interface LinkProps {
@@ -39,8 +40,7 @@ const Link: FC<LinkProps> = ({
   ariaLabel,
   className: externalClassName,
 }) => {
-  const isExternal =
-    /^https?:\/\//.test(to) || to.startsWith('mailto:') || to.startsWith('tel:')
+  const isExternal = isExternalHref(to)
 
   const className = [
     styles.link,

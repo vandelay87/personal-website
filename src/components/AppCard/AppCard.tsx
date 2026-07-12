@@ -4,6 +4,7 @@ import Tag from '@components/Tag'
 import Typography from '@components/Typography'
 import type { FC } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
+import { isExternalHref } from '../../utils/url'
 import styles from './AppCard.module.css'
 
 export interface AppCardProps {
@@ -13,9 +14,6 @@ export interface AppCardProps {
   image: ImageProps
   tag?: string
 }
-
-const isExternalHref = (href: string) =>
-  /^https?:\/\//.test(href) || href.startsWith('mailto:') || href.startsWith('tel:')
 
 const AppCard: FC<AppCardProps> = ({ title, description, href, image, tag }) => {
   const content = (

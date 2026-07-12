@@ -1,5 +1,6 @@
 import type { CSSProperties, FC, MouseEvent, ReactNode } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
+import { isExternalHref } from '../../utils/url'
 import styles from './Tag.module.css'
 
 interface TagBaseProps {
@@ -63,10 +64,8 @@ const Tag: FC<TagProps> = (props) => {
 
   if (props.as === 'a') {
     const href = props.to
-    const isExternal =
-      /^https?:\/\//.test(href) || href.startsWith('mailto:') || href.startsWith('tel:')
 
-    if (isExternal) {
+    if (isExternalHref(href)) {
       return (
         <a
           href={href}
