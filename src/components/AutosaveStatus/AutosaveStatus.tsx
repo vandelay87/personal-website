@@ -2,6 +2,8 @@ import { IconAlertCircle } from '@components/icons'
 import type { AutosaveStatus as AutosaveStatusValue } from '@hooks/useAutosave'
 import type { FC, ReactNode } from 'react'
 import { useEffect, useState } from 'react'
+
+import interactions from '../../styles/interactions.module.css'
 import styles from './AutosaveStatus.module.css'
 
 export interface AutosaveStatusProps {
@@ -86,7 +88,10 @@ const AutosaveStatus: FC<AutosaveStatusProps> = ({ status, lastSavedAt, onRetry 
     <span className={styles.container}>
       <span role="status" aria-live={ariaLive} className={styles.liveRegion}>
         {status === 'saving' && (
-          <span aria-hidden="true" className={styles.spinner} />
+          <span
+            aria-hidden="true"
+            className={`${interactions.spinner} ${interactions.spinnerSm}`}
+          />
         )}
         {statusIcon && (
           <span aria-hidden="true" className={ICON_CLASS[status]}>
@@ -103,7 +108,7 @@ const AutosaveStatus: FC<AutosaveStatusProps> = ({ status, lastSavedAt, onRetry 
       {status === 'error' && (
         <button
           type="button"
-          className={styles.retryButton}
+          className={`${interactions.focusRing} ${styles.retryButton}`}
           onClick={() => { onRetry() }}
         >
           Retry

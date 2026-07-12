@@ -13,7 +13,9 @@ import type { AdminRole, AdminUser } from '@models/auth'
 import { useCallback, useEffect, useId, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import interactions from '../../../styles/interactions.module.css'
 import stateBox from '../../../styles/stateBox.module.css'
+import text from '../../../styles/text.module.css'
 import styles from './UserManagement.module.css'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -193,7 +195,7 @@ const UserManagement = () => {
               </Typography>
               <button
                 type="button"
-                className={styles.closeButton}
+                className={`${interactions.focusRing} ${styles.closeButton}`}
                 onClick={resetInviteForm}
                 aria-label="Close"
               >
@@ -239,7 +241,7 @@ const UserManagement = () => {
                     <button
                       key={role}
                       type="button"
-                      className={styles.roleOption}
+                      className={`${interactions.focusRing} ${styles.roleOption}`}
                       aria-pressed={inviteRole === role}
                       onClick={() => setInviteRole(role)}
                     >
@@ -267,7 +269,10 @@ const UserManagement = () => {
                     className={styles.formActionButton}
                     iconLeft={
                       inviteSubmitting ? (
-                        <span className={styles.sendSpinner} aria-hidden="true" />
+                        <span
+                          className={`${interactions.spinner} ${interactions.spinnerSm}`}
+                          aria-hidden="true"
+                        />
                       ) : undefined
                     }
                   >
@@ -295,7 +300,9 @@ const UserManagement = () => {
                   </span>
                   <div className={styles.rowIdentity}>
                     <span className={styles.rowEmail}>{userRow.email}</span>
-                    {isSelf && <span className={styles.selfTag}>You</span>}
+                    {isSelf && (
+                      <span className={`${text.tagChipBase} ${styles.selfTag}`}>You</span>
+                    )}
                   </div>
                 </div>
                 <div className={styles.rowMeta}>
@@ -314,7 +321,7 @@ const UserManagement = () => {
                     {!isSelf && (
                       <button
                         type="button"
-                        className={styles.removeAction}
+                        className={`${interactions.focusRing} ${styles.removeAction}`}
                         onClick={() => setRemoveTarget(userRow)}
                         title="Remove user"
                       >

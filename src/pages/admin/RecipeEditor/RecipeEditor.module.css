@@ -62,8 +62,12 @@
   flex-shrink: 0;
 }
 
+/* `spinner`/`spinnerSm` (interactions.module.css) are composed in JS
+   rather than via `composes:` here, so Rollup can dedupe the shared
+   rules across lazy admin chunks instead of inlining a full copy into
+   each of RecipeList/RecipeEditor/UserManagement's independently
+   lazy-loaded chunks (same rationale as stateBox.module.css). */
 .timeoutSpinner {
-  composes: spinner spinnerSm from '../../../styles/interactions.module.css';
   flex-shrink: 0;
   border-top-color: var(--color-warning);
 }
@@ -91,9 +95,10 @@
 
 /* ── Back link ───────────────────────────────────────────────────── */
 
+/* `focusRing` (interactions.module.css) and `metaText` (text.module.css)
+   are composed in JS rather than via `composes:` here — see
+   `.timeoutSpinner` above for the shared-across-lazy-chunks rationale. */
 .backLink {
-  composes: focusRing from '../../../styles/interactions.module.css';
-  composes: metaText from '../../../styles/text.module.css';
   margin-bottom: 20px;
 }
 
@@ -183,12 +188,10 @@
     box-shadow var(--duration-fast) var(--easing-default);
 }
 
-.input {
-  composes: fieldFocusRing from '../../../styles/interactions.module.css';
-}
-
+/* `fieldFocusRing` (interactions.module.css) is composed in JS rather
+   than via `composes:` on `.input`/`.textarea` below — see
+   `.timeoutSpinner` above for the shared-across-lazy-chunks rationale. */
 .textarea {
-  composes: fieldFocusRing from '../../../styles/interactions.module.css';
   resize: vertical;
   line-height: var(--line-height-relaxed);
   /* 84px: design literal, no --space-* token lands on it. */
@@ -236,8 +239,10 @@
    text link" pattern in this codebase), not the shared Button component,
    which always carries border/padding chrome the design's inline
    `.lnk`-style actions don't want here. */
+/* `focusRing` (interactions.module.css) is composed in JS rather than
+   via `composes:` here — see `.timeoutSpinner` above for the
+   shared-across-lazy-chunks rationale. */
 .textButton {
-  composes: focusRing from '../../../styles/interactions.module.css';
   padding: 0;
   font: inherit;
   font-size: 12.5px;

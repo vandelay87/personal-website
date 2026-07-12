@@ -6,6 +6,7 @@ import ProcessingPlaceholder from '@components/ProcessingPlaceholder'
 import { parseImageType, recipeImageUrl, type ImageType } from '@models/recipe'
 import { useEffect, useId, useRef, useState, type ChangeEvent, type FC } from 'react'
 
+import interactions from '../../styles/interactions.module.css'
 import styles from './ImageUpload.module.css'
 
 export interface ImageUploadProps {
@@ -208,7 +209,7 @@ const ImageUpload: FC<ImageUploadProps> = ({
           />
           <button
             type="button"
-            className={styles.replaceButton}
+            className={`${interactions.focusRing} ${styles.replaceButton}`}
             onClick={handleClick}
             aria-label="Replace image"
           >
@@ -227,7 +228,11 @@ const ImageUpload: FC<ImageUploadProps> = ({
     }
 
     return isCover ? (
-      <button type="button" className={styles.dropzone} onClick={handleClick}>
+      <button
+        type="button"
+        className={`${interactions.focusRing} ${interactions.uploadHover} ${styles.dropzone}`}
+        onClick={handleClick}
+      >
         <span aria-hidden="true" className={styles.dropzoneIcon}>
           {iconUploadCloud}
         </span>

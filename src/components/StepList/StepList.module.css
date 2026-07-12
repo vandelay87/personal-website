@@ -55,13 +55,10 @@
   gap: var(--space-2);
 }
 
-.moveAction {
-  composes: iconButtonHover from '../../styles/interactions.module.css';
-}
-
-.removeAction {
-  composes: dangerIconButtonHover from '../../styles/interactions.module.css';
-}
+/* `iconButtonHover`/`dangerIconButtonHover` (interactions.module.css)
+   are composed directly in JS (see StepList.tsx) instead of via local
+   `.moveAction`/`.removeAction` classes — same rationale as
+   IngredientList.module.css's own doc comment. */
 
 .actions .actionButton {
   width: 30px;

@@ -140,11 +140,13 @@
   gap: 7px;
 }
 
+/* `tagChipBase` (text.module.css) is composed in JS rather than via
+   `composes:` here, so Rollup can dedupe the shared rules across lazy
+   admin chunks — see `.actionButton` below for the same rationale. This
+   design's chip padding (3px 8px) is smaller than RecipeDetailView's tag
+   (5px 10px) — each `tagChipBase` consumer sets its own padding, per
+   that composable's own doc comment. */
 .tagChip {
-  composes: tagChipBase from '../../../styles/text.module.css';
-  /* This design's chip padding (3px 8px) is smaller than
-     RecipeDetailView's tag (5px 10px) — each `tagChipBase` consumer sets
-     its own padding, per that composable's own doc comment. */
   padding: 3px 8px;
   display: inline-block;
 }
@@ -166,17 +168,15 @@
   gap: 4px;
 }
 
-/* CSS Modules only allows `composes` on a rule with a single bare local
-   class selector, not a compound/descendant one — `composes` inside
-   `.rowActions .actionButton { ... }` fails the build entirely
-   ("composition is only allowed when selector is single :local class
-   name"). Split: the bare `.actionButton` class carries the composed
-   focusRing; the descendant-scoped rule below carries the specificity-tie
-   fix (same rationale as `.header .newButton` above) and everything else. */
-.actionButton {
-  composes: focusRing from '../../../styles/interactions.module.css';
-}
-
+/* `.actionButton` carries no CSS of its own — `focusRing`
+   (interactions.module.css) is composed in JS instead of via
+   `composes:`, so Rollup can dedupe the shared rules across lazy admin
+   chunks rather than inlining a full copy into each of
+   RecipeList/RecipeEditor/UserManagement's independently lazy-loaded
+   chunks (same rationale as stateBox.module.css, see that file's own
+   doc comment). The descendant-scoped rule below carries the
+   specificity-tie fix (same rationale as `.header .newButton` above)
+   and everything else. */
 .rowActions .actionButton {
   /* display/align-items/font-family are already inherited from Link's own
      `.link` for Edit/Preview, but the native Publish/Delete `<button>`s

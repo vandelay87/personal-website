@@ -18,7 +18,9 @@ import type { Recipe } from '@models/recipe'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
+import interactions from '../../../styles/interactions.module.css'
 import stateBox from '../../../styles/stateBox.module.css'
+import text from '../../../styles/text.module.css'
 import { pluralize } from '../../../utils/pluralize'
 import { relativeUpdatedLabel } from '../../../utils/relativeTime'
 import styles from './RecipeList.module.css'
@@ -224,7 +226,7 @@ const RecipeList = () => {
                 </div>
                 <ul className={styles.rowMeta}>
                   {recipe.tags.map((tag) => (
-                    <li key={tag} className={styles.tagChip}>
+                    <li key={tag} className={`${text.tagChipBase} ${styles.tagChip}`}>
                       {tag}
                     </li>
                   ))}
@@ -236,7 +238,7 @@ const RecipeList = () => {
               <div className={styles.rowActions}>
                 <Link
                   to={`/admin/recipes/${recipe.id}/edit`}
-                  className={styles.actionButton}
+                  className={`${interactions.focusRing} ${styles.actionButton}`}
                   nudge="none"
                 >
                   {iconEdit}
@@ -244,7 +246,7 @@ const RecipeList = () => {
                 </Link>
                 <Link
                   to={`/admin/recipes/${recipe.id}/preview`}
-                  className={styles.actionButton}
+                  className={`${interactions.focusRing} ${styles.actionButton}`}
                   nudge="none"
                 >
                   {iconPreview}
@@ -252,7 +254,7 @@ const RecipeList = () => {
                 </Link>
                 <button
                   type="button"
-                  className={`${styles.actionButton} ${styles.publishAction}`}
+                  className={`${interactions.focusRing} ${styles.actionButton} ${styles.publishAction}`}
                   onClick={() => handlePublish(recipe)}
                 >
                   {isPublished ? iconUnpublish : iconPublish}
@@ -260,7 +262,7 @@ const RecipeList = () => {
                 </button>
                 <button
                   type="button"
-                  className={`${styles.actionButton} ${styles.deleteAction}`}
+                  className={`${interactions.focusRing} ${styles.actionButton} ${styles.deleteAction}`}
                   onClick={() => setDeleteTarget(recipe)}
                 >
                   {iconDelete}

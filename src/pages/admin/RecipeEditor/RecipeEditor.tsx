@@ -32,6 +32,8 @@ import type { Ingredient, Recipe, Step, Tag } from '@models/recipe'
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type FC } from 'react'
 import { useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom'
 
+import interactions from '../../../styles/interactions.module.css'
+import text from '../../../styles/text.module.css'
 import { pluralize } from '../../../utils/pluralize'
 import styles from './RecipeEditor.module.css'
 
@@ -574,12 +576,21 @@ const RecipeEditor: FC = () => {
 
       {timedOut && (
         <div role="status" aria-live="polite" className={styles.timeoutBanner}>
-          <span className={styles.timeoutSpinner} aria-hidden="true" />
+          <span
+            className={`${interactions.spinner} ${interactions.spinnerSm} ${styles.timeoutSpinner}`}
+            aria-hidden="true"
+          />
           <span>Processing is taking longer than expected — try refreshing the page.</span>
         </div>
       )}
 
-      <Link to="/admin/recipes" icon="←" iconSide="left" nudge="left" className={styles.backLink}>
+      <Link
+        to="/admin/recipes"
+        icon="←"
+        iconSide="left"
+        nudge="left"
+        className={`${interactions.focusRing} ${text.metaText} ${styles.backLink}`}
+      >
         Back to recipes
       </Link>
 
@@ -609,7 +620,7 @@ const RecipeEditor: FC = () => {
                 type="text"
                 value={form.title}
                 onChange={(e) => setField('title', e.target.value)}
-                className={styles.input}
+                className={`${interactions.fieldFocusRing} ${styles.input}`}
               />
             </div>
 
@@ -630,7 +641,7 @@ const RecipeEditor: FC = () => {
                   setSlugError(null)
                   setField('slug', e.target.value)
                 }}
-                className={styles.input}
+                className={`${interactions.fieldFocusRing} ${styles.input}`}
               />
               <div className={styles.slugHintRow}>
                 <p id="recipe-slug-preview" className={styles.hint}>
@@ -640,7 +651,7 @@ const RecipeEditor: FC = () => {
                   <button
                     type="button"
                     onClick={() => dispatch({ type: 'RESET_SLUG_TO_TITLE' })}
-                    className={styles.textButton}
+                    className={`${interactions.focusRing} ${styles.textButton}`}
                   >
                     Reset to title
                   </button>
@@ -669,7 +680,7 @@ const RecipeEditor: FC = () => {
                 id="recipe-intro"
                 value={form.intro}
                 onChange={(e) => setField('intro', e.target.value)}
-                className={styles.textarea}
+                className={`${interactions.fieldFocusRing} ${styles.textarea}`}
               />
             </div>
           </section>
@@ -701,7 +712,7 @@ const RecipeEditor: FC = () => {
                   type="text"
                   value={form.coverImageAlt}
                   onChange={(e) => setField('coverImageAlt', e.target.value)}
-                  className={styles.input}
+                  className={`${interactions.fieldFocusRing} ${styles.input}`}
                 />
               </div>
             )}
@@ -719,7 +730,7 @@ const RecipeEditor: FC = () => {
                   type="number"
                   value={form.prepTime}
                   onChange={(e) => setField('prepTime', Number(e.target.value))}
-                  className={styles.input}
+                  className={`${interactions.fieldFocusRing} ${styles.input}`}
                 />
               </div>
               <div className={styles.field}>
@@ -731,7 +742,7 @@ const RecipeEditor: FC = () => {
                   type="number"
                   value={form.cookTime}
                   onChange={(e) => setField('cookTime', Number(e.target.value))}
-                  className={styles.input}
+                  className={`${interactions.fieldFocusRing} ${styles.input}`}
                 />
               </div>
               <div className={styles.field}>
@@ -743,7 +754,7 @@ const RecipeEditor: FC = () => {
                   type="number"
                   value={form.servings}
                   onChange={(e) => setField('servings', Number(e.target.value))}
-                  className={styles.input}
+                  className={`${interactions.fieldFocusRing} ${styles.input}`}
                 />
               </div>
             </div>

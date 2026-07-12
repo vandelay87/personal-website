@@ -60,8 +60,12 @@
   margin: 0;
 }
 
+/* `focusRing` (interactions.module.css) is composed in JS rather than
+   via `composes:` here, so Rollup can dedupe the shared rules across
+   lazy admin chunks instead of inlining a full copy into each of
+   RecipeList/RecipeEditor/UserManagement's independently lazy-loaded
+   chunks (same rationale as stateBox.module.css). */
 .closeButton {
-  composes: focusRing from '../../../styles/interactions.module.css';
   background: transparent;
   border: none;
   /* .inviteCard has a --color-surface background (issue #274). */
@@ -136,8 +140,8 @@
   gap: 2px;
 }
 
+/* `focusRing` composed in JS — see `.closeButton` above for rationale. */
 .roleOption {
-  composes: focusRing from '../../../styles/interactions.module.css';
   font-family: inherit;
   font-size: 13px;
   font-weight: var(--font-weight-medium);
@@ -209,9 +213,11 @@
   font-size: 14px;
 }
 
-.sendSpinner {
-  composes: spinner spinnerSm from '../../../styles/interactions.module.css';
-}
+/* The invite-submit spinner composes `spinner`/`spinnerSm`
+   (interactions.module.css) directly in JS instead of via a local
+   `.sendSpinner` class — see `.closeButton` above for rationale; no
+   local declarations were needed here beyond the composed ones, so
+   there's no local class left to carry. */
 
 /* ── User row list ────────────────────────────────────────────────
    `<ul>/<li>`, not `<table>` — matches the established pattern from
@@ -291,9 +297,10 @@
 /* Static "You" label — composes the shared mono-chip look (not the
    interactive Tag component, which carries button/active/removable
    machinery this static badge doesn't need) exactly like RecipeList
-   .module.css's own `.tagChip` does. */
+   .module.css's own `.tagChip` does. `tagChipBase` (text.module.css) is
+   composed in JS rather than via `composes:` here — see `.closeButton`
+   above for the shared-across-lazy-chunks rationale. */
 .selfTag {
-  composes: tagChipBase from '../../../styles/text.module.css';
   font-size: 10px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -345,11 +352,10 @@
 
 /* Matches RecipeList.module.css's `.rowActions .actionButton`/
    `.deleteAction` ("act" button) pattern exactly — small icon+text button,
-   neutral by default, danger tint on hover. */
-.removeAction {
-  composes: focusRing from '../../../styles/interactions.module.css';
-}
-
+   neutral by default, danger tint on hover. `.removeAction` carries no
+   CSS of its own — `focusRing` (interactions.module.css) is composed in
+   JS instead of via `composes:` — see `.closeButton` above for the
+   shared-across-lazy-chunks rationale. */
 .rowActionSlot .removeAction {
   display: inline-flex;
   align-items: center;

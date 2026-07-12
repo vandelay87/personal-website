@@ -5,10 +5,14 @@
    radius/padding) is shared byte-for-byte with Input and TagInput via
    the `field` composable — see src/styles/formField.module.css for the
    full rationale (issue #244), including why transition stays local.
-   line-height/resize/min-height stay here — genuinely Textarea-only. */
+   line-height/resize/min-height stay here — genuinely Textarea-only.
+   `fieldFocusRing` (interactions.module.css) is composed in JS instead
+   (see Textarea.tsx) — Textarea is only used within the (lazy)
+   RecipeEditor page today, but interactions.module.css has no JS import
+   of its own, so `composes:` here would inline a full copy on top of
+   the shared chunk RecipeEditor already pulls in. */
 .field {
   composes: field from '../../styles/formField.module.css';
-  composes: fieldFocusRing from '../../styles/interactions.module.css';
   line-height: var(--line-height-relaxed);
   resize: vertical;
   min-height: var(--space-20);

@@ -1,4 +1,6 @@
 import type { ChangeEvent, FC } from 'react'
+
+import interactions from '../../styles/interactions.module.css'
 import styles from './Textarea.module.css'
 
 export interface TextareaProps {
@@ -29,7 +31,9 @@ const Textarea: FC<TextareaProps> = ({
   ariaDescribedBy,
   className: extraClassName,
 }) => {
-  const className = [styles.field, extraClassName].filter(Boolean).join(' ')
+  const className = [interactions.fieldFocusRing, styles.field, extraClassName]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <textarea
