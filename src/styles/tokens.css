@@ -177,6 +177,10 @@
   --max-w-prose-narrow: 46ch; /* short paragraph measure (in-progress notes, kitchen intro) */
   --max-w-sm:      24rem;  /* compact component box — dialogs, cards, toasts */
 
+  /* Grid auto-fit minmax tiers (Grid component's minWidth prop) */
+  --grid-min-sm: 220px;
+  --grid-min-md: 320px;
+
   /* ── Z-index ──────────────────────────────────────────────── */
   --z-header:  20;
   --z-overlay: 60;
