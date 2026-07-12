@@ -210,21 +210,16 @@
 /* WCAG AA override (issue #272): --color-success on --color-success-bg,
    composited over this row's --color-field backdrop, computes to ~3.83:1
    (fails AA's 4.5:1) — axe doesn't probe :hover states, which is likely
-   why this wasn't already flagged. Same failing pairing as StatusBadge
-   (#267); reusing its exact override color for consistency. Note
-   .row:hover also fires here (hovering a child hovers its ancestor),
-   layering --color-hover under this button's own background, which
-   brings the real margin to ~4.80:1 (not the ~5.01:1 you'd get against
-   --color-field alone) — still comfortably passes. Dark mode already
-   passes (~6.40:1), so it resets to the shared token. */
+   why this wasn't already flagged. Uses the shared --color-success-on-tint
+   token, same override color StatusBadge (#267) uses, for consistency.
+   Note .row:hover also fires here (hovering a child hovers
+   its ancestor), layering --color-hover under this button's own
+   background — accounting for that stacked hover, the token's value still
+   comfortably passes (not just against --color-field alone). The token
+   already resolves correctly per theme. */
 .rowActions .publishAction:hover {
-  --publish-action-fg: #1a754d; /* ~4.80:1, accounting for stacked .row:hover */
-  color: var(--publish-action-fg);
+  color: var(--color-success-on-tint);
   background: var(--color-success-bg);
-}
-
-[data-theme="dark"] .rowActions .publishAction:hover {
-  --publish-action-fg: var(--color-success);
 }
 
 .rowActions .deleteAction:hover {

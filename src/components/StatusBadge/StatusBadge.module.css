@@ -24,27 +24,16 @@
 
 /* WCAG AA override (issue #267): --color-success/--color-warning on their
    pill backgrounds compute to ~3.68:1/~3.66:1 (fail AA's 4.5:1 for normal
-   text). Each is darkened via a component-local custom property, scoped to
-   StatusBadge only — see issue for why the shared tokens aren't changed.
-   Dark mode already passes for both, so it resets to the shared token. */
+   text). Uses the shared --color-success-on-tint/--color-warning-on-tint
+   tokens, which already resolve correctly per theme. */
 .success {
-  --status-success-fg: #1a754d; /* ~4.83:1 */
-  color: var(--status-success-fg);
+  color: var(--color-success-on-tint);
   background: var(--color-success-bg);
 }
 
-[data-theme="dark"] .success {
-  --status-success-fg: var(--color-success);
-}
-
 .warning {
-  --status-warning-fg: #8c5a08; /* ~4.96:1 */
-  color: var(--status-warning-fg);
+  color: var(--color-warning-on-tint);
   background: var(--color-warning-bg);
-}
-
-[data-theme="dark"] .warning {
-  --status-warning-fg: var(--color-warning);
 }
 
 .error {

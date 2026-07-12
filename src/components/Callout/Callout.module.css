@@ -47,16 +47,11 @@
 /* WCAG AA override (issue #272): --color-success on this tint (6%
    color-mix into --color-surface — an even lighter wash than
    StatusBadge's 10% alpha pill) computes to ~3.59:1, worse than the
-   failing 3.68:1 StatusBadge (#267) case. Reusing that issue's exact
-   override color here (~4.70:1 against this backdrop) for consistency.
-   Dark mode already passes (~7.10:1), so it resets to the shared token. */
+   failing 3.68:1 StatusBadge (#267) case. Uses the shared
+   --color-success-on-tint token, same override color StatusBadge uses,
+   for consistency — it already resolves correctly per theme. */
 .tip .label {
-  --callout-tip-fg: #1a754d; /* ~4.70:1 */
-  color: var(--callout-tip-fg);
-}
-
-[data-theme="dark"] .tip .label {
-  --callout-tip-fg: var(--color-success);
+  color: var(--color-success-on-tint);
 }
 
 .warning {
@@ -65,17 +60,12 @@
 }
 
 /* WCAG AA override (issue #272): same pattern as `.tip .label` above but
-   for --color-warning — this 6% tint computes to ~3.58:1 (fails AA).
-   Reusing StatusBadge's (#267) exact warning override color (~4.85:1
-   against this backdrop). Dark mode already passes (~7.38:1), so it
-   resets to the shared token. */
+   for --color-warning — this 6% tint computes to ~3.58:1 (fails AA). Uses
+   the shared --color-warning-on-tint token, same override color
+   StatusBadge (#267) uses, for consistency — it already resolves
+   correctly per theme. */
 .warning .label {
-  --callout-warning-fg: #8c5a08; /* ~4.85:1 */
-  color: var(--callout-warning-fg);
-}
-
-[data-theme="dark"] .warning .label {
-  --callout-warning-fg: var(--color-warning);
+  color: var(--color-warning-on-tint);
 }
 
 .info {
