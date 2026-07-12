@@ -9,14 +9,13 @@
   box-sizing: border-box;
 }
 
+/* Shared box shape from stateBox.module.css. stateBox is imported directly
+   in RecipeEditor.tsx and composed in JS rather than via `composes:` here,
+   so Rollup can dedupe the shared rules across lazy admin chunks — see
+   stateBox.module.css's own header comment for why. */
 .loadingBox {
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-xl);
   padding: clamp(64px, 12vw, 120px) 24px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 /* ── Banners ─────────────────────────────────────────────────────── */

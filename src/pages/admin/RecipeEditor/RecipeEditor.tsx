@@ -33,6 +33,7 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type FC 
 import { useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import interactions from '../../../styles/interactions.module.css'
+import stateBox from '../../../styles/stateBox.module.css'
 import text from '../../../styles/text.module.css'
 import { pluralize } from '../../../utils/pluralize'
 import styles from './RecipeEditor.module.css'
@@ -546,7 +547,7 @@ const RecipeEditor: FC = () => {
   if (loading || (isNewPath && !form.id && !sessionExpired)) {
     return (
       <div className={styles.container}>
-        <div className={styles.loadingBox}>
+        <div className={`${stateBox.box} ${styles.loadingBox}`}>
           <Loading label="Loading recipe…" />
         </div>
       </div>
