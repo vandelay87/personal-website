@@ -17,6 +17,7 @@ import { useCallback, useEffect, useMemo, useState, type FC } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import { MAIN_LANDMARK_ID } from '../../../constants/mainLandmark'
+import stateBox from '../../../styles/stateBox.module.css'
 import styles from './RecipePreview.module.css'
 
 // Hoisted elements, not components — these never take props, so there's no
@@ -197,12 +198,12 @@ const RecipePreview: FC = () => {
   if (notFound || !recipe) {
     return (
       <main id={MAIN_LANDMARK_ID} tabIndex={-1} className={styles.main}>
-        <div className={styles.notFoundBox}>
-          <div className={styles.notFoundIcon}>{iconNotFound}</div>
-          <Typography variant="heading1" className={styles.notFoundHeading}>
+        <div className={`${stateBox.box} ${styles.notFoundBox}`}>
+          <div className={`${stateBox.icon} ${styles.notFoundIcon}`}>{iconNotFound}</div>
+          <Typography variant="heading1" className={`${stateBox.heading} ${styles.notFoundHeading}`}>
             Recipe not found
           </Typography>
-          <Typography variant="body" className={styles.notFoundBody}>
+          <Typography variant="body" className={`${stateBox.body} ${styles.notFoundBody}`}>
             This recipe may have been deleted, or the link is incorrect.
           </Typography>
           <Link

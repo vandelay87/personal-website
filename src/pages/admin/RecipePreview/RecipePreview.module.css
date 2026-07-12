@@ -204,12 +204,14 @@
 /* ── Not-found state ──────────────────────────────────────────────────
    Matches Admin Recipe Preview.dc.html's not-found block (lines 121-133):
    icon box + h1 + body + ghost back-link, centered. Design literal has no
-   border on its own outer wrapper, but this composes the shared
+   border on its own outer wrapper, but this uses the shared
    stateBox.module.css `.box` shape (same "adapt the established pattern,
    don't invent a new one" precedent as `.stateWrapper` above), sized/
-   centered per the design's own max-width:520px column. */
+   centered per the design's own max-width:520px column. stateBox is
+   imported directly in RecipePreview.tsx and composed in JS rather than
+   via `composes:` here, so Rollup can dedupe the shared rules across lazy
+   admin chunks. */
 .notFoundBox {
-  composes: box from '../../../styles/stateBox.module.css';
   max-width: 520px;
   margin-inline: auto;
   padding: clamp(56px, 9vw, 92px) 24px;
@@ -220,7 +222,6 @@
    the shared shape's default 52px icon, otherwise the same convention
    (surface fill, hairline border, muted icon color). */
 .notFoundIcon {
-  composes: icon from '../../../styles/stateBox.module.css';
   width: 54px;
   height: 54px;
   margin-bottom: 22px;
@@ -230,13 +231,11 @@
 }
 
 .notFoundHeading {
-  composes: heading from '../../../styles/stateBox.module.css';
   font-size: 24px;
   margin: 0 0 10px;
 }
 
 .notFoundBody {
-  composes: body from '../../../styles/stateBox.module.css';
   font-size: 15px;
   margin: 0 0 26px;
   max-width: 38ch;

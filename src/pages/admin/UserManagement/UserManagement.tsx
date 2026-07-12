@@ -13,6 +13,7 @@ import type { AdminRole, AdminUser } from '@models/auth'
 import { useCallback, useEffect, useId, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import stateBox from '../../../styles/stateBox.module.css'
 import styles from './UserManagement.module.css'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -159,7 +160,7 @@ const UserManagement = () => {
   const renderBody = () => {
     if (loading) {
       return (
-        <div className={styles.loadingBox}>
+        <div className={`${stateBox.box} ${stateBox.loading}`}>
           <Loading label="Loading users…" />
         </div>
       )
@@ -167,12 +168,12 @@ const UserManagement = () => {
 
     if (error) {
       return (
-        <div className={styles.errorBox}>
-          <div className={styles.errorIcon}>{iconWarning}</div>
-          <Typography variant="heading2" className={styles.errorHeading}>
+        <div className={`${stateBox.box} ${stateBox.error}`}>
+          <div className={`${stateBox.icon} ${stateBox.iconError}`}>{iconWarning}</div>
+          <Typography variant="heading2" className={stateBox.heading}>
             Couldn&apos;t load users
           </Typography>
-          <Typography variant="body" className={styles.errorBody}>
+          <Typography variant="body" className={`${stateBox.body} ${styles.errorBody}`}>
             Something went wrong reaching the server. Check your connection and try again.
           </Typography>
           <Button variant="outline" onClick={loadUsers} iconLeft={iconRetry}>

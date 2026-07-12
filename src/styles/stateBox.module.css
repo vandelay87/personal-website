@@ -4,6 +4,14 @@
    near-identical but independently re-typed, silently drifting on any
    future tweak. See issue #269.
 
+   Consumed by RecipeList/UserManagement/RecipePreview via a direct JS
+   import + classNames composed in JS, not via CSS Modules' `composes:
+   ... from`. A shared module reused only by independently lazy-loaded
+   consumers must be imported this way — `composes:` inlines the
+   referenced rules as literal text into each composing file at
+   CSS-transform time, so the bundler has no shared module instance to
+   dedupe and ships a full copy into every consumer's own chunk.
+
    Split across two layers, both registered in order in `src/index.css`
    (`@layer component-defaults, composed-overrides;`):
 
