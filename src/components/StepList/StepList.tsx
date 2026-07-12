@@ -2,6 +2,7 @@ import Button from '@components/Button'
 import { iconChevronDown, iconChevronUp, iconPlus, iconRemove } from '@components/icons'
 import ImageUpload from '@components/ImageUpload'
 import Input from '@components/Input'
+import List, { ListItem } from '@components/List'
 import Textarea from '@components/Textarea'
 import { useReorderableList } from '@hooks/useReorderableList'
 import { stepImageType, type RecipeImage, type Step } from '@models/recipe'
@@ -86,9 +87,9 @@ const StepList: FC<StepListProps> = ({
 
   return (
     <>
-      <ul className={styles.container}>
+      <List className={styles.container}>
         {steps.map((step, index) => (
-          <li key={step.stepId} className={styles.row}>
+          <ListItem key={step.stepId} className={styles.row}>
             <div className={styles.header}>
               <span className={styles.stepNumber}>{index + 1}</span>
               <div className={styles.actions}>
@@ -150,9 +151,9 @@ const StepList: FC<StepListProps> = ({
                 )}
               </div>
             )}
-          </li>
+          </ListItem>
         ))}
-      </ul>
+      </List>
       <Button onClick={handleAdd} variant="outline" iconLeft={iconPlus} className={styles.addButton}>
         Add step
       </Button>
