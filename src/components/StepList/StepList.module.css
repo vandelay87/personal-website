@@ -57,8 +57,8 @@
 
 /* `iconButtonHover`/`dangerIconButtonHover` (interactions.module.css)
    are composed directly in JS (see StepList.tsx) instead of via local
-   `.moveAction`/`.removeAction` classes — same rationale as
-   IngredientList.module.css's own doc comment. */
+   `.moveAction`/`.removeAction` classes — see interactions.module.css's
+   own header comment for why. */
 
 .actions .actionButton {
   width: 30px;

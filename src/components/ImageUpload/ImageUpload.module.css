@@ -12,12 +12,8 @@
 
 /* ── Empty state — cover (large dropzone) ─────────────────────── */
 /* `focusRing`/`uploadHover` (interactions.module.css) are composed in JS
-   (see ImageUpload.tsx) rather than via `composes:` here — ImageUpload
-   is only used within the (lazy) RecipeEditor page today, but
-   interactions.module.css has no JS import of its own, so `composes:`
-   would inline a full copy here on top of the shared chunk RecipeEditor
-   already pulls in for its own directly-composed classes (see
-   RecipeList.module.css's `.actionButton` for the pattern). */
+   (see ImageUpload.tsx) rather than via `composes:` here — see
+   interactions.module.css's own header comment for why. */
 .dropzone {
   display: flex;
   flex-direction: column;

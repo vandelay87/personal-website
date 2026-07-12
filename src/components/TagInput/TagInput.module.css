@@ -65,10 +65,7 @@
    src/styles/formField.module.css for the full rationale (issue #244),
    including why transition stays local. `fieldFocusRing`
    (interactions.module.css) is composed in JS instead (see TagInput.tsx)
-   — TagInput is only used within the (lazy) RecipeEditor page today,
-   but interactions.module.css has no JS import of its own, so
-   `composes:` here would inline a full copy on top of the shared chunk
-   RecipeEditor already pulls in. */
+   — see interactions.module.css's own header comment for why. */
 .input {
   composes: field from '../../styles/formField.module.css';
   transition: border-color var(--duration-fast) var(--easing-default);

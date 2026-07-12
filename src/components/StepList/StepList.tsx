@@ -10,6 +10,9 @@ import { useCallback, type FC } from 'react'
 import interactions from '../../styles/interactions.module.css'
 import styles from './StepList.module.css'
 
+const moveActionClassName = `${interactions.iconButtonHover} ${styles.actionButton}`
+const removeActionClassName = `${interactions.dangerIconButtonHover} ${styles.actionButton}`
+
 export interface StepListProps {
   steps: Step[]
   onChange: (steps: Step[]) => void
@@ -94,7 +97,7 @@ const StepList: FC<StepListProps> = ({
                   ariaLabel={`Move up step ${index + 1}`}
                   variant="outline"
                   disabled={index === 0}
-                  className={`${interactions.iconButtonHover} ${styles.actionButton}`}
+                  className={moveActionClassName}
                 >
                   {iconChevronUp}
                 </Button>
@@ -103,7 +106,7 @@ const StepList: FC<StepListProps> = ({
                   ariaLabel={`Move down step ${index + 1}`}
                   variant="outline"
                   disabled={index === steps.length - 1}
-                  className={`${interactions.iconButtonHover} ${styles.actionButton}`}
+                  className={moveActionClassName}
                 >
                   {iconChevronDown}
                 </Button>
@@ -112,7 +115,7 @@ const StepList: FC<StepListProps> = ({
                   ariaLabel={`Remove step ${index + 1}`}
                   variant="outline"
                   disabled={steps.length <= 1}
-                  className={`${interactions.dangerIconButtonHover} ${styles.actionButton}`}
+                  className={removeActionClassName}
                 >
                   {iconRemove}
                 </Button>

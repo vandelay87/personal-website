@@ -61,10 +61,8 @@
 }
 
 /* `focusRing` (interactions.module.css) is composed in JS rather than
-   via `composes:` here, so Rollup can dedupe the shared rules across
-   lazy admin chunks instead of inlining a full copy into each of
-   RecipeList/RecipeEditor/UserManagement's independently lazy-loaded
-   chunks (same rationale as stateBox.module.css). */
+   via `composes:` here — see interactions.module.css's own header
+   comment for why. */
 .closeButton {
   background: transparent;
   border: none;

@@ -141,11 +141,10 @@
 }
 
 /* `tagChipBase` (text.module.css) is composed in JS rather than via
-   `composes:` here, so Rollup can dedupe the shared rules across lazy
-   admin chunks — see `.actionButton` below for the same rationale. This
-   design's chip padding (3px 8px) is smaller than RecipeDetailView's tag
-   (5px 10px) — each `tagChipBase` consumer sets its own padding, per
-   that composable's own doc comment. */
+   `composes:` here — see text.module.css's own header comment for why.
+   This design's chip padding (3px 8px) is smaller than
+   RecipeDetailView's tag (5px 10px) — each `tagChipBase` consumer sets
+   its own padding, per that composable's own doc comment. */
 .tagChip {
   padding: 3px 8px;
   display: inline-block;
@@ -170,11 +169,8 @@
 
 /* `.actionButton` carries no CSS of its own — `focusRing`
    (interactions.module.css) is composed in JS instead of via
-   `composes:`, so Rollup can dedupe the shared rules across lazy admin
-   chunks rather than inlining a full copy into each of
-   RecipeList/RecipeEditor/UserManagement's independently lazy-loaded
-   chunks (same rationale as stateBox.module.css, see that file's own
-   doc comment). The descendant-scoped rule below carries the
+   `composes:` — see interactions.module.css's own header comment for
+   why. The descendant-scoped rule below carries the
    specificity-tie fix (same rationale as `.header .newButton` above)
    and everything else. */
 .rowActions .actionButton {

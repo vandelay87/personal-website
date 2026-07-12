@@ -52,14 +52,12 @@
 
 /* `iconButtonHover`/`dangerIconButtonHover` (interactions.module.css)
    are composed directly in JS (see IngredientList.tsx) instead of via
-   local `.moveAction`/`.removeAction` classes — IngredientList is only
-   used within the (lazy) RecipeEditor page today, but
-   interactions.module.css has no JS import of its own, so `composes:`
-   here would inline a full copy on top of the shared chunk RecipeEditor
-   already pulls in. Each icon button still picks up
-   exactly one hover treatment: reordering buttons get the neutral
-   hover, remove gets the danger hover — never both on the same element,
-   so there's no same-specificity `:hover` rule to referee. */
+   local `.moveAction`/`.removeAction` classes — see
+   interactions.module.css's own header comment for why. Each icon
+   button still picks up exactly one hover treatment: reordering buttons
+   get the neutral hover, remove gets the danger hover — never both on
+   the same element, so there's no same-specificity `:hover` rule to
+   referee. */
 
 /* Descendant-scoped (not a bare `.actionButton` rule) to safely out-rank
    Button's own `.button`/`.outline` single-class selectors regardless of

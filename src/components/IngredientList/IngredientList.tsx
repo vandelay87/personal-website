@@ -8,6 +8,9 @@ import type { FC } from 'react'
 import interactions from '../../styles/interactions.module.css'
 import styles from './IngredientList.module.css'
 
+const moveActionClassName = `${interactions.iconButtonHover} ${styles.actionButton}`
+const removeActionClassName = `${interactions.dangerIconButtonHover} ${styles.actionButton}`
+
 export interface IngredientListProps {
   ingredients: Ingredient[]
   onChange: (ingredients: Ingredient[]) => void
@@ -76,7 +79,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
                 ariaLabel={`Move up ingredient ${index + 1}`}
                 variant="outline"
                 disabled={index === 0}
-                className={`${interactions.iconButtonHover} ${styles.actionButton}`}
+                className={moveActionClassName}
               >
                 {iconChevronUp}
               </Button>
@@ -85,7 +88,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
                 ariaLabel={`Move down ingredient ${index + 1}`}
                 variant="outline"
                 disabled={index === ingredients.length - 1}
-                className={`${interactions.iconButtonHover} ${styles.actionButton}`}
+                className={moveActionClassName}
               >
                 {iconChevronDown}
               </Button>
@@ -94,7 +97,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
                 ariaLabel={`Remove ingredient ${index + 1}`}
                 variant="outline"
                 disabled={ingredients.length <= 1}
-                className={`${interactions.dangerIconButtonHover} ${styles.actionButton}`}
+                className={removeActionClassName}
               >
                 {iconRemove}
               </Button>

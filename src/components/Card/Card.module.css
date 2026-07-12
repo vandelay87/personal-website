@@ -13,13 +13,8 @@
 }
 
 /* `surfaceHover`/`focusRing` (interactions.module.css) are composed in
-   JS (see Card.tsx) rather than via `composes:` here. Card is currently
-   only used by the (lazy) Login page, but interactions.module.css has
-   no JS import of its own anywhere in the codebase — `composes:`
-   inlines its rules as literal text at CSS-transform time (ICSS import
-   semantics), so any independently lazy-loaded consumer duplicates a
-   full copy with no bundler-chunk-addressable module to dedupe against
-   (same rationale as stateBox.module.css). */
+   JS (see Card.tsx) rather than via `composes:` here — see
+   interactions.module.css's own header comment for why. */
 .hover {
   transition: background-color var(--duration-fast) var(--easing-default);
 }

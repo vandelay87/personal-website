@@ -19,7 +19,26 @@
    no `backdrop-filter` `@supports` fallback here: nothing in scope today
    uses `backdrop-filter` (the sticky header's blur, and its solid-bg
    fallback, land with the Header rebuild in issue #224) — see the note
-   above `.focusRing` for the fallback pattern to reuse when that lands. */
+   above `.focusRing` for the fallback pattern to reuse when that lands.
+
+   `composes: x from` inlines this file's rules as literal text into the
+   composing file at CSS-transform time (ICSS import semantics) — there is
+   no bundler-chunk-addressable module for the composed portion, since this
+   file has no JS import of its own. That's harmless for a consumer that's
+   part of a chunk Rollup already treats as shared (an eagerly-loaded file,
+   or the sole lazy chunk that ever needs it) — one inlined copy, same as
+   any other CSS. It becomes a real bug when two or more consumers are each
+   independently `lazy()`-loaded with no eager common ancestor: every rule
+   this file contributes gets duplicated verbatim into each of those
+   separate chunks. When adding a new consumer, check whether it lands in
+   that situation; if so, don't `composes` from this file — import it
+   directly as a real JS module in the consumer's own `.tsx` and compose
+   classNames at render time instead (`import interactions from
+   '.../interactions.module.css'`, then e.g. `` `${interactions.focusRing}
+   ${styles.button}` ``), which gives Rollup a genuine shared module to
+   hoist into its own chunk. See RecipeList/RecipeEditor/UserManagement/
+   Card for the JS-import pattern, and Button/Link/Header for consumers
+   correctly left on `composes:` because they don't hit this. */
 
 /* ── Links — icon nudge ──────────────────────────────────────
    Apply `linkIcon` to the icon element, and one direction class to the
