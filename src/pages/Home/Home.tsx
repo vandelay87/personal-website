@@ -180,7 +180,8 @@ const Home: FC = () => {
                 icon="↗"
                 nudge="right"
                 rotateIcon
-                className={`${styles.cta} ${styles.ctaSolid}`}
+                variant="solid"
+                className={styles.cta}
               >
                 Browse all recipes
               </Link>
