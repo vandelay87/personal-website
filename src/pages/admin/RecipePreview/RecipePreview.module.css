@@ -149,9 +149,7 @@
 .viewLink {
   font-size: 13px;
   padding: 8px 15px;
-  /* 9px: design literal — --radius-md (10px) is the nearest token but is
-     1px off. */
-  border-radius: 9px;
+  border-radius: var(--radius);
   gap: 7px;
 }
 
@@ -163,9 +161,7 @@
 .bannerActions .publishButton {
   padding: 8px 15px;
   font-size: 13px;
-  /* 9px: design literal — --radius-md (10px) is the nearest token but is
-     1px off. */
-  border-radius: 9px;
+  border-radius: var(--radius);
   gap: 7px;
 }
 
@@ -252,8 +248,6 @@
 .notFoundBackLink {
   font-size: 14px;
   padding: 10px 18px;
-  /* 9px: design literal — --radius-md (10px) is the nearest token but is
-     1px off, same value as `.editLink`/`.viewLink`/`.publishButton` above. */
-  border-radius: 9px;
+  border-radius: var(--radius);
   gap: 7px;
 }

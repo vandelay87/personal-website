@@ -144,6 +144,24 @@ for the cases above would have visibly broken the component (dialog/card nearly 
 width). That's why they were kept as flagged literals rather than forced onto `--max-w-article`
 at the time — #233 is the "later" this note referred to.
 
+### 3d. `--radius` gap fill
+
+The radius scale (`--radius-sm` 6px / `--radius-md` 10px / `--radius-lg` 12px / `--radius-xl`
+16px / `--radius-2xl` 18px / `--radius-full` 999px) had no step between `--radius-sm` and
+`--radius-md`, so consumers whose design literal fell in that gap were kept as hardcoded `8px`
+or `9px` with a "design literal, nearest token is Npx off" comment — flagged during #230's
+`/simplify` review.
+
+| Consumer | Old | Role | Resolution |
+|---|---|---|---|
+| `TagInput.module.css` `.chip`, `IngredientList.module.css`/`StepList.module.css`/`RecipeList.module.css` `.actionButton`, `UserManagement.module.css` `.removeAction` | `8px` literal | Small action buttons / chips | **Resolved (issue #344):** exact match onto the new token, no visual change. |
+| `UserManagement.module.css` `.roleSeg`, `RecipePreview.module.css` `.editLink`/`.viewLink`/`.publishButton`/`.notFoundBackLink` | `9px` literal | Segmented control / pill buttons | **Resolved (issue #344):** converged onto the same token; a real but accepted 1px visual change (9px → 8px). |
+
+**Resolved (issue #344):** the design system gained `--radius` (bare, unsuffixed — same
+base-tier naming convention as `--border-width`), 8px, the exact arithmetic midpoint of
+`--radius-sm` and `--radius-md`. All of the above call sites now reference `var(--radius)`;
+their "nearest token is Npx off" comments no longer apply and were removed.
+
 ## 4. Meaning flips (name unchanged, semantics changed)
 
 These keep their old name but now mean something different — a consumer that didn't change

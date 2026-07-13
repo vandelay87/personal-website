@@ -21,15 +21,14 @@
   gap: var(--space-2);
 }
 
-/* Tag's own padding (--space-1/--space-3, symmetric) and radius
-   (--radius-sm, 6px) are close but not an exact match for this design's
-   literal chip shape (5px 7px 5px 11px asymmetric padding, 8px radius) —
-   scoped under `.chips` so it reliably outranks Tag's own bare `.tag`
-   class regardless of CSS import order, same specificity-tie fix used
-   throughout this epic. */
+/* Tag's own padding (--space-1/--space-3, symmetric) is close but not an
+   exact match for this design's literal chip shape (5px 7px 5px 11px
+   asymmetric padding) — scoped under `.chips` so it reliably outranks
+   Tag's own bare `.tag` class regardless of CSS import order, same
+   specificity-tie fix used throughout this epic. */
 .chips .chip {
   padding: 5px 7px 5px 11px;
-  border-radius: 8px;
+  border-radius: var(--radius);
 }
 
 /* Tag exposes its remove button via the `removeClassName` prop (issue #265),
