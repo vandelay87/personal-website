@@ -82,8 +82,13 @@
    rule always wins over a layered one regardless of specificity, so this
    couldn't live in the layer next to the base `.link` rule the way
    `.ghost:hover`/`.solid:hover` do (those have no unlayered tone class to
-   compete with). */
-.link:hover {
+   compete with).
+   Excludes .ghost/.solid: those variants own their hover color entirely
+   (layered `.ghost:hover`/`.solid:hover` above) — .solid's white text is
+   meant to stay white on hover (just a slight opacity dim), and without
+   this exclusion the unlayered rule here would win regardless of layer
+   order and repaint it accent-blue instead. */
+.link:hover:not(.ghost):not(.solid) {
   color: var(--color-primary);
 }
 
