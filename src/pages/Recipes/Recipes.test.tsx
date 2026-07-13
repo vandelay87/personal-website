@@ -59,10 +59,11 @@ const mockTags: Tag[] = [
   { tag: 'Spicy', count: 1 },
 ]
 
-const renderRecipes = (initialRoute = '/recipes') =>
+const renderRecipes = (initialRoute = '/recipes', { withLocation = false } = {}) =>
   render(
     <MemoryRouter initialEntries={[initialRoute]}>
       <Recipes />
+      {withLocation && <LocationDisplay />}
     </MemoryRouter>
   )
 
@@ -103,12 +104,7 @@ describe('Recipes page', () => {
   })
 
   it('clicking a tag chip writes ?tag=<tag> to the URL', async () => {
-    render(
-      <MemoryRouter initialEntries={['/recipes']}>
-        <Recipes />
-        <LocationDisplay />
-      </MemoryRouter>
-    )
+    renderRecipes('/recipes', { withLocation: true })
 
     await waitFor(() => {
       expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
@@ -124,12 +120,7 @@ describe('Recipes page', () => {
   })
 
   it('clicking the active tag chip again clears ?tag from the URL', async () => {
-    render(
-      <MemoryRouter initialEntries={['/recipes?tag=Italian']}>
-        <Recipes />
-        <LocationDisplay />
-      </MemoryRouter>
-    )
+    renderRecipes('/recipes?tag=Italian', { withLocation: true })
 
     await waitFor(() => {
       expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
