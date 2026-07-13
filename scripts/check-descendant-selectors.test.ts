@@ -50,6 +50,9 @@ const LINK_CSS = `
 const TYPOGRAPHY_LAYERED = extractTopLevelClassNames(findLayerBlock(TYPOGRAPHY_CSS, 'component-defaults')!)
 const LINK_LAYERED = extractTopLevelClassNames(findLayerBlock(LINK_CSS, 'component-defaults')!)
 
+const check = (tsxSource: string, cssSource: string) =>
+  checkPair({ tsxSource, cssSource, typographyLayered: TYPOGRAPHY_LAYERED, linkLayered: LINK_LAYERED })
+
 describe('findLayerBlock / extractTopLevelClassNames', () => {
   it('extracts the layered class names from a @layer component-defaults block', () => {
     expect(TYPOGRAPHY_LAYERED).toEqual(new Set(['heading1', 'body', 'label']))
@@ -147,12 +150,7 @@ describe('checkPair — true positive (the anti-pattern this gate exists to catc
     `
     const cssSource = '.someParent .someName {\n  font-weight: bold;\n}\n'
 
-    const findings = checkPair({
-      tsxSource,
-      cssSource,
-      typographyLayered: TYPOGRAPHY_LAYERED,
-      linkLayered: LINK_LAYERED,
-    })
+    const findings = check(tsxSource, cssSource)
 
     expect(findings).toHaveLength(1)
     expect(findings[0]).toMatchObject({
@@ -172,12 +170,7 @@ describe('checkPair — true positive (the anti-pattern this gate exists to catc
     `
     const cssSource = '.header .newButton {\n  padding: 10px;\n}\n'
 
-    const findings = checkPair({
-      tsxSource,
-      cssSource,
-      typographyLayered: TYPOGRAPHY_LAYERED,
-      linkLayered: LINK_LAYERED,
-    })
+    const findings = check(tsxSource, cssSource)
 
     expect(findings).toHaveLength(1)
     expect(findings[0]).toMatchObject({
@@ -215,12 +208,7 @@ describe('checkPair — named false-positive cases', () => {
       }
     `
 
-    const findings = checkPair({
-      tsxSource,
-      cssSource,
-      typographyLayered: TYPOGRAPHY_LAYERED,
-      linkLayered: LINK_LAYERED,
-    })
+    const findings = check(tsxSource, cssSource)
 
     expect(findings).toHaveLength(0)
   })
@@ -235,12 +223,7 @@ describe('checkPair — named false-positive cases', () => {
     `
     const cssSource = '.small .inner {\n  border-radius: 8px;\n}\n'
 
-    const findings = checkPair({
-      tsxSource,
-      cssSource,
-      typographyLayered: TYPOGRAPHY_LAYERED,
-      linkLayered: LINK_LAYERED,
-    })
+    const findings = check(tsxSource, cssSource)
 
     expect(findings).toHaveLength(0)
   })
@@ -260,12 +243,7 @@ describe('checkPair — named false-positive cases', () => {
     `
     const cssSource = '.rowActions .actionButton {\n  color: gray;\n}\n'
 
-    const findings = checkPair({
-      tsxSource,
-      cssSource,
-      typographyLayered: TYPOGRAPHY_LAYERED,
-      linkLayered: LINK_LAYERED,
-    })
+    const findings = check(tsxSource, cssSource)
 
     expect(findings).toHaveLength(0)
   })

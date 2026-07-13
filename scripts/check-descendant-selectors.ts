@@ -28,6 +28,13 @@
  * Recipes.module.css's `.eyebrow`-style composition) is a different
  * mechanism — not JSX-visible the same way — and is out of scope here. See
  * the section below for why extending to it isn't a small change.
+ *
+ * Known limitation: `parseTagUsage`'s variant extraction only matches a
+ * string-literal `variant="X"`. A dynamic `variant={cond ? 'a' : 'b'}` usage
+ * would silently resolve to `variant: undefined` — indistinguishable from
+ * "no variant applied" — so a compound selector tied to such a usage would
+ * not be flagged. No such usage exists in the codebase today, but if one is
+ * introduced this gate won't catch it.
  */
 
 import { readFileSync } from 'node:fs'
@@ -162,9 +169,23 @@ export const extractTopLevelClassNames = (cssBlock: string): Set<string> => {
  * combinators (`>`, `+`, `~`) and 3+-level nesting are intentionally excluded
  * — those aren't the shape this anti-pattern takes in this repo.
  */
-export const findCompoundSelectorsForClass = (cssText: string, className: string): SelectorMatch[] => {
+export const findCompoundSelectorsForClass = (cssText: string, className: string): SelectorMatch[] =>
+  findCompoundSelectorsForClassInGroups(iterateSelectorGroups(cssText), className)
+
+/**
+ * Same matching logic as `findCompoundSelectorsForClass`, but operates on an
+ * already-parsed `SelectorGroup[]` — lets callers that need to check several
+ * class names against the same CSS text (e.g. `checkPair`'s nested loop over
+ * JSX class names) parse the CSS once and filter per class name, instead of
+ * re-running `iterateSelectorGroups` (a full comment-strip + split-on-`{`
+ * parse) on every call.
+ */
+export const findCompoundSelectorsForClassInGroups = (
+  groups: SelectorGroup[],
+  className: string
+): SelectorMatch[] => {
   const matches: SelectorMatch[] = []
-  for (const { selectors, index } of iterateSelectorGroups(cssText)) {
+  for (const { selectors, index } of groups) {
     for (const selector of selectors) {
       const words = selector.split(/\s+/)
       if (words.length !== 2) continue
@@ -266,6 +287,7 @@ export const checkPair = (params: {
 }): Array<Omit<Finding, 'tsxFile' | 'cssFile'>> => {
   const { tsxSource, cssSource, typographyLayered, linkLayered } = params
   const findings: Array<Omit<Finding, 'tsxFile' | 'cssFile'>> = []
+  const cssGroups = iterateSelectorGroups(cssSource)
 
   const collect = (component: 'Typography' | 'Link', layered: Set<string>) => {
     for (const tag of extractJsxTags(tsxSource, component)) {
@@ -277,7 +299,7 @@ export const checkPair = (params: {
       if (!variant || !layered.has(variant)) continue
 
       for (const className of classNames) {
-        for (const { selector, index } of findCompoundSelectorsForClass(cssSource, className)) {
+        for (const { selector, index } of findCompoundSelectorsForClassInGroups(cssGroups, className)) {
           findings.push({
             tsxLine: lineOf(tsxSource, tag.index),
             cssLine: lineOf(cssSource, index),
