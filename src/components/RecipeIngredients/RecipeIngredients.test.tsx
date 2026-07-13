@@ -70,6 +70,16 @@ describe('RecipeIngredients checkboxes', () => {
     expect(flourCheckbox).not.toBeChecked()
   })
 
+  it('toggling one ingredient does not affect the checked state of the others', () => {
+    render(<RecipeIngredients ingredients={mockIngredients} slug="spaghetti-bolognese" />)
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'flour 200 g' }))
+
+    expect(screen.getByRole('checkbox', { name: 'flour 200 g' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'sugar 100 g' })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'butter 50 g' })).not.toBeChecked()
+  })
+
   it('persists checked state to localStorage keyed by the recipe slug', () => {
     render(<RecipeIngredients ingredients={mockIngredients} slug="spaghetti-bolognese" />)
 

@@ -1,10 +1,15 @@
 import { fetchRecipes, fetchTags } from '@api/recipes'
 import type { RecipeIndex, Tag } from '@models/recipe'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { axe } from 'vitest-axe'
 import Recipes from './Recipes'
+
+const LocationDisplay = () => {
+  const location = useLocation()
+  return <div data-testid="location">{location.pathname}{location.search}</div>
+}
 
 vi.mock('@api/recipes', () => ({
   fetchRecipes: vi.fn(),
@@ -95,6 +100,45 @@ describe('Recipes page', () => {
     })
     expect(screen.getByText('Italian Pasta Carbonara')).toBeInTheDocument()
     expect(screen.queryByText('Thai Green Curry')).not.toBeInTheDocument()
+  })
+
+  it('clicking a tag chip writes ?tag=<tag> to the URL', async () => {
+    render(
+      <MemoryRouter initialEntries={['/recipes']}>
+        <Recipes />
+        <LocationDisplay />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /italian/i }))
+
+    expect(screen.getByTestId('location')).toHaveTextContent('/recipes?tag=Italian')
+    expect(screen.getByRole('button', { name: /italian/i })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    )
+  })
+
+  it('clicking the active tag chip again clears ?tag from the URL', async () => {
+    render(
+      <MemoryRouter initialEntries={['/recipes?tag=Italian']}>
+        <Recipes />
+        <LocationDisplay />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /italian/i }))
+
+    expect(screen.getByTestId('location')).toHaveTextContent('/recipes')
+    expect(screen.getByTestId('location').textContent).not.toMatch(/tag=/)
   })
 
   it('searches by keyword (title match)', async () => {
