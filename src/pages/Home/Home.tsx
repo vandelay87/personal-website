@@ -59,7 +59,7 @@ const LinkSection: FC<LinkSectionProps> = ({ headingId, eyebrow, allHref, rows }
       >
         {eyebrow}
       </Typography>
-      <Link to={allHref} icon="→" nudge="right" className={styles.sectionAll}>
+      <Link to={allHref} icon="↗" nudge="right" rotateIcon className={styles.sectionAll}>
         All
       </Link>
     </div>
@@ -177,8 +177,9 @@ const Home: FC = () => {
             <div className={styles.browseAll}>
               <Link
                 to="/recipes"
-                icon="→"
+                icon="↗"
                 nudge="right"
+                rotateIcon
                 className={`${styles.cta} ${styles.ctaSolid}`}
               >
                 Browse all recipes
