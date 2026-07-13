@@ -91,6 +91,12 @@
   line-height: 1.7;
   color: var(--color-text);
   margin: 0;
+  /* recipe.intro comes from a plain <textarea> in the editor — HTML
+     collapses newlines by default, so line breaks typed there were
+     silently lost on render. pre-line preserves them as line breaks
+     while still collapsing runs of spaces/tabs and wrapping normally
+     (unlike pre-wrap, which would also preserve extra spaces verbatim). */
+  white-space: pre-line;
 }
 
 .divider {

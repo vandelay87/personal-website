@@ -42,6 +42,13 @@
   line-height: 1.7;
   color: var(--color-text);
   margin: 0 0 var(--space-3);
+  /* step.text comes from a multi-line <Textarea> in the editor — HTML
+     collapses newlines by default, so line breaks typed there were
+     silently lost on render. pre-line preserves them as line breaks
+     while still collapsing runs of spaces/tabs and wrapping normally
+     (unlike pre-wrap, which would also preserve extra spaces verbatim);
+     same fix as RecipeDetailView's own .intro. */
+  white-space: pre-line;
 }
 
 .image {
