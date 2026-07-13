@@ -62,10 +62,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Fixed white, not --color-on-primary — same rationale as Tag's own
-     .active state (design hardcodes #fff on the accent fill regardless
-     of theme). */
-  color: #fff;
+  color: var(--color-on-accent-fixed);
   font-size: 10px;
   line-height: 1;
 }

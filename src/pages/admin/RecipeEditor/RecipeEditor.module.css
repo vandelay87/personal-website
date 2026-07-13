@@ -435,9 +435,7 @@
   border: var(--border-width-thick) solid var(--color-border);
   font-size: 10px;
   line-height: 1;
-  /* Fixed white, not --color-on-primary — same rationale as
-     RecipeIngredients' own checked checkbox tick. */
-  color: #fff;
+  color: var(--color-on-accent-fixed);
 }
 
 .checklistItem[data-done="true"] .checklistIcon {
