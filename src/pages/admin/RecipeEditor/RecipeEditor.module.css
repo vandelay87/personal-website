@@ -412,13 +412,37 @@
   color: var(--color-text);
 }
 
+/* Done items fade out rather than disappearing — the whole set of publish
+   requirements stays visible as a persistent progress checklist (see the
+   comment on computePublishChecklist in RecipeEditor.tsx). Same "already
+   handled" fade idiom as the public recipe page's checked-off ingredients
+   (RecipeIngredients.module.css); --color-text-faint-on-surface for the
+   same reason — .railCard sits on --color-surface, and plain
+   --color-text-faint fails WCAG AA there. */
+.checklistItem[data-done="true"] {
+  color: var(--color-text-faint-on-surface);
+}
+
 .checklistIcon {
   flex-shrink: 0;
   margin-top: 1px;
   width: 16px;
   height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--radius-full);
   border: var(--border-width-thick) solid var(--color-border);
+  font-size: 10px;
+  line-height: 1;
+  /* Fixed white, not --color-on-primary — same rationale as
+     RecipeIngredients' own checked checkbox tick. */
+  color: #fff;
+}
+
+.checklistItem[data-done="true"] .checklistIcon {
+  border-color: var(--color-success);
+  background: var(--color-success);
 }
 
 .previewWrap {
