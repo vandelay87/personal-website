@@ -67,9 +67,7 @@
   min-height: 0;
   flex-shrink: 0;
   padding: 0;
-  /* 8px: design literal — --radius-sm (6px) is the nearest token but is
-     2px off. */
-  border-radius: 8px;
+  border-radius: var(--radius);
   border-color: var(--color-border);
   background: var(--color-field);
   color: var(--color-text-muted);

@@ -140,8 +140,7 @@
   display: inline-flex;
   background: var(--color-field);
   border: var(--border-width) solid var(--color-border);
-  /* 9px: design literal, between --radius-sm (6px) and --radius-md (10px). */
-  border-radius: 9px;
+  border-radius: var(--radius);
   padding: 3px;
   gap: 2px;
 }
@@ -375,9 +374,7 @@
   color: var(--color-text-muted);
   background: transparent;
   border: var(--border-width) solid transparent;
-  /* 8px: design literal — --radius-sm (6px) is the nearest token but is
-     2px off — same value as RecipeList.module.css's `.actionButton`. */
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 6px 11px;
   gap: 6px;
   cursor: pointer;

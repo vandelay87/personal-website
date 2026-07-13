@@ -197,9 +197,7 @@
   color: var(--color-text-muted);
   background: transparent;
   border: var(--border-width) solid transparent;
-  /* 8px: design literal — --radius-sm (6px) is the nearest token but is
-     2px off. */
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 6px 10px;
   /* 6px: design literal, between --space-1 (4px) and --space-2 (8px). */
   gap: 6px;
