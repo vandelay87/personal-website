@@ -123,9 +123,9 @@ const Home: FC = () => {
           Full-stack engineer
         </Typography>
         <Typography variant="body" as="p" className={styles.bio}>
-          I build web applications with React, TypeScript, and AWS — from the
-          frontend down to the infrastructure that runs it. This site collects
-          some of what I&apos;ve built and written along the way.
+          I build beautiful, responsive web applications with React,
+          TypeScript, and modern web technologies — with a focus on
+          accessible, user-friendly experiences.
         </Typography>
         <div className={styles.ctaRow}>
           <a

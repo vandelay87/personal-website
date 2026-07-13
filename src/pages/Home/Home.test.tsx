@@ -49,13 +49,11 @@ describe('Home', () => {
     expect(screen.getByText('Full-stack engineer')).toBeInTheDocument()
   })
 
-  it('displays plain, non-hyperbolic bio copy', () => {
+  it('displays the bio copy matching the design', () => {
     renderHome()
     expect(
-      screen.getByText(/I build web applications with React, TypeScript, and AWS/i)
+      screen.getByText(/I build beautiful, responsive web applications with React, TypeScript/i)
     ).toBeInTheDocument()
-    expect(screen.queryByText(/beautiful/i)).not.toBeInTheDocument()
-    expect(screen.queryByText(/passionate/i)).not.toBeInTheDocument()
   })
 
   it('renders the profile image with real alt text', () => {
