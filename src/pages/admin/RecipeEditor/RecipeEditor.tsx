@@ -908,7 +908,7 @@ const RecipeEditor: FC = () => {
                     to={`/recipes/${form.slug}`}
                     icon={iconPreview}
                     iconSide="right"
-                    nudge="right"
+                    nudge="none"
                     className={styles.previewLink}
                   >
                     View live recipe
