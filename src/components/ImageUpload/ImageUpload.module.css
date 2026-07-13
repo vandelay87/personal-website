@@ -118,7 +118,17 @@
 .replaceButton:hover {
   color: var(--color-text);
   border-color: var(--color-border-strong);
-  background-color: var(--color-hover);
+  /* Not --color-hover: that's a near-transparent wash (rgba alpha ~0.02–0.04)
+     meant to tint an already-transparent/opaque-page-colored surface (e.g.
+     Button's own .outline, which is `background-color: transparent` at
+     rest). This button is opaque at rest specifically because it overlays
+     an arbitrary photo — swapping to a near-transparent background on
+     hover let the cover image show through almost unobstructed, reading as
+     "the background disappeared" rather than a hover highlight.
+     --color-field is reliably lighter than --color-bg in both themes
+     (#FFFFFF vs #FBFAF7 light; #1B1914 vs #141310 dark) and, unlike
+     --color-hover, stays fully opaque. */
+  background-color: var(--color-field);
 }
 
 @media (prefers-reduced-motion: reduce) {
