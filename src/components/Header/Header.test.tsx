@@ -72,6 +72,18 @@ describe('Header', () => {
       expect(screen.getByRole('link', { name: 'Users' })).toHaveAttribute('aria-current', 'page')
       expect(screen.getByRole('link', { name: 'Recipes' })).not.toHaveAttribute('aria-current')
     })
+
+    it('moves aria-current to the newly active link when navigating via click', () => {
+      renderWithRouter(<Header variant="admin" links={LINKS} />, { route: '/admin/recipes' })
+
+      expect(screen.getByRole('link', { name: 'Recipes' })).toHaveAttribute('aria-current', 'page')
+      expect(screen.getByRole('link', { name: 'Users' })).not.toHaveAttribute('aria-current')
+
+      fireEvent.click(screen.getByRole('link', { name: 'Users' }))
+
+      expect(screen.getByRole('link', { name: 'Users' })).toHaveAttribute('aria-current', 'page')
+      expect(screen.getByRole('link', { name: 'Recipes' })).not.toHaveAttribute('aria-current')
+    })
   })
 
   describe('logged-out variant', () => {

@@ -24,7 +24,8 @@ To write a new PRD, copy `docs/prds/template.md` and fill it in.
 - Each component/page has a co-located test file `<Name>.test.tsx`
 - Use path aliases: `@api/`, `@components/`, `@contexts/`, `@hooks/`, `@pages/`, `@models/` (→ `src/types/`)
 - Dark mode via `data-theme` attribute on the document root
-- Warm "paper" design (soft radii, hairline borders, Geist/JetBrains Mono) per `docs/prds/paper-redesign.md` (source of truth `docs/design/paper/`) — `--radius-none` no longer exists; pick from the soft radius scale (`--radius-sm/md/lg/xl/2xl/full`) per `docs/design/paper/token-migration.md`. The token layer (#218) has landed; component rebuilds are still landing across the rest of the epic (`epic/paper-redesign`).
+- Warm "paper" design (soft radii, hairline borders, Geist/JetBrains Mono) per `docs/prds/paper-redesign.md` (source of truth `docs/design/paper/`) — `--radius-none` no longer exists; pick from the soft radius scale (`--radius-sm/md/lg/xl/2xl/full`) per `docs/design/paper/token-migration.md`. The paper redesign epic (`epic/paper-redesign`) is complete — the token layer (#218) and all component rebuilds have landed.
+- Accessibility test bar: `vitest-axe` + `eslint-plugin-jsx-a11y` are the project's standard for a11y coverage. New components/pages that render meaningful content should follow the pattern already used across `Home`, `RecipeDetailView`, `RecipeList`, `Recipes`, `Blog`/`BlogPost`, `Apps`, and `Login`: `import { axe } from 'vitest-axe'` and `expect(await axe(container)).toHaveNoViolations()` on the key rendered states.
 - Use const arrow functions, not function declarations — enforced by ESLint (`func-style: expression`)
 - After modifying TSX files, run `pnpm exec eslint --fix` on changed files to auto-fix import order
 - Before creating new UI elements, check `src/components/` for existing reusable components (Image, Typography, Button, Card, Link, Loading, etc.). Always prefer existing components over raw HTML tags.

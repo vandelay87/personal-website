@@ -36,6 +36,12 @@
 }
 
 .imageWrapper > figure > div {
+  /* Image's own container div has a 12px radius on all four corners by
+     default (for standalone use) — here it sits flush at the top of a
+     card whose own overflow:hidden already rounds the top edge, so the
+     container's radius only ever shows as an unwanted rounded seam where
+     the image meets the body below. Flattened to a plain rect; the card's
+     outer radius handles the top corners — same fix as RecipeCard.module.css. */
   border: none;
   border-radius: 0;
 }
