@@ -252,6 +252,8 @@
 .notFoundBackLink {
   font-size: 14px;
   padding: 10px 18px;
+  /* 9px: design literal — --radius-md (10px) is the nearest token but is
+     1px off, same value as `.editLink`/`.viewLink`/`.publishButton` above. */
   border-radius: 9px;
   gap: 7px;
 }

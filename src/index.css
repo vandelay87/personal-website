@@ -96,7 +96,14 @@ svg[id^="mermaid-"] {
    way to beat a selector this stylesheet structurally cannot match.
    Targeting the tag names directly (not mermaid's class names)
    catches every text-bearing wrapper mermaid uses across node/edge/
-   cluster labels without needing to track each one's exact class. */
+   cluster labels without needing to track each one's exact class.
+   Literal #000 (not a --color-* token) is required for both properties:
+   this rule only exists to force mermaid's own inline `color:#333` back
+   down to pure black as the pre-invert input, so the filter above lands
+   on near-white text — any warm-toned token would invert to an off
+   color, not white. Known, permanent exception to the "no hardcoded
+   brutalist literal" grep in token-migration.md §6 — unrelated to the
+   old neo-brutalist system, added after that migration (see §5). */
 [data-theme="dark"] svg[id^="mermaid-"] span,
 [data-theme="dark"] svg[id^="mermaid-"] p,
 [data-theme="dark"] svg[id^="mermaid-"] text,

@@ -155,7 +155,9 @@
   background: transparent;
   border: none;
   padding: 8px 16px;
-  border-radius: 6px;
+  /* Small toggle chip inside the segmented control → --radius-sm role
+     (docs/design/paper/token-migration.md §3a), and 6px is an exact match. */
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background var(--duration-fast) var(--easing-default),
     color var(--duration-fast) var(--easing-default);
@@ -311,6 +313,8 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 2px 7px;
+  /* 5px: design literal — --radius-sm (6px) is the nearest token but is
+     1px off. */
   border-radius: 5px;
   display: inline-block;
 }
@@ -371,6 +375,8 @@
   color: var(--color-text-muted);
   background: transparent;
   border: var(--border-width) solid transparent;
+  /* 8px: design literal — --radius-sm (6px) is the nearest token but is
+     2px off — same value as RecipeList.module.css's `.actionButton`. */
   border-radius: 8px;
   padding: 6px 11px;
   gap: 6px;

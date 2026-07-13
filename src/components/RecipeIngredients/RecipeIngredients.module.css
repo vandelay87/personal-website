@@ -25,6 +25,8 @@
   height: 17px;
   margin: 0;
   border: 1.5px solid var(--color-border-strong);
+  /* 5px: design literal — --radius-sm (6px) is the nearest token but is
+     1px off. */
   border-radius: 5px;
   cursor: pointer;
   position: relative;

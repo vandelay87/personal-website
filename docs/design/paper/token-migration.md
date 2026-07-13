@@ -187,16 +187,38 @@ wouldn't catch them:
   - Mermaid's own dark theme (via rehype/MDX plugin config) would be the more "correct"
     long-term fix, but that's outside `src/**` CSS and outside this issue's scope.
 
+- **Mermaid dark-mode label-text fix** (added later, unrelated to this migration): mermaid's
+  own inline `<style>` tags set node/edge/cluster label text to `#333`, which reads as a
+  muddy mid-gray rather than near-white after the `invert(0.88)` filter above (measured: 51,51,51
+  only inverts to mid-gray, not the ~224,224,224 pure black gets). Fixed by forcing
+  `color`/`fill: #000 !important` on the label-bearing tag names (`span`/`p`/`text`/`tspan`)
+  inside `[data-theme="dark"] svg[id^="mermaid-"]`, so the pre-invert input is pure black and
+  the post-invert output is near-white. The `#000` here is a **required literal, not a token**
+  — the invert-filter math needs an exact pure-black input, and no `--color-*` token is pure
+  black — so it's a permanent, intentional exception to the §6 "no hardcoded brutalist literal"
+  grep, not a regression (it postdates this migration entirely).
+
 ## 6. Verification
 
 ```
 # No src/** file references a removed token:
-grep -rn -- "radius-none\|color-bg-subtle\|color-border-subtle\|color-primary-hover\|color-link-hover\|font-weight-extrabold\|max-w-xs\|max-w-sm\|max-w-md\|max-w-lg\|max-w-2xl" src
-# → no output
-
-# No hardcoded brutalist literals remain:
-grep -rniE "#000000|#000\b|invert\(1\)|[0-9]px [0-9]px 0" src
+grep -rn -- "radius-none\|color-bg-subtle\|color-border-subtle\|color-primary-hover\|color-link-hover\|font-weight-extrabold\|max-w-xs\|max-w-md\|max-w-lg\|max-w-2xl" src
 # → no output
 ```
 
-Both return clean as of this migration.
+`--max-w-sm` was dropped from this pattern (it was present at the original time of writing):
+issue #233 reinstated `--max-w-sm` as a legitimate current token (§3c) — it's no longer a
+removed token, so keeping it in this pattern would false-positive on its own real consumers
+(`ConfirmDialog`, `SocialCard`, `ToastProvider`).
+
+```
+# No hardcoded brutalist literals remain:
+grep -rniE "#000000|#000\b|invert\(1\)|[0-9]px [0-9]px 0" src
+# → src/index.css: one `invert(1)` match inside a comment (prose explaining what is
+#   *not* used, not code) and two `#000 !important` declarations (the mermaid
+#   dark-mode label-text fix documented above). Both are known, justified exceptions
+#   that postdate this migration — not brutalist regressions. No other output expected.
+```
+
+Both patterns are clean of genuine neo-brutalist-era CSS as of this migration; the
+`src/index.css` exceptions above are later, unrelated, and independently justified.
