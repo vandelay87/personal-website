@@ -211,20 +211,15 @@ interface PublishChecklistItem {
 // item rather than disappearing from the box). Per-step image warnings
 // below stay conditional (pushed only when there's an actual problem)
 // since they only apply to steps that have an image at all.
-const BASE_PUBLISH_CHECKLIST: { label: string; isDone: (form: FormState) => boolean }[] = [
-  { label: 'Title', isDone: (form) => !!form.title.trim() },
-  { label: 'Intro', isDone: (form) => !!form.intro.trim() },
-  { label: 'Cover image', isDone: (form) => form.coverImageProcessedAt !== undefined },
-  { label: 'Alt text', isDone: (form) => !!form.coverImageAlt.trim() },
-  { label: 'At least one ingredient', isDone: (form) => form.ingredients.some((ing) => ing.item.trim()) },
-  { label: 'At least one step', isDone: (form) => form.steps.some((s) => s.text.trim()) },
-]
-
 const computePublishChecklist = (form: FormState): PublishChecklistItem[] => {
-  const items: PublishChecklistItem[] = BASE_PUBLISH_CHECKLIST.map(({ label, isDone }) => ({
-    label,
-    done: isDone(form),
-  }))
+  const items: PublishChecklistItem[] = [
+    { label: 'Title', done: !!form.title.trim() },
+    { label: 'Intro', done: !!form.intro.trim() },
+    { label: 'Cover image', done: form.coverImageProcessedAt !== undefined },
+    { label: 'Alt text', done: !!form.coverImageAlt.trim() },
+    { label: 'At least one ingredient', done: form.ingredients.some((ing) => ing.item.trim()) },
+    { label: 'At least one step', done: form.steps.some((s) => s.text.trim()) },
+  ]
   form.steps.forEach((step, index) => {
     if (step.image && step.image.processedAt === undefined) {
       items.push({ label: `Step ${index + 1} image still processing`, done: false })
