@@ -101,7 +101,7 @@ describe('Blog', () => {
   it('renders the page heading', () => {
     renderBlog()
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Notes' })
+      screen.getByRole('heading', { level: 1, name: 'Archive' })
     ).toBeInTheDocument()
   })
 
