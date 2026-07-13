@@ -1,0 +1,11 @@
+{
+  "name": "Akli Aissat",
+  "short_name": "Akli Aissat",
+  "icons": [
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
