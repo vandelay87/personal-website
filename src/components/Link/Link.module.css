@@ -21,10 +21,6 @@
     transition: color var(--duration-fast) var(--easing-default);
   }
 
-  .link:hover {
-    color: var(--color-primary);
-  }
-
   /* Button/pill shapes several admin pages independently hand-rolled on top
      of plain Link — border/bg, radius, hover color-swap, transition, all
      re-derived per file (issue #270). Centralized here so consumers only
@@ -78,6 +74,16 @@
 }
 
 .accent {
+  color: var(--color-primary);
+}
+
+/* Unlayered (not in @layer component-defaults) so its specificity
+   (class + :hover) actually beats the tone rules above — an unlayered
+   rule always wins over a layered one regardless of specificity, so this
+   couldn't live in the layer next to the base `.link` rule the way
+   `.ghost:hover`/`.solid:hover` do (those have no unlayered tone class to
+   compete with). */
+.link:hover {
   color: var(--color-primary);
 }
 
