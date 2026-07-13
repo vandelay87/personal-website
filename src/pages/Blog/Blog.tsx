@@ -49,7 +49,7 @@ const Blog = () => {
         <Typography variant="caption" as="p" className={styles.eyebrow}>
           The blog
         </Typography>
-        <Typography variant="heading1">Blog</Typography>
+        <Typography variant="heading1">Notes</Typography>
         <Typography variant="bodyLarge">Posts coming soon.</Typography>
       </section>
     )
@@ -62,7 +62,7 @@ const Blog = () => {
           The blog
         </Typography>
         <Typography variant="heading1" className={styles.heading}>
-          Blog
+          Notes
         </Typography>
         <Typography variant="bodyLarge" className={styles.intro}>
           Thoughts on building things, technical deep-dives, and the lessons
