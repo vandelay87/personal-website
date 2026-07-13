@@ -15,7 +15,8 @@
     "sitemap-plugin.ts",
     "sitemap-plugin.test.ts",
     "index.html.test.ts",
-    "plugins/**/*.ts"
+    "plugins/**/*.ts",
+    "scripts/**/*.ts"
   ],
   "exclude": ["node_modules", "dist", "coverage"]
 }

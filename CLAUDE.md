@@ -31,6 +31,12 @@ To write a new PRD, copy `docs/prds/template.md` and fill it in.
 - Site images (cards, hero) live in `src/assets/` — imported via Vite, get hashed filenames and responsive srcSet
 - Blog post images live in `public/images/blog/` — referenced by URL string in MDX, served as-is, no Vite processing. Optimise manually before adding.
 
+## Greppable gates
+
+- `pnpm check:descendant-selectors` (`scripts/check-descendant-selectors.ts`, runs in CI after Lint) — flags stale `.parent .child` CSS descendant-selector specificity workarounds. These were only ever needed to out-specificity a bare override className before the underlying variant's base rule moved into `@layer component-defaults` (an unlayered rule always beats a layered one, so the extra specificity buys nothing once that happens) — manually rediscovered and fixed across issues #263–#336. Two independent checks, both wired into this one script/gate:
+  - The `variant`-prop pattern: JSX-aware, only flags a `.foo .Y` selector when the same JSX tag actually applies both `variant="X"` and `className={styles.Y}` and `X` is confirmed inside the layer, so it doesn't false-positive on coincidental class-name collisions (e.g. Callout's own `.label`) or on Link's default `tone` classes (deliberately unlayered, no `variant` prop passed). Components are discovered automatically (any `src/components/**/*.module.css` with a real `@layer component-defaults` at-rule; JSX tag name derived from the file's basename) rather than hardcoded — Typography and Link are found this way today, and Button will be picked up automatically once it migrates into the layer. Known gap: Tag has a real layer (`.remove`) but no `variant` prop at all (`active`/`removable` booleans instead), so it's discovered as a candidate but never flagged — a Tag-specific check would need different logic entirely and isn't attempted here.
+  - The `composes:`-based tie: a pure single-file CSS check (no JSX) for a consumer `.module.css` rule that `composes:` a variant from `src/styles/text.module.css` on a bare class, which also has a separate `.ancestor .thatClass` compound selector for the same class in the same file (the pre-#334 `Recipes.module.css` shape).
+
 ## Workflow
 
 - When completing issues that involve CSS, styling, or visual changes, use the `frontend-design` skill for implementation.

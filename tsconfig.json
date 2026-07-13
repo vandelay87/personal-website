@@ -24,6 +24,6 @@
     "skipLibCheck": true,
     "isolatedModules": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.mdx", "src/mdx.d.ts", "vite.config.ts", "plugins/**/*.ts", "tests/vitest-axe.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.mdx", "src/mdx.d.ts", "vite.config.ts", "plugins/**/*.ts", "tests/vitest-axe.d.ts", "scripts/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
