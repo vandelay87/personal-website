@@ -48,6 +48,30 @@ describe('RecipeSteps', () => {
     expect(screen.getByText('Let it cool')).toBeInTheDocument()
   })
 
+  it('renders each newline-separated sentence in step.text as its own paragraph', () => {
+    const multiLineSteps: Step[] = [
+      {
+        stepId: stepId1,
+        order: 1,
+        text: 'Preheat the oven.\nHeat a pan with oil.\nAdd the lardons and cook.',
+      },
+    ]
+
+    render(<RecipeSteps steps={multiLineSteps} slug={slug} />)
+
+    const preheat = screen.getByText('Preheat the oven.')
+    const heat = screen.getByText('Heat a pan with oil.')
+    const add = screen.getByText('Add the lardons and cook.')
+
+    expect(preheat.tagName).toBe('P')
+    expect(heat.tagName).toBe('P')
+    expect(add.tagName).toBe('P')
+    // Each sentence is its own element (not one blob with embedded
+    // newlines), so the tighter --space-3 margin applies per line.
+    expect(preheat).not.toBe(heat)
+    expect(heat).not.toBe(add)
+  })
+
   it('shows step image with alt text when image is present', () => {
     render(<RecipeSteps steps={mockSteps} slug={slug} />)
 

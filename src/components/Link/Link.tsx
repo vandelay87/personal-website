@@ -15,6 +15,13 @@ export interface LinkProps {
   iconSide?: 'left' | 'right'
   /** Direction the icon nudges on hover. @default 'right' */
   nudge?: 'left' | 'right' | 'up-right' | 'none'
+  /**
+   * Rotates the icon 45deg clockwise so a "↗" glyph reads as pointing
+   * right, while keeping a rightward (not diagonal) hover nudge — for CTAs
+   * that want the up-right arrow's visual weight/style without its
+   * diagonal direction.
+   */
+  rotateIcon?: boolean
   /** Button/pill shape. Omit for a plain link (default, unchanged). */
   variant?: 'ghost' | 'solid'
   ariaLabel?: string
@@ -37,6 +44,7 @@ const Link: FC<LinkProps> = ({
   iconSide = 'right',
   nudge = 'right',
   variant,
+  rotateIcon,
   ariaLabel,
   className: externalClassName,
 }) => {
@@ -61,7 +69,7 @@ const Link: FC<LinkProps> = ({
     .filter(Boolean)
     .join(' ')
 
-  const iconClassName = styles.icon
+  const iconClassName = rotateIcon ? styles.iconRotateRight : styles.icon
 
   const content = icon ? (
     <>

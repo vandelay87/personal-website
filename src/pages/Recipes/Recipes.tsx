@@ -19,7 +19,7 @@ const RecipesHero: FC<{ intro?: ReactNode }> = ({ intro }) => (
       From the Kitchen
     </Typography>
     <Typography variant="heading1" className={styles.heading}>
-      Things I keep coming back to.
+      The meals I cook on repeat.
     </Typography>
     {intro && (
       <Typography variant="bodyLarge" className={styles.intro}>

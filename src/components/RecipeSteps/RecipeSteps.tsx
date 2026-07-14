@@ -19,7 +19,14 @@ const RecipeSteps: FC<RecipeStepsProps> = ({ steps, slug }) => (
           {idx + 1}
         </span>
         <div className={styles.content}>
-          <Typography variant="body" className={styles.text}>{step.text}</Typography>
+          {step.text
+            .split('\n')
+            .filter((line) => line.trim())
+            .map((line, lineIdx) => (
+              <Typography key={lineIdx} variant="body" className={styles.text}>
+                {line}
+              </Typography>
+            ))}
           {step.image && (step.image.processedAt ? (
             <Image
               src={recipeImageUrl(slug, stepImageType(step.stepId), 'medium')}

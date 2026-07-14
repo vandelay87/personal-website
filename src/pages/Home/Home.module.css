@@ -105,26 +105,17 @@
   padding: var(--space-3) var(--space-6);
   border-radius: var(--radius-full);
   text-decoration: none;
+  /* `opacity` is only meaningful on the solid variant (RecipeList's own
+     `.newButton` has the identical comment/fix for the same reason): this
+     unlayered class overrides `.solid`'s own transition wholesale rather
+     than merging with it (a bare CSS `transition` shorthand always
+     replaces the whole property, layered or not), so `.solid:hover`'s
+     opacity dim would otherwise snap instantly instead of fading. */
   transition:
     background var(--duration-fast) var(--easing-default),
     color var(--duration-fast) var(--easing-default),
-    border-color var(--duration-fast) var(--easing-default);
-}
-
-.ctaSolid {
-  background: var(--color-btn-bg);
-  color: var(--color-btn-fg);
-  border: var(--border-width) solid var(--color-btn-bg);
-}
-
-.ctaSolid:hover {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  /* Without this, Link's own generic `.link:hover` rule (accent-blue
-     text) bleeds through onto the now-blue background, making the
-     label unreadable in both themes. #fff matches the design exactly
-     (hardcoded there too, not theme-dependent). */
-  color: #fff;
+    border-color var(--duration-fast) var(--easing-default),
+    opacity var(--duration-fast) var(--easing-default);
 }
 
 .ctaOutline {

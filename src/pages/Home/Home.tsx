@@ -59,7 +59,7 @@ const LinkSection: FC<LinkSectionProps> = ({ headingId, eyebrow, allHref, rows }
       >
         {eyebrow}
       </Typography>
-      <Link to={allHref} icon="→" nudge="right" className={styles.sectionAll}>
+      <Link to={allHref} icon="↗" nudge="right" rotateIcon className={styles.sectionAll}>
         All
       </Link>
     </div>
@@ -123,9 +123,9 @@ const Home: FC = () => {
           Full-stack engineer
         </Typography>
         <Typography variant="body" as="p" className={styles.bio}>
-          I build web applications with React, TypeScript, and AWS — from the
-          frontend down to the infrastructure that runs it. This site collects
-          some of what I&apos;ve built and written along the way.
+          I build beautiful, responsive web applications with React,
+          TypeScript, and modern web technologies — with a focus on
+          accessible, user-friendly experiences.
         </Typography>
         <div className={styles.ctaRow}>
           <a
@@ -177,9 +177,11 @@ const Home: FC = () => {
             <div className={styles.browseAll}>
               <Link
                 to="/recipes"
-                icon="→"
+                icon="↗"
                 nudge="right"
-                className={`${styles.cta} ${styles.ctaSolid}`}
+                rotateIcon
+                variant="solid"
+                className={styles.cta}
               >
                 Browse all recipes
               </Link>

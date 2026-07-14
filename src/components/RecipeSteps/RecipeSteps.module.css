@@ -37,6 +37,12 @@
    `@layer component-defaults` (Typography.module.css, #263), so this plain
    unlayered class deterministically wins without needing the old
    descendant-selector trick. */
+/* One `.text` per line (see RecipeSteps.tsx) rather than one block with
+   `white-space: pre-line` — matches the design's own step.lines[] model
+   (docs/design/paper/pages/Recipe.dc.html) exactly: a fixed --space-3
+   (12px) gap between sentences, distinct from the larger ~28px this
+   font-size/line-height would produce between wrapped *and* newline-
+   separated lines alike if they all lived in one pre-line block. */
 .text {
   font-size: 16.5px;
   line-height: 1.7;

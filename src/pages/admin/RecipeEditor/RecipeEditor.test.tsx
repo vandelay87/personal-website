@@ -575,6 +575,36 @@ describe('RecipeEditor page', () => {
         expect(screen.getByRole('button', { name: /publish/i })).not.toBeDisabled()
       })
     })
+
+    it('keeps Title/Intro visible (checked off) in the checklist once filled in, instead of dropping them', async () => {
+      const user = userEvent.setup()
+      renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /publish/i })).toBeInTheDocument()
+      })
+
+      await user.type(screen.getByRole('textbox', { name: /title/i }), 'My Recipe')
+      await user.type(screen.getByRole('textbox', { name: /intro/i }), 'A great recipe')
+
+      const publishButton = screen.getByRole('button', { name: /publish/i })
+      const describedBy = publishButton.getAttribute('aria-describedby')
+      const checklist = document.getElementById(describedBy as string)
+
+      await waitFor(() => {
+        const titleItem = within(checklist as HTMLElement).getByText('Title').closest('li')
+        const introItem = within(checklist as HTMLElement).getByText('Intro').closest('li')
+        expect(titleItem).toHaveAttribute('data-done', 'true')
+        expect(introItem).toHaveAttribute('data-done', 'true')
+        expect(titleItem?.textContent).toContain('✓')
+        expect(introItem?.textContent).toContain('✓')
+      })
+
+      // Still-missing items remain present and unchecked.
+      const coverItem = within(checklist as HTMLElement).getByText('Cover image').closest('li')
+      expect(coverItem).toHaveAttribute('data-done', 'false')
+      expect(coverItem?.textContent).not.toContain('✓')
+    })
   })
 
   describe('published-mode submit (Update)', () => {

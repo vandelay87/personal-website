@@ -198,23 +198,37 @@ const buildPatchPayload = (form: FormState): Partial<Recipe> => ({
   ...(isValidSlug(form.slug) ? { slug: form.slug } : {}),
 })
 
-const computeMissingFields = (form: FormState): string[] => {
-  const missing: string[] = []
-  if (!form.title.trim()) missing.push('Title')
-  if (!form.intro.trim()) missing.push('Intro')
-  if (form.coverImageProcessedAt === undefined) missing.push('Cover image')
-  if (!form.coverImageAlt.trim()) missing.push('Alt text')
-  if (!form.ingredients.some((ing) => ing.item.trim())) missing.push('At least one ingredient')
-  if (!form.steps.some((s) => s.text.trim())) missing.push('At least one step')
+interface PublishChecklistItem {
+  label: string
+  done: boolean
+}
+
+// The base requirements are always applicable to every recipe, so they're
+// listed unconditionally with a done/not-done state (design source: Admin
+// Recipe Editor.dc.html's `missing()`/`cl` mapping — every item is always
+// rendered and ticked off in place, never filtered down to only what's
+// outstanding, so a filled-in Title/Intro stays visible as a completed
+// item rather than disappearing from the box). Per-step image warnings
+// below stay conditional (pushed only when there's an actual problem)
+// since they only apply to steps that have an image at all.
+const computePublishChecklist = (form: FormState): PublishChecklistItem[] => {
+  const items: PublishChecklistItem[] = [
+    { label: 'Title', done: !!form.title.trim() },
+    { label: 'Intro', done: !!form.intro.trim() },
+    { label: 'Cover image', done: form.coverImageProcessedAt !== undefined },
+    { label: 'Alt text', done: !!form.coverImageAlt.trim() },
+    { label: 'At least one ingredient', done: form.ingredients.some((ing) => ing.item.trim()) },
+    { label: 'At least one step', done: form.steps.some((s) => s.text.trim()) },
+  ]
   form.steps.forEach((step, index) => {
     if (step.image && step.image.processedAt === undefined) {
-      missing.push(`Step ${index + 1} image still processing`)
+      items.push({ label: `Step ${index + 1} image still processing`, done: false })
     }
     if (step.image?.processedAt !== undefined && !step.image.alt?.trim()) {
-      missing.push(`Step ${index + 1} image alt text`)
+      items.push({ label: `Step ${index + 1} image alt text`, done: false })
     }
   })
-  return missing
+  return items
 }
 
 const draftFromCreated = (id: string, slug: string): Recipe => ({
@@ -448,8 +462,8 @@ const RecipeEditor: FC = () => {
 
   const slugValid = isValidSlug(form.slug)
 
-  const missingFields = computeMissingFields(form)
-  const canPublish = missingFields.length === 0 && slugValid
+  const publishChecklist = computePublishChecklist(form)
+  const canPublish = publishChecklist.every((item) => item.done) && slugValid
 
   const handlePublish = async () => {
     if (!form.id) return
@@ -851,10 +865,16 @@ const RecipeEditor: FC = () => {
                       aria-labelledby={`${MISSING_FIELDS_ID}-label`}
                       className={styles.checklist}
                     >
-                      {missingFields.map((field) => (
-                        <li key={field} className={styles.checklistItem}>
-                          <span className={styles.checklistIcon} aria-hidden="true" />
-                          <span>{field}</span>
+                      {publishChecklist.map((item) => (
+                        <li
+                          key={item.label}
+                          className={styles.checklistItem}
+                          data-done={item.done}
+                        >
+                          <span className={styles.checklistIcon} aria-hidden="true">
+                            {item.done ? '✓' : ''}
+                          </span>
+                          <span>{item.label}</span>
                         </li>
                       ))}
                     </ul>
@@ -883,7 +903,7 @@ const RecipeEditor: FC = () => {
                     to={`/recipes/${form.slug}`}
                     icon={iconPreview}
                     iconSide="right"
-                    nudge="right"
+                    nudge="none"
                     className={styles.previewLink}
                   >
                     View live recipe

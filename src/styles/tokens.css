@@ -85,6 +85,14 @@
   --color-primary:       #1F66E0;   /* links, focus, active filter, accents */
   --color-on-primary:    #FFFFFF;
   --color-link:          #1F66E0;
+  /* Fixed white, not --color-on-primary (which flips to dark text in dark
+     mode) — the design hardcodes #fff on small accent-filled glyphs (a
+     checkmark tick, an active tag chip) regardless of theme. Consolidates
+     what were 3 identical component-local #fff literals (Tag's .active,
+     RecipeIngredients' checked checkbox tick, RecipeEditor's checklist
+     tick), each previously cross-referencing the other two in comments,
+     into one shared token — same pattern as --color-success-on-tint above. */
+  --color-on-accent-fixed: #fff;
 
   /* Inverted button (primary CTA) */
   --color-btn-bg:        #1C1A16;
@@ -229,6 +237,7 @@
   --color-primary:       #6BA0FF;
   --color-on-primary:    #11151F;
   --color-link:          #6BA0FF;
+  --color-on-accent-fixed: #fff;
 
   --color-btn-bg:        #F3F0E8;
   --color-btn-fg:        #141310;

@@ -2,6 +2,22 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  /* Design wants checked-off ingredient text to visibly fade (design source:
+     docs/design/paper/pages/Recipe.dc.html's `--faint` color). Plain
+     --color-text-faint-on-surface can't be reused here: at ~4.75:1 against
+     --color-surface it's nearly indistinguishable from --color-text-muted
+     (~4.81:1), which is already this row's non-checked color — so the
+     "faded" state read as unchanged. This local override is tuned to
+     ~4.55:1, the lightest shade that still clears WCAG AA's 4.5:1 floor
+     against --color-surface, giving the most fade this surface allows.
+     Dark mode's existing faint-on-surface token already has enough gap
+     from muted (~4.71:1 vs ~6.68:1) to read as a visible fade, so it's
+     reused unchanged there. */
+  --checked-ingredient-color: #736D63;
+}
+
+:global([data-theme='dark']) .list {
+  --checked-ingredient-color: var(--color-text-faint-on-surface);
 }
 
 .item:not(:first-child) {
@@ -46,10 +62,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Fixed white, not --color-on-primary — same rationale as Tag's own
-     .active state (design hardcodes #fff on the accent fill regardless
-     of theme). */
-  color: #fff;
+  color: var(--color-on-accent-fixed);
   font-size: 10px;
   line-height: 1;
 }
@@ -65,8 +78,8 @@
   text-decoration: line-through;
   /* WCAG AA override: --color-text-faint fails 4.5:1 against this
      panel's --color-surface (4.35:1 light / 4.40:1 dark) — use the
-     shared --color-text-faint-on-surface token instead. */
-  color: var(--color-text-faint-on-surface);
+     locally-tuned --checked-ingredient-color instead (see .list). */
+  color: var(--checked-ingredient-color);
 }
 
 .qty {
@@ -77,7 +90,7 @@
 }
 
 .checkbox:checked ~ .qty {
-  color: var(--color-text-faint-on-surface);
+  color: var(--checked-ingredient-color);
 }
 
 @media (prefers-reduced-motion: reduce) {

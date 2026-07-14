@@ -77,8 +77,9 @@ const Apps: FC = () => {
           </Typography>
           <Link
             to="/blog"
-            icon="→"
+            icon="↗"
             nudge="right"
+            rotateIcon
             tone="accent"
             className={styles.readBlogLink}
           >
