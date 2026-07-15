@@ -24,13 +24,13 @@ const rootDir = dirname(fileURLToPath(import.meta.url))
 const collectCssModules = (
   mod: ModuleNode | undefined,
   visited: Set<string> = new Set(),
-  cssModules: Map<string, ModuleNode> = new Map()
-): Map<string, ModuleNode> => {
+  cssModules: Set<string> = new Set()
+): Set<string> => {
   if (!mod || visited.has(mod.url)) return cssModules
   visited.add(mod.url)
 
   if (isCSSRequest(mod.url)) {
-    cssModules.set(mod.url, mod)
+    cssModules.add(mod.url)
   }
 
   for (const imported of mod.importedModules) {
@@ -83,7 +83,13 @@ const collectInlineStyles = async (
     // never reaches index.css, and every component CSS Module's var(--...)
     // references resolve to nothing without it — the exact "unstyled" look
     // reported, despite component-level CSS already being inlined correctly.
-    const cssUrls = new Set([...cssModules.keys(), '/src/index.css'])
+    //
+    // Deliberately hardcoded rather than also walking entry-client.tsx's
+    // graph: that module only gets registered once the browser actually
+    // requests it, which happens after this response is sent — on a cold
+    // dev-server start that walk would find nothing, reintroducing this
+    // exact bug intermittently instead of fixing it deterministically.
+    const cssUrls = new Set([...cssModules, '/src/index.css'])
 
     const cssTexts = await Promise.all(
       [...cssUrls].map(async (url) => {
