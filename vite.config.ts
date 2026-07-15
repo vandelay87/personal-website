@@ -76,9 +76,18 @@ const collectInlineStyles = async (
     const entryMod = await server.moduleGraph.getModuleByUrl(entryUrl)
     const cssModules = collectCssModules(entryMod)
 
+    // index.css is entry-client.tsx's global stylesheet (tokens, fonts,
+    // resets, @layer ordering) — entry-server.tsx never imports it, since
+    // production SSR relies on the built <link> stylesheet for it instead.
+    // The dev module graph walk above starts from entry-server.tsx, so it
+    // never reaches index.css, and every component CSS Module's var(--...)
+    // references resolve to nothing without it — the exact "unstyled" look
+    // reported, despite component-level CSS already being inlined correctly.
+    const cssUrls = new Set([...cssModules.keys(), '/src/index.css'])
+
     const cssTexts = await Promise.all(
-      [...cssModules.values()].map(async (mod) => {
-        const directUrl = mod.url.includes('?') ? `${mod.url}&direct` : `${mod.url}?direct`
+      [...cssUrls].map(async (url) => {
+        const directUrl = url.includes('?') ? `${url}&direct` : `${url}?direct`
         // No { ssr: true } here despite this module being found via the SSR
         // module graph — passing it makes Vite route ?direct CSS requests
         // through ssrTransformScript (a JS parser) instead of the CSS
