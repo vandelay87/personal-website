@@ -5,7 +5,7 @@ import Input from '@components/Input'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import type { AuthChallenge } from '@models/auth'
-import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from 'react'
+import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import styles from './Login.module.css'
@@ -15,17 +15,6 @@ const isChallenge = (result: unknown): result is AuthChallenge =>
   result !== null &&
   'challengeName' in result &&
   (result as AuthChallenge).challengeName === 'NEW_PASSWORD_REQUIRED'
-
-interface FieldConfig {
-  id: string
-  name: string
-  label: string
-  type: string
-  autoComplete: string
-  placeholder: string
-  value: string
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void
-}
 
 const Login = () => {
   const { login } = useAuth()
@@ -123,52 +112,6 @@ const Login = () => {
       }
   const submitLabel = loading ? copy.loadingLabel : copy.idleLabel
 
-  const fields: FieldConfig[] = isSetPassword
-    ? [
-        {
-          id: 'new-password',
-          name: 'newPassword',
-          label: 'New password',
-          type: 'password',
-          autoComplete: 'new-password',
-          placeholder: 'At least 8 characters',
-          value: newPassword,
-          onChange: (e) => setNewPassword(e.target.value),
-        },
-        {
-          id: 'confirm-password',
-          name: 'confirmPassword',
-          label: 'Confirm password',
-          type: 'password',
-          autoComplete: 'new-password',
-          placeholder: 'Re-enter your new password',
-          value: confirmPassword,
-          onChange: (e) => setConfirmPassword(e.target.value),
-        },
-      ]
-    : [
-        {
-          id: 'email',
-          name: 'email',
-          label: 'Email',
-          type: 'email',
-          autoComplete: 'username',
-          placeholder: 'you@akli.dev',
-          value: email,
-          onChange: (e) => setEmail(e.target.value),
-        },
-        {
-          id: 'password',
-          name: 'password',
-          label: 'Password',
-          type: 'password',
-          autoComplete: 'current-password',
-          placeholder: '••••••••••',
-          value: password,
-          onChange: (e) => setPassword(e.target.value),
-        },
-      ]
-
   return (
     <div className={styles.page}>
       <div className={styles.column}>
@@ -196,24 +139,75 @@ const Login = () => {
             onSubmit={isSetPassword ? handleNewPassword : handleLogin}
             noValidate
           >
-            {fields.map((field, index) => (
-              <label key={field.id} className={styles.field} htmlFor={field.id}>
-                <Typography variant="label" as="span">
-                  {field.label}
-                </Typography>
-                <Input
-                  ref={index === 0 ? firstFieldRef : undefined}
-                  id={field.id}
-                  name={field.name}
-                  type={field.type}
-                  autoComplete={field.autoComplete}
-                  placeholder={field.placeholder}
-                  value={field.value}
-                  onChange={field.onChange}
-                  ariaDescribedBy={error ? 'form-error' : undefined}
-                />
-              </label>
-            ))}
+            {isSetPassword ? (
+              <>
+                <label className={styles.field} htmlFor="new-password">
+                  <Typography variant="label" as="span">
+                    New password
+                  </Typography>
+                  <Input
+                    ref={firstFieldRef}
+                    id="new-password"
+                    name="newPassword"
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder="At least 8 characters"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    ariaDescribedBy={error ? 'form-error' : undefined}
+                  />
+                </label>
+                <label className={styles.field} htmlFor="confirm-password">
+                  <Typography variant="label" as="span">
+                    Confirm password
+                  </Typography>
+                  <Input
+                    id="confirm-password"
+                    name="confirmPassword"
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder="Re-enter your new password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    ariaDescribedBy={error ? 'form-error' : undefined}
+                  />
+                </label>
+              </>
+            ) : (
+              <>
+                <label className={styles.field} htmlFor="email">
+                  <Typography variant="label" as="span">
+                    Email
+                  </Typography>
+                  <Input
+                    ref={firstFieldRef}
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="username"
+                    placeholder="you@akli.dev"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    ariaDescribedBy={error ? 'form-error' : undefined}
+                  />
+                </label>
+                <label className={styles.field} htmlFor="password">
+                  <Typography variant="label" as="span">
+                    Password
+                  </Typography>
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    placeholder="••••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    ariaDescribedBy={error ? 'form-error' : undefined}
+                  />
+                </label>
+              </>
+            )}
 
             <Button type="submit" loading={loading} fullWidth>
               {submitLabel}
