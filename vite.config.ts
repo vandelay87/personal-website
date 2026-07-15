@@ -166,12 +166,17 @@ export default defineConfig(({ command, isSsrBuild, mode }) => {
     },
   },
   ssr: {
-    // Only bundle deps into the SSR build for production (a single CJS file
-    // for Lambda, with no node_modules). Vite's dev-mode ssrLoadModule reads
-    // this same option, and forcing packages like React's dev runtime through
-    // Vite's SSR transform pipeline (instead of externalizing/require-ing them
-    // from node_modules) breaks on their `typeof module` CJS-interop checks.
-    noExternal: command === 'build' ? true : undefined,
+    // Bundle deps for production builds (a single CJS file for Lambda, with
+    // no node_modules) and for Vitest, which also resolves through this
+    // config with command === 'serve' (it calls Vite's createServer()
+    // internally) but defaults `mode` to 'test' — forcing noExternal there
+    // matches production's bundled path and preserves prior test coverage.
+    // Only the real interactive dev server (mode === 'development') gets
+    // noExternal: undefined, since Vite's dev-mode ssrLoadModule, run live
+    // over HTTP, breaks when packages like React's dev runtime are forced
+    // through Vite's SSR transform pipeline instead of externalized/required
+    // from node_modules, on their `typeof module` CJS-interop checks.
+    noExternal: command === 'build' || mode === 'test' ? true : undefined,
     external: ['node:fs', 'node:path'],
   },
   build: {
