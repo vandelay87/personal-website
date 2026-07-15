@@ -27,14 +27,15 @@ const ssrDevServerPlugin = (): Plugin => ({
     return () => {
       server.middlewares.use(async (req, res, next) => {
         const url = req.originalUrl
+        const acceptsHtml = req.headers.accept?.includes('text/html')
 
         if (
           !url ||
           req.method !== 'GET' ||
+          !acceptsHtml ||
           url.startsWith('/@') ||
           url.startsWith('/src/') ||
-          url.startsWith('/node_modules/') ||
-          /\.[^/?]+$/.test(url.split('?')[0])
+          url.startsWith('/node_modules/')
         ) {
           next()
           return
@@ -42,8 +43,10 @@ const ssrDevServerPlugin = (): Plugin => ({
 
         try {
           const rawHtml = readFileSync(join(rootDir, 'index.html'), 'utf-8')
-          const transformedHtml = await server.transformIndexHtml(url, rawHtml)
-          const { render } = await server.ssrLoadModule('/src/entry-server.tsx')
+          const [transformedHtml, { render }] = await Promise.all([
+            server.transformIndexHtml(url, rawHtml),
+            server.ssrLoadModule('/src/entry-server.tsx'),
+          ])
           const html = await render(url, undefined, transformedHtml)
 
           res.statusCode = 200
@@ -169,14 +172,18 @@ export default defineConfig(({ command, isSsrBuild, mode }) => {
     // Bundle deps for production builds (a single CJS file for Lambda, with
     // no node_modules) and for Vitest, which also resolves through this
     // config with command === 'serve' (it calls Vite's createServer()
-    // internally) but defaults `mode` to 'test' — forcing noExternal there
-    // matches production's bundled path and preserves prior test coverage.
-    // Only the real interactive dev server (mode === 'development') gets
-    // noExternal: undefined, since Vite's dev-mode ssrLoadModule, run live
-    // over HTTP, breaks when packages like React's dev runtime are forced
-    // through Vite's SSR transform pipeline instead of externalized/required
-    // from node_modules, on their `typeof module` CJS-interop checks.
-    noExternal: command === 'build' || mode === 'test' ? true : undefined,
+    // internally) — forcing noExternal there matches production's bundled
+    // path and preserves prior test coverage. `process.env.VITEST` is the
+    // reliable Vitest-detection signal here (Vitest always sets it), unlike
+    // `mode`, which is a general Vite concept a real dev server run could
+    // also set to 'test' (e.g. `vite dev --mode test` for a `.env.test`
+    // file) without being Vitest at all. The real interactive dev server
+    // gets noExternal: undefined, since Vite's dev-mode ssrLoadModule, run
+    // live over HTTP, breaks when packages like React's dev runtime are
+    // forced through Vite's SSR transform pipeline instead of
+    // externalized/required from node_modules, on their `typeof module`
+    // CJS-interop checks.
+    noExternal: command === 'build' || process.env.VITEST ? true : undefined,
     external: ['node:fs', 'node:path'],
   },
   build: {

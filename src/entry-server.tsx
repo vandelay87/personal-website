@@ -35,7 +35,12 @@ try {
 </html>`
 }
 
-const [templateBeforeOutlet, templateAfterOutlet] = template.split('<!--ssr-outlet-->')
+const splitTemplate = (html: string): [string, string] => {
+  const [before, after] = html.split('<!--ssr-outlet-->')
+  return [before, after]
+}
+
+const [templateBeforeOutlet, templateAfterOutlet] = splitTemplate(template)
 
 const buildHeadHtml = (routePath: string, data?: RecipeData): string => {
   const meta = getMetaTags(routePath, data)
@@ -103,7 +108,7 @@ export const render = async (
   const router = createStaticRouter(handler.dataRoutes, context)
   const head = buildHeadHtml(url, data)
   const [beforeOutlet, afterOutlet] = htmlTemplate
-    ? htmlTemplate.split('<!--ssr-outlet-->')
+    ? splitTemplate(htmlTemplate)
     : [templateBeforeOutlet, templateAfterOutlet]
   const beforeHtml = beforeOutlet.replace('<!--ssr-head-->', head)
 
