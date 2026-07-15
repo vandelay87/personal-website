@@ -67,19 +67,34 @@ const collectInlineStyles = async (
   server: ViteDevServer,
   entryUrl: string
 ): Promise<string> => {
-  const entryMod = await server.moduleGraph.getModuleByUrl(entryUrl)
-  const cssModules = collectCssModules(entryMod)
+  // Purely cosmetic anti-FOUC enhancement — render() has already produced
+  // valid markup by the time this runs, so any failure here (e.g. a single
+  // CSS module failing to transform) must degrade to the unstyled HTML
+  // rather than propagate to the middleware's outer catch, which would send
+  // an otherwise-successful render to Vite's error overlay.
+  try {
+    const entryMod = await server.moduleGraph.getModuleByUrl(entryUrl)
+    const cssModules = collectCssModules(entryMod)
 
-  const cssTexts = await Promise.all(
-    [...cssModules.values()].map(async (mod) => {
-      const directUrl = mod.url.includes('?') ? `${mod.url}&direct` : `${mod.url}?direct`
-      const result = await server.transformRequest(directUrl)
-      return result?.code ?? ''
-    })
-  )
+    const cssTexts = await Promise.all(
+      [...cssModules.values()].map(async (mod) => {
+        const directUrl = mod.url.includes('?') ? `${mod.url}&direct` : `${mod.url}?direct`
+        // No { ssr: true } here despite this module being found via the SSR
+        // module graph — passing it makes Vite route ?direct CSS requests
+        // through ssrTransformScript (a JS parser) instead of the CSS
+        // pipeline, throwing on every module. Confirmed by isolation test;
+        // the default client-environment transform is what actually works.
+        const result = await server.transformRequest(directUrl)
+        return result?.code ?? ''
+      })
+    )
 
-  const css = cssTexts.filter(Boolean).join('\n')
-  return css ? `<style data-vite-dev-ssr-inline>${css}</style>` : ''
+    const css = cssTexts.filter(Boolean).join('\n')
+    return css ? `<style data-vite-dev-ssr-inline>${css}</style>` : ''
+  } catch (error) {
+    console.warn('[ssr-dev-server] Failed to collect inline styles, falling back to unstyled HTML:', error)
+    return ''
+  }
 }
 
 // Vite's dev server never runs SSR on its own — it serves the static index.html
