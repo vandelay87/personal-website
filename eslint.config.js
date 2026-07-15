@@ -84,7 +84,7 @@ export default [
     },
   },
   {
-    files: ['scripts/**/*.ts'],
+    files: ['scripts/**/*.ts', 'vite.config.ts'],
     languageOptions: {
       globals: {
         ...globals.node,
