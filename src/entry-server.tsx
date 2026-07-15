@@ -88,7 +88,11 @@ const buildHeadHtml = (routePath: string, data?: RecipeData): string => {
 
 const handler = createStaticHandler(routes)
 
-export const render = async (url: string, data?: RecipeData): Promise<string> => {
+export const render = async (
+  url: string,
+  data?: RecipeData,
+  htmlTemplate?: string
+): Promise<string> => {
   const request = new Request(`http://localhost${url}`)
   const context = await handler.query(request)
 
@@ -98,7 +102,10 @@ export const render = async (url: string, data?: RecipeData): Promise<string> =>
 
   const router = createStaticRouter(handler.dataRoutes, context)
   const head = buildHeadHtml(url, data)
-  const beforeHtml = templateBeforeOutlet.replace('<!--ssr-head-->', head)
+  const [beforeOutlet, afterOutlet] = htmlTemplate
+    ? htmlTemplate.split('<!--ssr-outlet-->')
+    : [templateBeforeOutlet, templateAfterOutlet]
+  const beforeHtml = beforeOutlet.replace('<!--ssr-head-->', head)
 
   return new Promise<string>((resolve, reject) => {
     const { pipe } = renderToPipeableStream(
@@ -119,7 +126,7 @@ export const render = async (url: string, data?: RecipeData): Promise<string> =>
           })
 
           reactStream.on('end', () => {
-            const fullHtml = beforeHtml + reactHtml + templateAfterOutlet
+            const fullHtml = beforeHtml + reactHtml + afterOutlet
             resolve(fullHtml)
           })
 

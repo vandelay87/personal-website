@@ -1,4 +1,4 @@
-import { readdirSync } from 'fs'
+import { readFileSync, readdirSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import mdx from '@mdx-js/rollup'
@@ -8,15 +8,58 @@ import react from '@vitejs/plugin-react'
 import rehypeMermaid from 'rehype-mermaid'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
-import { loadEnv } from 'vite'
+import { loadEnv, type Plugin } from 'vite'
 import { imagetools } from 'vite-imagetools'
 import { defineConfig } from 'vitest/config'
 import remarkReadingTime from './plugins/remark-reading-time'
 import { sitemapPlugin } from './sitemap-plugin'
 
+const rootDir = dirname(fileURLToPath(import.meta.url))
+
+// Vite's dev server never runs SSR on its own — it serves the static index.html
+// with <!--ssr-outlet--> unrendered, which produces a hydration mismatch on the
+// first real DOM node. This renders the app for real, the same way the Lambda
+// handler does in production, using Vite's own transformed HTML template so
+// HMR/client scripts keep working.
+const ssrDevServerPlugin = (): Plugin => ({
+  name: 'ssr-dev-server',
+  configureServer(server) {
+    return () => {
+      server.middlewares.use(async (req, res, next) => {
+        const url = req.originalUrl
+
+        if (
+          !url ||
+          req.method !== 'GET' ||
+          url.startsWith('/@') ||
+          url.startsWith('/src/') ||
+          url.startsWith('/node_modules/') ||
+          /\.[^/?]+$/.test(url.split('?')[0])
+        ) {
+          next()
+          return
+        }
+
+        try {
+          const rawHtml = readFileSync(join(rootDir, 'index.html'), 'utf-8')
+          const transformedHtml = await server.transformIndexHtml(url, rawHtml)
+          const { render } = await server.ssrLoadModule('/src/entry-server.tsx')
+          const html = await render(url, undefined, transformedHtml)
+
+          res.statusCode = 200
+          res.setHeader('Content-Type', 'text/html')
+          res.end(html)
+        } catch (error) {
+          server.ssrFixStacktrace(error as Error)
+          next(error)
+        }
+      })
+    }
+  },
+})
+
 const getBlogRoutes = (): Array<{ route: string; priority: number; changefreq: 'monthly' }> => {
-  const currentDir = dirname(fileURLToPath(import.meta.url))
-  const postsDir = join(currentDir, 'src/pages/Blog/posts')
+  const postsDir = join(rootDir, 'src/pages/Blog/posts')
   try {
     const files = readdirSync(postsDir)
     return files
@@ -31,11 +74,12 @@ const getBlogRoutes = (): Array<{ route: string; priority: number; changefreq: '
   }
 }
 
-export default defineConfig(({ isSsrBuild, mode }) => {
-  const env = loadEnv(mode, dirname(fileURLToPath(import.meta.url)), '')
+export default defineConfig(({ command, isSsrBuild, mode }) => {
+  const env = loadEnv(mode, rootDir, '')
   return {
   plugins: [
     react(),
+    ssrDevServerPlugin(),
     mdx({
       remarkPlugins: [
         remarkFrontmatter,
@@ -122,7 +166,12 @@ export default defineConfig(({ isSsrBuild, mode }) => {
     },
   },
   ssr: {
-    noExternal: true,
+    // Only bundle deps into the SSR build for production (a single CJS file
+    // for Lambda, with no node_modules). Vite's dev-mode ssrLoadModule reads
+    // this same option, and forcing packages like React's dev runtime through
+    // Vite's SSR transform pipeline (instead of externalizing/require-ing them
+    // from node_modules) breaks on their `typeof module` CJS-interop checks.
+    noExternal: command === 'build' ? true : undefined,
     external: ['node:fs', 'node:path'],
   },
   build: {
