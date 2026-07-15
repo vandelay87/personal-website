@@ -8,13 +8,79 @@ import react from '@vitejs/plugin-react'
 import rehypeMermaid from 'rehype-mermaid'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
-import { loadEnv, type Plugin } from 'vite'
+import { isCSSRequest, loadEnv, type ModuleNode, type Plugin, type ViteDevServer } from 'vite'
 import { imagetools } from 'vite-imagetools'
 import { defineConfig } from 'vitest/config'
 import remarkReadingTime from './plugins/remark-reading-time'
 import { sitemapPlugin } from './sitemap-plugin'
 
 const rootDir = dirname(fileURLToPath(import.meta.url))
+
+// Recursively walks the dev module graph from `mod`, collecting every
+// CSS(-Modules) module transitively imported (statically or dynamically).
+// Dedupes by URL rather than object identity, since Vite's ModuleNode is a
+// "backward compatible" view that may hand back distinct wrapper objects
+// for the same underlying module across separate lookups.
+const collectCssModules = (
+  mod: ModuleNode | undefined,
+  visited: Set<string> = new Set(),
+  cssModules: Map<string, ModuleNode> = new Map()
+): Map<string, ModuleNode> => {
+  if (!mod || visited.has(mod.url)) return cssModules
+  visited.add(mod.url)
+
+  if (isCSSRequest(mod.url)) {
+    cssModules.set(mod.url, mod)
+  }
+
+  for (const imported of mod.importedModules) {
+    collectCssModules(imported, visited, cssModules)
+  }
+
+  return cssModules
+}
+
+// Vite dev mode never emits a blocking <link rel="stylesheet"> for CSS
+// Modules — it transforms them into JS that injects a <style> tag as a side
+// effect of the importing module executing on the client. Before this file's
+// SSR middleware existed that was invisible: pnpm dev never painted real
+// content before client JS ran, so there was nothing to flash. Now that we
+// SSR real markup, the browser paints real class names immediately while the
+// rules for them are still absent until the client bundle executes each
+// CSS-module import — a visible flash of unstyled content.
+//
+// The fix (Vite's documented dev-SSR CSS-collection pattern): after
+// rendering, walk the module graph for every CSS module transitively
+// imported by the SSR entry, fetch each one's real transformed CSS text, and
+// inline it as a <style> block in <head> so first paint is already styled.
+// The dev-mode JS-injected <style> tags still land later — harmless
+// redundant styling, since by then nothing is left to visually flash.
+//
+// SSR-transformed CSS modules only export the class-name map (dev mode's
+// css-post plugin returns `modulesCode || 'export {}'` for SSR consumers —
+// no CSS text), so `ssrModule` can't supply the text. Instead we re-request
+// each module's URL with Vite's own `?direct` marker, which is exactly what
+// the dev server itself appends for CSS requested via <link> instead of a
+// JS import — it makes the css-post plugin skip the JS-injection wrapper and
+// return the real processed CSS text.
+const collectInlineStyles = async (
+  server: ViteDevServer,
+  entryUrl: string
+): Promise<string> => {
+  const entryMod = await server.moduleGraph.getModuleByUrl(entryUrl)
+  const cssModules = collectCssModules(entryMod)
+
+  const cssTexts = await Promise.all(
+    [...cssModules.values()].map(async (mod) => {
+      const directUrl = mod.url.includes('?') ? `${mod.url}&direct` : `${mod.url}?direct`
+      const result = await server.transformRequest(directUrl)
+      return result?.code ?? ''
+    })
+  )
+
+  const css = cssTexts.filter(Boolean).join('\n')
+  return css ? `<style data-vite-dev-ssr-inline>${css}</style>` : ''
+}
 
 // Vite's dev server never runs SSR on its own — it serves the static index.html
 // with <!--ssr-outlet--> unrendered, which produces a hydration mismatch on the
@@ -47,11 +113,19 @@ const ssrDevServerPlugin = (): Plugin => ({
             server.transformIndexHtml(url, rawHtml),
             server.ssrLoadModule('/src/entry-server.tsx'),
           ])
+          // Sequenced, not parallelized: admin routes are React.lazy(), so
+          // their module (and its CSS) only lands in the module graph once
+          // render() actually reaches and awaits that Suspense boundary.
+          // Collecting styles concurrently with render() would race that.
           const html = await render(url, undefined, transformedHtml)
+          const inlineStyles = await collectInlineStyles(server, '/src/entry-server.tsx')
+          const htmlWithStyles = inlineStyles
+            ? html.replace('</head>', `${inlineStyles}</head>`)
+            : html
 
           res.statusCode = 200
           res.setHeader('Content-Type', 'text/html')
-          res.end(html)
+          res.end(htmlWithStyles)
         } catch (error) {
           server.ssrFixStacktrace(error as Error)
           next(error)
