@@ -100,7 +100,7 @@ const RecipeIngredients: FC<RecipeIngredientsProps> = ({ ingredients, slug }) =>
                 checked={checked.has(key)}
                 onChange={() => toggle(key)}
               />
-              <span className={styles.name}>{ingredient.item}</span>
+              <span className={styles.name}>{ingredient.item}</span>{' '}
               <span className={styles.qty}>
                 {ingredient.quantity} {ingredient.unit}
               </span>
