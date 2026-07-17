@@ -124,8 +124,8 @@ const Recipes: FC = () => {
         intro={
           <>
             A small, growing collection of recipes I cook on repeat — written
-            down so they&apos;re easy to make again. Tried, refined, and worth
-            the effort.
+            down so they&apos;re easy to make again. I make some of these way
+            more often than I&apos;d like to admit.
           </>
         }
       />
