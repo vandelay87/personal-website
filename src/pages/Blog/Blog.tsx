@@ -49,7 +49,9 @@ const Blog = () => {
         <Typography variant="caption" as="p" className={styles.eyebrow}>
           The blog
         </Typography>
-        <Typography variant="heading1">Archive</Typography>
+        <Typography variant="heading1">
+          Notes I keep meaning to write more of.
+        </Typography>
         <Typography variant="bodyLarge">Posts coming soon.</Typography>
       </section>
     )
@@ -62,7 +64,7 @@ const Blog = () => {
           The blog
         </Typography>
         <Typography variant="heading1" className={styles.heading}>
-          Archive
+          Notes I keep meaning to write more of.
         </Typography>
         <Typography variant="bodyLarge" className={styles.intro}>
           Thoughts on building things, technical deep-dives, and the lessons
