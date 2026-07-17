@@ -26,7 +26,7 @@ describe('Apps', () => {
   it('renders a single page heading', () => {
     renderApps()
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Apps' })
+      screen.getByRole('heading', { level: 1, name: 'A few things I built for fun.' })
     ).toBeInTheDocument()
   })
 

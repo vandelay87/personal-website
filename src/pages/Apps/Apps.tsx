@@ -48,7 +48,7 @@ const Apps: FC = () => {
           Apps &amp; experiments
         </Typography>
         <Typography variant="heading1" className={styles.heading}>
-          Apps
+          A few things I built for fun.
         </Typography>
         <Typography variant="bodyLarge" className={styles.lead}>
           A collection of interactive experiments and side projects. Most of
