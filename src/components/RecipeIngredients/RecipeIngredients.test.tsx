@@ -127,6 +127,14 @@ describe('RecipeIngredients checkboxes', () => {
     ['treats checked state older than 7 days as expired', 7 * 24 * 60 * 60 * 1000 + 1, false],
     ['keeps checked state that has not yet expired', 7 * 24 * 60 * 60 * 1000 - 1, true],
   ])('%s', (_label, elapsedMs, expectStillChecked) => {
+    // The clock is faked before the initial click (rather than started
+    // afterwards) so the write's `Date.now()` and the later expiry check
+    // both read from the same deterministic fake clock — pinning the
+    // clock only after the click left a real-time gap between the two
+    // reads, which could tip the "not yet expired" case over the edge on
+    // a slow/contended test runner.
+    vi.useFakeTimers()
+
     const { unmount } = render(
       <RecipeIngredients ingredients={mockIngredients} slug="spaghetti-bolognese" />
     )
@@ -134,7 +142,6 @@ describe('RecipeIngredients checkboxes', () => {
     fireEvent.click(screen.getByRole('checkbox', { name: 'flour 200 g' }))
     unmount()
 
-    vi.useFakeTimers()
     vi.advanceTimersByTime(elapsedMs)
 
     render(<RecipeIngredients ingredients={mockIngredients} slug="spaghetti-bolognese" />)

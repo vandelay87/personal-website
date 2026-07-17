@@ -306,6 +306,11 @@ export default defineConfig(({ command, isSsrBuild, mode }) => {
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
+    // Default 5000ms is tight for the SSR/Suspense-resolving tests under
+    // full-suite parallel load on CI's constrained runners (in isolation
+    // they run in well under a second) — 10000ms gives headroom without
+    // masking a genuine hang.
+    testTimeout: 10000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
