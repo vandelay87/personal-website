@@ -321,7 +321,7 @@ export const iconAddImage = (
 )
 
 // Design's overlaid icon-button is a trash glyph (it deletes the image
-// outright in the design's simulated backend). This component only has a
+// outright in the design's simulated backend). ImageUpload only has a
 // replace-via-re-upload callback surface (see the "Ready state" note in
 // the PR description), so a pencil/replace glyph is used instead of the
 // literal trash icon to avoid implying a destructive delete that doesn't
