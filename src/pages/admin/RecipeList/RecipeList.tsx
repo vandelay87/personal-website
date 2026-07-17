@@ -7,6 +7,8 @@ import {
 } from '@api/recipes'
 import ConfirmDialog from '@components/ConfirmDialog'
 import {
+  IconPlus,
+  IconPreview,
   iconDelete,
   iconDocument,
   iconEdit,
@@ -14,8 +16,7 @@ import {
   iconRetry,
   iconUnpublish,
   iconWarning,
-} from '@components/iconGlyphs'
-import { IconPlus, IconPreview } from '@components/icons'
+} from '@components/icons'
 import Link from '@components/Link'
 import StateBox from '@components/StateBox'
 import StatusBadge from '@components/StatusBadge'
