@@ -27,7 +27,7 @@ const Footer: FC<FooterProps> = ({ variant = 'public', email, className: extraCl
           <>
             <nav aria-labelledby={elsewhereLabelId} className={styles.elsewhere}>
               <span id={elsewhereLabelId} className={styles.elsewhereLabel}>
-                Elsewhere
+                Find me elsewhere
               </span>
               <ul className={styles.linkList}>
                 {SOCIAL_LINKS.map((link) => (

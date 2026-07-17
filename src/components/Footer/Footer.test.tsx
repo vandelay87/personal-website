@@ -12,16 +12,16 @@ const renderFooter = (props: FooterProps = {}) =>
 
 describe('Footer', () => {
   describe('public variant (default)', () => {
-    it('renders a nav landmark accessibly named "Elsewhere"', () => {
+    it('renders a nav landmark accessibly named "Find me elsewhere"', () => {
       renderFooter()
 
-      expect(screen.getByRole('navigation', { name: 'Elsewhere' })).toBeInTheDocument()
+      expect(screen.getByRole('navigation', { name: 'Find me elsewhere' })).toBeInTheDocument()
     })
 
     it('renders a list of 3 links with correct hrefs inside the nav', () => {
       renderFooter()
 
-      const nav = screen.getByRole('navigation', { name: 'Elsewhere' })
+      const nav = screen.getByRole('navigation', { name: 'Find me elsewhere' })
       const list = within(nav).getByRole('list')
       const items = within(list).getAllByRole('listitem')
 
@@ -76,7 +76,7 @@ describe('Footer', () => {
     it('does not render the public nav or its links', () => {
       renderFooter({ variant: 'admin' })
 
-      expect(screen.queryByRole('navigation', { name: 'Elsewhere' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('navigation', { name: 'Find me elsewhere' })).not.toBeInTheDocument()
       expect(screen.queryByRole('link')).not.toBeInTheDocument()
     })
   })
