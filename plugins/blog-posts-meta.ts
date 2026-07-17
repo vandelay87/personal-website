@@ -12,7 +12,7 @@ const FRONTMATTER_BLOCK = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/
 // (flat `key: value` pairs plus one `key: [a, b, c]` array field) — not a
 // general YAML parser. See docs/prds/blog.md's "MDX frontmatter" section
 // for the authoritative shape.
-const parseFrontmatter = (raw: string): Record<string, string | string[]> => {
+export const parseFrontmatter = (raw: string): Record<string, string | string[]> => {
   const match = raw.match(FRONTMATTER_BLOCK)
   if (!match) return {}
 
@@ -42,7 +42,7 @@ const parseFrontmatter = (raw: string): Record<string, string | string[]> => {
 // remark-reading-time computes from the real MDX AST, without running the
 // MDX/remark pipeline: strips frontmatter, code fences, import/export
 // statements, and JSX tags, leaving roughly the same text left to count.
-const extractPlainText = (raw: string): string => {
+export const extractPlainText = (raw: string): string => {
   const withoutFrontmatter = raw.replace(FRONTMATTER_BLOCK, '')
   const withoutCodeFences = withoutFrontmatter.replace(/```[\s\S]*?```/g, ' ')
   const withoutImportsExports = withoutCodeFences
