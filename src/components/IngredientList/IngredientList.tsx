@@ -1,7 +1,8 @@
 import Button from '@components/Button'
-import { iconChevronDown, iconChevronUp, iconPlus, iconRemove } from '@components/icons'
+import { iconPlus } from '@components/icons'
 import Input from '@components/Input'
 import List, { ListItem } from '@components/List'
+import ReorderControls from '@components/ReorderControls'
 import { useReorderableList } from '@hooks/useReorderableList'
 import type { Ingredient } from '@models/recipe'
 import type { FC } from 'react'
@@ -75,33 +76,16 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
               />
             </div>
             <div className={styles.actions}>
-              <Button
-                onClick={() => handleMoveUp(index)}
-                ariaLabel={`Move up ingredient ${index + 1}`}
-                variant="outline"
-                disabled={index === 0}
-                className={moveActionClassName}
-              >
-                {iconChevronUp}
-              </Button>
-              <Button
-                onClick={() => handleMoveDown(index)}
-                ariaLabel={`Move down ingredient ${index + 1}`}
-                variant="outline"
-                disabled={index === ingredients.length - 1}
-                className={moveActionClassName}
-              >
-                {iconChevronDown}
-              </Button>
-              <Button
-                onClick={() => handleRemove(index)}
-                ariaLabel={`Remove ingredient ${index + 1}`}
-                variant="outline"
-                disabled={ingredients.length <= 1}
-                className={removeActionClassName}
-              >
-                {iconRemove}
-              </Button>
+              <ReorderControls
+                index={index}
+                count={ingredients.length}
+                itemLabel="ingredient"
+                onMoveUp={handleMoveUp}
+                onMoveDown={handleMoveDown}
+                onRemove={handleRemove}
+                moveActionClassName={moveActionClassName}
+                removeActionClassName={removeActionClassName}
+              />
             </div>
           </ListItem>
         ))}
