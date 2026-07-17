@@ -1,38 +1,66 @@
 import { handleSessionError } from '@api/auth'
-import { deleteRecipe, fetchAllRecipes, publishRecipe, unpublishRecipe } from '@api/recipes'
-import Button from '@components/Button'
+import {
+  deleteRecipe,
+  fetchAllRecipes,
+  publishRecipe,
+  unpublishRecipe,
+} from '@api/recipes'
 import ConfirmDialog from '@components/ConfirmDialog'
+import {
+  IconPlus,
+  IconPreview,
+  iconDelete,
+  iconDocument,
+  iconEdit,
+  iconPublish,
+  iconRetry,
+  iconUnpublish,
+  iconWarning,
+} from '@components/icons'
 import Link from '@components/Link'
-import Loading from '@components/Loading'
+import StateBox from '@components/StateBox'
 import StatusBadge from '@components/StatusBadge'
-import Toast, { type ToastState } from '@components/Toast'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
+import { useToast } from '@contexts/ToastContext'
 import type { Recipe } from '@models/recipe'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
+import interactions from '../../../styles/interactions.module.css'
+import stateBox from '../../../styles/stateBox.module.css'
+import text from '../../../styles/text.module.css'
+import { pluralize } from '../../../utils/pluralize'
+import { relativeUpdatedLabel } from '../../../utils/relativeTime'
 import styles from './RecipeList.module.css'
+
+// Hoisted so every row in the list below reuses the same element by
+// reference instead of mounting a fresh IconPreview per row per render.
+const iconPreviewAction = <IconPreview size={14} />
 
 const RecipeList = () => {
   const { getAccessToken, logout } = useAuth()
+  const { showToast } = useToast()
   const navigate = useNavigate()
   const location = useLocation()
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Recipe | null>(null)
-  const [toast, setToast] = useState<ToastState | null>(null)
 
   const sortedRecipes = useMemo(
-    () => [...recipes].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
-    [recipes],
+    () =>
+      [...recipes].sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      ),
+    [recipes]
   )
 
   useEffect(() => {
     const state = location.state as { accessDenied?: boolean } | null
     if (state?.accessDenied) {
-      setToast({ message: 'Access denied', type: 'error' })
+      showToast('Access denied', 'error')
       navigate(location.pathname, { replace: true, state: null })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,107 +112,139 @@ const RecipeList = () => {
     }
   }
 
-  const renderContent = () => {
+  const renderBody = () => {
     if (loading) {
-      return (
-        <div className={styles.loadingWrapper}>
-          <Loading />
-        </div>
-      )
+      return <StateBox variant="loading" label="Loading recipes…" />
     }
 
     if (error) {
       return (
-        <>
-          <Typography variant="body">Something went wrong.</Typography>
-          <Button onClick={loadRecipes}>Retry</Button>
-        </>
+        <StateBox
+          variant="error"
+          icon={iconWarning}
+          heading="Couldn't load recipes"
+          body="Something went wrong reaching the server. Check your connection and try again."
+          action={{ label: 'Retry', onClick: loadRecipes, icon: iconRetry }}
+        />
       )
     }
 
-    if (recipes.length === 0) {
+    if (sortedRecipes.length === 0) {
       return (
-        <>
-          <Typography variant="heading2">Recipes</Typography>
-          <Typography variant="body">No recipes yet.</Typography>
-          <Link to="/admin/recipes/new" ariaLabel="Create your first recipe">
+        <div className={`${stateBox.box} ${styles.emptyBox}`}>
+          <div className={`${stateBox.icon} ${styles.emptyIcon}`}>{iconDocument}</div>
+          <Typography variant="heading2" className={stateBox.heading}>
+            No recipes yet
+          </Typography>
+          <Typography variant="body" className={stateBox.body}>
+            Your kitchen is empty. Create your first recipe to start building the collection.
+          </Typography>
+          <Link to="/admin/recipes/new" variant="solid" className={styles.newButton}>
+            <IconPlus size={15} />
             Create your first recipe
           </Link>
-        </>
+        </div>
       )
     }
 
+    const now = new Date()
+
     return (
-      <>
-        <div className={styles.header}>
-          <Typography variant="heading2">Recipes</Typography>
-          <Link to="/admin/recipes/new" className={styles.newRecipeLink}>
-            New recipe
-          </Link>
-        </div>
-
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Status</th>
-                <th>Tags</th>
-                <th>Last updated</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedRecipes.map((recipe) => (
-                <tr key={recipe.id}>
-                  <td>{recipe.title}</td>
-                  <td>
-                    <StatusBadge status={recipe.status} />
-                  </td>
-                  <td>{recipe.tags.join(', ')}</td>
-                  <td>{new Date(recipe.updatedAt).toLocaleDateString()}</td>
-                  <td className={styles.actions}>
-                    <div className={styles.actionsInner}>
-                      <Link to={`/admin/recipes/${recipe.id}/edit`} ariaLabel={`Edit ${recipe.title}`}>
-                        Edit
-                      </Link>
-                      <Link
-                        to={`/admin/recipes/${recipe.id}/preview`}
-                        ariaLabel={`Preview ${recipe.title}`}
-                      >
-                        Preview
-                      </Link>
-                      <button type="button" className={styles.actionLink} onClick={() => handlePublish(recipe)}>
-                        {recipe.status === 'published' ? 'Unpublish' : 'Publish'}
-                      </button>
-                      <button type="button" className={styles.actionLink} onClick={() => setDeleteTarget(recipe)}>
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <ConfirmDialog
-          title="Delete recipe"
-          message={`Are you sure you want to delete "${deleteTarget?.title ?? ''}"?`}
-          isOpen={deleteTarget !== null}
-          onConfirm={handleDeleteConfirm}
-          onCancel={() => setDeleteTarget(null)}
-        />
-      </>
+      <ul className={styles.list}>
+        {sortedRecipes.map((recipe) => {
+          const isPublished = recipe.status === 'published'
+          return (
+            <li key={recipe.id} className={styles.row}>
+              <div className={styles.rowMain}>
+                <div className={styles.rowTop}>
+                  <StatusBadge tone={isPublished ? 'success' : 'warning'}>
+                    {isPublished ? 'Published' : 'Draft'}
+                  </StatusBadge>
+                  <Typography variant="heading2" className={styles.rowTitle}>
+                    {recipe.title}
+                  </Typography>
+                </div>
+                <ul className={styles.rowMeta}>
+                  {recipe.tags.map((tag) => (
+                    <li key={tag} className={`${text.tagChipBase} ${styles.tagChip}`}>
+                      {tag}
+                    </li>
+                  ))}
+                  <li className={styles.updatedLabel}>
+                    {relativeUpdatedLabel(recipe.updatedAt, now)}
+                  </li>
+                </ul>
+              </div>
+              <div className={styles.rowActions}>
+                <Link
+                  to={`/admin/recipes/${recipe.id}/edit`}
+                  className={`${interactions.focusRing} ${styles.actionButton}`}
+                  nudge="none"
+                >
+                  {iconEdit}
+                  Edit
+                </Link>
+                <Link
+                  to={`/admin/recipes/${recipe.id}/preview`}
+                  className={`${interactions.focusRing} ${styles.actionButton}`}
+                  nudge="none"
+                >
+                  {iconPreviewAction}
+                  Preview
+                </Link>
+                <button
+                  type="button"
+                  className={`${interactions.focusRing} ${styles.actionButton} ${styles.publishAction}`}
+                  onClick={() => handlePublish(recipe)}
+                >
+                  {isPublished ? iconUnpublish : iconPublish}
+                  {isPublished ? 'Unpublish' : 'Publish'}
+                </button>
+                <button
+                  type="button"
+                  className={`${interactions.focusRing} ${styles.actionButton} ${styles.deleteAction}`}
+                  onClick={() => setDeleteTarget(recipe)}
+                >
+                  {iconDelete}
+                  Delete
+                </button>
+              </div>
+            </li>
+          )
+        })}
+      </ul>
     )
   }
 
   return (
     <div className={styles.page}>
-      {renderContent()}
-      {toast && (
-        <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />
-      )}
+      <div className={styles.header}>
+        <div>
+          <Typography variant="heading1" className={styles.heading}>
+            Recipes
+          </Typography>
+          <Typography variant="body" className={styles.subtitle}>
+            {pluralize(sortedRecipes.length, 'recipe')}
+          </Typography>
+        </div>
+        <Link to="/admin/recipes/new" variant="solid" className={styles.newButton}>
+          <IconPlus size={15} />
+          New recipe
+        </Link>
+      </div>
+
+      {renderBody()}
+
+      <ConfirmDialog
+        title="Delete recipe"
+        danger
+        open={deleteTarget !== null}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteTarget(null)}
+      >
+        Are you sure you want to delete &quot;{deleteTarget?.title ?? ''}
+        &quot;?
+      </ConfirmDialog>
     </div>
   )
 }

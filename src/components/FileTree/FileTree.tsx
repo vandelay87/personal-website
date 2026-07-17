@@ -1,3 +1,4 @@
+import List, { ListItem } from '@components/List'
 import type { FC, ReactNode } from 'react'
 
 import styles from './FileTree.module.css'
@@ -43,14 +44,14 @@ const renderNodes = (nodes: TreeNode[], isRoot: boolean): ReactNode => {
   if (nodes.length === 0) return null
 
   return (
-    <ul className={isRoot ? styles.rootList : styles.list}>
+    <List className={isRoot ? styles.rootList : styles.list}>
       {nodes.map((node, index) => (
-        <li key={`${node.name}-${index}`} className={styles.item}>
+        <ListItem key={`${node.name}-${index}`} className={styles.item}>
           <span><span aria-hidden="true">{node.isFolder ? '📁 ' : '📄 '}</span>{node.name}</span>
           {node.children.length > 0 && renderNodes(node.children, false)}
-        </li>
+        </ListItem>
       ))}
-    </ul>
+    </List>
   )
 }
 

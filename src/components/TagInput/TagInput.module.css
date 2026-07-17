@@ -1,7 +1,18 @@
+/* TagInput.module.css — chips now render via the actual shared `Tag`
+   component (`as="span" removable`) rather than hand-rolled chip markup,
+   so Tag owns the base look; the field row shares Input's `.ds-field`
+   treatment; suggestions restyle to the design's dashed mono pill row.
+   The suggestion list keeps its existing `role="listbox"`/`role="option"`
+   markup (TagInput.tsx is out of scope to restructure) but renders as a
+   static inline-flow row rather than an absolutely-positioned popup —
+   that's a pure CSS layout choice (ARIA listbox semantics don't require
+   a floating popup) and matches the design's inline suggestion-chips row
+   (TagInput.jsx), rather than the dropdown look this stub previously had. */
+
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .chips {
@@ -10,64 +21,115 @@
   gap: var(--space-2);
 }
 
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1) var(--space-2);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background: var(--color-bg-subtle);
-  font-size: var(--font-size-sm);
+/* Tag's own padding (--space-1/--space-3, symmetric) is close but not an
+   exact match for this design's literal chip shape (5px 7px 5px 11px
+   asymmetric padding) — scoped under `.chips` so it reliably outranks
+   Tag's own bare `.tag` class regardless of CSS import order, same
+   specificity-tie fix used throughout this epic. */
+.chips .chip {
+  padding: 5px 7px 5px 11px;
+  border-radius: var(--radius);
 }
 
-.removeBtn {
-  padding: 0 var(--space-1);
-  min-width: auto;
-  font-size: var(--font-size-sm);
-  line-height: 1;
+/* Tag exposes its remove button via the `removeClassName` prop (issue #265),
+   so this styles it directly by class rather than reaching into Tag's
+   internal markup with a bare element-type selector — that old approach
+   would silently break or over-match if Tag's internal markup ever changed.
+   Bare class, not scoped under `.chips .chip`: Tag.module.css's own
+   `.remove` rule now lives in `@layer component-defaults` (same mechanism
+   as Typography/Link, #263), so this plain unlayered class deterministically
+   outranks it without needing the old descendant-selector trick — same
+   pattern RecipeDetailView.module.css's `.title` already uses. Mirrors the
+   design's own `.chip button` / `.chip button:hover` rules exactly (Admin
+   Recipe Editor.dc.html's `.chip` styles). Tag's default `.remove
+   { color: inherit }` has no hover treatment of its own (most Tag consumers
+   don't want a red tint), so both the faint resting color and the
+   hover-to-error tint are supplied here. */
+.chipRemove {
+  /* Renders on Tag's --color-surface background (issue #274). */
+  color: var(--color-text-faint-on-surface);
+}
+
+.chipRemove:hover {
+  color: var(--color-error);
 }
 
 .inputWrapper {
   position: relative;
 }
 
+/* The core field-chrome block (width/font/color/background/border/
+   radius/padding) is shared byte-for-byte with Input and Textarea's
+   `.field` via the `field` composable — see
+   src/styles/formField.module.css for the full rationale (issue #244),
+   including why transition stays local. `fieldFocusRing`
+   (interactions.module.css) is composed in JS instead (see TagInput.tsx)
+   — see interactions.module.css's own header comment for why. */
 .input {
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: var(--font-size-base);
-  font-family: var(--font-sans);
+  composes: field from '../../styles/formField.module.css';
+  transition: border-color var(--duration-fast) var(--easing-default);
 }
 
-.input:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
+@media (prefers-reduced-motion: reduce) {
+  .input {
+    transition: none;
+  }
 }
 
 .listbox {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
-  border: var(--border-width) solid var(--color-border);
-  border-top: none;
-  border-radius: var(--radius-none);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  z-index: 10;
 }
 
+/* `chipHover` (interactions.module.css) composed in JS — see `.input`
+   above for rationale. */
 .option {
-  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--tracking-meta);
+  color: var(--color-text-muted);
+  background: transparent;
+  border: var(--border-width) dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
   cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--easing-default),
+    color var(--duration-fast) var(--easing-default),
+    background-color var(--duration-fast) var(--easing-default);
 }
 
-.option:hover {
-  background: var(--color-bg-subtle);
+/* Decorative "+" affordance from the design (TagInput.jsx renders "+ {tag}")
+   — generated content rather than a JSX text change, since suggestion
+   labels aren't meaningfully different without it (purely visual). */
+.option::before {
+  content: '+ ';
+}
+
+/* Arrow-key highlight — the ARIA state set via `aria-selected` on the
+   option already carries the semantics, so this keys off the attribute
+   directly rather than duplicating it as a second CSS Modules class.
+   Reuses `chipHover`'s own border/text treatment (border-color + color
+   swapped to --color-primary) so keyboard arrow-highlight and mouse
+   hover read as the same visual weight, plus a tinted background so the
+   *persistent* keyboard-selected state stays visible even without the
+   pointer sitting on it. The 10% color-mix background matches this
+   project's established "accent" fill (see StatusBadge.module.css's
+   `.accent` tone, same color-mix(...transparent) shape as the --ring
+   token — the design's --accent-bg is rgba(31,102,224,0.10)). */
+.option[aria-selected='true'] {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option {
+    transition: none;
+  }
 }

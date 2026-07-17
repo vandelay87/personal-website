@@ -3,18 +3,22 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-xl);
   border: var(--border-width) solid var(--color-border);
-  background-color: var(--color-surface);
-  box-shadow: var(--shadow-md);
+  /* The design's .rc uses the page background, not the elevated
+     "surface" tone — this isn't meant to look like a raised panel. */
+  background-color: var(--color-bg);
+  /* No resting shadow — the design only shows one on hover. */
   transition:
     transform var(--duration-fast) var(--easing-default),
     box-shadow var(--duration-fast) var(--easing-default);
 }
 
 .card:hover {
-  transform: translate(-4px, -4px);
-  box-shadow: var(--shadow-lg);
+  /* Vertical lift only, not the neo-brutalist diagonal offset. 14px/34px/
+     0.10 opacity: matches the design exactly; no shadow token lands on it. */
+  transform: translateY(-4px);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.1);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -35,7 +39,14 @@
 }
 
 .imageWrapper > figure > div {
+  /* Image's own container div has a 12px radius on all four corners by
+     default (for standalone use) — here it sits flush at the top of a
+     card whose own overflow:hidden already rounds the top edge, so the
+     container's radius only ever shows as an unwanted rounded seam
+     where the image meets the body below. Flattened to a plain rect;
+     the card's outer radius handles the top corners. */
   border: none;
+  border-radius: 0;
 }
 
 .image {
@@ -43,6 +54,22 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  /* Cover-zoom on card hover, matching the design's signature interaction. */
+  transition: transform var(--duration-base) var(--easing-default);
+}
+
+.card:hover .image {
+  transform: scale(1.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image {
+    transition: none;
+  }
+
+  .card:hover .image {
+    transform: none;
+  }
 }
 
 .body {
@@ -53,10 +80,13 @@
 }
 
 .title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-tight);
-  margin: 0 0 var(--space-2);
+  /* 17px/600/1.3/-0.01em: matches the design exactly; no token combo
+     lands on it (Typography's heading3 is 18px/bold/1.08/untracked). */
+  font-size: 17px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
 }
 
 .titleLink {
@@ -64,13 +94,36 @@
   text-decoration: none;
 }
 
-.titleLink:hover {
-  color: var(--color-link-hover);
+/* Suppresses the browser's native default focus outline here — the
+   visible ring is drawn on .card instead (below), so the small
+   title-text box doesn't show its own separate, narrower one too. */
+.titleLink:focus-visible {
+  outline: none;
 }
 
-.titleLink:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-  outline-offset: 2px;
+/* Stretched-link pattern: makes the whole card clickable (matching the
+   design's single <a> wrapping the entire .rc) while keeping the link's
+   accessible name scoped to just the title, not a wall of card text.
+   .card's own `position: relative` is what this anchors against. The
+   design has no separate hover color for the title text — only the
+   card-level lift/shadow/zoom — so none is added here either. */
+.titleLink::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+/* Ring has to show on .card itself, not the stretched ::after — .card's
+   own `overflow: hidden` (needed to clip the image to its rounded
+   corners) clips a descendant's outline too, so putting the ring on
+   the pseudo-element (tried during a /simplify pass, to avoid :has())
+   silently made it invisible. :has() is the only way to style an
+   ancestor from a descendant's state in plain CSS. Reuses the same
+   tokens as the shared `.focusRing` composable (interactions.module.css)
+   rather than repeating its literal values. */
+.card:has(.titleLink:focus-visible) {
+  outline: var(--focus-ring-outline);
+  outline-offset: var(--focus-ring-outline-offset);
 }
 
 .tags {
@@ -84,9 +137,9 @@
   padding: var(--space-1) var(--space-2);
   font-size: var(--font-size-sm);
   font-family: var(--font-mono);
-  background: var(--color-bg-subtle);
+  background: var(--color-surface);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-sm);
 }
 
 .meta {
@@ -94,12 +147,13 @@
   align-items: center;
   flex-wrap: nowrap;
   gap: var(--space-2);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
+  /* faint, not muted, and 12.5px: matches the design exactly. */
+  color: var(--color-text-faint);
+  font-size: 12.5px;
   white-space: nowrap;
   margin-block-start: auto;
 }
 
 .separator {
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-normal);
 }

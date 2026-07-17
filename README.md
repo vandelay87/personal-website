@@ -6,7 +6,7 @@ Personal portfolio site for [akli.dev](https://akli.dev). Built with React 19, T
 
 - React 19 + TypeScript
 - React Router v7 (SSR + client-side hydration)
-- Vite 6
+- Vite 7
 - CSS Modules with design tokens
 - MDX blog with Shiki syntax highlighting
 - Vitest + Testing Library
@@ -70,9 +70,9 @@ Admin routes are code-split via `React.lazy` and gated by `ProtectedRoute`, whic
 
 ## Design
 
-Neo-brutalist aesthetic with a minimal, blocky layout. Dark mode is supported via a `data-theme` attribute on the document root and persisted to localStorage. Typography uses system font stacks with no external font requests.
+Warm editorial "paper" aesthetic — soft radii, hairline borders, and self-hosted Geist + JetBrains Mono fonts. Dark mode is supported via a `data-theme` attribute on the document root and persisted to localStorage.
 
-Design tokens (colors, spacing, typography, shadows) are defined in `src/styles/tokens.css`.
+Design tokens (colors, spacing, typography, shadows, radii) are defined in `src/styles/tokens.css`; `docs/design/paper/` is the source-of-truth design reference for the paper redesign.
 
 ## Deployment
 

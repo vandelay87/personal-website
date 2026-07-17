@@ -1,5 +1,6 @@
 import { fetchUsers, inviteUser, removeUser, UserExistsError } from '@api/users'
 import { useAuth } from '@contexts/AuthContext'
+import { ToastProvider } from '@contexts/ToastContext'
 import type { AdminUser } from '@models/auth'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -48,7 +49,9 @@ const pendingUser: AdminUser = {
 const renderUserManagement = () =>
   render(
     <MemoryRouter initialEntries={['/admin/users']}>
-      <UserManagement />
+      <ToastProvider>
+        <UserManagement />
+      </ToastProvider>
     </MemoryRouter>
   )
 
@@ -133,7 +136,7 @@ describe('Admin UserManagement page', () => {
   })
 
   describe('invite flow (AC3, AC4, AC5, AC6)', () => {
-    it('opens an invite form with email input and role select when the Invite button is clicked', async () => {
+    it('opens an invite form with email input and role toggle when the Invite button is clicked', async () => {
       const user = userEvent.setup()
       renderUserManagement()
 
@@ -144,7 +147,9 @@ describe('Admin UserManagement page', () => {
       await user.click(screen.getByRole('button', { name: /invite user/i }))
 
       expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/role/i)).toBeInTheDocument()
+      expect(screen.getByRole('group', { name: /role/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Admin' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Contributor' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /send invite/i })).toBeInTheDocument()
     })
 
@@ -181,15 +186,23 @@ describe('Admin UserManagement page', () => {
       await user.click(screen.getByRole('button', { name: /invite user/i }))
 
       await user.type(screen.getByLabelText(/email/i), 'new@akli.dev')
-      await user.selectOptions(screen.getByLabelText(/role/i), 'contributor')
+
+      const adminRoleButton = screen.getByRole('button', { name: 'Admin' })
+      const contributorRoleButton = screen.getByRole('button', { name: 'Contributor' })
+      expect(contributorRoleButton).toHaveAttribute('aria-pressed', 'true')
+
+      await user.click(adminRoleButton)
+      expect(adminRoleButton).toHaveAttribute('aria-pressed', 'true')
+      expect(contributorRoleButton).toHaveAttribute('aria-pressed', 'false')
+
       await user.click(screen.getByRole('button', { name: /send invite/i }))
 
       await waitFor(() => {
-        expect(inviteUser).toHaveBeenCalledWith('token-123', 'new@akli.dev', 'contributor')
+        expect(inviteUser).toHaveBeenCalledWith('token-123', 'new@akli.dev', 'admin')
       })
 
-      const toast = await screen.findByRole('status')
-      expect(toast).toHaveTextContent(/invite sent to new@akli\.dev/i)
+      const toast = await screen.findByRole('button', { name: /invite sent to new@akli\.dev/i })
+      expect(toast).toBeInTheDocument()
     })
 
     it('shows an inline "User already exists" error when inviteUser rejects with UserExistsError', async () => {
@@ -203,12 +216,18 @@ describe('Admin UserManagement page', () => {
       })
 
       await user.click(screen.getByRole('button', { name: /invite user/i }))
-      await user.type(screen.getByLabelText(/email/i), 'contrib@akli.dev')
+      const emailInput = screen.getByLabelText(/email/i)
+      await user.type(emailInput, 'contrib@akli.dev')
       await user.click(screen.getByRole('button', { name: /send invite/i }))
 
-      expect(await screen.findByText(/user already exists/i)).toBeInTheDocument()
+      const alert = await screen.findByRole('alert')
+      expect(alert).toHaveTextContent(/user already exists/i)
       // No success toast
       expect(screen.queryByText(/invite sent to/i)).not.toBeInTheDocument()
+
+      // Email errors wire up aria-invalid + aria-describedby (AC: role="alert" + aria-invalid/aria-describedby)
+      expect(emailInput).toHaveAttribute('aria-invalid', 'true')
+      expect(emailInput).toHaveAttribute('aria-describedby', alert.id)
     })
   })
 
@@ -220,7 +239,7 @@ describe('Admin UserManagement page', () => {
         expect(screen.getByText('admin@akli.dev')).toBeInTheDocument()
       })
 
-      const adminRow = screen.getByText('admin@akli.dev').closest('tr')
+      const adminRow = screen.getByText('admin@akli.dev').closest('li')
       expect(adminRow).not.toBeNull()
 
       const removeButton = within(adminRow as HTMLElement).queryByRole('button', {
@@ -237,7 +256,7 @@ describe('Admin UserManagement page', () => {
         expect(screen.getByText('contrib@akli.dev')).toBeInTheDocument()
       })
 
-      const contribRow = screen.getByText('contrib@akli.dev').closest('tr')
+      const contribRow = screen.getByText('contrib@akli.dev').closest('li')
       const removeButton = within(contribRow as HTMLElement).getByRole('button', {
         name: /remove/i,
       })
@@ -255,7 +274,7 @@ describe('Admin UserManagement page', () => {
         expect(screen.getByText('contrib@akli.dev')).toBeInTheDocument()
       })
 
-      const contribRow = screen.getByText('contrib@akli.dev').closest('tr')
+      const contribRow = screen.getByText('contrib@akli.dev').closest('li')
       const removeButton = within(contribRow as HTMLElement).getByRole('button', {
         name: /remove/i,
       })
@@ -278,8 +297,8 @@ describe('Admin UserManagement page', () => {
       })
 
       // Success toast
-      const toasts = await screen.findAllByRole('status')
-      expect(toasts.some((t) => /removed|success/i.test(t.textContent ?? ''))).toBe(true)
+      const toast = await screen.findByRole('button', { name: /removed/i })
+      expect(toast).toBeInTheDocument()
     })
   })
 })

@@ -60,3 +60,9 @@
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+/* ── Auto-fit variant ──────────────────────────────────────── */
+
+.autoFit {
+  grid-template-columns: repeat(auto-fit, minmax(var(--grid-min-width), 1fr));
+}

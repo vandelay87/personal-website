@@ -1,44 +1,168 @@
+/* Matches docs/design/paper/pages/Admin Recipe Editor.dc.html's COVER and
+   STEPS image sections (empty dropzone / processing shimmer / ready image
+   with an overlaid replace control). */
+
 .container {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   align-items: flex-start;
+  width: 100%;
 }
 
-.input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+/* ── Empty state — cover (large dropzone) ─────────────────────── */
+/* `focusRing`/`uploadHover` (interactions.module.css) are composed in JS
+   (see ImageUpload.tsx) rather than via `composes:` here — see
+   interactions.module.css's own header comment for why. */
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 10px: design literal (--space-2=8px, --space-3=12px — neither lands). */
+  gap: 10px;
+  width: 100%;
+  /* 22px: design literal (--space-5=20px, --space-6=24px — neither lands). */
+  padding: 22px;
+  font-family: inherit;
+  color: inherit;
+  text-align: center;
+  cursor: pointer;
+  background: var(--color-surface);
+  border: var(--border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  transition:
+    border-color var(--duration-base) var(--easing-default),
+    background-color var(--duration-base) var(--easing-default);
 }
 
-.preview {
+@media (prefers-reduced-motion: reduce) {
+  .dropzone {
+    transition: none;
+  }
+}
+
+.dropzoneIcon {
+  display: inline-flex;
+  color: var(--color-text-muted);
+}
+
+.dropzoneLabel {
+  font-size: var(--font-size-sm-plus);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.dropzoneHint {
+  /* 12.5px: design literal (--font-size-xs=11px, --font-size-sm=13px —
+     neither lands). */
+  font-size: 12.5px;
+  line-height: var(--line-height-normal);
+  /* .dropzone renders on --color-surface (issue #274). */
+  color: var(--color-text-faint-on-surface);
+}
+
+/* ── Processing state — step thumbnail width cap ──────────────────
+   Matches the ready-state step thumbnail's own maxWidth (128px, ~96px
+   tall at the 4/3 aspect ratio below) so the shimmer placeholder doesn't
+   jump in size once the image finishes processing. Cover has no
+   equivalent — it's full-width in both states. */
+.stepProcessing {
+  max-width: 128px;
+}
+
+/* ── Ready state — image + overlaid replace control ───────────────── */
+.frame {
+  position: relative;
+}
+
+.coverFrame {
+  width: 100%;
+}
+
+/* Matches ImageUpload.jsx's ready-state frame (1px border, radius-lg,
+   object-fit cover) — the empty/processing states are the dropzone's own
+   or ProcessingPlaceholder's own frame respectively. */
+.previewImage {
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-lg);
   object-fit: cover;
 }
 
-.error {
-  display: flex;
+/* No standalone "remove image" callback exists on this component (see
+   ReplaceIcon's comment in ImageUpload.tsx) — this restyles the previous
+   below-image "Replace" text button into the design's overlaid
+   top-right icon-button position/shape, kept non-destructive in tone
+   (not the design's literal danger/trash treatment, since it doesn't
+   delete anything). */
+/* `focusRing` composed in JS — see `.dropzone` above for rationale. */
+.replaceButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-3);
-  color: var(--color-error);
-  font-size: var(--font-size-sm);
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    color var(--duration-fast) var(--easing-default),
+    border-color var(--duration-fast) var(--easing-default),
+    background-color var(--duration-fast) var(--easing-default);
 }
 
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+.replaceButton:hover {
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
+  /* Not --color-hover: that's a near-transparent wash (rgba alpha ~0.02–0.04)
+     meant to tint an already-transparent/opaque-page-colored surface (e.g.
+     Button's own .outline, which is `background-color: transparent` at
+     rest). This button is opaque at rest specifically because it overlays
+     an arbitrary photo — swapping to a near-transparent background on
+     hover let the cover image show through almost unobstructed, reading as
+     "the background disappeared" rather than a hover highlight.
+     --color-field is reliably lighter than --color-bg in both themes
+     (#FFFFFF vs #FBFAF7 light; #1B1914 vs #141310 dark) and, unlike
+     --color-hover, stays fully opaque. */
+  background-color: var(--color-field);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .replaceButton {
+    transition: none;
+  }
+}
+
+/* ── Error — Login's `.errorBox`/`.errorDot`/`.errorText` pattern
+   (src/pages/admin/Login/Login.module.css), extended with a Retry
+   action since, unlike Login's static message, this error is
+   recoverable in place. */
+.error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px; /* no --space-* token lands on 9px (--space-2=8px, --space-3=12px) */
+  width: 100%;
+  background: var(--color-error-bg);
+  border: var(--border-width) solid color-mix(in srgb, var(--color-error) 34%, transparent);
+  border-radius: var(--radius-md);
+  padding: 11px 13px; /* no --space-* token lands on 11px/13px */
+}
+
+.errorDot {
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  flex-shrink: 0;
+}
+
+.errorText {
+  flex: 1;
+  font-size: 13.5px; /* no token lands between --font-size-sm (13px) and --font-size-sm-plus (14px) */
+  line-height: var(--line-height-normal);
+  color: var(--color-error);
 }

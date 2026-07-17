@@ -2,20 +2,99 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  /* Design wants checked-off ingredient text to visibly fade (design source:
+     docs/design/paper/pages/Recipe.dc.html's `--faint` color). Plain
+     --color-text-faint-on-surface can't be reused here: at ~4.75:1 against
+     --color-surface it's nearly indistinguishable from --color-text-muted
+     (~4.81:1), which is already this row's non-checked color — so the
+     "faded" state read as unchanged. This local override is tuned to
+     ~4.55:1, the lightest shade that still clears WCAG AA's 4.5:1 floor
+     against --color-surface, giving the most fade this surface allows.
+     Dark mode's existing faint-on-surface token already has enough gap
+     from muted (~4.71:1 vs ~6.68:1) to read as a visible fade, so it's
+     reused unchanged there. */
+  --checked-ingredient-color: #736D63;
+}
+
+:global([data-theme='dark']) .list {
+  --checked-ingredient-color: var(--color-text-faint-on-surface);
+}
+
+.item:not(:first-child) {
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.row {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  padding: 11px 4px;
+  cursor: pointer;
 }
 
-.item {
-  padding: var(--space-2) 0;
-  border-bottom: 1px solid var(--color-border);
+.checkbox {
+  composes: focusRing from '../../styles/interactions.module.css';
+  appearance: none;
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  border: 1.5px solid var(--color-border-strong);
+  /* 5px: design literal — --radius-sm (6px) is the nearest token but is
+     1px off. */
+  border-radius: 5px;
+  cursor: pointer;
+  position: relative;
+  transition: background var(--duration-fast) var(--easing-default),
+              border-color var(--duration-fast) var(--easing-default);
 }
 
-.quantity {
-  font-weight: var(--font-weight-bold);
+.checkbox:checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
-.unit {
+.checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-on-accent-fixed);
+  font-size: 10px;
+  line-height: 1;
+}
+
+.name {
+  flex: 1;
+  font-size: 15px;
+  color: var(--color-text-strong);
+  line-height: 1.35;
+}
+
+.checkbox:checked ~ .name {
+  text-decoration: line-through;
+  /* WCAG AA override: --color-text-faint fails 4.5:1 against this
+     panel's --color-surface (4.35:1 light / 4.40:1 dark) — use the
+     locally-tuned --checked-ingredient-color instead (see .list). */
+  color: var(--checked-ingredient-color);
+}
+
+.qty {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
+}
+
+.checkbox:checked ~ .qty {
+  color: var(--checked-ingredient-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkbox {
+    transition: none;
+  }
 }

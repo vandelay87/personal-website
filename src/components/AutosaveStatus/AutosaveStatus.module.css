@@ -1,46 +1,46 @@
+/* Matches docs/design/paper/pages/Admin Recipe Editor.dc.html's rail
+   autosave-indicator exactly (sticky rail row, min-height:20px). */
+
 .container {
-  display: inline-flex;
+  display: flex;
   flex-direction: row;
   align-items: center;
-  gap: var(--space-2);
+  /* 9px: design literal (--space-2=8px, --space-3=12px — neither lands). */
+  gap: 9px;
+  min-height: 20px;
+  width: 100%;
   font-family: var(--font-sans);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
   color: var(--color-text);
-}
-
-.icon {
-  display: inline-block;
-  flex-shrink: 0;
-  inline-size: 0.5rem;
-  block-size: 0.5rem;
-  border-radius: var(--radius-none);
-  background-color: var(--color-text-muted);
-}
-
-.iconSaving {
-  background-color: var(--color-text-muted);
-  animation: autosaveStatusPulse 1.2s ease-in-out infinite;
-}
-
-.iconSaved {
-  background-color: var(--color-success);
-}
-
-.iconError {
-  background-color: var(--color-error);
 }
 
 .liveRegion {
   display: inline-flex;
   flex-direction: row;
   align-items: center;
-  gap: var(--space-2);
+  gap: 9px;
+}
+
+/* ── Saving — shared spinner composable, small size ───────────────
+   `spinner`/`spinnerSm` (interactions.module.css) are composed directly
+   in JS (see AutosaveStatus.tsx) rather than via a local `.spinner`
+   class — see interactions.module.css's own header comment for why. See
+   that file's own comment for why the keyframe needs `global(...)` and
+   why prefers-reduced-motion needs no local override (handled at the
+   `spin`/`shimmerSweep` keyframe level in animations.css). */
+
+.iconSaved {
+  display: inline-flex;
+  color: var(--color-success);
+}
+
+.iconError {
+  display: inline-flex;
+  color: var(--color-error);
 }
 
 .text {
   font-size: var(--font-size-sm);
-  color: var(--color-text);
+  color: var(--color-text-muted);
 }
 
 .relativeTime {
@@ -48,35 +48,25 @@
   color: var(--color-text-muted);
 }
 
+/* `focusRing` composed in JS — see `.spinner`'s removed rule above for
+   rationale. */
 .retryButton {
+  margin-left: auto;
   padding: 0;
-  font: inherit;
+  /* 12.5px: design literal (--font-size-sm=13px is the nearest token). */
+  font-size: 12.5px;
+  font-family: inherit;
+  font-weight: var(--font-weight-medium);
   color: var(--color-primary);
   background: transparent;
   border: 0;
-  border-radius: var(--radius-none);
-  text-decoration: underline;
+  border-radius: var(--radius-sm);
   cursor: pointer;
 }
 
-.retryButton:hover {
-  color: var(--color-primary-hover);
-}
-
+.retryButton:hover,
 .retryButton:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-@keyframes autosaveStatusPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .iconSaving {
-    animation: none;
-  }
+  text-decoration: underline;
 }
 
 @media (max-width: 640px) {

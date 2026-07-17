@@ -8,7 +8,13 @@ import RecipeDetail from '@pages/RecipeDetail'
 import Recipes from '@pages/Recipes'
 import { lazy } from 'react'
 import { type RouteObject } from 'react-router-dom'
-import { AdminSuspense, RootLayout } from './routeLayouts'
+import {
+  AdminRootLayout,
+  AdminSuspense,
+  LoginLayout,
+  RecipePreviewLayout,
+  RootLayout,
+} from './routeLayouts'
 
 const Login = lazy(() => import('@pages/admin/Login'))
 const RecipeList = lazy(() => import('@pages/admin/RecipeList'))
@@ -26,21 +32,35 @@ export const routes: RouteObject[] = [
       { path: '/blog/:slug', element: <BlogPost /> },
       { path: '/recipes', element: <Recipes /> },
       { path: '/recipes/:slug', element: <RecipeDetail /> },
+      { path: '*', element: <NotFound /> },
+    ],
+  },
+  {
+    path: '/admin/login',
+    element: <LoginLayout />,
+    children: [
       {
-        path: '/admin/login',
+        index: true,
         element: (
           <AdminSuspense>
             <Login />
           </AdminSuspense>
         ),
       },
+    ],
+  },
+  {
+    element: (
+      <ProtectedRoute>
+        <AdminRootLayout />
+      </ProtectedRoute>
+    ),
+    children: [
       {
         path: '/admin/recipes',
         element: (
           <AdminSuspense>
-            <ProtectedRoute>
-              <RecipeList />
-            </ProtectedRoute>
+            <RecipeList />
           </AdminSuspense>
         ),
       },
@@ -48,9 +68,7 @@ export const routes: RouteObject[] = [
         path: '/admin/recipes/new',
         element: (
           <AdminSuspense>
-            <ProtectedRoute>
-              <RecipeEditor />
-            </ProtectedRoute>
+            <RecipeEditor />
           </AdminSuspense>
         ),
       },
@@ -58,19 +76,7 @@ export const routes: RouteObject[] = [
         path: '/admin/recipes/:id/edit',
         element: (
           <AdminSuspense>
-            <ProtectedRoute>
-              <RecipeEditor />
-            </ProtectedRoute>
-          </AdminSuspense>
-        ),
-      },
-      {
-        path: '/admin/recipes/:id/preview',
-        element: (
-          <AdminSuspense>
-            <ProtectedRoute>
-              <RecipePreview />
-            </ProtectedRoute>
+            <RecipeEditor />
           </AdminSuspense>
         ),
       },
@@ -84,7 +90,23 @@ export const routes: RouteObject[] = [
           </AdminSuspense>
         ),
       },
-      { path: '*', element: <NotFound /> },
+    ],
+  },
+  {
+    element: (
+      <ProtectedRoute>
+        <RecipePreviewLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        path: '/admin/recipes/:id/preview',
+        element: (
+          <AdminSuspense>
+            <RecipePreview />
+          </AdminSuspense>
+        ),
+      },
     ],
   },
 ]

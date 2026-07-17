@@ -1,9 +1,15 @@
 import { fetchRecipes, fetchTags } from '@api/recipes'
 import type { RecipeIndex, Tag } from '@models/recipe'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { axe } from 'vitest-axe'
 import Recipes from './Recipes'
+
+const LocationDisplay = () => {
+  const location = useLocation()
+  return <div data-testid="location">{location.pathname}{location.search}</div>
+}
 
 vi.mock('@api/recipes', () => ({
   fetchRecipes: vi.fn(),
@@ -53,10 +59,11 @@ const mockTags: Tag[] = [
   { tag: 'Spicy', count: 1 },
 ]
 
-const renderRecipes = (initialRoute = '/recipes') =>
+const renderRecipes = (initialRoute = '/recipes', { withLocation = false } = {}) =>
   render(
     <MemoryRouter initialEntries={[initialRoute]}>
       <Recipes />
+      {withLocation && <LocationDisplay />}
     </MemoryRouter>
   )
 
@@ -96,6 +103,35 @@ describe('Recipes page', () => {
     expect(screen.queryByText('Thai Green Curry')).not.toBeInTheDocument()
   })
 
+  it('clicking a tag chip writes ?tag=<tag> to the URL', async () => {
+    renderRecipes('/recipes', { withLocation: true })
+
+    await waitFor(() => {
+      expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /italian/i }))
+
+    expect(screen.getByTestId('location')).toHaveTextContent('/recipes?tag=Italian')
+    expect(screen.getByRole('button', { name: /italian/i })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    )
+  })
+
+  it('clicking the active tag chip again clears ?tag from the URL', async () => {
+    renderRecipes('/recipes?tag=Italian', { withLocation: true })
+
+    await waitFor(() => {
+      expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /italian/i }))
+
+    expect(screen.getByTestId('location')).toHaveTextContent('/recipes')
+    expect(screen.getByTestId('location').textContent).not.toMatch(/tag=/)
+  })
+
   it('searches by keyword (title match)', async () => {
     renderRecipes()
 
@@ -109,6 +145,24 @@ describe('Recipes page', () => {
     await waitFor(() => {
       expect(screen.getByText('Thai Green Curry')).toBeInTheDocument()
       expect(screen.queryByText('Classic Margherita Pizza')).not.toBeInTheDocument()
+    })
+  })
+
+  it('searches by keyword (tag match)', async () => {
+    renderRecipes()
+
+    await waitFor(() => {
+      expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
+    })
+
+    // "Spicy" only appears as a tag (on Thai Green Curry), not in any title.
+    const searchInput = screen.getByRole('searchbox', { name: /search recipes/i })
+    fireEvent.change(searchInput, { target: { value: 'spicy' } })
+
+    await waitFor(() => {
+      expect(screen.getByText('Thai Green Curry')).toBeInTheDocument()
+      expect(screen.queryByText('Classic Margherita Pizza')).not.toBeInTheDocument()
+      expect(screen.queryByText('Italian Pasta Carbonara')).not.toBeInTheDocument()
     })
   })
 
@@ -128,7 +182,7 @@ describe('Recipes page', () => {
     })
   })
 
-  it('shows "No recipes found" with clear button when filter has no matches', async () => {
+  it('shows the no-results message with clear button when filter has no matches', async () => {
     renderRecipes()
 
     await waitFor(() => {
@@ -139,10 +193,10 @@ describe('Recipes page', () => {
     fireEvent.change(searchInput, { target: { value: 'nonexistent dish xyz' } })
 
     await waitFor(() => {
-      expect(screen.getByText(/no recipes found/i)).toBeInTheDocument()
+      expect(screen.getByText(/nothing in the kitchen matches that/i)).toBeInTheDocument()
     })
 
-    expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /clear filter/i })).toBeInTheDocument()
   })
 
   it('shows "Recipes coming soon" when no recipes exist', async () => {
@@ -176,5 +230,34 @@ describe('Recipes page', () => {
 
     const liveRegion = screen.getByRole('status')
     expect(liveRegion).toHaveAttribute('aria-live', 'polite')
+  })
+
+  describe('accessibility', () => {
+    it('renders the default loaded recipe grid with no detectable axe violations', async () => {
+      const { container } = renderRecipes()
+
+      await waitFor(() => {
+        expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
+      })
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
+
+    it('renders the no-results empty state with no detectable axe violations', async () => {
+      const { container } = renderRecipes()
+
+      await waitFor(() => {
+        expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
+      })
+
+      const searchInput = screen.getByRole('searchbox', { name: /search recipes/i })
+      fireEvent.change(searchInput, { target: { value: 'nonexistent dish xyz' } })
+
+      await waitFor(() => {
+        expect(screen.getByText(/nothing in the kitchen matches that/i)).toBeInTheDocument()
+      })
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
   })
 })

@@ -1,8 +1,0 @@
-.main {
-  min-height: 100vh;
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  padding-inline: var(--space-6);
-  max-width: var(--max-w-site);
-  margin-inline: auto;
-}

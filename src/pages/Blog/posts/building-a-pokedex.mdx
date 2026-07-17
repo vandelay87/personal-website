@@ -20,6 +20,8 @@ The infrastructure lives in a separate repo from the frontend. The Pokedex spans
 
 ```mermaid
 graph TD
+    accTitle: Pokedex CDK stack architecture
+    accDescr: AkliCertificateStack in us-east-1 provisions the Route 53 hosted zone and ACM certificates for akli.dev and api.akli.dev. PokedexStack in eu-west-2 holds the DynamoDB pokemon table, the Lambda handler, a seeder Lambda that loads pokemon.json into DynamoDB, and an HTTP API Gateway exposing GET /pokedex/pokemon endpoints, which the handler Lambda serves from the table. ApiStack in eu-west-2 wires a CloudFront distribution and Route 53 record for api.akli.dev, routed by the certificate and hosted zone, so CloudFront forwards /pokedex/* requests to the API Gateway.
     subgraph "AkliCertificateStack (us-east-1)"
         HZ[Route 53 Hosted Zone]
         SC[ACM Certificate<br/>akli.dev, www.akli.dev]

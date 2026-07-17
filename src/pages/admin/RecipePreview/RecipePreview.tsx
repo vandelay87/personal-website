@@ -1,19 +1,44 @@
 import { isSessionError } from '@api/auth'
 import { fetchRecipeByIdAdmin, publishRecipe } from '@api/recipes'
+import Button from '@components/Button'
+import { IconPreview, iconEdit, iconNotFound, iconPublish, iconViewPublic } from '@components/icons'
 import Link from '@components/Link'
 import Loading from '@components/Loading'
 import RecipeDetailView from '@components/RecipeDetailView'
+import ThemeToggle from '@components/ThemeToggle'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import {
   useImageProcessingPoll,
   type ImageReadyUpdate,
 } from '@hooks/useImageProcessingPoll'
+import { useMeasuredHeightVar } from '@hooks/useMeasuredHeightVar'
 import { applyStepReadiness, type Recipe } from '@models/recipe'
-import { useCallback, useEffect, useMemo, useState, type FC } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type FC } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import { MAIN_LANDMARK_ID } from '../../../constants/mainLandmark'
+import stateBox from '../../../styles/stateBox.module.css'
 import styles from './RecipePreview.module.css'
+
+// Hoisted element, not a component — it never takes props, so there's no
+// need to re-invoke a function (and rebuild the tree) on every render. Path
+// matches Admin Recipe Preview.dc.html's inline SVG (line 76) exactly.
+const iconStatusPublished = (
+  <svg
+    width="17"
+    height="17"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2.2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M20 6 9 17l-5-5" />
+  </svg>
+)
 
 const mergeReadiness = (recipe: Recipe, updates: ImageReadyUpdate[]): Recipe => {
   const byImageType = new Map(updates.map((u) => [u.imageType, u.processedAt]))
@@ -40,6 +65,9 @@ const RecipePreview: FC = () => {
   const { id } = useParams<{ id: string }>()
   const { getAccessToken, logout } = useAuth()
   const navigate = useNavigate()
+  const bannerRef = useRef<HTMLDivElement>(null)
+
+  useMeasuredHeightVar(bannerRef, '--banner-height')
 
   const [recipe, setRecipe] = useState<Recipe | undefined>()
   const [loading, setLoading] = useState(true)
@@ -106,57 +134,118 @@ const RecipePreview: FC = () => {
 
   if (loading) {
     return (
-      <div className={styles.stateWrapper}>
-        <Loading />
-      </div>
+      <main id={MAIN_LANDMARK_ID} tabIndex={-1} className={styles.main}>
+        <div className={styles.stateWrapper}>
+          <Loading />
+        </div>
+      </main>
     )
   }
 
   if (notFound || !recipe) {
     return (
-      <div className={styles.stateWrapper}>
-        <Typography variant="body">Recipe not found.</Typography>
-      </div>
+      <main id={MAIN_LANDMARK_ID} tabIndex={-1} className={styles.main}>
+        <div className={`${stateBox.box} ${styles.notFoundBox}`}>
+          <div className={`${stateBox.icon} ${styles.notFoundIcon}`}>{iconNotFound}</div>
+          <Typography variant="heading1" className={`${stateBox.heading} ${styles.notFoundHeading}`}>
+            Recipe not found
+          </Typography>
+          <Typography variant="body" className={`${stateBox.body} ${styles.notFoundBody}`}>
+            This recipe may have been deleted, or the link is incorrect.
+          </Typography>
+          <Link
+            to="/admin/recipes"
+            icon="←"
+            iconSide="left"
+            nudge="left"
+            variant="ghost"
+            className={styles.notFoundBackLink}
+          >
+            Back to recipes
+          </Link>
+        </div>
+      </main>
     )
   }
 
   const editHref = `/admin/recipes/${recipe.id}/edit`
   const isDraft = recipe.status !== 'published'
+  const bannerToneClassName = isDraft ? styles.draft : styles.published
 
   return (
     <div className={styles.container}>
-      <div className={styles.banner} role="status" aria-live="polite">
-        {isDraft ? (
-          <>
+      <div
+        ref={bannerRef}
+        className={[styles.banner, bannerToneClassName].join(' ')}
+        role="status"
+        aria-live="polite"
+      >
+        <div className={styles.bannerInner}>
+          <div className={styles.bannerLeft}>
+            <Link
+              to="/admin/recipes"
+              icon="←"
+              iconSide="left"
+              nudge="left"
+              className={styles.backLink}
+            >
+              Recipes
+            </Link>
+            <span aria-hidden="true" className={styles.bannerDivider} />
+            <span aria-hidden="true" className={styles.statusIcon}>
+              {isDraft ? <IconPreview size={17} /> : iconStatusPublished}
+            </span>
             <Typography variant="body" className={styles.bannerMessage}>
-              Preview — this recipe is not yet published
+              {isDraft
+                ? 'Preview — this recipe is not yet published.'
+                : 'This recipe is published.'}
             </Typography>
-            <div className={styles.bannerActions}>
-              <Link to={editHref}>Edit</Link>
-              <button
-                type="button"
-                className={styles.actionLink}
+          </div>
+          <div className={styles.bannerActions}>
+            <Link
+              to={editHref}
+              icon={iconEdit}
+              iconSide="left"
+              nudge="none"
+              variant="ghost"
+              className={styles.editLink}
+            >
+              Edit
+            </Link>
+            {isDraft ? (
+              <Button
                 onClick={handlePublish}
-                disabled={publishing}
+                size="sm"
+                loading={publishing}
+                iconLeft={iconPublish}
+                className={styles.publishButton}
               >
-                {publishing ? 'Publishing…' : 'Publish'}
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <Typography variant="body" className={styles.bannerMessage}>
-              This recipe is published
-            </Typography>
-            <div className={styles.bannerActions}>
-              <Link to={editHref}>Edit</Link>
-              <Link to={`/recipes/${recipe.slug}`}>View public page</Link>
-            </div>
-          </>
-        )}
+                Publish
+              </Button>
+            ) : (
+              <Link
+                to={`/recipes/${recipe.slug}`}
+                icon={iconViewPublic}
+                iconSide="right"
+                nudge="up-right"
+                variant="solid"
+                className={styles.viewLink}
+              >
+                View public page
+              </Link>
+            )}
+            <ThemeToggle />
+          </div>
+        </div>
       </div>
 
-      <RecipeDetailView recipe={recipe} />
+      <main
+        id={MAIN_LANDMARK_ID}
+        tabIndex={-1}
+        className={[styles.main, styles.mainWithBanner].join(' ')}
+      >
+        <RecipeDetailView recipe={recipe} />
+      </main>
     </div>
   )
 }

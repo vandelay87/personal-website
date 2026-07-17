@@ -11,6 +11,7 @@ import {
 import { AuthProvider } from './contexts/AuthContext'
 import { RecipeDataContext } from './contexts/RecipeDataContext'
 import type { RecipeData } from './contexts/RecipeDataContext'
+import { ToastProvider } from './contexts/ToastContext'
 import { getMetaTags, escapeHtml } from './meta'
 import { routes } from './routes'
 
@@ -24,7 +25,7 @@ try {
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!--ssr-head-->
   </head>
@@ -34,7 +35,12 @@ try {
 </html>`
 }
 
-const [templateBeforeOutlet, templateAfterOutlet] = template.split('<!--ssr-outlet-->')
+const splitTemplate = (html: string): [string, string] => {
+  const [before, after] = html.split('<!--ssr-outlet-->')
+  return [before, after]
+}
+
+const [templateBeforeOutlet, templateAfterOutlet] = splitTemplate(template)
 
 const buildHeadHtml = (routePath: string, data?: RecipeData): string => {
   const meta = getMetaTags(routePath, data)
@@ -87,7 +93,11 @@ const buildHeadHtml = (routePath: string, data?: RecipeData): string => {
 
 const handler = createStaticHandler(routes)
 
-export const render = async (url: string, data?: RecipeData): Promise<string> => {
+export const render = async (
+  url: string,
+  data?: RecipeData,
+  htmlTemplate?: string
+): Promise<string> => {
   const request = new Request(`http://localhost${url}`)
   const context = await handler.query(request)
 
@@ -97,14 +107,19 @@ export const render = async (url: string, data?: RecipeData): Promise<string> =>
 
   const router = createStaticRouter(handler.dataRoutes, context)
   const head = buildHeadHtml(url, data)
-  const beforeHtml = templateBeforeOutlet.replace('<!--ssr-head-->', head)
+  const [beforeOutlet, afterOutlet] = htmlTemplate
+    ? splitTemplate(htmlTemplate)
+    : [templateBeforeOutlet, templateAfterOutlet]
+  const beforeHtml = beforeOutlet.replace('<!--ssr-head-->', head)
 
   return new Promise<string>((resolve, reject) => {
     const { pipe } = renderToPipeableStream(
       <AuthProvider>
-        <RecipeDataContext.Provider value={data ?? {}}>
-          <StaticRouterProvider router={router} context={context} />
-        </RecipeDataContext.Provider>
+        <ToastProvider>
+          <RecipeDataContext.Provider value={data ?? {}}>
+            <StaticRouterProvider router={router} context={context} />
+          </RecipeDataContext.Provider>
+        </ToastProvider>
       </AuthProvider>,
       {
         onAllReady() {
@@ -116,7 +131,7 @@ export const render = async (url: string, data?: RecipeData): Promise<string> =>
           })
 
           reactStream.on('end', () => {
-            const fullHtml = beforeHtml + reactHtml + templateAfterOutlet
+            const fullHtml = beforeHtml + reactHtml + afterOutlet
             resolve(fullHtml)
           })
 

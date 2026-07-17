@@ -1,95 +1,224 @@
 .article {
-  padding-block-end: var(--space-12);
+  /* Matches the design's article column exactly: a narrower, dedicated
+     680px long-form width (--max-w-article), not the wider 720px
+     index/hero reading column (--max-w-reading) used elsewhere on the
+     Blog page — a bare max-width was previously unset entirely, so
+     the whole post stretched to the page's own width with no reading
+     column at all. Padding is the design's literal clamp values; no
+     tokens land on them. */
+  max-width: var(--max-w-article);
+  margin-inline: auto;
+  padding: clamp(40px, 7vw, 72px) var(--space-6) clamp(64px, 9vw, 96px);
   overflow-x: hidden;
 }
 
+/* 12px mono meta text — used by .backLink, .meta, .sectionLabel, and
+   .relatedMeta below. metaText's own font-size-sm (13px) is tuned for
+   other mono-meta contexts, not this page's back-link/meta/label
+   lines, all of which the design sets to this exact size. */
+.metaLabel {
+  composes: metaText from '../../styles/text.module.css';
+  font-size: 12px;
+}
+
+.backLink {
+  composes: focusRing from '../../styles/interactions.module.css';
+  composes: metaLabel;
+  color: var(--color-text-muted);
+  margin-block-end: 36px;
+}
+
+.header {
+  margin-block-end: var(--space-8);
+}
+
+.meta {
+  composes: metaLabel;
+  margin: 0 0 18px;
+}
+
+.title {
+  /* Fluid 32-46px/-0.03em: matches the design's h1 exactly —
+     Typography's shared heading1 variant is a fixed 46px with no
+     letter-spacing or margin, both needed here. line-height already
+     matches via --line-height-tight (1.08), same value the design
+     hardcodes. */
+  font-size: clamp(32px, 5.6vw, 46px);
+  letter-spacing: -0.03em;
+  margin: 0 0 var(--space-6);
+}
+
 .tags {
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: 0;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
-  margin-block-start: var(--space-2);
-  margin-block-end: var(--space-12);
 }
 
-.tag {
-  padding: var(--space-1) var(--space-2);
-  font-size: var(--font-size-sm);
-  font-family: var(--font-mono);
-  font-weight: var(--font-weight-normal);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background: var(--color-bg-subtle);
+/* Long-form MDX body typography — matches the design's `.prose`
+   exactly. Previously unstyled entirely (plain <p>/<h2> tags render
+   with only the page's ambient body styles), which is the bulk of why
+   a post's content didn't look "wrapped" like the design at all. */
+.prose p {
+  font-size: var(--font-size-lg);
+  line-height: 1.75;
   color: var(--color-text);
-  text-decoration: none;
-  transition: background var(--duration-fast) var(--easing-default),
-              color var(--duration-fast) var(--easing-default);
+  margin: 0 0 22px;
 }
 
-.tag:hover {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+.prose h2 {
+  font-size: clamp(23px, 3.2vw, 27px);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--color-text-strong);
+  margin: 54px 0 18px;
 }
 
+.prose strong {
+  color: var(--color-text-strong);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Matches the design's `.prose a`/`.prose a:hover` exactly: no
+   underline until hover. Link's own `underline` prop makes it
+   permanent, so this is a scoped override rather than that prop —
+   BlogLink (BlogPost.tsx) only sets `tone="accent"` for the color. */
+.prose a:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Inline code within running prose text — matches the design exactly.
+   `:not(pre code)` (not a blanket `.prose code`) so it doesn't also
+   catch CodeBlock's own <pre><code> fenced blocks, which render
+   directly inside .prose too and have their own distinct styling.
+   Was scoped to `p code` specifically, but MDX doesn't wrap a
+   Callout's children in a <p> (it's inline JSX-children content, not
+   a separate markdown block) — that let inline code inside a Callout
+   render with no styling at all. Background reads from
+   --inline-code-bg (default --color-surface) rather than a literal,
+   so Callout.module.css can redeclare just that one custom property
+   on its own container instead of fighting this rule's specificity. */
+.prose code:not(pre code) {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--inline-code-bg, var(--color-surface));
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+/* Matches the design's share block exactly: 56px/32px top spacing —
+   distinctly more than the related-posts section below (--space-8/6),
+   no tokens land on either literal. */
 .shareSection {
-  margin-block-start: var(--space-8);
-  padding-block-start: var(--space-6);
-  border-top: var(--border-width) solid var(--color-border-subtle);
+  margin-block-start: 56px;
+  padding-block-start: 32px;
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+/* Shared by .shareSection's "Share this post" and .relatedSection's
+   "Related posts" — both use this same small mono eyebrow-style
+   label in the design. 0.06em: matches the design exactly;
+   --tracking-meta (0.04em) is tuned for other mono-meta contexts,
+   not this one. */
+.sectionLabel {
+  composes: metaLabel;
+  letter-spacing: 0.06em;
+  margin: 0 0 var(--space-4);
 }
 
 .shareLinks {
   display: flex;
-  gap: var(--space-4);
-  margin-block-start: var(--space-3);
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
+/* Matches the design's `.share-btn` exactly: a bordered pill with a
+   visible "Share on X"/"Share on LinkedIn" label — was an icon-only
+   circle (SVG logos), same pattern already corrected on CodeBlock's
+   copy button. */
 .shareLink {
+  composes: focusRing chipHover from '../../styles/interactions.module.css';
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: var(--space-10);
-  height: var(--space-10);
-  color: var(--color-text);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background: var(--color-surface);
-  transition: background var(--duration-fast) var(--easing-default),
-              color var(--duration-fast) var(--easing-default);
+  font-size: 13.5px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-strong);
+  text-decoration: none;
+  border: var(--border-width) solid var(--color-border-strong);
+  padding: 9px 16px;
+  border-radius: var(--radius-full);
+  transition:
+    border-color var(--duration-fast) var(--easing-default),
+    color var(--duration-fast) var(--easing-default),
+    background var(--duration-fast) var(--easing-default);
 }
 
 .shareLink:hover {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: var(--color-hover);
 }
 
-.shareLink svg {
-  width: var(--space-6);
-  height: var(--space-6);
+@media (prefers-reduced-motion: reduce) {
+  .shareLink {
+    transition: none;
+  }
 }
 
+/* Matches the design exactly: 48px top spacing, no border-top (unlike
+   .shareSection above, which has one) — no token lands on the
+   literal. */
 .relatedSection {
-  margin-block-start: var(--space-8);
-  padding-block-start: var(--space-6);
-  border-top: var(--border-width) solid var(--color-border-subtle);
+  margin-block-start: 48px;
 }
 
 .relatedGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  /* The design stacks related posts as plain full-width blocks, not
+     a multi-column grid — its own markup has no grid/flex wrapper
+     around each `.rel` item at all. */
+  display: flex;
+  flex-direction: column;
   gap: var(--space-4);
-  margin-block-start: var(--space-4);
 }
 
+/* Matches the design's `.rel`/`.rel-title` exactly: a plain bordered
+   block (no background/shadow), with the title recoloring to accent
+   on hover — not the card treatment (surface fill, shadow-on-hover)
+   this previously borrowed from RecipeCard/AppCard's own pattern. */
 .relatedCard {
+  composes: focusRing from '../../styles/interactions.module.css';
   display: block;
-  padding: var(--space-4);
+  padding: 22px 24px;
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background: var(--color-surface);
+  border-radius: 14px;
   text-decoration: none;
   color: inherit;
-  transition: box-shadow var(--duration-fast) var(--easing-default);
 }
 
-.relatedCard:hover {
-  box-shadow: var(--shadow-md);
+.relatedMeta {
+  composes: metaLabel;
+  margin: 0 0 var(--space-2);
+}
+
+.relatedTitle {
+  font-size: 19px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.02em;
+  color: var(--color-text-strong);
+  transition: color var(--duration-fast) var(--easing-default);
+}
+
+.relatedCard:hover .relatedTitle {
+  color: var(--color-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .relatedTitle {
+    transition: none;
+  }
 }

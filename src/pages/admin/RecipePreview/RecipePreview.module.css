@@ -3,58 +3,251 @@
   flex-direction: column;
 }
 
+/* ── Status banner ─────────────────────────────────────────────────
+   Matches Admin Recipe Preview.dc.html's sticky status region (lines
+   71-107): tinted amber (draft) / green (published), back link + status
+   icon/text on the left, Edit + Publish/View-public-page + theme-toggle
+   on the right.
+
+   `top: 0`: this route no longer renders inside AdminLayout/AdminRootLayout
+   (RecipePreviewLayout has no Header at all — see routeLayouts.tsx) —
+   the design's own isolated mockup has no persistent app chrome above this
+   status region either, and its footer is the public-style footer, not
+   the admin one, confirming the page is meant to read as the public
+   Recipe page with just this admin-only banner overlaid. This banner is
+   therefore this route's own topmost sticky element, exactly like
+   Header.module.css's `.sticky`, not an offset below one.
+
+   `backdrop-filter`: re-enabled below (gated behind the same `@supports`
+   pattern as Header.module.css's `.sticky`) for the same reason — the
+   design system's "only the one sticky header gets blur" reservation
+   assumed a persistent admin Header would sit above this banner. With no
+   such header on this route, this banner functionally *is* the one sticky
+   header, so it gets the full treatment. */
 .banner {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  border-block-end: var(--border-width) solid;
+}
+
+@supports (backdrop-filter: blur(1px)) and (color: color-mix(in srgb, red 50%, transparent)) {
+  .draft {
+    backdrop-filter: saturate(140%) blur(10px);
+  }
+
+  .published {
+    backdrop-filter: saturate(140%) blur(10px);
+  }
+}
+
+/* Background formula matches Admin Recipe Preview.dc.html's `renderVals()`
+   `bannerBg` exactly (nested color-mix: page background tinted mostly-opaque
+   first, then lightly blended with warning/success) — NOT the generic
+   --color-warning-bg/--color-success-bg tokens, which are a different,
+   much-lower-opacity wash meant for other surfaces. 14%/13% (draft/published)
+   is the design's own literal split, not a typo. This is identical whether
+   or not backdrop-filter is supported, so it stays out of the @supports
+   block above, which now only adds the blur itself. */
+.draft {
+  background: color-mix(in srgb, var(--color-warning) 14%, color-mix(in srgb, var(--color-bg) 78%, transparent));
+  border-block-end-color: color-mix(in srgb, var(--color-warning) 30%, var(--color-border));
+}
+
+.published {
+  background: color-mix(in srgb, var(--color-success) 13%, color-mix(in srgb, var(--color-bg) 78%, transparent));
+  border-block-end-color: color-mix(in srgb, var(--color-success) 30%, var(--color-border));
+}
+
+.bannerInner {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-3) var(--space-4);
   max-width: var(--max-w-site);
-  margin: var(--space-6) auto 0;
-  padding: var(--space-4);
-  border: var(--border-width) solid var(--color-border);
-  background: var(--color-bg-subtle);
-  border-radius: var(--radius-none);
+  margin-inline: auto;
+  /* 13px: design literal (Admin Recipe Preview.dc.html line 73), no
+     --space-* token lands on it. */
+  padding: 13px clamp(20px, 5vw, 28px);
 }
 
+.bannerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+/* Bare `.backLink` override: Link's own `.link` now lives in
+   `@layer component-defaults` (Link.module.css, #263), so this plain
+   unlayered class deterministically wins without needing the old
+   descendant-selector trick. */
+.backLink {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.bannerDivider {
+  width: var(--border-width);
+  height: 16px;
+  background: var(--color-border-strong);
+}
+
+.statusIcon {
+  display: inline-flex;
+}
+
+.draft .statusIcon {
+  color: var(--color-warning);
+}
+
+.published .statusIcon {
+  color: var(--color-success);
+}
+
+/* Bare `.bannerMessage` override: Typography's own `.body` now lives in
+   `@layer component-defaults` (Typography.module.css, #263), same
+   de-scoping already applied to `.backLink` above. */
 .bannerMessage {
   margin: 0;
-  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm-plus);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-strong);
 }
 
 .bannerActions {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
-.actionLink {
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--color-link);
-  font: inherit;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+/* ── Pill buttons ──────────────────────────────────────────────────
+   .editLink / .viewLink (below) and .notFoundBackLink (further down)
+   are Link-backed ghost/solid pill buttons; .publishButton (below) is
+   the one Button-backed pill among them. All four share the same pill
+   shape (9px radius, 7px icon/label gap).
+
+   .editLink/.viewLink/.notFoundBackLink are bare, unlayered overrides
+   now: Link's own `.link`/`.ghost`/`.solid` base classes already live in
+   `@layer component-defaults` (Link.module.css, #263), so a bare class
+   here deterministically wins without the old descendant-selector
+   trick — same de-scoping already applied to `.backLink` above.
+
+   `.bannerActions .publishButton` stays compound (`.bannerActions`-
+   prefixed, not bare) because Button.module.css has no `@layer` of its
+   own — its base classes are still unlayered, so this selector still
+   needs the extra specificity to win the tie (the same descendant-
+   selector trick `.bannerMessage` above needed before Typography's
+   `.body` was layered in #263).
+
+   Ghost/solid coloring, transition and hover already come from Link's
+   own `.ghost`/`.solid` via the `variant` prop alone (RecipePreview.tsx)
+   — no `composes:` needed here, these local classes only supply each
+   consumer's own size/shape deltas as plain overrides. */
+.editLink,
+.viewLink {
+  font-size: 13px;
+  padding: 8px 15px;
+  border-radius: var(--radius);
+  gap: 7px;
 }
 
-.actionLink:hover:not(:disabled) {
-  color: var(--color-link-hover);
+/* Sizing-only override — the shared Button component's own `.button`/
+   `.sm` padding, font-size and border-radius are replaced here; Button's
+   `solid` variant colors already match the design's `.banner-solid`
+   exactly, and its own transition (Button.module.css's `.button`) is left
+   untouched, so this rule stays out of the ghost-pill group above. */
+.bannerActions .publishButton {
+  padding: 8px 15px;
+  font-size: 13px;
+  border-radius: var(--radius);
+  gap: 7px;
 }
 
-.actionLink:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-  outline-offset: 2px;
+/* ── Main landmark ─────────────────────────────────────────────────────
+   This route no longer renders inside AdminLayout (which previously
+   supplied `<main id="main" tabIndex={-1}>` via its own `.content`), so
+   RecipePreview.tsx now provides the landmark itself, matching the public
+   site's equivalent wrapper (Layout.module.css's `.main`) exactly — this
+   page reads as the public Recipe page with an admin-only banner overlaid,
+   not an admin-shell page, so it gets the public shell's own sizing. */
+.main {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  padding-inline: var(--space-6);
+  max-width: var(--max-w-site);
+  margin-inline: auto;
 }
 
-.actionLink:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+/* Applied only to the loaded-recipe state's `.main`, where the sticky
+   status banner precedes it in normal flow. SC 2.4.11: reserves room
+   above the landmark equal to the banner's live-measured rendered height
+   (`--banner-height`, kept in sync by a ResizeObserver on the banner
+   element — same live-measurement pattern as Header's --header-height),
+   so the banner — pinned via `position: sticky` — never fully covers
+   focus/scroll landing here or on a near-top descendant. The
+   loading/not-found states render no banner above them at all (Admin
+   Recipe Preview.dc.html gates the banner behind the same `isRecipe`
+   check as the loaded article), so plain `.main` alone is correct there —
+   there is nothing sticky left to obscure. */
+.mainWithBanner {
+  scroll-margin-block-start: var(--banner-height);
 }
 
 .stateWrapper {
   display: flex;
   justify-content: center;
   padding: var(--space-12);
+}
+
+/* ── Not-found state ──────────────────────────────────────────────────
+   Matches Admin Recipe Preview.dc.html's not-found block (lines 121-133):
+   icon box + h1 + body + ghost back-link, centered. Design literal has no
+   border on its own outer wrapper, but this uses the shared
+   stateBox.module.css `.box` shape (same "adapt the established pattern,
+   don't invent a new one" precedent as `.stateWrapper` above), sized/
+   centered per the design's own max-width:520px column. stateBox is
+   imported directly in RecipePreview.tsx and composed in JS rather than
+   via `composes:` here, so Rollup can dedupe the shared rules across lazy
+   admin chunks. */
+.notFoundBox {
+  max-width: 520px;
+  margin-inline: auto;
+  padding: clamp(56px, 9vw, 92px) 24px;
+  border: 1px dashed var(--color-border);
+}
+
+/* 54px: design literal (Admin Recipe Preview.dc.html line 123) — 2px past
+   the shared shape's default 52px icon, otherwise the same convention
+   (surface fill, hairline border, muted icon color). */
+.notFoundIcon {
+  width: 54px;
+  height: 54px;
+  margin-bottom: 22px;
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.notFoundHeading {
+  font-size: 24px;
+  margin: 0 0 10px;
+}
+
+.notFoundBody {
+  font-size: 15px;
+  margin: 0 0 26px;
+}
+
+/* Bare `.notFoundBackLink` override: Link's own `.link`/`.ghost` base
+   classes already live in `@layer component-defaults` (Link.module.css,
+   #263), same de-scoping as `.editLink`/`.viewLink` in the "Pill buttons"
+   group above — no `composes:` needed, only the shape/size differ here. */
+.notFoundBackLink {
+  font-size: 14px;
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  gap: 7px;
 }

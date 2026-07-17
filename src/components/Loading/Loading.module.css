@@ -1,40 +1,30 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-12) 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
 .spinner {
+  composes: spinner from '../../styles/interactions.module.css';
   display: inline-block;
-  width: 1em;
-  height: 1em;
-  vertical-align: middle;
-  border-radius: var(--radius-none);
-  border: var(--border-width-thick) solid var(--color-border);
-  border-block-start-color: var(--color-primary);
+  /* Larger + a two-sided arc than the shared 24px/single-edge default —
+     this is the prominent whole-view variant, not the inline/toast one. */
+  width: 2rem;
+  height: 2rem;
+  border-width: var(--border-width-thick);
   border-inline-end-color: var(--color-primary);
-  animation: spin 0.8s linear infinite;
 }
 
-.small {
-  width: 0.75em;
-  height: 0.75em;
-  border-width: 2px;
+.label {
+  font-family: var(--font-mono);
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .spinner {
-    animation: pulse 1.5s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%,
-    100% {
-      opacity: 1;
-    }
-
-    50% {
-      opacity: 0.4;
-    }
-  }
-}
+/* Uses the global `spin` keyframe (src/styles/animations.css) via the
+   composed `spinner` class, which is already neutered under
+   prefers-reduced-motion at the keyframe level (rotation frozen) — no
+   local override needed. */

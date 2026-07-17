@@ -1,153 +1,447 @@
-.loadingWrapper {
-  display: flex;
-  justify-content: center;
-  padding: var(--space-12) 0;
-}
-
+/* Matches the design's admin `<main>` column exactly (Admin Recipe
+   Editor.dc.html line 112) — the shared AdminLayout `<main>` sets no
+   max-width of its own, each admin page supplies it, same as
+   RecipeList.module.css's `.page`. */
 .container {
-  max-width: 48rem;
-  margin: 0 auto;
-  padding: var(--space-6);
+  max-width: var(--max-w-site);
+  margin-inline: auto;
+  padding: clamp(22px, 4vw, 36px) clamp(20px, 5vw, 28px) 72px;
+  box-sizing: border-box;
 }
 
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-10);
-}
-
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.input {
-  padding: var(--space-2) var(--space-3);
+/* Shared box shape from stateBox.module.css. stateBox is imported directly
+   in RecipeEditor.tsx and composed in JS rather than via `composes:` here,
+   so Rollup can dedupe the shared rules across lazy admin chunks — see
+   stateBox.module.css's own header comment for why. */
+.loadingBox {
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: var(--font-size-base);
-  font-family: var(--font-sans);
+  padding: clamp(64px, 12vw, 120px) 24px;
 }
 
-.input:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-}
-
-.textarea {
-  padding: var(--space-2) var(--space-3);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: var(--font-size-base);
-  font-family: var(--font-sans);
-  resize: vertical;
-  min-height: 6rem;
-}
-
-.textarea:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-}
-
-.metadataRow {
-  display: flex;
-  gap: var(--space-4);
-}
-
-.numberInput {
-  width: 6rem;
-  padding: var(--space-2) var(--space-3);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: var(--font-size-base);
-  font-family: var(--font-sans);
-}
-
-.numberInput:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-}
-
-.error {
-  color: var(--color-error);
-  font-size: var(--font-size-sm);
-}
-
-.slugPreview {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
-
-.slugLockHint {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  font-style: italic;
-}
-
-.slugError {
-  margin: 0;
-  color: var(--color-error);
-  font-size: var(--font-size-sm);
-}
-
-.actions {
-  display: flex;
-  gap: var(--space-3);
-  padding: var(--space-6) 0;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
-}
-
-.backLink {
-  font-size: var(--font-size-sm);
-}
-
-.missingFieldsList {
-  margin: var(--space-2) 0 0;
-  padding-left: var(--space-6);
-}
+/* ── Banners ─────────────────────────────────────────────────────── */
 
 .sessionBanner {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  gap: 12px;
   justify-content: space-between;
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
-  padding: var(--space-4);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background: var(--color-warning, var(--color-surface));
-  color: var(--color-text);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-lg);
+  /* 13px/16px: design literal, no --space-* pairing lands on 13px. */
+  padding: 13px 16px;
+  margin-bottom: var(--space-4);
+  background: var(--color-error-bg);
+  border: var(--border-width) solid color-mix(in srgb, var(--color-error) 34%, var(--color-border));
 }
 
 .timeoutBanner {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
-  padding: var(--space-4);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background: var(--color-warning, var(--color-surface));
+  gap: 10px;
+  border-radius: var(--radius-lg);
+  padding: 13px 16px;
+  margin-bottom: var(--space-4);
+  background: var(--color-warning-bg);
+  border: var(--border-width) solid color-mix(in srgb, var(--color-warning) 32%, var(--color-border));
+  font-size: 13.5px;
   color: var(--color-text);
-  box-shadow: var(--shadow-sm);
+}
+
+.bannerMessage {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--color-text);
+}
+
+.bannerIcon {
+  color: var(--color-error);
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+/* `spinner`/`spinnerSm` (interactions.module.css) are composed in JS
+   rather than via `composes:` here — see interactions.module.css's own
+   header comment for why. */
+.timeoutSpinner {
+  flex-shrink: 0;
+  border-top-color: var(--color-warning);
+}
+
+/* Bare `.bannerAction` override: Link's own `.link` (color:
+   var(--color-link)) now lives in `@layer component-defaults`
+   (Link.module.css, #263), so this plain unlayered class deterministically
+   wins without needing the old descendant-selector trick. Border/color/
+   transition/hover already come from Link's own `.ghost` via the
+   `variant="ghost"` prop alone — no `composes:` needed, sizing, the extra
+   hover background wash (`.ghost` itself has none), and font-weight (this
+   banner link keeps its original `medium` weight, overriding `.ghost`'s
+   `semibold` default) stay local. */
+.bannerAction {
+  flex-shrink: 0;
+  width: auto;
+  font-size: 13px;
+  padding: 7px 14px;
+  font-weight: var(--font-weight-medium);
+}
+
+.bannerAction:hover {
+  background: var(--color-hover);
+}
+
+/* ── Back link ───────────────────────────────────────────────────── */
+
+/* Bare `.backLink` override: Link's own `.link` now lives in
+   `@layer component-defaults` (Link.module.css, #263), so this plain
+   unlayered class deterministically wins — same mechanism as
+   `.bannerAction` above.
+
+   Separately: `focusRing`/`metaText` are composed in JS rather than via
+   `composes:` here — see `.timeoutSpinner` above for the
+   shared-across-lazy-chunks rationale. */
+.backLink {
+  margin-bottom: 20px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* ── Title bar ───────────────────────────────────────────────────── */
+
+.titleBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 26px;
+}
+
+/* Bare `.pageHeading` override: Typography's own `.heading1` now lives in
+   `@layer component-defaults` (Typography.module.css, #263), so this plain
+   unlayered class deterministically wins without needing the old
+   descendant-selector trick. */
+.pageHeading {
+  font-size: clamp(24px, 3.4vw, 30px);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+/* ── Two-column grid ─────────────────────────────────────────────── */
+
+.editorGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(28px, 4vw, 44px);
+}
+
+@media (min-width: 880px) {
+  .editorGrid {
+    grid-template-columns: minmax(0, 1fr) 296px;
+    align-items: start;
+  }
+
+  .rail {
+    position: sticky;
+    top: 84px;
+  }
+}
+
+.formColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  min-width: 0;
+}
+
+/* ── Fields ──────────────────────────────────────────────────────── */
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.fieldLabel {
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  margin-bottom: 7px;
+  display: block;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  color: var(--color-text-strong);
+  background: var(--color-field);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  /* 12px/13px: design literal, no --space-* pairing lands on 13px. */
+  padding: 12px 13px;
+  outline: none;
+  transition: border-color var(--duration-fast) var(--easing-default),
+    box-shadow var(--duration-fast) var(--easing-default);
+}
+
+/* `fieldFocusRing` (interactions.module.css) is composed in JS rather
+   than via `composes:` on `.input`/`.textarea` below — see
+   `.timeoutSpinner` above for the shared-across-lazy-chunks rationale. */
+.textarea {
+  resize: vertical;
+  line-height: var(--line-height-relaxed);
+  /* 84px: design literal, no --space-* token lands on it. */
+  min-height: 84px;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  /* .field (shared) has a --color-field background (issue #274). */
+  color: var(--color-text-faint-on-field);
+}
+
+.input[readonly] {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .input,
+  .textarea {
+    transition: none;
+  }
+}
+
+.hint {
+  /* 12.5px: design literal (.fhint) — --font-size-sm (13px) is the
+     nearest token but is 0.5px off. */
+  font-size: 12.5px;
+  color: var(--color-text-faint);
+  line-height: var(--line-height-normal);
+  margin: 0;
+}
+
+.slugHintRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px var(--space-3);
+  margin-top: var(--space-2);
+}
+
+/* Text-link-styled action button — mirrors AutosaveStatus.module.css's
+   own `.retryButton` (the established "native button styled as a plain
+   text link" pattern in this codebase), not the shared Button component,
+   which always carries border/padding chrome the design's inline
+   `.lnk`-style actions don't want here. */
+/* `focusRing` (interactions.module.css) is composed in JS rather than
+   via `composes:` here — see `.timeoutSpinner` above for the
+   shared-across-lazy-chunks rationale. */
+.textButton {
+  padding: 0;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.slugLockHint {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: var(--space-2) 0 0;
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+}
+
+.slugLockIcon {
+  color: var(--color-warning);
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.slugError {
+  margin: var(--space-2) 0 0;
+  color: var(--color-error);
+  font-size: 12.5px;
+}
+
+/* ── Sections (fieldset groups) ─────────────────────────────────── */
+
+.basics {
+  display: flex;
+  flex-direction: column;
+  /* 18px: design literal — --space-5 (20px) is the nearest token but is
+     2px off. */
+  gap: 18px;
+}
+
+/* `all: unset` resets the UA fieldset default chrome (border/padding/
+   min-width) reliably across browsers before reapplying the design's own
+   border-top divider — a plain `border:0;padding:0` reset alone leaves
+   Firefox's `min-width: min-content` in place, which can force the
+   fieldset wider than its grid track. */
+.section,
+.sectionTight {
+  all: unset;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  border-top: var(--border-width) solid var(--color-border);
+  padding-top: 26px;
+}
+
+.section {
+  gap: var(--space-4);
+}
+
+.sectionTight {
+  /* 14px: design literal — --space-4 (16px) is the nearest token but is
+     2px off (matches Cover/Timing's own 16px gap instead). */
+  gap: 14px;
+}
+
+.sectionLabel {
+  all: unset;
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  /* 0.14em: no --tracking-* token matches (eyebrow is 0.16em, meta is
+     0.04em) — this is the design's own distinct "section label" tracking. */
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+/* Wraps both the label and a trailing item-count hint inside the same
+   <legend> (Ingredients/Method) — the count has to live inside the
+   legend, not a sibling wrapper div, or it stops being part of the
+   fieldset's accessible name. */
+.sectionLabelRow {
+  all: unset;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.metadataRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+/* ── Sticky rail ─────────────────────────────────────────────────── */
+
+.railCard {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.autosaveRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 20px;
+}
+
+.divider {
+  height: var(--border-width);
+  background: var(--color-border);
+}
+
+.actionsCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.checklistWrap {
+  border-top: var(--border-width) solid var(--color-border);
+  padding-top: 14px;
+}
+
+.checklistLabel {
+  composes: sectionLabel;
+  margin-bottom: var(--space-2);
+  /* .railCard has a --color-surface background (issue #274) — sectionLabel's
+     own faint color is tuned for --color-bg, the bare <legend> usage's
+     actual context. */
+  color: var(--color-text-faint-on-surface);
+}
+
+.checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.checklistItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 13px;
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text);
+}
+
+/* Done items fade out rather than disappearing — the whole set of publish
+   requirements stays visible as a persistent progress checklist (see the
+   comment on computePublishChecklist in RecipeEditor.tsx). Same "already
+   handled" fade idiom as the public recipe page's checked-off ingredients
+   (RecipeIngredients.module.css); --color-text-faint-on-surface for the
+   same reason — .railCard sits on --color-surface, and plain
+   --color-text-faint fails WCAG AA there. */
+.checklistItem[data-done="true"] {
+  color: var(--color-text-faint-on-surface);
+}
+
+.checklistIcon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  border: var(--border-width-thick) solid var(--color-border);
+  font-size: 10px;
+  line-height: 1;
+  color: var(--color-on-accent-fixed);
+}
+
+.checklistItem[data-done="true"] .checklistIcon {
+  border-color: var(--color-success);
+  background: var(--color-success);
+}
+
+.previewWrap {
+  border-top: var(--border-width) solid var(--color-border);
+  padding-top: 14px;
+}
+
+/* Bare `.previewLink` override: Link's own `.link` now lives in
+   `@layer component-defaults` (Link.module.css, #263) — same mechanism
+   as `.backLink` above. */
+.previewLink {
+  font-size: 13px;
+  color: var(--color-text-muted);
 }

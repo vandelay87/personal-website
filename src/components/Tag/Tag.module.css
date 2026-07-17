@@ -1,0 +1,81 @@
+/* Mono chip — tech tag, category, removable, or filter button. */
+
+.tag {
+  composes: focusRing from '../../styles/interactions.module.css';
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--tracking-meta);
+  border: var(--border-width) solid var(--color-border);
+  /* Chips/tags/badges → --radius-sm per docs/design/paper/token-migration.md §3a. */
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text-muted);
+}
+
+button.tag,
+a.tag {
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-default),
+              color var(--duration-fast) var(--easing-default);
+}
+
+a.tag {
+  text-decoration: none;
+}
+
+/* Mirrors interactions.module.css's chipHover (border-color/color → accent
+   on hover) — can't `composes` it here since composition only applies to a
+   simple single-class selector, and this hover must be scoped to
+   interactive (button/anchor) tags only, not static display spans. Guarded
+   against .active so the hover tint doesn't fight the selected-filter
+   fill. */
+button.tag:hover:not(.active),
+a.tag:hover:not(.active) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button.tag,
+  a.tag {
+    transition: none;
+  }
+}
+
+.active {
+  background-color: var(--color-primary);
+  /* --color-on-accent-fixed, not --color-on-primary (which flips to dark
+     text in dark mode) — the design's `.tag-chip[data-active]`/`.cat-chip
+     [data-active]` both hardcode color:#fff regardless of theme. */
+  color: var(--color-on-accent-fixed);
+  border-color: var(--color-primary);
+}
+
+/* `.remove` lives in a low-priority @layer so a consumer's plain (unlayered)
+   `removeClassName` always wins over it, regardless of source/bundle order
+   or matching specificity — same mechanism as Typography.module.css /
+   Link.module.css (issue #263), applied here to close out #265's own AC on
+   TagInput's former element-type-selector workaround for this exact rule. */
+@layer component-defaults {
+  .remove {
+    composes: focusRing from '../../styles/interactions.module.css';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* SC 2.5.8 Target size (minimum) — the glyph alone renders well under
+       24x24 CSS px at --font-size-xs; give the control an explicit minimum
+       hit area. */
+    min-width: 24px;
+    min-height: 24px;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+  }
+}

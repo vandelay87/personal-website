@@ -111,10 +111,10 @@ describe('AutosaveStatus', () => {
   })
 
   describe('error state', () => {
-    it('renders "Failed to save" text', () => {
+    it('renders "Couldn\'t save" text', () => {
       render(<AutosaveStatus status="error" lastSavedAt={null} onRetry={noop} />)
 
-      expect(screen.getByText(/failed to save/i)).toBeInTheDocument()
+      expect(screen.getByText(/couldn.t save/i)).toBeInTheDocument()
     })
 
     it('renders a Retry button with accessible name', () => {

@@ -2,6 +2,7 @@ import type { Recipe } from '@models/recipe'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect } from 'vitest'
+import { axe } from 'vitest-axe'
 import RecipeDetailView from './RecipeDetailView'
 
 const baseRecipe: Recipe = {
@@ -58,5 +59,12 @@ describe('RecipeDetailView', () => {
 
     expect(screen.getByText(/processing image/i)).toBeInTheDocument()
     expect(screen.queryByRole('img', { name: 'Test cover' })).not.toBeInTheDocument()
+  })
+
+  describe('accessibility', () => {
+    it('renders the default recipe detail view with no detectable axe violations', async () => {
+      const { container } = renderView(baseRecipe)
+      expect(await axe(container)).toHaveNoViolations()
+    })
   })
 })

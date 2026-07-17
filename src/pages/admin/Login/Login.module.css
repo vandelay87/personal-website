@@ -1,55 +1,117 @@
+/* Login.module.css — matches docs/design/paper/pages/Admin Login.dc.html
+   exactly. Layout's shared <main> (src/components/Layout) owns page chrome
+   for every route and isn't touched by this issue, so `.page` reproduces
+   the design's `main { flex:1; display:flex; align-items:center;
+   justify-content:center; padding:48px 24px }` centering itself, the same
+   way NotFound's own `.container` approximates the header/footer-free
+   viewport height with `min-height` rather than a real flex:1 parent. */
+
 .page {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding: var(--space-12) var(--space-4) var(--space-4);
+  min-height: 60vh;
+  padding: var(--space-12) var(--space-6);
+}
+
+.column {
+  width: 100%;
+  /* 392px: no --max-w-* token lands here — they're all reading-column
+     widths for long-form content, not a compact auth-card width. */
+  max-width: 392px;
+}
+
+.cardHeader {
+  margin-bottom: var(--space-6);
+}
+
+/* Bare `.heading` override: Typography's own `.heading3` now lives in
+   `@layer component-defaults` (Typography.module.css, #263), so this
+   plain unlayered class deterministically wins without needing the old
+   descendant-selector trick. */
+.heading {
+  /* 22px: between --font-size-xl (21px) and --font-size-2xl (24px); no
+     token lands on it exactly. */
+  font-size: 22px;
+  letter-spacing: var(--tracking-snug);
+  /* 6px: no --space-* token lands between --space-1 (4px) and --space-2
+     (8px). */
+  margin: 0 0 6px;
+}
+
+/* Bare `.subheading` override: Typography's own `.body` now lives in
+   `@layer component-defaults` (Typography.module.css, #263), so this
+   plain unlayered class deterministically wins without needing the old
+   descendant-selector trick. Same mechanism as `.heading` above. */
+.subheading {
+  font-size: var(--font-size-sm-plus);
+  /* 1.55: between --line-height-normal (1.5) and --line-height-relaxed
+     (1.65); no token lands on it exactly. */
+  line-height: 1.55;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.errorBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px; /* no --space-* token lands on 9px (--space-2=8px, --space-3=12px) */
+  background: var(--color-error-bg);
+  border: var(--border-width) solid color-mix(in srgb, var(--color-error) 34%, transparent);
+  border-radius: var(--radius-md);
+  padding: 11px 13px; /* no --space-* token lands on 11px/13px */
+  margin-bottom: 18px; /* no --space-* token lands on 18px (--space-4=16px, --space-5=20px) */
+}
+
+.errorDot {
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  flex-shrink: 0;
+}
+
+.errorText {
+  /* 13.5px: no token lands between --font-size-sm (13px) and
+     --font-size-sm-plus (14px). */
+  font-size: 13.5px;
+  line-height: var(--line-height-normal);
+  color: var(--color-error);
 }
 
 .form {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  width: 100%;
-  max-width: 24rem;
-  padding: var(--space-6);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 7px; /* no --space-* token lands on 7px (--space-1=4px, --space-2=8px) */
 }
 
-.label {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text);
-}
-
-.input {
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--font-size-base);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background: var(--color-bg);
-  color: var(--color-text);
-}
-
-.input:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-.error {
-  font-size: var(--font-size-sm);
-  color: var(--color-error, #dc2626);
-  font-weight: var(--font-weight-medium);
-}
-
-.title {
+/* Bare `.footnote` override: Typography's own `.caption` now lives in
+   `@layer component-defaults` (Typography.module.css, #263), so this plain
+   unlayered class deterministically wins without needing the old
+   descendant-selector trick. Same mechanism as `.heading`/`.subheading`
+   above. */
+.footnote {
+  font-size: 12.5px; /* no token lands between --font-size-xs (11px) and --font-size-sm (13px) */
+  line-height: var(--line-height-normal);
+  /* Renders inside <Card fill>, whose .fill sets --color-surface (issue #274). */
+  color: var(--color-text-faint-on-surface);
+  margin: 18px 0 0; /* no --space-* token lands on 18px (--space-4=16px, --space-5=20px) */
   text-align: center;
+}
+
+/* Bare `.belowCard` override: Typography's own `.caption` now lives in
+   `@layer component-defaults` (Typography.module.css, #263), so this plain
+   unlayered class deterministically wins without needing the old
+   descendant-selector trick. Same mechanism as `.heading`/`.subheading`
+   above. */
+.belowCard {
+  text-align: center;
+  font-size: 12px; /* no --font-size-* token lands on 12px (--font-size-xs=11px, --font-size-sm=13px) */
+  color: var(--color-text-faint);
+  margin: 22px 0 0; /* no --space-* token lands on 22px (--space-5=20px, --space-6=24px) */
 }

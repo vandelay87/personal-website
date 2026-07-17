@@ -1,0 +1,15 @@
+.main {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  padding-inline: var(--space-6);
+  max-width: var(--max-w-site);
+  margin-inline: auto;
+  /* SC 2.4.11: reserves room above the main landmark equal to the Header's
+     real rendered height — tracked live via --header-height, a custom
+     property a ResizeObserver in Header.tsx keeps in sync (covers both the
+     single-row layout and the narrow-viewport wrapped two-row state) — so
+     the header, pinned via position: sticky, never fully covers focus/scroll
+     landing here or on a near-top descendant. */
+  scroll-margin-block-start: var(--header-height);
+}

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import CodeBlock from './CodeBlock'
 
 /**
@@ -81,6 +81,34 @@ describe('CodeBlock', () => {
     expect(writeText).toHaveBeenCalledWith(
       expect.stringContaining('const greeting')
     )
+  })
+
+  it('announces "Copied to clipboard" via aria-live after copying, then clears it after the timeout', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, {
+      clipboard: { writeText },
+    })
+
+    vi.useFakeTimers()
+
+    render(<CodeBlock>{mockShikiChildren}</CodeBlock>)
+
+    expect(screen.queryByText('Copied to clipboard')).not.toBeInTheDocument()
+
+    const copyButton = screen.getByRole('button', { name: /copy/i })
+    await act(async () => {
+      fireEvent.click(copyButton)
+    })
+
+    expect(screen.getByText('Copied to clipboard')).toBeInTheDocument()
+
+    act(() => {
+      vi.advanceTimersByTime(2000)
+    })
+
+    expect(screen.queryByText('Copied to clipboard')).not.toBeInTheDocument()
+
+    vi.useRealTimers()
   })
 
   it('copy button does not call clipboard when navigator.clipboard is undefined (SSR guard)', () => {

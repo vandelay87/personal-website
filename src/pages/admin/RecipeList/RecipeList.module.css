@@ -1,87 +1,261 @@
+/* Matches the design's admin `<main>` column exactly (Admin Recipes.dc.html
+   line 98) — the shared AdminLayout `<main>` sets no max-width of its own,
+   each admin page supplies it. --max-w-site (1080px) is the same token
+   Header/Footer use for their own inner width. */
 .page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  max-width: 64rem;
-  margin: 0 auto;
+  max-width: var(--max-w-site);
+  margin-inline: auto;
+  padding: clamp(32px, 5vw, 52px) clamp(20px, 5vw, 28px) 64px;
   box-sizing: border-box;
-}
-
-.loadingWrapper {
-  display: flex;
-  justify-content: center;
-  padding: var(--space-12) 0;
 }
 
 .header {
   display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-end;
+  justify-content: space-between;
+  /* 30px: design literal (Admin Recipes.dc.html line 101) — --space-8
+     (32px) is the nearest token but is 2px off. */
+  margin-bottom: 30px;
+}
+
+/* Bare `.heading` override: Typography's own `.heading1` now lives in
+   `@layer component-defaults` (Typography.module.css, #263), so this plain
+   unlayered class deterministically wins without needing the old
+   descendant-selector trick. */
+.heading {
+  font-size: clamp(28px, 4vw, 34px);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.025em;
+  margin: 0 0 6px;
+}
+
+/* Bare `.subtitle` override: Typography's own `.body` now lives in
+   `@layer component-defaults` (Typography.module.css, #263), same
+   de-scoping as `.heading` above. */
+.subtitle {
+  font-size: 14.5px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* ── "New recipe" / "Create your first recipe" primary button ──────────
+   Applied to the shared Link component (client-side routing to
+   /admin/recipes/new) rather than Button, which has no polymorphic `as`/
+   href support — see RecipeDetailView.module.css's `.backLink` for the
+   same "style Link locally" precedent. Solid coloring/hover already come
+   from Link's own `.solid` via the `variant="solid"` prop alone — no
+   `composes:` needed, only sizing and the `:active` press effect
+   (genuinely RecipeList-specific, `.solid` has none) stay local. The
+   opacity leg of the transition is re-declared here alongside transform:
+   `.solid`'s own transition lives in Link.module.css's `@layer`, and an
+   unlayered `transition` on this class would otherwise replace it
+   wholesale rather than merge, silently dropping the hover fade. */
+.newButton {
+  font-size: 14px;
+  padding: 11px 18px;
+  gap: var(--space-2);
+  transition: opacity var(--duration-fast) var(--easing-default),
+    transform var(--duration-fast) var(--easing-default);
+}
+
+.newButton:active {
+  transform: translateY(1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .newButton {
+    transition: none;
+  }
+}
+
+/* ── Recipe row list ─────────────────────────────────────────────────
+   `<ul>/<li>`, not `<table>` — the design has zero table markup (a
+   bordered container of stacked flex rows). */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--color-field);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  /* 16px/20px: design literal (row gap / column gap), no single token
+     covers both. */
+  gap: 16px 20px;
   align-items: center;
   justify-content: space-between;
+  padding: 18px clamp(16px, 2.5vw, 22px);
+  transition: background var(--duration-fast) var(--easing-default);
 }
 
-.newRecipeLink {
-  font-weight: var(--font-weight-semibold);
+.row:not(:first-child) {
+  border-top: var(--border-width) solid var(--color-border);
 }
 
-.tableWrapper {
-  overflow-x: auto;
+.row:hover {
+  background: var(--color-hover);
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  border: var(--border-width) solid var(--color-border);
-  background: var(--color-surface);
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    transition: none;
+  }
 }
 
-.table th,
-.table td {
-  padding: var(--space-3) var(--space-4);
-  text-align: left;
-  vertical-align: middle;
-  border-bottom: var(--border-width) solid var(--color-border);
-  white-space: nowrap;
+.rowMain {
+  min-width: 240px;
+  flex: 1;
 }
 
-.table td:first-child {
-  white-space: normal;
-}
-
-.table th {
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  background: var(--color-bg);
-}
-
-.actionsInner {
+.rowTop {
   display: flex;
-  gap: var(--space-2);
   align-items: center;
+  gap: 11px;
+  margin-bottom: 9px;
 }
 
-.table td.actions {
-  border-bottom: none;
+/* Bare `.rowTitle` override: Typography's own `.heading2` now lives in
+   `@layer component-defaults` (Typography.module.css, #263), same
+   de-scoping as `.heading` above. */
+.rowTitle {
+  font-size: 16.5px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.015em;
+  margin: 0;
+  color: var(--color-text-strong);
 }
 
-.actionLink {
-  background: none;
-  border: none;
+.rowMeta {
+  list-style: none;
+  margin: 0;
   padding: 0;
-  color: var(--color-link);
-  font: inherit;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  /* 7px: design literal, between --space-1 (4px) and --space-2 (8px). */
+  gap: 7px;
+}
+
+/* `tagChipBase` (text.module.css) is composed in JS rather than via
+   `composes:` here — see text.module.css's own header comment for why.
+   This design's chip padding (3px 8px) is smaller than
+   RecipeDetailView's tag (5px 10px) — each `tagChipBase` consumer sets
+   its own padding, per that composable's own doc comment. */
+.tagChip {
+  padding: 3px 8px;
+  display: inline-block;
+}
+
+.updatedLabel {
+  font-size: 12.5px;
+  /* .list has a --color-field background (issue #274). */
+  color: var(--color-text-faint-on-field);
+  /* 4px: design literal, on top of `.rowMeta`'s own 7px gap (Admin
+     Recipes.dc.html line 126 sets this margin in addition to the flex
+     gap already separating every sibling). */
+  margin-left: 4px;
+}
+
+.rowActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+/* `.actionButton` carries no CSS of its own — `focusRing`
+   (interactions.module.css) is composed in JS instead of via
+   `composes:` — see interactions.module.css's own header comment for
+   why. This class is applied to both `<Link>` (Edit/Preview, no
+   `variant` prop) and native `<button>` (Publish/Delete) elements.
+   Unlike the rest of this epic's `@layer component-defaults`
+   de-scoping (#263/#326/#328/#330/#333/#334), this one genuinely still
+   needs the `.rowActions`-scoped compound selector: Link's own default
+   `tone="inherit"` class (`.inherit`, Link.module.css) is deliberately
+   left UNLAYERED (only `.link`/`.ghost`/`.solid` are layered), so a
+   bare `.actionButton` would tie in specificity with `.inherit` — both
+   unlayered, single-class selectors — leaving the color winner
+   dependent on unguaranteed source/bundle order. The compound form's
+   higher specificity is what reliably wins here; it's not a leftover
+   of the old pre-#263 convention. */
+.rowActions .actionButton {
+  /* display/align-items/font-family are already inherited from Link's own
+     `.link` for Edit/Preview, but the native Publish/Delete `<button>`s
+     have no such base class — set explicitly so both element types match. */
+  display: inline-flex;
+  align-items: center;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  background: transparent;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  /* 6px: design literal, between --space-1 (4px) and --space-2 (8px). */
+  gap: 6px;
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  transition: color var(--duration-fast) var(--easing-default),
+    background var(--duration-fast) var(--easing-default);
 }
 
-.actionLink:hover {
-  color: var(--color-link-hover);
+.rowActions .actionButton svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
 }
 
-.actionLink:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-  outline-offset: 2px;
+.rowActions .actionButton:hover {
+  color: var(--color-text-strong);
+  background: var(--color-hover);
+}
+
+/* WCAG AA override (issue #272): --color-success on --color-success-bg,
+   composited over this row's --color-field backdrop, computes to ~3.83:1
+   (fails AA's 4.5:1) — axe doesn't probe :hover states, which is likely
+   why this wasn't already flagged. Uses the shared --color-success-on-tint
+   token, same override color StatusBadge (#267) uses, for consistency.
+   Note .row:hover also fires here (hovering a child hovers
+   its ancestor), layering --color-hover under this button's own
+   background — accounting for that stacked hover, the token's value still
+   comfortably passes (not just against --color-field alone). The token
+   already resolves correctly per theme. */
+.rowActions .publishAction:hover {
+  color: var(--color-success-on-tint);
+  background: var(--color-success-bg);
+}
+
+.rowActions .deleteAction:hover {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rowActions .actionButton {
+    transition: none;
+  }
+}
+
+/* ── Empty state — shared box shape from stateBox.module.css. stateBox is
+   imported directly in RecipeList.tsx and composed in JS rather than via
+   `composes:` here, so Rollup can dedupe the shared rules across lazy
+   admin chunks. Loading/error states are handled by the shared StateBox
+   component (src/components/StateBox) instead — see issue #304. ──────── */
+
+.emptyBox {
+  border: 1px dashed var(--color-border);
+  padding: clamp(48px, 8vw, 84px) 24px;
+}
+
+.emptyIcon {
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  color: var(--color-text-muted);
 }

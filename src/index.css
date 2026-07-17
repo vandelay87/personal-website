@@ -1,7 +1,42 @@
+@import './styles/fonts.css';
 @import './styles/tokens.css';
 @import './styles/animations.css';
 
+/* Cascade layer order (higher-priority layers later): `component-defaults`
+   (Typography/Link/Tag's own base styles, issue #263) is beaten by
+   `composed-overrides` (any shared/composed-pattern module's classes that
+   must win over a `component-defaults`-layered variant class applied to
+   the same element — e.g. stateBox.module.css's heading/body classes,
+   issue #269) — both still lose to any fully unlayered rule (any plain
+   consumer className, which is how every actual page-level override in
+   this codebase works). Declaring this order once, here, means it holds
+   regardless of which file's `@layer` block is parsed first at runtime,
+   and lets any future shared pattern opt into `composed-overrides`
+   without inventing another bespoke layer name. */
+@layer component-defaults, composed-overrides;
+
 /* ── Global base styles ────────────────────────────────────── */
+
+/* Design's Home.dc.html uses a bare `* { box-sizing: border-box }` —
+   extended to ::before/::after here since the universal selector alone
+   doesn't reach pseudo-elements. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Reserves the scrollbar's own width permanently, on every page, so a
+   classic (non-overlay) scrollbar appearing/disappearing — e.g. the
+   Blog page's post list crossing the viewport-height threshold when a
+   tag filter changes how many posts render — never shifts content
+   horizontally. Without this, that shift is real but easy to miss:
+   overlay-scrollbar systems (macOS, most of this session's testing)
+   never reflow on scrollbar presence, so it only shows up on browsers/
+   OSes with classic reflowing scrollbars. */
+html {
+  scrollbar-gutter: stable;
+}
 
 body {
   margin: 0;
@@ -13,16 +48,20 @@ body {
 
 /* ── Shiki dual theme toggle ─────────────────────────────── */
 
+/* No background-color here (Shiki's own --shiki-light-bg/dark-bg
+   vars go unused) — CodeBlock.module.css's `.pre` owns the code
+   block's background (--color-surface); this rule set one too,
+   at equal specificity, which is exactly what forced CodeBlock to
+   fight it with compound selectors. Color is still needed — that's
+   the actual syntax-highlighting theme. */
 .shiki,
 .shiki span {
   color: var(--shiki-light);
-  background-color: var(--shiki-light-bg);
 }
 
 [data-theme="dark"] .shiki,
 [data-theme="dark"] .shiki span {
   color: var(--shiki-dark);
-  background-color: var(--shiki-dark-bg);
 }
 
 /* ── Mermaid diagram styles ─────────────────────────────── */
@@ -34,17 +73,72 @@ svg[id^="mermaid-"] {
   padding: var(--space-4);
   height: auto;
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
 }
 
 [data-theme="dark"] svg[id^="mermaid-"] {
-  filter: invert(1) hue-rotate(180deg);
-  border-color: #000000;
-  box-shadow: 4px 4px 0 #000000;
+  /* Fractional invert (not invert(1)) avoids the old harsh black/white swap;
+     border/shadow inherit from the base rule since the filter already
+     recolors them correctly for dark mode. See token-migration.md §5. */
+  filter: invert(0.88) hue-rotate(180deg);
+}
+
+/* Mermaid's own label text renders at ~#333, too close to the also-
+   inverted box/background tones after the filter above to read
+   (measured empirically: (51,51,51) only inverts to a mid-gray, not
+   the ~224,224,224 pure black gets). Forcing pure black would fix
+   it, but mermaid ships its own <style> tag *inside* the SVG using
+   `#mermaid-N .cluster-label span{color:#333}`-style ID-scoped
+   selectors — the ID is generated per-diagram, so no external
+   selector can out-specify it by stacking classes. `!important`
+   here isn't a shortcut around our own specificity; it's the only
+   way to beat a selector this stylesheet structurally cannot match.
+   Targeting the tag names directly (not mermaid's class names)
+   catches every text-bearing wrapper mermaid uses across node/edge/
+   cluster labels without needing to track each one's exact class.
+   Literal #000 (not a --color-* token) is required for both properties:
+   this rule only exists to force mermaid's own inline `color:#333` back
+   down to pure black as the pre-invert input, so the filter above lands
+   on near-white text — any warm-toned token would invert to an off
+   color, not white. Known, permanent exception to the "no hardcoded
+   brutalist literal" grep in token-migration.md §6 — unrelated to the
+   old neo-brutalist system, added after that migration (see §5). */
+[data-theme="dark"] svg[id^="mermaid-"] span,
+[data-theme="dark"] svg[id^="mermaid-"] p,
+[data-theme="dark"] svg[id^="mermaid-"] text,
+[data-theme="dark"] svg[id^="mermaid-"] tspan {
+  color: #000 !important;
+  fill: #000 !important;
 }
 
 /* ── Global accessibility utilities ──────────────────────── */
+
+/* SC 2.4.11 (Focus Not Obscured): reserves clearance above every
+   focusable element equal to the sticky Header's real rendered height
+   (--header-height, live-measured in Header.tsx via ResizeObserver, see
+   useMeasuredHeightVar) so tabbing to an element never lands it partially
+   or fully behind the header. PageShell/AdminLayout's `.main` already
+   does this for the initial skip-link/hash-jump landing spot only; this
+   extends the same clearance to every individual focusable element, so
+   normal Tab/Shift+Tab navigation anywhere on the page is covered too.
+   The extra `+ var(--focus-ring-outline-offset) + var(--focus-ring-outline-width)`
+   clears the `.focusRing` outline itself (interactions.module.css) —
+   scroll-margin only guarantees the element's own box clears the header,
+   but the outline is drawn outside that box by its offset plus its own
+   width, so without this the ring's outer edge still pokes up into the
+   header. Both referenced directly from tokens.css rather than repeating
+   a literal, so this can't drift out of sync with the real outline. */
+a,
+button,
+input,
+select,
+textarea,
+[tabindex] {
+  scroll-margin-block-start: calc(
+    var(--header-height) + var(--focus-ring-outline-offset) + var(--focus-ring-outline-width)
+  );
+}
 
 /* Visually hidden but accessible to screen readers */
 .sr-only {

@@ -1,10 +1,11 @@
 import { completeNewPassword } from '@api/auth'
 import Button from '@components/Button'
-import Loading from '@components/Loading'
+import Card from '@components/Card'
+import Input from '@components/Input'
 import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import type { AuthChallenge } from '@models/auth'
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import styles from './Login.module.css'
@@ -29,7 +30,22 @@ const Login = () => {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
 
+  const firstFieldRef = useRef<HTMLInputElement>(null)
+
   const redirectTo = searchParams.get('redirect') ?? '/admin/recipes'
+  const isSetPassword = Boolean(challenge)
+
+  // Moves focus to the first field of the newly-shown form when the Cognito
+  // NEW_PASSWORD_REQUIRED challenge flips the page from sign-in to
+  // set-password mode. `challenge` only ever transitions null -> set (never
+  // back), so this effect's own [isSetPassword] dependency already gates it
+  // to firing once, on that transition — it can't re-fire on mount, since
+  // isSetPassword starts false there.
+  useEffect(() => {
+    if (isSetPassword) {
+      firstFieldRef.current?.focus()
+    }
+  }, [isSetPassword])
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault()
@@ -81,103 +97,134 @@ const Login = () => {
     }
   }
 
-  if (challenge) {
-    return (
-      <div className={styles.page}>
-        <form className={styles.form} onSubmit={handleNewPassword}>
-          <Typography variant="heading2" className={styles.title}>
-            Set new password
-          </Typography>
-
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="new-password">
-              New password
-            </label>
-            <input
-              id="new-password"
-              className={styles.input}
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              aria-describedby={error ? 'form-error' : undefined}
-            />
-          </div>
-
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="confirm-password">
-              Confirm password
-            </label>
-            <input
-              id="confirm-password"
-              className={styles.input}
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              aria-describedby={error ? 'form-error' : undefined}
-            />
-          </div>
-
-          {error && (
-            <p id="form-error" className={styles.error}>
-              {error}
-            </p>
-          )}
-
-          <Button type="submit" disabled={loading}>
-            {loading ? <Loading size="small" /> : 'Set new password'}
-          </Button>
-        </form>
-      </div>
-    )
-  }
+  const copy = isSetPassword
+    ? {
+        heading: 'Set a new password',
+        subheading: 'Your account needs a password before you can continue.',
+        idleLabel: 'Set password & continue',
+        loadingLabel: 'Saving…',
+      }
+    : {
+        heading: 'Sign in',
+        subheading: 'Enter your credentials to access the admin.',
+        idleLabel: 'Sign in',
+        loadingLabel: 'Signing in…',
+      }
+  const submitLabel = loading ? copy.loadingLabel : copy.idleLabel
 
   return (
     <div className={styles.page}>
-      <form className={styles.form} onSubmit={handleLogin}>
-        <Typography variant="heading2" className={styles.title}>
-          Log in
+      <div className={styles.column}>
+        <Card fill radius="var(--radius-2xl)" padding="clamp(26px, 4vw, 34px)">
+          <header className={styles.cardHeader}>
+            <Typography variant="heading3" as="h1" className={styles.heading}>
+              {copy.heading}
+            </Typography>
+            <Typography variant="body" as="p" className={styles.subheading}>
+              {copy.subheading}
+            </Typography>
+          </header>
+
+          {error && (
+            <div id="form-error" role="alert" className={styles.errorBox}>
+              <span aria-hidden="true" className={styles.errorDot}>
+                ●
+              </span>
+              <span className={styles.errorText}>{error}</span>
+            </div>
+          )}
+
+          <form
+            className={styles.form}
+            onSubmit={isSetPassword ? handleNewPassword : handleLogin}
+            noValidate
+          >
+            {isSetPassword ? (
+              <>
+                <label className={styles.field} htmlFor="new-password">
+                  <Typography variant="label" as="span">
+                    New password
+                  </Typography>
+                  <Input
+                    ref={firstFieldRef}
+                    id="new-password"
+                    name="newPassword"
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder="At least 8 characters"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    ariaDescribedBy={error ? 'form-error' : undefined}
+                  />
+                </label>
+                <label className={styles.field} htmlFor="confirm-password">
+                  <Typography variant="label" as="span">
+                    Confirm password
+                  </Typography>
+                  <Input
+                    id="confirm-password"
+                    name="confirmPassword"
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder="Re-enter your new password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    ariaDescribedBy={error ? 'form-error' : undefined}
+                  />
+                </label>
+              </>
+            ) : (
+              <>
+                <label className={styles.field} htmlFor="email">
+                  <Typography variant="label" as="span">
+                    Email
+                  </Typography>
+                  <Input
+                    ref={firstFieldRef}
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="username"
+                    placeholder="you@akli.dev"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    ariaDescribedBy={error ? 'form-error' : undefined}
+                  />
+                </label>
+                <label className={styles.field} htmlFor="password">
+                  <Typography variant="label" as="span">
+                    Password
+                  </Typography>
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    placeholder="••••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    ariaDescribedBy={error ? 'form-error' : undefined}
+                  />
+                </label>
+              </>
+            )}
+
+            <Button type="submit" loading={loading} fullWidth>
+              {submitLabel}
+            </Button>
+          </form>
+
+          {isSetPassword && (
+            <Typography variant="caption" as="p" className={styles.footnote}>
+              First time signing in? Choose a password to finish setting up your account.
+            </Typography>
+          )}
+        </Card>
+
+        <Typography variant="caption" as="p" className={styles.belowCard}>
+          Authorized access only.
         </Typography>
-
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="email">
-            Email
-          </label>
-          <input
-            id="email"
-            className={styles.input}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            aria-describedby={error ? 'form-error' : undefined}
-            required
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="password">
-            Password
-          </label>
-          <input
-            id="password"
-            className={styles.input}
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            aria-describedby={error ? 'form-error' : undefined}
-            required
-          />
-        </div>
-
-        {error && (
-          <p id="form-error" className={styles.error}>
-            {error}
-          </p>
-        )}
-
-        <Button type="submit" disabled={loading}>
-          {loading ? <Loading size="small" /> : 'Log in'}
-        </Button>
-      </form>
+      </div>
     </div>
   )
 }

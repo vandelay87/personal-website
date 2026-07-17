@@ -3,6 +3,7 @@ import tsPlugin from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
 import prettier from 'eslint-config-prettier'
 import importPlugin from 'eslint-plugin-import'
+import jsxA11y from 'eslint-plugin-jsx-a11y'
 import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
@@ -44,6 +45,7 @@ export default [
       'react-refresh': reactRefresh,
       import: importPlugin,
       vitest,
+      'jsx-a11y': jsxA11y,
     },
     rules: {
       ...js.configs.recommended.rules,
@@ -53,6 +55,7 @@ export default [
       ...prettier.rules,
       ...vitest.configs.recommended.rules,
       ...tsPlugin.configs.recommended.rules,
+      ...jsxA11y.flatConfigs.recommended.rules,
 
       'import/order': [
         'error',
@@ -77,6 +80,14 @@ export default [
     languageOptions: {
       globals: {
         awslambda: 'readonly',
+      },
+    },
+  },
+  {
+    files: ['scripts/**/*.ts', 'vite.config.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
       },
     },
   },

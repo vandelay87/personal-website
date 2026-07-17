@@ -31,7 +31,7 @@ describe('AdminLayout', () => {
     })
   })
 
-  it('renders top bar with user email and logout button', () => {
+  it('renders header with user email and log out button', () => {
     renderWithRouter(
       <AdminLayout>
         <div>Content</div>
@@ -39,10 +39,10 @@ describe('AdminLayout', () => {
     )
 
     expect(screen.getByText('admin@example.com')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /log out/i })).toBeInTheDocument()
   })
 
-  it('sidebar shows "Recipes" and "Users" nav items', () => {
+  it('header nav shows "Recipes" and "Users" links', () => {
     renderWithRouter(
       <AdminLayout>
         <div>Content</div>
@@ -66,14 +66,14 @@ describe('AdminLayout', () => {
     expect(recipesLink).toHaveAttribute('aria-current', 'page')
   })
 
-  it('clicking logout calls auth context logout', () => {
+  it('clicking log out calls auth context logout', () => {
     renderWithRouter(
       <AdminLayout>
         <div>Content</div>
       </AdminLayout>
     )
 
-    const logoutButton = screen.getByRole('button', { name: /logout/i })
+    const logoutButton = screen.getByRole('button', { name: /log out/i })
 
     fireEvent.click(logoutButton)
 

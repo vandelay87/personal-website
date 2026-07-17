@@ -1,9 +1,17 @@
 import Button from '@components/Button'
+import { IconPlus } from '@components/icons'
+import Input from '@components/Input'
+import List, { ListItem } from '@components/List'
+import ReorderControls from '@components/ReorderControls'
 import { useReorderableList } from '@hooks/useReorderableList'
 import type { Ingredient } from '@models/recipe'
 import type { FC } from 'react'
 
+import interactions from '../../styles/interactions.module.css'
 import styles from './IngredientList.module.css'
+
+const moveActionClassName = `${interactions.iconButtonHover} ${styles.actionButton}`
+const removeActionClassName = `${interactions.dangerIconButtonHover} ${styles.actionButton}`
 
 export interface IngredientListProps {
   ingredients: Ingredient[]
@@ -39,77 +47,53 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
   }
 
   return (
-    <div className={styles.container}>
-      {ingredients.map((ingredient, index) => (
-        <div key={index} className={styles.row}>
-          <label className={styles.quantityInput}>
-            <span className="sr-only">Quantity</span>
-            <input
-              type="text"
-              aria-label={`Ingredient ${index + 1} quantity`}
-              placeholder="Qty"
-              value={ingredient.quantity}
-              onChange={(e) => handleFieldChange(index, 'quantity', e.target.value)}
-              className={[styles.input, styles.quantityInput].join(' ')}
-            />
-          </label>
-          <label className={styles.unitInput}>
-            <span className="sr-only">Unit</span>
-            <input
-              type="text"
-              aria-label={`Ingredient ${index + 1} unit`}
-              placeholder="Unit"
-              value={ingredient.unit}
-              onChange={(e) => handleFieldChange(index, 'unit', e.target.value)}
-              className={[styles.input, styles.unitInput].join(' ')}
-            />
-          </label>
-          <label className={styles.itemInput}>
-            <span className="sr-only">Item</span>
-            <input
-              type="text"
-              aria-label={`Ingredient ${index + 1} item`}
-              placeholder="Ingredient"
-              value={ingredient.item}
-              onChange={(e) => handleFieldChange(index, 'item', e.target.value)}
-              className={[styles.input, styles.itemInput].join(' ')}
-            />
-          </label>
-          <div className={styles.actions}>
-            <Button
-              onClick={() => handleMoveUp(index)}
-              ariaLabel={`Move up ingredient ${index + 1}`}
-              variant="secondary"
-              disabled={index === 0}
-              className={styles.actionButton}
-            >
-              ↑
-            </Button>
-            <Button
-              onClick={() => handleMoveDown(index)}
-              ariaLabel={`Move down ingredient ${index + 1}`}
-              variant="secondary"
-              disabled={index === ingredients.length - 1}
-              className={styles.actionButton}
-            >
-              ↓
-            </Button>
-            <Button
-              onClick={() => handleRemove(index)}
-              ariaLabel={`Remove ingredient ${index + 1}`}
-              variant="secondary"
-              disabled={ingredients.length <= 1}
-              className={styles.actionButton}
-            >
-              Remove
-            </Button>
-          </div>
-        </div>
-      ))}
-      <Button onClick={handleAdd} variant="secondary">
+    <>
+      <List className={styles.container}>
+        {ingredients.map((ingredient, index) => (
+          <ListItem key={index} className={styles.row}>
+            <div className={styles.quantityField}>
+              <Input
+                ariaLabel={`Ingredient ${index + 1} quantity`}
+                placeholder="Qty"
+                value={ingredient.quantity}
+                onChange={(e) => handleFieldChange(index, 'quantity', e.target.value)}
+              />
+            </div>
+            <div className={styles.unitField}>
+              <Input
+                ariaLabel={`Ingredient ${index + 1} unit`}
+                placeholder="Unit"
+                value={ingredient.unit}
+                onChange={(e) => handleFieldChange(index, 'unit', e.target.value)}
+              />
+            </div>
+            <div className={styles.itemField}>
+              <Input
+                ariaLabel={`Ingredient ${index + 1} item`}
+                placeholder="Ingredient"
+                value={ingredient.item}
+                onChange={(e) => handleFieldChange(index, 'item', e.target.value)}
+              />
+            </div>
+            <div className={styles.actions}>
+              <ReorderControls
+                index={index}
+                count={ingredients.length}
+                itemLabel="ingredient"
+                onMoveUp={handleMoveUp}
+                onMoveDown={handleMoveDown}
+                onRemove={handleRemove}
+                moveActionClassName={moveActionClassName}
+                removeActionClassName={removeActionClassName}
+              />
+            </div>
+          </ListItem>
+        ))}
+      </List>
+      <Button onClick={handleAdd} variant="outline" iconLeft={<IconPlus size={14} />} className={styles.addButton}>
         Add ingredient
       </Button>
-    </div>
+    </>
   )
 }
 

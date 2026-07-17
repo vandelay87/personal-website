@@ -1,22 +1,59 @@
 .list {
-  padding-inline-start: var(--space-6);
+  list-style: none;
+  padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: 28px;
 }
 
 .item {
-  padding-inline-start: var(--space-2);
+  display: flex;
+  gap: 18px;
 }
 
+.number {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+}
+
+.content {
+  flex: 1;
+  padding-block-start: 3px;
+}
+
+/* Bare `.text` override: Typography's own `.body` now lives in
+   `@layer component-defaults` (Typography.module.css, #263), so this plain
+   unlayered class deterministically wins without needing the old
+   descendant-selector trick. */
+/* One `.text` per line (see RecipeSteps.tsx) rather than one block with
+   `white-space: pre-line` — matches the design's own step.lines[] model
+   (docs/design/paper/pages/Recipe.dc.html) exactly: a fixed --space-3
+   (12px) gap between sentences, distinct from the larger ~28px this
+   font-size/line-height would produce between wrapped *and* newline-
+   separated lines alike if they all lived in one pre-line block. */
 .text {
+  font-size: 16.5px;
+  line-height: 1.7;
+  color: var(--color-text);
   margin: 0 0 var(--space-3);
 }
 
 .image {
   display: block;
   max-width: 100%;
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-lg);
   border: var(--border-width) solid var(--color-border);
+  margin-block-start: var(--space-3);
 }

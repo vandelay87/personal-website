@@ -259,7 +259,12 @@ describe('ImageUpload', () => {
   })
 
   describe('render branches (preview / processing / ready)', () => {
-    it('renders the processing placeholder when processedAt is not set', () => {
+    // NEW (#228): on a fresh mount with no prior upload attempt in this
+    // session, `processedAt` being unset now means "never uploaded" (empty
+    // dropzone), not "processing" — the processing placeholder is reserved
+    // for an upload actually in flight (see "shows local preview after file
+    // selection" below, which covers that in-flight case).
+    it('renders the empty dropzone (not the processing placeholder) on mount when no upload has been attempted', () => {
       render(
         <ImageUpload
           slug="beans-on-toast"
@@ -269,7 +274,8 @@ describe('ImageUpload', () => {
         />
       )
 
-      expect(screen.getByText(/processing image/i)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /upload a cover image/i })).toBeInTheDocument()
+      expect(screen.queryByText(/processing image/i)).not.toBeInTheDocument()
       expect(screen.queryByRole('img')).not.toBeInTheDocument()
     })
 

@@ -1,0 +1,118 @@
+/* AppCard component styles — the app-grid card: lift + cover-zoom, the
+   design's signature hover (see docs/design/paper/pages/Apps.dc.html
+   .app-card). Uses the shared cardLift/cardLiftImage composables rather
+   than the --shadow-* scale (reserved for toasts/dropdowns/dialogs) —
+   the lift shadow is a literal, matching the shared utility. */
+
+.card {
+  composes: cardLift focusRing nudgeUpRight from '../../styles/interactions.module.css';
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  border: var(--border-width) solid var(--color-border);
+  /* The design's .app-card uses the page background, not the elevated
+     "surface" tone — this isn't meant to look like a raised panel. */
+  background-color: var(--color-bg);
+  text-decoration: none;
+  color: inherit;
+  /* border-color transition lives on the composed `cardLift` (it owns
+     transform/box-shadow/border-color together, matching the design's
+     single transition declaration) — a separate one here would compete
+     with it for the same CSS property depending on bundle order. */
+}
+
+.card:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+}
+
+.imageWrapper {
+  /* aspect-video = 16/9 */
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  overflow: hidden;
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.imageWrapper > figure > div {
+  /* Image's own container div has a 12px radius on all four corners by
+     default (for standalone use) — here it sits flush at the top of a
+     card whose own overflow:hidden already rounds the top edge, so the
+     container's radius only ever shows as an unwanted rounded seam where
+     the image meets the body below. Flattened to a plain rect; the card's
+     outer radius handles the top corners — same fix as RecipeCard.module.css. */
+  border: none;
+  border-radius: 0;
+}
+
+/* Applied to the underlying <img> (via Image's `className` prop) — pairs
+   with `.card`'s composed `cardLift` for the cover-zoom-on-hover effect. */
+.imageScaled {
+  composes: cardLiftImage from '../../styles/interactions.module.css';
+}
+
+/* Tech-stack pill overlaying the top-left corner of the preview image —
+   built on the shared Tag component (font-family/font-size/color already
+   match the design via Tag's own base styles) rather than a bespoke
+   span, per CLAUDE.md's "prefer existing components" convention. This
+   class only carries what the overlay placement needs beyond Tag's
+   defaults, matching docs/design/paper/pages/Apps.dc.html's
+   `.app-card`'s `{{ app.tag }}` exactly: no border (Tag's default has
+   one), a translucent background instead of a solid one, and
+   letter-spacing/padding/radius a notch different from Tag's own
+   chip-list values (0.1em vs --tracking-meta's 0.04em; 5px 10px vs
+   Tag's --space-1/--space-3; 7px vs --radius-sm's 6px — all exact
+   design values, no tokens land on them). Positioned against `.card`
+   (a sibling of `.imageWrapper`, not nested in it — see the
+   accessibility note in AppCard.tsx), which lands in the same spot
+   since the image sits flush at the card's own top-left corner. */
+.tagOverlay {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  border: none;
+  letter-spacing: 0.1em;
+  background: color-mix(in srgb, var(--color-bg) 80%, transparent);
+  padding: 5px 10px;
+  border-radius: 7px;
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding-block-start: 0;
+  padding-block-end: var(--space-6);
+  padding-inline: var(--space-6);
+}
+
+.titleRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-block-end: var(--space-2);
+}
+
+.title {
+  margin-block-end: 0;
+}
+
+.arrowIcon {
+  composes: linkIcon from '../../styles/interactions.module.css';
+  flex-shrink: 0;
+  color: var(--color-primary);
+  font-size: var(--font-size-lg);
+}
+
+.description {
+  margin-block-end: var(--space-4);
+}
+
+.openApp {
+  margin-block-start: auto;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}

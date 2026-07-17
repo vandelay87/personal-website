@@ -1,7 +1,7 @@
-import Button from '@components/Button'
+import Tag from '@components/Tag'
 import { useId, useState, type FC, type KeyboardEvent } from 'react'
 
-
+import interactions from '../../styles/interactions.module.css'
 import styles from './TagInput.module.css'
 
 export interface TagInputProps {
@@ -20,6 +20,8 @@ const TagInput: FC<TagInputProps> = ({
   placeholder,
 }) => {
   const [inputValue, setInputValue] = useState('')
+  const [highlightedIndex, setHighlightedIndex] = useState(-1)
+  const [suggestionsClosed, setSuggestionsClosed] = useState(false)
   const listboxId = useId()
 
   const filtered = inputValue
@@ -28,25 +30,54 @@ const TagInput: FC<TagInputProps> = ({
       )
     : []
 
-  const isExpanded = filtered.length > 0
+  const isExpanded = filtered.length > 0 && !suggestionsClosed
+
+  const resetHighlight = () => {
+    setHighlightedIndex(-1)
+    setSuggestionsClosed(false)
+  }
 
   const addTag = (tag: string) => {
     if (tag.trim() && !tags.includes(tag.trim())) {
       onChange([...tags, tag.trim()])
     }
     setInputValue('')
+    resetHighlight()
   }
 
   const removeTag = (index: number) => {
     onChange(tags.filter((_, i) => i !== index))
   }
 
+  const handleInputChange = (value: string) => {
+    setInputValue(value)
+    resetHighlight()
+  }
+
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault()
-      if (inputValue.trim()) {
+      const highlighted = isExpanded ? filtered[highlightedIndex] : undefined
+      if (highlighted) {
+        addTag(highlighted)
+      } else if (inputValue.trim()) {
         addTag(inputValue)
       }
+      return
+    }
+
+    if (!isExpanded) return
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setHighlightedIndex((i) => Math.min(i + 1, filtered.length - 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setHighlightedIndex((i) => Math.max(i - 1, 0))
+    } else if (e.key === 'Escape') {
+      e.preventDefault()
+      setSuggestionsClosed(true)
+      setHighlightedIndex(-1)
     }
   }
 
@@ -54,17 +85,15 @@ const TagInput: FC<TagInputProps> = ({
     <div className={styles.container}>
       <div className={styles.chips}>
         {tags.map((tag, i) => (
-          <span key={tag} className={styles.chip}>
+          <Tag
+            key={tag}
+            removable
+            onRemove={() => removeTag(i)}
+            className={styles.chip}
+            removeClassName={styles.chipRemove}
+          >
             {tag}
-            <Button
-              onClick={() => removeTag(i)}
-              ariaLabel={`Remove ${tag}`}
-              variant="secondary"
-              className={styles.removeBtn}
-            >
-              &times;
-            </Button>
-          </span>
+          </Tag>
         ))}
       </div>
 
@@ -74,20 +103,31 @@ const TagInput: FC<TagInputProps> = ({
           role="combobox"
           aria-expanded={isExpanded}
           aria-controls={listboxId}
+          aria-activedescendant={
+            isExpanded && highlightedIndex >= 0
+              ? `${listboxId}-option-${highlightedIndex}`
+              : undefined
+          }
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={(e) => handleInputChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          className={styles.input}
+          className={`${interactions.fieldFocusRing} ${styles.input}`}
           placeholder={placeholder}
         />
 
         {isExpanded && (
           <ul id={listboxId} role="listbox" className={styles.listbox}>
-            {filtered.map((tag) => (
+            {filtered.map((tag, index) => (
+              // Keyboard selection is handled by the input's own onKeyDown (Enter
+              // selects filtered[highlightedIndex] via the same addTag call); DOM
+              // focus never leaves the input, per the WAI-ARIA combobox pattern.
+              // eslint-disable-next-line jsx-a11y/click-events-have-key-events
               <li
                 key={tag}
+                id={`${listboxId}-option-${index}`}
                 role="option"
-                className={styles.option}
+                aria-selected={index === highlightedIndex}
+                className={`${interactions.chipHover} ${styles.option}`}
                 onClick={() => addTag(tag)}
               >
                 {tag}

@@ -1,5 +1,5 @@
-import { render } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter, useSearchParams } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import ScrollToTop from './ScrollToTop'
 
@@ -16,6 +16,7 @@ vi.mock('react-router-dom', async () => {
 const renderWithRouter = (initialPath: string) => {
   return render(
     <MemoryRouter initialEntries={[initialPath]}>
+      <main id="main" tabIndex={-1} />
       <ScrollToTop />
     </MemoryRouter>
   )
@@ -37,10 +38,21 @@ describe('ScrollToTop', () => {
     expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
   })
 
+  it('moves focus to #main on PUSH navigation', () => {
+    renderWithRouter('/apps')
+    expect(document.activeElement).toBe(document.getElementById('main'))
+  })
+
   it('does not scroll on POP navigation (back/forward)', () => {
     mockNavigationType.mockReturnValue('POP')
     renderWithRouter('/apps')
     expect(window.scrollTo).not.toHaveBeenCalled()
+  })
+
+  it('does not move focus to #main on POP navigation (back/forward)', () => {
+    mockNavigationType.mockReturnValue('POP')
+    renderWithRouter('/apps')
+    expect(document.activeElement).not.toBe(document.getElementById('main'))
   })
 
   it('scrolls to top on REPLACE navigation', () => {
@@ -50,7 +62,7 @@ describe('ScrollToTop', () => {
   })
 
   it('scrolls to anchor element when hash is present', () => {
-    const mockElement = { scrollIntoView: vi.fn() }
+    const mockElement = { scrollIntoView: vi.fn(), focus: vi.fn() }
     vi.spyOn(document, 'querySelector').mockReturnValue(mockElement as unknown as Element)
 
     renderWithRouter('/apps#section')
@@ -58,6 +70,16 @@ describe('ScrollToTop', () => {
     expect(document.querySelector).toHaveBeenCalledWith('#section')
     expect(mockElement.scrollIntoView).toHaveBeenCalled()
     expect(window.scrollTo).not.toHaveBeenCalled()
+    expect(document.activeElement).not.toBe(document.getElementById('main'))
+  })
+
+  it('moves focus to the anchor element when hash is present', () => {
+    const mockElement = { scrollIntoView: vi.fn(), focus: vi.fn() }
+    vi.spyOn(document, 'querySelector').mockReturnValue(mockElement as unknown as Element)
+
+    renderWithRouter('/apps#section')
+
+    expect(mockElement.focus).toHaveBeenCalledWith({ preventScroll: true })
   })
 
   it('scrolls to top when hash element does not exist', () => {
@@ -67,6 +89,39 @@ describe('ScrollToTop', () => {
 
     expect(document.querySelector).toHaveBeenCalledWith('#nonexistent')
     expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
+  })
+
+  it('does not scroll to top when only the search string changes on the same route (e.g. a filter chip)', () => {
+    // Mirrors real router behavior: a fresh load starts as POP, and the
+    // first PUSH (e.g. a tag filter click) flips it to PUSH, where it then
+    // stays for subsequent PUSH navigations too.
+    let navType: 'POP' | 'PUSH' = 'POP'
+    mockNavigationType.mockImplementation(() => navType)
+
+    const SetTagButton = () => {
+      const [, setSearchParams] = useSearchParams()
+      return (
+        <button onClick={() => setSearchParams({ tag: 'Italian' })}>
+          set tag
+        </button>
+      )
+    }
+
+    render(
+      <MemoryRouter initialEntries={['/recipes']}>
+        <main id="main" tabIndex={-1} />
+        <SetTagButton />
+        <ScrollToTop />
+      </MemoryRouter>
+    )
+
+    expect(window.scrollTo).not.toHaveBeenCalled()
+
+    navType = 'PUSH'
+    fireEvent.click(screen.getByRole('button', { name: 'set tag' }))
+
+    expect(window.scrollTo).not.toHaveBeenCalled()
+    expect(document.activeElement).not.toBe(document.getElementById('main'))
   })
 
   it('does not scroll to anchor on POP navigation with hash', () => {

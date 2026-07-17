@@ -1,19 +1,62 @@
 .badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
   padding: var(--space-1) var(--space-2);
-  font-size: var(--font-size-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-meta);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-}
-
-.badge[data-status='published'] {
-  background: var(--color-bg-subtle);
-  color: var(--color-text);
-  border-color: var(--color-primary);
-}
-
-.badge[data-status='draft'] {
-  background: var(--color-bg-subtle);
+  /* Chips/tags/badges → --radius-sm per docs/design/paper/token-migration.md §3a
+     (StatusBadge .badge is listed explicitly). */
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
   color: var(--color-text-muted);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: currentcolor;
+}
+
+/* WCAG AA override (issue #267): --color-success/--color-warning on their
+   pill backgrounds compute to ~3.68:1/~3.66:1 (fail AA's 4.5:1 for normal
+   text). Uses the shared --color-success-on-tint/--color-warning-on-tint
+   tokens, which already resolve correctly per theme. */
+.success {
+  color: var(--color-success-on-tint);
+  background: var(--color-success-bg);
+}
+
+.warning {
+  color: var(--color-warning-on-tint);
+  background: var(--color-warning-bg);
+}
+
+.error {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
+.neutral {
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+}
+
+.accent {
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+}
+
+/* Full-pill shape (role badges etc.) — extracted verbatim from
+   UserManagement.module.css's former `.rolePill` override (issue #270). */
+.pill {
+  border: none;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  font-size: 10.5px;
+  padding: 4px 10px;
 }

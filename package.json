@@ -1,7 +1,7 @@
 {
   "name": "personal-website",
   "private": true,
-  "version": "1.10.2",
+  "version": "1.11.0",
   "type": "module",
   "packageManager": "pnpm@11.9.0",
   "engines": {
@@ -14,6 +14,7 @@
     "build:prod": "cp public/robots.prod.txt public/robots.txt && pnpm build:client && pnpm build:server && cp dist/client/index.html dist/server/index.html",
     "build:dev": "cp public/robots.dev.txt public/robots.txt && vite build",
     "lint": "eslint .",
+    "check:descendant-selectors": "node scripts/check-descendant-selectors.ts",
     "preview": "vite preview",
     "format": "prettier --write . && eslint --fix .",
     "test": "vitest run",
@@ -46,6 +47,7 @@
     "eslint": "^9.20.1",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.5.3",
@@ -61,6 +63,7 @@
     "unist-util-visit": "^5.1.0",
     "vite": "^8.1.4",
     "vite-imagetools": "^10.0.1",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "vitest-axe": "^0.1.0"
   }
 }

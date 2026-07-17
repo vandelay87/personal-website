@@ -1,38 +1,32 @@
-import Button from '@components/Button'
-import { useEffect, useRef, type FC } from 'react'
-
+import { ListItem } from '@components/List'
+import type { FC, ReactNode } from 'react'
 
 import styles from './Toast.module.css'
 
-export interface ToastState {
-  message: string
-  type: 'success' | 'error'
+export type ToastTone = 'success' | 'error' | 'info'
+
+export interface ToastProps {
+  /** @default 'info' */
+  tone?: ToastTone
+  children?: ReactNode
+  /** Click-anywhere dismiss handler. */
+  onDismiss?: () => void
 }
 
-export interface ToastProps extends ToastState {
-  onDismiss: () => void
-}
-
-const Toast: FC<ToastProps> = ({ message, type, onDismiss }) => {
-  const onDismissRef = useRef(onDismiss)
-  onDismissRef.current = onDismiss
-
-  useEffect(() => {
-    const timer = setTimeout(() => onDismissRef.current(), 5000)
-    return () => clearTimeout(timer)
-  }, [])
-
+const Toast: FC<ToastProps> = ({ tone = 'info', children, onDismiss }) => {
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className={[styles.toast, styles[type]].join(' ')}
-    >
-      <span className={styles.message}>{message}</span>
-      <Button onClick={onDismiss} ariaLabel="Close" variant="secondary" className={styles.close}>
-        &times;
-      </Button>
-    </div>
+    <ListItem className={styles.item}>
+      <button
+        type="button"
+        className={[styles.toast, styles[tone]].filter(Boolean).join(' ')}
+        onClick={onDismiss}
+      >
+        <span className={styles.message}>{children}</span>
+        <span className={styles.close} aria-hidden="true">
+          &times;
+        </span>
+      </button>
+    </ListItem>
   )
 }
 

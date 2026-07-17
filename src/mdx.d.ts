@@ -20,3 +20,21 @@ declare module '*.mdx' {
   const MdxComponent: (props: MDXProps) => JSX.Element
   export default MdxComponent
 }
+
+// See plugins/blog-posts-meta.ts — build-time frontmatter/reading-time
+// metadata for src/pages/Blog/posts, sourced from raw file text rather
+// than the compiled .mdx module so posts/index.ts never statically
+// imports the same module contentModules dynamically imports.
+declare module 'virtual:blog-posts-meta' {
+  export const frontmatterMap: Record<
+    string,
+    {
+      title: string
+      date: string
+      description: string
+      tags: string[]
+      image?: string
+    }
+  >
+  export const readingTimeMap: Record<string, number>
+}

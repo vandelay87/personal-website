@@ -1,9 +1,12 @@
-import { FC, ReactNode } from 'react'
+import List, { ListItem } from '@components/List'
+import { CSSProperties, FC, ReactNode } from 'react'
 import styles from './Grid.module.css'
 
 interface GridProps {
   children: ReactNode
   columns?: 1 | 2 | 3 | 4
+  minWidth?: 'sm' | 'md'
+  className?: string
 }
 
 const columnClassMap: Record<NonNullable<GridProps['columns']>, string> = {
@@ -13,19 +16,41 @@ const columnClassMap: Record<NonNullable<GridProps['columns']>, string> = {
   4: styles.cols4,
 }
 
-const Grid: FC<GridProps> = ({ children, columns = 3 }) => {
+const minWidthVarMap: Record<NonNullable<GridProps['minWidth']>, string> = {
+  sm: 'var(--grid-min-sm)',
+  md: 'var(--grid-min-md)',
+}
+
+const Grid: FC<GridProps> = ({
+  children,
+  columns = 3,
+  minWidth,
+  className: extraClassName,
+}) => {
+  const gridClassName = [
+    styles.grid,
+    minWidth ? styles.autoFit : columnClassMap[columns],
+    extraClassName,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  const gridStyle = minWidth
+    ? ({ '--grid-min-width': minWidthVarMap[minWidth] } as CSSProperties)
+    : undefined
+
   return (
-    <ul className={`${styles.grid} ${columnClassMap[columns]}`}>
+    <List className={gridClassName} style={gridStyle}>
       {Array.isArray(children) ? (
         children.map((child, index) => (
-          <li key={index} className={styles.item}>
+          <ListItem key={index} className={styles.item}>
             {child}
-          </li>
+          </ListItem>
         ))
       ) : (
-        <li className={styles.item}>{children}</li>
+        <ListItem className={styles.item}>{children}</ListItem>
       )}
-    </ul>
+    </List>
   )
 }
 

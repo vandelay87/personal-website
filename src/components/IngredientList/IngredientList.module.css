@@ -1,4 +1,14 @@
+/* IngredientList.module.css — restyled per docs/design/paper/pages/
+   Admin Recipe Editor.dc.html's ingredient row (Qty + Name fields, 3
+   square icon-buttons). The design's mock only shows a single "Qty"
+   field (96px) — this codebase's Ingredient model splits that into
+   `quantity`/`unit`, so those two share roughly the same combined
+   footprint instead of literally matching the single-field width. */
+
 .container {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -8,55 +18,86 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-areas:
-    "item item"
-    "quantity unit"
-    "actions actions";
+    'item item'
+    'quantity unit'
+    'actions actions';
   gap: var(--space-2);
   align-items: center;
 }
 
-.input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: var(--space-2) var(--space-3);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-none);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: var(--font-size-base);
-  font-family: var(--font-sans);
-}
-
-.input:focus-visible {
-  outline: var(--border-width) solid var(--color-primary);
-}
-
-.quantityInput {
+.quantityField {
   grid-area: quantity;
 }
 
-.unitInput {
+.unitField {
   grid-area: unit;
 }
 
-.itemInput {
+.itemField {
   grid-area: item;
+}
+
+@media (min-width: 768px) {
+  .row {
+    grid-template-columns: 4.5rem 4.5rem 1fr auto;
+    grid-template-areas: 'quantity unit item actions';
+  }
 }
 
 .actions {
   grid-area: actions;
   display: flex;
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 
-.actionButton {
-  min-width: 44px;
-  min-height: 44px;
+/* `iconButtonHover`/`dangerIconButtonHover` (interactions.module.css)
+   are composed directly in JS (see IngredientList.tsx) instead of via
+   local `.moveAction`/`.removeAction` classes — see
+   interactions.module.css's own header comment for why. Each icon
+   button still picks up exactly one hover treatment: reordering buttons
+   get the neutral hover, remove gets the danger hover — never both on
+   the same element, so there's no same-specificity `:hover` rule to
+   referee. */
+
+/* Descendant-scoped (not a bare `.actionButton` rule) to safely out-rank
+   Button's own `.button`/`.outline` single-class selectors regardless of
+   CSS import order — same specificity-tie fix as RecipeList.module.css's
+   `.rowActions .actionButton`. */
+.actions .actionButton {
+  width: 30px;
+  height: 30px;
+  min-width: 0;
+  min-height: 0;
+  flex-shrink: 0;
+  padding: 0;
+  border-radius: var(--radius);
+  border-color: var(--color-border);
+  background: var(--color-field);
+  color: var(--color-text-muted);
 }
 
-@media (min-width: 768px) {
-  .row {
-    grid-template-columns: 5rem 5rem 1fr auto;
-    grid-template-areas: "quantity unit item actions";
-  }
+.actions .actionButton svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.actions .actionButton:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* `button.addButton` (element + class, not `.container .addButton`): the
+   button is now a sibling after the `<ul>` rather than a flex child of it
+   — a `<ul>` can only contain `<li>` rows per HTML list semantics. The
+   element qualifier keeps specificity above Button's own bare `.button`/
+   `.outline` regardless of CSS import order (same fix as Tag.module.css's
+   `button.tag`). margin-top reproduces the gap the flex column used to
+   provide between the last row and this button. */
+button.addButton {
+  width: auto;
+  margin-top: var(--space-3);
+  padding: 9px var(--space-4);
+  font-size: 13.5px;
+  font-weight: var(--font-weight-medium);
 }
