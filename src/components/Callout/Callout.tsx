@@ -16,11 +16,11 @@ const indicators: Record<CalloutProps['type'], { emoji: string; label: string }>
 const Callout: FC<CalloutProps> = ({ type, children }) => {
   return (
     <div className={`${styles.callout} ${styles[type]}`} role="note" aria-labelledby={`callout-${type}`}>
-      <span className={styles.emoji} aria-hidden="true">{indicators[type].emoji}</span>
-      <div>
+      <div className={styles.header}>
+        <span className={styles.emoji} aria-hidden="true">{indicators[type].emoji}</span>
         <div id={`callout-${type}`} className={styles.label}>{indicators[type].label}</div>
-        <div>{children}</div>
       </div>
+      <div>{children}</div>
     </div>
   )
 }

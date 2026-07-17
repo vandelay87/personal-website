@@ -154,7 +154,7 @@ const Home: FC = () => {
           <section className={styles.kitchenSection} aria-labelledby="kitchen-section-heading">
             <div className={styles.kitchenIntro}>
               <Typography variant="caption" as="p" className={styles.kitchenKicker}>
-                From the kitchen
+                Recipe collection
               </Typography>
               <Typography
                 variant="heading2"

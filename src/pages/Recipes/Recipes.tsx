@@ -16,7 +16,7 @@ import styles from './Recipes.module.css'
 const RecipesHero: FC<{ intro?: ReactNode }> = ({ intro }) => (
   <section className={styles.hero}>
     <Typography variant="caption" as="p" className={styles.eyebrow}>
-      From the Kitchen
+      Recipe collection
     </Typography>
     <Typography variant="heading1" className={styles.heading}>
       The meals I cook on repeat.
@@ -124,8 +124,8 @@ const Recipes: FC = () => {
         intro={
           <>
             A small, growing collection of recipes I cook on repeat — written
-            down so they&apos;re easy to make again. Tried, refined, and worth
-            the effort.
+            down so they&apos;re easy to make again. I make some of these way
+            more often than I&apos;d like to admit.
           </>
         }
       />

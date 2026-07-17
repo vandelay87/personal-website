@@ -9,6 +9,7 @@ import styles from './Blog.module.css'
 import { formatDate, posts } from './posts'
 
 const ALL_TAGS = Array.from(new Set(posts.flatMap((post) => post.tags)))
+const BLOG_HEADING = 'Notes I keep meaning to write more of.'
 
 interface TagChipProps {
   tag: string
@@ -49,7 +50,7 @@ const Blog = () => {
         <Typography variant="caption" as="p" className={styles.eyebrow}>
           The blog
         </Typography>
-        <Typography variant="heading1">Archive</Typography>
+        <Typography variant="heading1">{BLOG_HEADING}</Typography>
         <Typography variant="bodyLarge">Posts coming soon.</Typography>
       </section>
     )
@@ -62,7 +63,7 @@ const Blog = () => {
           The blog
         </Typography>
         <Typography variant="heading1" className={styles.heading}>
-          Archive
+          {BLOG_HEADING}
         </Typography>
         <Typography variant="bodyLarge" className={styles.intro}>
           Thoughts on building things, technical deep-dives, and the lessons

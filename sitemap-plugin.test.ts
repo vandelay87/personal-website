@@ -1,22 +1,57 @@
-import { describe, expect, it, vi } from 'vitest'
+import { utimesSync, writeFileSync } from 'fs'
+import { join } from 'path'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { generateSitemap } from './sitemap-plugin'
-
-// Mock statSync so it doesn't try to access real files
-vi.mock('fs', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('fs')>()
-  return {
-    ...actual,
-    statSync: vi.fn(() => ({
-      mtime: new Date('2025-01-15'),
-    })),
-  }
-})
+import { createTempTestDir } from './tests/tempTestDir'
 
 describe('generateSitemap', () => {
+  // Uses a real file in a real temp directory rather than mocking `fs` —
+  // this is a root-level module outside src/, and Vitest's module mocking
+  // doesn't reliably intercept `fs` calls made from those (confirmed by
+  // hand: a `vi.mock('fs', ...)` in this file never reached the real
+  // statSync call inside generateSitemap, even with `node:fs` also mocked).
+  // plugins/blog-posts-meta.test.ts hit the same issue and uses the same
+  // real-temp-file pattern (see tests/tempTestDir.ts).
+  let tempDir: string
+  let filePath: string
+  let cleanup: () => void
+  const pinnedDate = new Date('2025-01-15T00:00:00.000Z')
+
+  beforeAll(() => {
+    const temp = createTempTestDir('sitemap-plugin-test-')
+    tempDir = temp.dir
+    cleanup = temp.cleanup
+    filePath = join(tempDir, 'Home.tsx')
+    writeFileSync(filePath, 'export const Home = () => null')
+    utimesSync(filePath, pinnedDate, pinnedDate)
+  })
+
+  afterAll(() => {
+    cleanup()
+  })
+
+  it('uses the file mtime as lastmod when a filePath is provided', () => {
+    const routes = [{ route: '/', filePath }]
+    const routeConfig = { '/': { priority: 1.0, changefreq: 'monthly' as const } }
+
+    const sitemap = generateSitemap('https://akli.dev', routes, 'monthly', 0.5, routeConfig)
+
+    expect(sitemap).toContain('<lastmod>2025-01-15</lastmod>')
+  })
+
+  it('falls back to the current date when statSync throws for a nonexistent filePath', () => {
+    const routes = [{ route: '/apps', filePath: join(tempDir, 'does-not-exist.tsx') }]
+
+    const sitemap = generateSitemap('https://akli.dev', routes, 'monthly', 0.5, {})
+
+    const today = new Date().toISOString().split('T')[0]
+    expect(sitemap).toContain(`<lastmod>${today}</lastmod>`)
+  })
+
   it('includes additional routes without filePath', () => {
     const routes = [
-      { route: '/', filePath: 'src/pages/Home/Home.tsx' },
-      { route: '/apps', filePath: 'src/pages/Apps/Apps.tsx' },
+      { route: '/', filePath },
+      { route: '/apps', filePath },
       { route: '/apps/pokedex' }, // additional route, no filePath
     ]
 
@@ -34,7 +69,7 @@ describe('generateSitemap', () => {
 
   it('includes /apps/pokedex with correct priority and changefreq', () => {
     const routes = [
-      { route: '/', filePath: 'src/pages/Home/Home.tsx' },
+      { route: '/', filePath },
       { route: '/apps/pokedex' },
     ]
 
@@ -68,8 +103,8 @@ describe('generateSitemap', () => {
 
   it('includes blog post routes in sitemap', () => {
     const routes = [
-      { route: '/', filePath: 'src/pages/Home/Home.tsx' },
-      { route: '/blog', filePath: 'src/pages/Blog/Blog.tsx' },
+      { route: '/', filePath },
+      { route: '/blog', filePath },
       { route: '/blog/test-post' },
     ]
 
@@ -92,8 +127,8 @@ describe('generateSitemap', () => {
 
   it('does not break existing routes with filePath', () => {
     const routes = [
-      { route: '/', filePath: 'src/pages/Home/Home.tsx' },
-      { route: '/apps', filePath: 'src/pages/Apps/Apps.tsx' },
+      { route: '/', filePath },
+      { route: '/apps', filePath },
     ]
 
     const routeConfig = {

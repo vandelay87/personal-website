@@ -171,7 +171,15 @@
 
   /* ── Focus ring ───────────────────────────────────────────── */
   --ring: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent); /* form fields only, see .fieldFocusRing */
-  --focus-ring-outline: 2px solid var(--color-primary); /* general interactive elements, see .focusRing */
+  /* Decomposed into width/style/color (not just a shorthand literal) so a
+     consumer that needs just one part — e.g. index.css's scroll-margin
+     calc(), which has to clear the outline's rendered width but can't
+     decompose a shorthand inside calc() — can reference it directly
+     instead of repeating a literal that could drift out of sync. */
+  --focus-ring-outline-width: 2px;
+  --focus-ring-outline-style: solid;
+  --focus-ring-outline-color: var(--color-primary);
+  --focus-ring-outline: var(--focus-ring-outline-width) var(--focus-ring-outline-style) var(--focus-ring-outline-color); /* general interactive elements, see .focusRing */
   --focus-ring-outline-offset: 3px;
 
   /* ── Layout ───────────────────────────────────────────────── */

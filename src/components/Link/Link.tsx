@@ -64,6 +64,9 @@ const Link: FC<LinkProps> = ({
     // trigger the icon's transform.
     NUDGE_CLASSES[nudge],
     variant && styles[variant],
+    // No icon to lay out and no button shape to fill — drop inline-flex
+    // for a glyph-height box instead (see Link.module.css's .textOnly).
+    !icon && !variant && styles.textOnly,
     externalClassName,
   ]
     .filter(Boolean)

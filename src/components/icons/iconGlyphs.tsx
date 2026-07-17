@@ -1,5 +1,3 @@
-import type { FC } from 'react'
-
 export const iconChevronUp = (
   <svg
     viewBox="0 0 24 24"
@@ -43,26 +41,6 @@ export const iconRemove = (
   </svg>
 )
 
-export interface SizedIconProps {
-  size: number
-}
-
-export const IconPlus: FC<SizedIconProps> = ({ size }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.2"
-    strokeLinecap="round"
-    aria-hidden="true"
-  >
-    <line x1="12" y1="5" x2="12" y2="19" />
-    <line x1="5" y1="12" x2="19" y2="12" />
-  </svg>
-)
-
 // iconEdit/iconPublish carry explicit width/height even though some
 // consumers (RecipeList.tsx's .rowActions .actionButton) have a CSS rule
 // that overrides SVG-level sizing anyway — the other consumer (Link's
@@ -82,23 +60,6 @@ export const iconEdit = (
   >
     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
     <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
-  </svg>
-)
-
-export const IconPreview: FC<SizedIconProps> = ({ size }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
-    <circle cx="12" cy="12" r="3" />
   </svg>
 )
 
@@ -335,32 +296,5 @@ export const iconReplace = (
   >
     <path d="M12 20h9" />
     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
-  </svg>
-)
-
-export interface IconAlertCircleProps {
-  size: number
-  // Optional because one caller (AutosaveStatus) already wraps this icon in
-  // an `aria-hidden="true"` span, so the svg itself carried no attribute;
-  // the other (RecipeEditor) set it directly on the svg. Preserved per call
-  // site rather than defaulted so neither render output changes.
-  ariaHidden?: boolean
-}
-
-export const IconAlertCircle: FC<IconAlertCircleProps> = ({ size, ariaHidden }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden={ariaHidden || undefined}
-  >
-    <circle cx="12" cy="12" r="10" />
-    <line x1="12" y1="8" x2="12" y2="12" />
-    <line x1="12" y1="16" x2="12.01" y2="16" />
   </svg>
 )

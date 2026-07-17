@@ -12,8 +12,8 @@
      consumer also reads the same variable. */
   --inline-code-bg: var(--color-bg);
   display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
+  flex-direction: column;
+  gap: var(--space-2);
   margin: var(--space-4) 0;
   padding: var(--space-4) var(--space-5);
   border-radius: var(--radius-lg);
@@ -21,6 +21,16 @@
   font-size: var(--font-size-base);
   line-height: var(--line-height-relaxed);
   color: var(--color-text);
+}
+
+/* Icon + label as their own centered row, separate from the body content
+   below — centering the icon against the *whole* callout (icon + label +
+   however many lines of body text) made it drift away from the label
+   next to it, which is the thing it's actually meant to align with. */
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 }
 
 .emoji {
@@ -31,7 +41,6 @@
 }
 
 .label {
-  margin-bottom: var(--space-2);
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);

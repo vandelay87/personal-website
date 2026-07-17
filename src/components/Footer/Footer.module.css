@@ -9,9 +9,13 @@
   color: var(--color-text-muted);
 }
 
+/* align-items: flex-end (design doc uses center) — the "Elsewhere" column
+   is taller than the single-line "akli.dev" brand text once its link row
+   wraps, so centering left the brand floating oddly mid-height; bottom-
+   aligning grounds it against the last row of links instead. */
 .inner {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: var(--space-4);
   max-width: var(--max-w-site);
