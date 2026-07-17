@@ -1,7 +1,7 @@
 import { isSessionError } from '@api/auth'
 import { fetchRecipeByIdAdmin, publishRecipe } from '@api/recipes'
 import Button from '@components/Button'
-import { iconEdit, iconPublish } from '@components/icons'
+import { IconPreview, iconEdit, iconNotFound, iconPublish, iconViewPublic } from '@components/icons'
 import Link from '@components/Link'
 import Loading from '@components/Loading'
 import RecipeDetailView from '@components/RecipeDetailView'
@@ -21,11 +21,9 @@ import { MAIN_LANDMARK_ID } from '../../../constants/mainLandmark'
 import stateBox from '../../../styles/stateBox.module.css'
 import styles from './RecipePreview.module.css'
 
-// Hoisted elements, not components — these never take props, so there's no
-// need to re-invoke a function (and rebuild the tree) on every render. Same
-// established pattern as `iconRetry` in icons.tsx / `iconLock` in
-// RecipeEditor.tsx. Paths match Admin Recipe Preview.dc.html's inline SVGs
-// (lines 76, 81-82, 88, 93, 100) exactly.
+// Hoisted element, not a component — it never takes props, so there's no
+// need to re-invoke a function (and rebuild the tree) on every render. Path
+// matches Admin Recipe Preview.dc.html's inline SVG (line 76) exactly.
 const iconStatusPublished = (
   <svg
     width="17"
@@ -39,61 +37,6 @@ const iconStatusPublished = (
     aria-hidden="true"
   >
     <path d="M20 6 9 17l-5-5" />
-  </svg>
-)
-
-const iconStatusDraft = (
-  <svg
-    width="17"
-    height="17"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
-    <circle cx="12" cy="12" r="3" />
-  </svg>
-)
-
-const iconViewPublic = (
-  <svg
-    width="13"
-    height="13"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d="M7 17 17 7" />
-    <path d="M7 7h10v10" />
-  </svg>
-)
-
-// Search-with-exclamation glyph — matches Admin Recipe Preview.dc.html's
-// not-found icon (lines 123) exactly.
-const iconNotFound = (
-  <svg
-    width="25"
-    height="25"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <circle cx="11" cy="11" r="8" />
-    <path d="m21 21-3.5-3.5" />
-    <path d="M11 8v3" />
-    <path d="M11 14h.01" />
   </svg>
 )
 
@@ -250,7 +193,7 @@ const RecipePreview: FC = () => {
             </Link>
             <span aria-hidden="true" className={styles.bannerDivider} />
             <span aria-hidden="true" className={styles.statusIcon}>
-              {isDraft ? iconStatusDraft : iconStatusPublished}
+              {isDraft ? <IconPreview size={17} /> : iconStatusPublished}
             </span>
             <Typography variant="body" className={styles.bannerMessage}>
               {isDraft

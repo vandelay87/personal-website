@@ -11,7 +11,7 @@ import {
 import AutosaveStatus from '@components/AutosaveStatus'
 import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
-import { IconAlertCircle, iconPreview } from '@components/icons'
+import { IconAlertCircle, IconPreview, iconLock } from '@components/icons'
 import ImageUpload from '@components/ImageUpload'
 import IngredientList from '@components/IngredientList'
 import Link from '@components/Link'
@@ -251,23 +251,6 @@ const draftFromCreated = (id: string, slug: string): Recipe => ({
 })
 
 const NEW_PATH = '/admin/recipes/new'
-
-const iconLock = (
-  <svg
-    width="13"
-    height="13"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <rect x="3" y="11" width="18" height="11" rx="2" />
-    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-  </svg>
-)
 
 const RecipeEditor: FC = () => {
   const { id: routeId } = useParams<{ id: string }>()
@@ -901,7 +884,7 @@ const RecipeEditor: FC = () => {
                 <div className={styles.previewWrap}>
                   <Link
                     to={`/recipes/${form.slug}`}
-                    icon={iconPreview}
+                    icon={<IconPreview size={14} />}
                     iconSide="right"
                     nudge="none"
                     className={styles.previewLink}

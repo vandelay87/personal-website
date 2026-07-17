@@ -1,5 +1,5 @@
 import Button from '@components/Button'
-import { iconPlus } from '@components/icons'
+import { IconPlus } from '@components/icons'
 import Input from '@components/Input'
 import List, { ListItem } from '@components/List'
 import ReorderControls from '@components/ReorderControls'
@@ -90,7 +90,7 @@ const IngredientList: FC<IngredientListProps> = ({ ingredients, onChange, onAnno
           </ListItem>
         ))}
       </List>
-      <Button onClick={handleAdd} variant="outline" iconLeft={iconPlus} className={styles.addButton}>
+      <Button onClick={handleAdd} variant="outline" iconLeft={<IconPlus size={14} />} className={styles.addButton}>
         Add ingredient
       </Button>
     </>
