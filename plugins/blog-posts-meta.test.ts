@@ -1,7 +1,7 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'fs'
-import { tmpdir } from 'os'
+import { writeFileSync } from 'fs'
 import { join } from 'path'
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest'
+import { createTempTestDir } from '../tests/tempTestDir'
 import { blogPostsMeta, extractPlainText, parseFrontmatter } from './blog-posts-meta'
 
 describe('parseFrontmatter', () => {
@@ -131,11 +131,15 @@ describe('blogPostsMeta', () => {
   // plugin is a root-level module outside src/, and Vitest's module mocking
   // doesn't reliably intercept `fs` calls made from those (confirmed by
   // hand: a `vi.mock('fs', ...)` in this file never reached readdirSync
-  // calls made inside blog-posts-meta.ts, even with `node:fs` also mocked).
+  // calls made inside blog-posts-meta.ts, even with `node:fs` also mocked;
+  // see tests/tempTestDir.ts).
   let postsDir: string
+  let cleanup: () => void
 
   beforeAll(() => {
-    postsDir = mkdtempSync(join(tmpdir(), 'blog-posts-meta-test-'))
+    const temp = createTempTestDir('blog-posts-meta-test-')
+    postsDir = temp.dir
+    cleanup = temp.cleanup
     writeFileSync(
       join(postsDir, 'post-a.mdx'),
       `---
@@ -162,7 +166,7 @@ ${Array(250).fill('word').join(' ')}`
   })
 
   afterAll(() => {
-    rmSync(postsDir, { recursive: true, force: true })
+    cleanup()
   })
 
   it('resolves the virtual module id to its internal id', () => {

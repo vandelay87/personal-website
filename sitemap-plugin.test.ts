@@ -1,8 +1,8 @@
-import { mkdtempSync, rmSync, utimesSync, writeFileSync } from 'fs'
-import { tmpdir } from 'os'
+import { utimesSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { generateSitemap } from './sitemap-plugin'
+import { createTempTestDir } from './tests/tempTestDir'
 
 describe('generateSitemap', () => {
   // Uses a real file in a real temp directory rather than mocking `fs` —
@@ -11,20 +11,23 @@ describe('generateSitemap', () => {
   // hand: a `vi.mock('fs', ...)` in this file never reached the real
   // statSync call inside generateSitemap, even with `node:fs` also mocked).
   // plugins/blog-posts-meta.test.ts hit the same issue and uses the same
-  // real-temp-file pattern.
+  // real-temp-file pattern (see tests/tempTestDir.ts).
   let tempDir: string
   let filePath: string
+  let cleanup: () => void
   const pinnedDate = new Date('2025-01-15T00:00:00.000Z')
 
   beforeAll(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'sitemap-plugin-test-'))
+    const temp = createTempTestDir('sitemap-plugin-test-')
+    tempDir = temp.dir
+    cleanup = temp.cleanup
     filePath = join(tempDir, 'Home.tsx')
     writeFileSync(filePath, 'export const Home = () => null')
     utimesSync(filePath, pinnedDate, pinnedDate)
   })
 
   afterAll(() => {
-    rmSync(tempDir, { recursive: true, force: true })
+    cleanup()
   })
 
   it('uses the file mtime as lastmod when a filePath is provided', () => {

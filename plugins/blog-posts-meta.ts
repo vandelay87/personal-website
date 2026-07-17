@@ -8,12 +8,22 @@ const RESOLVED_VIRTUAL_MODULE_ID = '\0' + VIRTUAL_MODULE_ID
 
 const FRONTMATTER_BLOCK = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/
 
+// `load()` below calls both parseFrontmatter and extractPlainText on the
+// same raw file text; matching FRONTMATTER_BLOCK is shared work, so it's
+// factored out and threaded through an optional param on each rather than
+// each function re-running the same regex against the same string. Both
+// still default to matching it themselves so they stay simple one-arg
+// pure functions for standalone/test use.
+const matchFrontmatterBlock = (raw: string): RegExpMatchArray | null => raw.match(FRONTMATTER_BLOCK)
+
 // Minimal YAML subset parser scoped to this project's frontmatter shape
 // (flat `key: value` pairs plus one `key: [a, b, c]` array field) — not a
 // general YAML parser. See docs/prds/blog.md's "MDX frontmatter" section
 // for the authoritative shape.
-export const parseFrontmatter = (raw: string): Record<string, string | string[]> => {
-  const match = raw.match(FRONTMATTER_BLOCK)
+export const parseFrontmatter = (
+  raw: string,
+  match: RegExpMatchArray | null = matchFrontmatterBlock(raw)
+): Record<string, string | string[]> => {
   if (!match) return {}
 
   const result: Record<string, string | string[]> = {}
@@ -42,8 +52,11 @@ export const parseFrontmatter = (raw: string): Record<string, string | string[]>
 // remark-reading-time computes from the real MDX AST, without running the
 // MDX/remark pipeline: strips frontmatter, code fences, import/export
 // statements, and JSX tags, leaving roughly the same text left to count.
-export const extractPlainText = (raw: string): string => {
-  const withoutFrontmatter = raw.replace(FRONTMATTER_BLOCK, '')
+export const extractPlainText = (
+  raw: string,
+  match: RegExpMatchArray | null = matchFrontmatterBlock(raw)
+): string => {
+  const withoutFrontmatter = match ? raw.slice(match[0].length) : raw
   const withoutCodeFences = withoutFrontmatter.replace(/```[\s\S]*?```/g, ' ')
   const withoutImportsExports = withoutCodeFences
     .split(/\r?\n/)
@@ -80,8 +93,9 @@ export const blogPostsMeta = (postsDir: string): Plugin => ({
 
       const raw = readFileSync(filePath, 'utf-8')
       const key = `./${file}`
-      frontmatterMap[key] = parseFrontmatter(raw)
-      readingTimeMap[key] = calculateReadingTime(extractPlainText(raw))
+      const frontmatterMatch = matchFrontmatterBlock(raw)
+      frontmatterMap[key] = parseFrontmatter(raw, frontmatterMatch)
+      readingTimeMap[key] = calculateReadingTime(extractPlainText(raw, frontmatterMatch))
     }
 
     return `export const frontmatterMap = ${JSON.stringify(frontmatterMap)}
