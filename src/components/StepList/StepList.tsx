@@ -1,5 +1,5 @@
 import Button from '@components/Button'
-import { iconPlus } from '@components/icons'
+import { IconPlus } from '@components/icons'
 import ImageUpload from '@components/ImageUpload'
 import Input from '@components/Input'
 import List, { ListItem } from '@components/List'
@@ -138,7 +138,7 @@ const StepList: FC<StepListProps> = ({
           </ListItem>
         ))}
       </List>
-      <Button onClick={handleAdd} variant="outline" iconLeft={iconPlus} className={styles.addButton}>
+      <Button onClick={handleAdd} variant="outline" iconLeft={<IconPlus size={14} />} className={styles.addButton}>
         Add step
       </Button>
     </>
