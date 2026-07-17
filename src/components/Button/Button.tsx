@@ -11,6 +11,8 @@ export interface ButtonProps {
   shape?: 'rounded' | 'pill'
   /** @default 'md' */
   size?: 'sm' | 'md'
+  /** Tints the `outline` variant's hover state red for destructive-but-secondary actions. Only meaningful combined with `variant="outline"`. @default undefined */
+  tone?: 'danger'
   disabled?: boolean
   /** Shows a spinner and blocks interaction. @default false */
   loading?: boolean
@@ -30,6 +32,7 @@ const Button = ({
   variant = 'solid',
   shape = 'rounded',
   size = 'md',
+  tone,
   disabled = false,
   loading = false,
   iconLeft,
@@ -45,6 +48,7 @@ const Button = ({
     styles[variant],
     styles[shape],
     styles[size],
+    tone === 'danger' && styles.toneDanger,
     fullWidth && styles.fullWidth,
     loading && styles.loading,
     extraClassName,

@@ -847,9 +847,9 @@ const RecipeEditor: FC = () => {
                     onClick={() => setDiscardDialogOpen(true)}
                     type="button"
                     variant="outline"
+                    tone="danger"
                     disabled={submitting}
                     fullWidth
-                    className={styles.discardButton}
                   >
                     Discard draft
                   </Button>
