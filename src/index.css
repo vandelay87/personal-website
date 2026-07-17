@@ -114,6 +114,33 @@ svg[id^="mermaid-"] {
 
 /* ── Global accessibility utilities ──────────────────────── */
 
+/* SC 2.4.11 (Focus Not Obscured): reserves clearance above every
+   focusable element equal to the sticky Header's real rendered height
+   (--header-height, live-measured in Header.tsx via ResizeObserver, see
+   useMeasuredHeightVar) so tabbing to an element never lands it partially
+   or fully behind the header. PageShell/AdminLayout's `.main` already
+   does this for the initial skip-link/hash-jump landing spot only; this
+   extends the same clearance to every individual focusable element, so
+   normal Tab/Shift+Tab navigation anywhere on the page is covered too.
+   The extra `+ var(--focus-ring-outline-offset) + 2px` clears the
+   `.focusRing` outline itself (interactions.module.css) — scroll-margin
+   only guarantees the element's own box clears the header, but the
+   outline is drawn outside that box by its offset plus its own width, so
+   without this the ring's outer edge still pokes up into the header.
+   The `2px` is that outline's width — `--focus-ring-outline` is a
+   shorthand (`2px solid ...`) calc() can't decompose, so it's repeated
+   as a literal here; keep in sync if that token's width ever changes. */
+a,
+button,
+input,
+select,
+textarea,
+[tabindex] {
+  scroll-margin-block-start: calc(
+    var(--header-height) + var(--focus-ring-outline-offset) + 2px
+  );
+}
+
 /* Visually hidden but accessible to screen readers */
 .sr-only {
   position: absolute;
