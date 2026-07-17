@@ -1,8 +1,9 @@
 import Button from '@components/Button'
-import { iconChevronDown, iconChevronUp, iconPlus, iconRemove } from '@components/icons'
+import { iconPlus } from '@components/icons'
 import ImageUpload from '@components/ImageUpload'
 import Input from '@components/Input'
 import List, { ListItem } from '@components/List'
+import ReorderControls from '@components/ReorderControls'
 import Textarea from '@components/Textarea'
 import { useReorderableList } from '@hooks/useReorderableList'
 import { stepImageType, type RecipeImage, type Step } from '@models/recipe'
@@ -93,33 +94,16 @@ const StepList: FC<StepListProps> = ({
             <div className={styles.header}>
               <span className={styles.stepNumber}>{index + 1}</span>
               <div className={styles.actions}>
-                <Button
-                  onClick={() => handleMoveUp(index)}
-                  ariaLabel={`Move up step ${index + 1}`}
-                  variant="outline"
-                  disabled={index === 0}
-                  className={moveActionClassName}
-                >
-                  {iconChevronUp}
-                </Button>
-                <Button
-                  onClick={() => handleMoveDown(index)}
-                  ariaLabel={`Move down step ${index + 1}`}
-                  variant="outline"
-                  disabled={index === steps.length - 1}
-                  className={moveActionClassName}
-                >
-                  {iconChevronDown}
-                </Button>
-                <Button
-                  onClick={() => handleRemove(index)}
-                  ariaLabel={`Remove step ${index + 1}`}
-                  variant="outline"
-                  disabled={steps.length <= 1}
-                  className={removeActionClassName}
-                >
-                  {iconRemove}
-                </Button>
+                <ReorderControls
+                  index={index}
+                  count={steps.length}
+                  itemLabel="step"
+                  onMoveUp={handleMoveUp}
+                  onMoveDown={handleMoveDown}
+                  onRemove={handleRemove}
+                  moveActionClassName={moveActionClassName}
+                  removeActionClassName={removeActionClassName}
+                />
               </div>
             </div>
             <Textarea
