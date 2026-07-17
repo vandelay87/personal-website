@@ -80,6 +80,16 @@
   background-color: var(--color-hover);
 }
 
+/* tone="danger" only makes sense combined with variant="outline" (see the
+   prop doc comment in Button.tsx) — tints the outline variant's hover state
+   red for destructive-but-secondary actions (e.g. RecipeEditor's "Discard
+   draft"), instead of the outline variant's default accent-blue hover. */
+.outline.toneDanger:hover:not(:disabled) {
+  border-color: var(--color-error);
+  color: var(--color-error);
+  background-color: var(--color-error-bg);
+}
+
 /* ── Shape ───────────────────────────────────────────────────── */
 
 .pill {

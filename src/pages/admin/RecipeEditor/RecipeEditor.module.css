@@ -370,16 +370,6 @@
   gap: var(--space-3);
 }
 
-/* .actionsCol .discardButton (not bare): raises specificity above
-   Button's own `.outline` hover — the design's "Discard draft" ghost
-   button tints red on hover (`.ghost-btn.danger:hover`), Button's shared
-   outline variant tints accent-blue instead. */
-.actionsCol .discardButton:hover:not(:disabled) {
-  border-color: var(--color-error);
-  color: var(--color-error);
-  background: var(--color-error-bg);
-}
-
 .checklistWrap {
   border-top: var(--border-width) solid var(--color-border);
   padding-top: 14px;
