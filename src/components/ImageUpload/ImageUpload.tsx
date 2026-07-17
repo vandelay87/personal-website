@@ -1,7 +1,7 @@
 
 import { getUploadUrl } from '@api/recipes'
 import Button from '@components/Button'
-import { iconAddImage, iconReplace, iconUploadCloud } from '@components/icons'
+import { iconAddImage, iconReplace, iconUploadCloud } from '@components/iconGlyphs'
 import Image from '@components/Image'
 import ProcessingPlaceholder from '@components/ProcessingPlaceholder'
 import { parseImageType, recipeImageUrl, type ImageType } from '@models/recipe'
