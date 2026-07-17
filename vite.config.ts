@@ -11,6 +11,7 @@ import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import { isCSSRequest, loadEnv, type ModuleNode, type Plugin, type ViteDevServer } from 'vite'
 import { imagetools } from 'vite-imagetools'
 import { defineConfig } from 'vitest/config'
+import { blogPostsMeta } from './plugins/blog-posts-meta'
 import remarkReadingTime from './plugins/remark-reading-time'
 import { sitemapPlugin } from './sitemap-plugin'
 
@@ -187,6 +188,7 @@ export default defineConfig(({ command, isSsrBuild, mode }) => {
   plugins: [
     react(),
     ssrDevServerPlugin(),
+    blogPostsMeta(join(rootDir, 'src/pages/Blog/posts')),
     mdx({
       remarkPlugins: [
         remarkFrontmatter,

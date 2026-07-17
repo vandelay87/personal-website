@@ -1,4 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
+import { frontmatterMap, readingTimeMap } from 'virtual:blog-posts-meta'
 import type { MDXComponents } from '*.mdx'
 
 export interface PostMeta {
@@ -14,22 +15,6 @@ export interface PostMeta {
 interface MDXModule {
   default: ComponentType<{ components?: MDXComponents }>
 }
-
-interface Frontmatter {
-  title: string
-  date: string
-  description: string
-  tags: string[]
-}
-
-interface EagerMDXModule {
-  frontmatter: Frontmatter
-  readingTime: number
-}
-
-const eagerModules = import.meta.glob('./*.mdx', {
-  eager: true,
-}) as Record<string, EagerMDXModule>
 
 const contentModules = import.meta.glob('./*.mdx') as Record<
   string,
@@ -49,11 +34,11 @@ export const formatDate = (dateString: string): string => {
   })
 }
 
-export const posts: PostMeta[] = Object.entries(eagerModules)
-  .map(([path, mod]) => ({
-    ...mod.frontmatter,
+export const posts: PostMeta[] = Object.entries(frontmatterMap)
+  .map(([path, frontmatter]) => ({
+    ...frontmatter,
     slug: extractSlug(path),
-    readingTime: mod.readingTime ?? 1,
+    readingTime: readingTimeMap[path] ?? 1,
   }))
   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
