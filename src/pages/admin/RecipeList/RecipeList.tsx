@@ -34,6 +34,10 @@ import { pluralize } from '../../../utils/pluralize'
 import { relativeUpdatedLabel } from '../../../utils/relativeTime'
 import styles from './RecipeList.module.css'
 
+// Hoisted so every row in the list below reuses the same element by
+// reference instead of mounting a fresh IconPreview per row per render.
+const iconPreviewAction = <IconPreview size={14} />
+
 const RecipeList = () => {
   const { getAccessToken, logout } = useAuth()
   const { showToast } = useToast()
@@ -185,7 +189,7 @@ const RecipeList = () => {
                   className={`${interactions.focusRing} ${styles.actionButton}`}
                   nudge="none"
                 >
-                  <IconPreview size={14} />
+                  {iconPreviewAction}
                   Preview
                 </Link>
                 <button

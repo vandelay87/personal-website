@@ -43,11 +43,11 @@ export const iconRemove = (
   </svg>
 )
 
-export interface IconPlusProps {
+export interface SizedIconProps {
   size: number
 }
 
-export const IconPlus: FC<IconPlusProps> = ({ size }) => (
+export const IconPlus: FC<SizedIconProps> = ({ size }) => (
   <svg
     width={size}
     height={size}
@@ -85,11 +85,7 @@ export const iconEdit = (
   </svg>
 )
 
-export interface IconPreviewProps {
-  size: number
-}
-
-export const IconPreview: FC<IconPreviewProps> = ({ size }) => (
+export const IconPreview: FC<SizedIconProps> = ({ size }) => (
   <svg
     width={size}
     height={size}
