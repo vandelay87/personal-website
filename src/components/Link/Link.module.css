@@ -61,6 +61,22 @@
       transition: none;
     }
   }
+
+  /* Only icon-bearing links need `inline-flex`'s gap/align-items to lay
+     out the icon; plain text links (no icon, no button variant) get this
+     instead — a lower, glyph-height box, so their :focus-visible outline
+     hugs the text rather than stretching to whatever line-height happens
+     to surround them. Most noticeable for links embedded in prose
+     paragraphs (e.g. BlogPost's .prose), where inline-flex's box height
+     matched the paragraph's full line-height instead of the link's own
+     text. Kept in this layer (not alongside the unlayered tone/underline
+     classes below) so a consumer overriding display for its own reason
+     (e.g. BlogPost's `.relatedCard` wrapping full card content in
+     `display: block`) always wins deterministically, regardless of CSS
+     chunk/bundle order — the same reason `.link` itself lives here. */
+  .textOnly {
+    display: inline;
+  }
 }
 
 /* ── Tone ────────────────────────────────────────────────────── */
