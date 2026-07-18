@@ -25,9 +25,14 @@ const searchIcon = (
 const RecipeSearch: FC<RecipeSearchProps> = ({ value: controlledValue, onSearch }) => {
   const [value, setValue] = useState(controlledValue)
 
-  useEffect(() => {
+  // Adjusted here during render (React's "adjusting state when a prop
+  // changes" pattern) rather than in an effect, since resyncing to a new
+  // controlled value doesn't need to synchronize with anything external.
+  const [prevControlledValue, setPrevControlledValue] = useState(controlledValue)
+  if (controlledValue !== prevControlledValue) {
+    setPrevControlledValue(controlledValue)
     setValue(controlledValue)
-  }, [controlledValue])
+  }
 
   useEffect(() => {
     const timer = setTimeout(() => {

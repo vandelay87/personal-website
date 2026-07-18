@@ -83,6 +83,27 @@ export const handleSessionError = (
   return true
 }
 
+// Wraps a Suspense resource fetch so a session error redirects (via
+// handleSessionError) instead of surfacing to the nearest ErrorBoundary —
+// returns a promise that never resolves in that case, so Suspense just
+// keeps its loading state up until the redirect unmounts the tree.
+export const withSessionRecovery = async <T>(
+  fetchFn: (token: string) => Promise<T>,
+  getAccessToken: () => Promise<string>,
+  logout: () => void,
+  navigate: (path: string) => void
+): Promise<T> => {
+  try {
+    const token = await getAccessToken()
+    return await fetchFn(token)
+  } catch (err) {
+    if (handleSessionError(err, logout, navigate)) {
+      return new Promise<never>(() => {})
+    }
+    throw err
+  }
+}
+
 export const isNotFoundError = (err: unknown): boolean => {
   const message = err instanceof Error ? err.message : ''
   return /\b404\b/.test(message)

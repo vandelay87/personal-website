@@ -2,7 +2,14 @@ import { fetchUsers, inviteUser, removeUser, UserExistsError } from '@api/users'
 import { useAuth } from '@contexts/AuthContext'
 import { ToastProvider } from '@contexts/ToastContext'
 import type { AdminUser } from '@models/auth'
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  within,
+  type RenderResult,
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -46,14 +53,23 @@ const pendingUser: AdminUser = {
   status: 'pending',
 }
 
-const renderUserManagement = () =>
-  render(
-    <MemoryRouter initialEntries={['/admin/users']}>
-      <ToastProvider>
-        <UserManagement />
-      </ToastProvider>
-    </MemoryRouter>
-  )
+// UserManagement suspends on mount (Suspense + `use()`), so the initial
+// render must be awaited inside an async act() — otherwise React defers the
+// resolved commit indefinitely instead of applying it once the fetch
+// settles.
+const renderUserManagement = async (): Promise<RenderResult> => {
+  let result!: RenderResult
+  await act(async () => {
+    result = render(
+      <MemoryRouter initialEntries={['/admin/users']}>
+        <ToastProvider>
+          <UserManagement />
+        </ToastProvider>
+      </MemoryRouter>
+    )
+  })
+  return result
+}
 
 describe('Admin UserManagement page', () => {
   beforeEach(() => {
@@ -78,11 +94,9 @@ describe('Admin UserManagement page', () => {
 
   describe('user table (AC2)', () => {
     it('renders a row for each user with email, role badge, and status', async () => {
-      renderUserManagement()
+      await renderUserManagement()
 
-      await waitFor(() => {
-        expect(screen.getByText('admin@akli.dev')).toBeInTheDocument()
-      })
+      expect(screen.getByText('admin@akli.dev')).toBeInTheDocument()
       expect(screen.getByText('contrib@akli.dev')).toBeInTheDocument()
       expect(screen.getByText('pending@akli.dev')).toBeInTheDocument()
 
@@ -96,53 +110,50 @@ describe('Admin UserManagement page', () => {
     })
 
     it('calls fetchUsers with the current access token on mount', async () => {
-      renderUserManagement()
+      await renderUserManagement()
 
-      await waitFor(() => {
-        expect(fetchUsers).toHaveBeenCalledWith('token-123')
-      })
+      expect(fetchUsers).toHaveBeenCalledWith('token-123')
     })
   })
 
   describe('loading and error states (AC9)', () => {
-    it('shows a loading indicator while fetching users', () => {
+    it('shows a loading indicator while fetching users', async () => {
       vi.mocked(fetchUsers).mockReturnValue(new Promise(() => {}))
-      renderUserManagement()
+      await renderUserManagement()
 
       expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument()
     })
 
     it('shows an error state with a retry button when fetchUsers rejects', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
       vi.mocked(fetchUsers).mockRejectedValueOnce(new Error('500 Internal Server Error'))
-      renderUserManagement()
+      await renderUserManagement()
 
-      const retryButton = await screen.findByRole('button', { name: /retry/i })
-      expect(retryButton).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
     })
 
     it('re-fetches users when retry is clicked', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
       vi.mocked(fetchUsers).mockRejectedValueOnce(new Error('500 Internal Server Error'))
-      renderUserManagement()
+      await renderUserManagement()
 
-      const retryButton = await screen.findByRole('button', { name: /retry/i })
+      const retryButton = screen.getByRole('button', { name: /retry/i })
 
       vi.mocked(fetchUsers).mockResolvedValueOnce([adminUser])
-      fireEvent.click(retryButton)
-
-      await waitFor(() => {
-        expect(screen.getByText('admin@akli.dev')).toBeInTheDocument()
+      // Retrying remounts and refetches (suspends again), so this click
+      // must be awaited inside act().
+      await act(async () => {
+        fireEvent.click(retryButton)
       })
+
+      expect(screen.getByText('admin@akli.dev')).toBeInTheDocument()
     })
   })
 
   describe('invite flow (AC3, AC4, AC5, AC6)', () => {
     it('opens an invite form with email input and role toggle when the Invite button is clicked', async () => {
       const user = userEvent.setup()
-      renderUserManagement()
-
-      await waitFor(() => {
-        expect(screen.getByText('admin@akli.dev')).toBeInTheDocument()
-      })
+      await renderUserManagement()
 
       await user.click(screen.getByRole('button', { name: /invite user/i }))
 
@@ -155,11 +166,7 @@ describe('Admin UserManagement page', () => {
 
     it('disables the submit button while the email is invalid', async () => {
       const user = userEvent.setup()
-      renderUserManagement()
-
-      await waitFor(() => {
-        expect(screen.getByText('admin@akli.dev')).toBeInTheDocument()
-      })
+      await renderUserManagement()
 
       await user.click(screen.getByRole('button', { name: /invite user/i }))
 
@@ -177,11 +184,7 @@ describe('Admin UserManagement page', () => {
 
     it('submits the invite and shows a success toast with the invited email', async () => {
       const user = userEvent.setup()
-      renderUserManagement()
-
-      await waitFor(() => {
-        expect(screen.getByText('admin@akli.dev')).toBeInTheDocument()
-      })
+      await renderUserManagement()
 
       await user.click(screen.getByRole('button', { name: /invite user/i }))
 
@@ -195,11 +198,13 @@ describe('Admin UserManagement page', () => {
       expect(adminRoleButton).toHaveAttribute('aria-pressed', 'true')
       expect(contributorRoleButton).toHaveAttribute('aria-pressed', 'false')
 
-      await user.click(screen.getByRole('button', { name: /send invite/i }))
-
-      await waitFor(() => {
-        expect(inviteUser).toHaveBeenCalledWith('token-123', 'new@akli.dev', 'admin')
+      // Submitting a successful invite triggers a refresh, which remounts
+      // and refetches (suspends again).
+      await act(async () => {
+        await user.click(screen.getByRole('button', { name: /send invite/i }))
       })
+
+      expect(inviteUser).toHaveBeenCalledWith('token-123', 'new@akli.dev', 'admin')
 
       const toast = await screen.findByRole('button', { name: /invite sent to new@akli\.dev/i })
       expect(toast).toBeInTheDocument()
@@ -209,11 +214,7 @@ describe('Admin UserManagement page', () => {
       vi.mocked(inviteUser).mockRejectedValueOnce(new UserExistsError())
 
       const user = userEvent.setup()
-      renderUserManagement()
-
-      await waitFor(() => {
-        expect(screen.getByText('admin@akli.dev')).toBeInTheDocument()
-      })
+      await renderUserManagement()
 
       await user.click(screen.getByRole('button', { name: /invite user/i }))
       const emailInput = screen.getByLabelText(/email/i)
@@ -233,11 +234,7 @@ describe('Admin UserManagement page', () => {
 
   describe('remove flow (AC7, AC8)', () => {
     it('does not render a remove button for the current user', async () => {
-      renderUserManagement()
-
-      await waitFor(() => {
-        expect(screen.getByText('admin@akli.dev')).toBeInTheDocument()
-      })
+      await renderUserManagement()
 
       const adminRow = screen.getByText('admin@akli.dev').closest('li')
       expect(adminRow).not.toBeNull()
@@ -250,11 +247,7 @@ describe('Admin UserManagement page', () => {
 
     it('opens a confirmation dialog when remove is clicked for another user', async () => {
       const user = userEvent.setup()
-      renderUserManagement()
-
-      await waitFor(() => {
-        expect(screen.getByText('contrib@akli.dev')).toBeInTheDocument()
-      })
+      await renderUserManagement()
 
       const contribRow = screen.getByText('contrib@akli.dev').closest('li')
       const removeButton = within(contribRow as HTMLElement).getByRole('button', {
@@ -268,11 +261,7 @@ describe('Admin UserManagement page', () => {
 
     it('calls removeUser after confirming and shows a success toast', async () => {
       const user = userEvent.setup()
-      renderUserManagement()
-
-      await waitFor(() => {
-        expect(screen.getByText('contrib@akli.dev')).toBeInTheDocument()
-      })
+      await renderUserManagement()
 
       const contribRow = screen.getByText('contrib@akli.dev').closest('li')
       const removeButton = within(contribRow as HTMLElement).getByRole('button', {
@@ -285,16 +274,16 @@ describe('Admin UserManagement page', () => {
       // After removal, fetchUsers should return the reduced list
       vi.mocked(fetchUsers).mockResolvedValueOnce([adminUser, pendingUser])
 
-      await user.click(confirmButton)
-
-      await waitFor(() => {
-        expect(removeUser).toHaveBeenCalledWith('token-123', 'user-contrib')
+      // Confirming triggers a refresh, which remounts and refetches
+      // (suspends again).
+      await act(async () => {
+        await user.click(confirmButton)
       })
+
+      expect(removeUser).toHaveBeenCalledWith('token-123', 'user-contrib')
 
       // User disappears from the list
-      await waitFor(() => {
-        expect(screen.queryByText('contrib@akli.dev')).not.toBeInTheDocument()
-      })
+      expect(screen.queryByText('contrib@akli.dev')).not.toBeInTheDocument()
 
       // Success toast
       const toast = await screen.findByRole('button', { name: /removed/i })

@@ -10,7 +10,7 @@ import type { AnchorHTMLAttributes } from 'react'
 import { Suspense, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import styles from './BlogPost.module.css'
-import { formatDate, getLazyPost, getPost, posts } from './posts'
+import { formatDate, getPost, lazyPosts, posts } from './posts'
 import type { PostMeta } from './posts'
 
 const BlogLink = ({ href, children }: AnchorHTMLAttributes<HTMLAnchorElement>) => (
@@ -44,7 +44,7 @@ const getRelatedPosts = (current: PostMeta, allPosts: PostMeta[]): PostMeta[] =>
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>()
   const post = slug ? getPost(slug) : undefined
-  const PostContent = slug ? getLazyPost(slug) : undefined
+  const PostContent = slug ? lazyPosts[slug] : undefined
 
   const relatedPosts = useMemo(
     () => (post ? getRelatedPosts(post, posts) : []),

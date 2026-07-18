@@ -3,7 +3,7 @@ import { fetchRecipeByIdAdmin } from '@api/recipes'
 import { useAuth } from '@contexts/AuthContext'
 import type { ImageReadyUpdate, ImageType, Recipe, RecipeImage } from '@models/recipe'
 import { stepImageType } from '@models/recipe'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export type { ImageReadyUpdate } from '@models/recipe'
@@ -77,17 +77,36 @@ export const useImageProcessingPoll = (
   const emittedReadyRef = useRef<Set<string>>(new Set())
   const activeRecipeIdRef = useRef<string | null>(null)
 
-  onReadyRef.current = onReady
-  logoutRef.current = logout
-  navigateRef.current = navigate
-  getAccessTokenRef.current = getAccessToken
-  recipeRef.current = recipe
+  // useLayoutEffect (not useEffect) so these are current before any
+  // synchronous event handler or timer callback can observe them.
+  useLayoutEffect(() => {
+    onReadyRef.current = onReady
+    logoutRef.current = logout
+    navigateRef.current = navigate
+    getAccessTokenRef.current = getAccessToken
+    recipeRef.current = recipe
+  })
 
   const recipeId = recipe?.id ?? null
   const unreadyImageTypesSignature = useMemo(() => {
     if (!recipe) return ''
     return unreadyImageTypesOf(recipe).sort().join('|')
   }, [recipe])
+
+  // A new poll session starts whenever this key changes. `timedOut` is reset
+  // here — during render, following React's "adjusting state when a prop
+  // changes" pattern — rather than in the effect below, since the effect's
+  // own job is starting/stopping the poll (an external timer/network
+  // subscription), not deriving this piece of state.
+  const pollSessionKey =
+    recipeId !== null && unreadyImageTypesSignature.length > 0
+      ? `${recipeId}:${unreadyImageTypesSignature}`
+      : null
+  const [lastPollSessionKey, setLastPollSessionKey] = useState(pollSessionKey)
+  if (pollSessionKey !== lastPollSessionKey) {
+    setLastPollSessionKey(pollSessionKey)
+    if (timedOut) setTimedOut(false)
+  }
 
   useEffect(() => {
     isMountedRef.current = true
@@ -110,7 +129,6 @@ export const useImageProcessingPoll = (
             .filter(({ image }) => image.processedAt)
             .map(({ imageType }) => imageType)
     )
-    setTimedOut(false)
 
     const stopPolling = () => {
       if (nextTickTimerRef.current !== null) {

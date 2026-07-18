@@ -1,7 +1,13 @@
 // @vitest-environment node
-import type { Recipe } from '@models/recipe'
+import { fetchRecipes, fetchTags } from '@api/recipes'
+import type { Recipe, RecipeIndex } from '@models/recipe'
 import { describe, it, expect, vi } from 'vitest'
 import { render } from './entry-server'
+
+vi.mock('@api/recipes', () => ({
+  fetchRecipes: vi.fn(),
+  fetchTags: vi.fn(),
+}))
 
 describe('entry-server render', () => {
   describe('home page /', () => {
@@ -137,6 +143,60 @@ describe('entry-server render', () => {
       const html = await render('/blog/building-a-pokedex')
       expect(html).toContain('name="twitter:card" content="summary_large_image"')
       expect(html).toContain('name="twitter:image"')
+    })
+  })
+
+  describe('recipes list page /recipes', () => {
+    const mockRecipeIndex: RecipeIndex[] = [
+      {
+        id: 'r1',
+        title: 'Spaghetti Bolognese',
+        slug: 'spaghetti-bolognese',
+        coverImage: { alt: 'A bowl of spaghetti bolognese' },
+        tags: ['Italian', 'Pasta'],
+        prepTime: 15,
+        cookTime: 45,
+        servings: 4,
+        createdAt: '2026-03-01T12:00:00Z',
+      },
+    ]
+
+    // /recipes suspends on the server (Suspense + `use()`) rather than
+    // fetching in an effect (which never runs during SSR) — these confirm
+    // the streaming render (onAllReady) actually waits for it to resolve
+    // instead of shipping the loading fallback or hanging.
+    it('waits for the fetch and renders the loaded recipe title', async () => {
+      vi.mocked(fetchRecipes).mockResolvedValue(mockRecipeIndex)
+      vi.mocked(fetchTags).mockResolvedValue([{ tag: 'Italian', count: 1 }])
+
+      const html = await render('/recipes')
+
+      expect(html).toContain('Spaghetti Bolognese')
+    })
+
+    it('renders the coming-soon copy when there are no recipes yet', async () => {
+      vi.mocked(fetchRecipes).mockResolvedValue([])
+      vi.mocked(fetchTags).mockResolvedValue([])
+
+      const html = await render('/recipes')
+
+      expect(html).toContain('Recipes coming soon')
+    })
+
+    it('degrades gracefully to client-side retry instead of hanging or crashing the page when the fetch rejects', async () => {
+      // React defers a Suspense boundary that errors during server rendering
+      // to client-side hydration rather than emitting the ErrorBoundary's
+      // fallback in the static HTML — the page around it (header/footer)
+      // still renders, and the boundary ships its loading fallback plus a
+      // recovery marker for the client to retry and show the real error UI.
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      vi.mocked(fetchRecipes).mockRejectedValue(new Error('500 Internal Server Error'))
+      vi.mocked(fetchTags).mockRejectedValue(new Error('500 Internal Server Error'))
+
+      const html = await render('/recipes')
+
+      expect(html).toContain('<title>Recipes | Akli Aissat</title>')
+      expect(html).toContain('Switched to client rendering')
     })
   })
 

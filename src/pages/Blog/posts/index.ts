@@ -53,23 +53,15 @@ export const loadPostContent = (
   return contentModules[path]
 }
 
-const lazyCache = new Map<
+// The set of post slugs is fixed at build time (import.meta.glob above), so
+// every lazy component can be built once here rather than on first access —
+// getLazyPost becomes a plain lookup, never creating one at call time.
+export const lazyPosts: Record<
   string,
   LazyExoticComponent<ComponentType<{ components?: MDXComponents }>>
->()
-
-export const getLazyPost = (
-  slug: string
-):
-  | LazyExoticComponent<ComponentType<{ components?: MDXComponents }>>
-  | undefined => {
-  const loader = loadPostContent(slug)
-  if (!loader) return undefined
-
-  let cached = lazyCache.get(slug)
-  if (!cached) {
-    cached = lazy(() => loader())
-    lazyCache.set(slug, cached)
-  }
-  return cached
-}
+> = Object.fromEntries(
+  Object.keys(contentModules).map((path) => [
+    extractSlug(path),
+    lazy(() => contentModules[path]()),
+  ])
+)

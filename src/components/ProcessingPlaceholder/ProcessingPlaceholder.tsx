@@ -1,4 +1,4 @@
-import { useEffect, useState, type FC } from 'react'
+import { useSyncExternalStore, type FC } from 'react'
 import styles from './ProcessingPlaceholder.module.css'
 
 export interface ProcessingPlaceholderProps {
@@ -12,6 +12,20 @@ export interface ProcessingPlaceholderProps {
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
 
+const canUseMatchMedia = (): boolean => typeof window !== 'undefined' && !!window.matchMedia
+
+const subscribeToReducedMotion = (onStoreChange: () => void) => {
+  if (!canUseMatchMedia()) return () => {}
+  const mediaQueryList = window.matchMedia(REDUCED_MOTION_QUERY)
+  mediaQueryList.addEventListener('change', onStoreChange)
+  return () => mediaQueryList.removeEventListener('change', onStoreChange)
+}
+
+const getReducedMotionSnapshot = (): boolean =>
+  canUseMatchMedia() && window.matchMedia(REDUCED_MOTION_QUERY).matches
+
+const getReducedMotionServerSnapshot = () => false
+
 const ProcessingPlaceholder: FC<ProcessingPlaceholderProps> = ({
   aspectRatio,
   height,
@@ -19,23 +33,14 @@ const ProcessingPlaceholder: FC<ProcessingPlaceholderProps> = ({
   small = false,
   className = '',
 }) => {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return
-
-    const mediaQueryList = window.matchMedia(REDUCED_MOTION_QUERY)
-    setPrefersReducedMotion(mediaQueryList.matches)
-
-    const handleChange = (event: MediaQueryListEvent) => {
-      setPrefersReducedMotion(event.matches)
-    }
-
-    mediaQueryList.addEventListener('change', handleChange)
-    return () => {
-      mediaQueryList.removeEventListener('change', handleChange)
-    }
-  }, [])
+  // Subscribes directly to the OS-level reduced-motion preference via
+  // useSyncExternalStore rather than an effect + setState, since this is
+  // exactly the "syncing with an external system" case it exists for.
+  const prefersReducedMotion = useSyncExternalStore(
+    subscribeToReducedMotion,
+    getReducedMotionSnapshot,
+    getReducedMotionServerSnapshot
+  )
 
   const rootClassName = [
     styles.root,

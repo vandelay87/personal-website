@@ -2,7 +2,14 @@ import { deleteRecipe, fetchAllRecipes, publishRecipe, unpublishRecipe } from '@
 import { useAuth } from '@contexts/AuthContext'
 import { ToastProvider } from '@contexts/ToastContext'
 import type { Recipe } from '@models/recipe'
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  within,
+  type RenderResult,
+} from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { axe } from 'vitest-axe'
@@ -58,25 +65,40 @@ const mockPublishedRecipe: Recipe = {
   status: 'published',
 }
 
-const renderRecipeList = () =>
-  render(
-    <MemoryRouter initialEntries={['/admin/recipes']}>
-      <ToastProvider>
-        <RecipeList />
-      </ToastProvider>
-    </MemoryRouter>
-  )
+// RecipeList suspends on mount (Suspense + `use()`), so the initial render
+// must be awaited inside an async act() — otherwise React defers the
+// resolved commit indefinitely instead of applying it once the fetch
+// settles. The same applies to any interaction (e.g. publish/delete) that
+// triggers a refetch.
+const renderRecipeList = async (): Promise<RenderResult> => {
+  let result!: RenderResult
+  await act(async () => {
+    result = render(
+      <MemoryRouter initialEntries={['/admin/recipes']}>
+        <ToastProvider>
+          <RecipeList />
+        </ToastProvider>
+      </MemoryRouter>
+    )
+  })
+  return result
+}
 
-const renderRecipeListWithAccessDenied = () =>
-  render(
-    <MemoryRouter
-      initialEntries={[{ pathname: '/admin/recipes', state: { accessDenied: true } }]}
-    >
-      <ToastProvider>
-        <RecipeList />
-      </ToastProvider>
-    </MemoryRouter>
-  )
+const renderRecipeListWithAccessDenied = async (): Promise<RenderResult> => {
+  let result!: RenderResult
+  await act(async () => {
+    result = render(
+      <MemoryRouter
+        initialEntries={[{ pathname: '/admin/recipes', state: { accessDenied: true } }]}
+      >
+        <ToastProvider>
+          <RecipeList />
+        </ToastProvider>
+      </MemoryRouter>
+    )
+  })
+  return result
+}
 
 describe('Admin RecipeList page', () => {
   beforeEach(() => {
@@ -97,22 +119,16 @@ describe('Admin RecipeList page', () => {
   })
 
   it('renders recipe list with titles and status badges', async () => {
-    renderRecipeList()
+    await renderRecipeList()
 
-    await waitFor(() => {
-      expect(screen.getByText('Spaghetti Bolognese')).toBeInTheDocument()
-    })
+    expect(screen.getByText('Spaghetti Bolognese')).toBeInTheDocument()
     expect(screen.getByText('Thai Green Curry')).toBeInTheDocument()
     expect(screen.getByText(/draft/i)).toBeInTheDocument()
     expect(screen.getByText(/published/i)).toBeInTheDocument()
   })
 
   it('shows action buttons per row', async () => {
-    renderRecipeList()
-
-    await waitFor(() => {
-      expect(screen.getByText('Spaghetti Bolognese')).toBeInTheDocument()
-    })
+    await renderRecipeList()
 
     const editButtons = screen.getAllByRole('link', { name: /edit/i })
     const previewButtons = screen.getAllByRole('link', { name: /preview/i })
@@ -124,22 +140,14 @@ describe('Admin RecipeList page', () => {
   })
 
   it('has a new recipe button linking to /admin/recipes/new', async () => {
-    renderRecipeList()
-
-    await waitFor(() => {
-      expect(screen.getByText('Spaghetti Bolognese')).toBeInTheDocument()
-    })
+    await renderRecipeList()
 
     const newRecipeLink = screen.getByRole('link', { name: /new recipe/i })
     expect(newRecipeLink).toHaveAttribute('href', '/admin/recipes/new')
   })
 
   it('shows confirmation dialog when delete is clicked', async () => {
-    renderRecipeList()
-
-    await waitFor(() => {
-      expect(screen.getByText('Spaghetti Bolognese')).toBeInTheDocument()
-    })
+    await renderRecipeList()
 
     const deleteButtons = screen.getAllByRole('button', { name: /delete/i })
     fireEvent.click(deleteButtons[0])
@@ -148,29 +156,23 @@ describe('Admin RecipeList page', () => {
   })
 
   it('executes delete after confirmation', async () => {
-    renderRecipeList()
-
-    await waitFor(() => {
-      expect(screen.getByText('Spaghetti Bolognese')).toBeInTheDocument()
-    })
+    await renderRecipeList()
 
     const deleteButtons = screen.getAllByRole('button', { name: /delete/i })
     fireEvent.click(deleteButtons[0])
 
     const confirmButton = screen.getByRole('button', { name: /confirm/i })
-    fireEvent.click(confirmButton)
-
-    await waitFor(() => {
-      expect(deleteRecipe).toHaveBeenCalledWith('token-123', 'rec-001')
+    // Deleting triggers a refresh, which remounts and refetches (suspends
+    // again), so this click must be awaited inside act().
+    await act(async () => {
+      fireEvent.click(confirmButton)
     })
+
+    expect(deleteRecipe).toHaveBeenCalledWith('token-123', 'rec-001')
   })
 
   it('shows Publish button for draft and Unpublish for published recipe', async () => {
-    renderRecipeList()
-
-    await waitFor(() => {
-      expect(screen.getByText('Spaghetti Bolognese')).toBeInTheDocument()
-    })
+    await renderRecipeList()
 
     const publishButton = screen.getByRole('button', { name: /^publish$/i })
     const unpublishButton = screen.getByRole('button', { name: /unpublish/i })
@@ -178,58 +180,66 @@ describe('Admin RecipeList page', () => {
     expect(publishButton).toBeInTheDocument()
     expect(unpublishButton).toBeInTheDocument()
 
-    fireEvent.click(publishButton)
-
-    await waitFor(() => {
-      expect(publishRecipe).toHaveBeenCalledWith('token-123', 'rec-001')
+    // Publishing triggers a refresh, which remounts and refetches (suspends
+    // again), so this click must be awaited inside act().
+    await act(async () => {
+      fireEvent.click(publishButton)
     })
+
+    expect(publishRecipe).toHaveBeenCalledWith('token-123', 'rec-001')
   })
 
   it('clicking Unpublish on a published recipe calls unpublishRecipe', async () => {
-    renderRecipeList()
-
-    await waitFor(() => {
-      expect(screen.getByText('Thai Green Curry')).toBeInTheDocument()
-    })
+    await renderRecipeList()
 
     const unpublishButton = screen.getByRole('button', { name: /unpublish/i })
-    fireEvent.click(unpublishButton)
-
-    await waitFor(() => {
-      expect(unpublishRecipe).toHaveBeenCalledWith('token-123', 'rec-002')
+    await act(async () => {
+      fireEvent.click(unpublishButton)
     })
+
+    expect(unpublishRecipe).toHaveBeenCalledWith('token-123', 'rec-002')
     expect(publishRecipe).not.toHaveBeenCalled()
   })
 
   it('shows empty state when no recipes exist', async () => {
     vi.mocked(fetchAllRecipes).mockResolvedValue([])
-    renderRecipeList()
+    await renderRecipeList()
 
-    await waitFor(() => {
-      expect(screen.getByText(/no recipes yet/i)).toBeInTheDocument()
-    })
-
+    expect(screen.getByText(/no recipes yet/i)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /create/i })).toBeInTheDocument()
   })
 
-  it('shows loading indicator while fetching', () => {
+  it('shows loading indicator while fetching', async () => {
     vi.mocked(fetchAllRecipes).mockReturnValue(new Promise(() => {}))
-    renderRecipeList()
+    await renderRecipeList()
 
     expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument()
   })
 
   it('shows error state with retry button when fetch fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
     vi.mocked(fetchAllRecipes).mockRejectedValue(new Error('500 Internal Server Error'))
-    renderRecipeList()
+    await renderRecipeList()
 
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
+  })
+
+  it('retrying after an error re-fetches and shows the recipe list', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.mocked(fetchAllRecipes).mockRejectedValueOnce(new Error('500 Internal Server Error'))
+    await renderRecipeList()
+
+    expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /retry/i }))
     })
+
+    expect(screen.getByText('Spaghetti Bolognese')).toBeInTheDocument()
   })
 
   it('shows an "Access denied" toast when navigated here with accessDenied state', async () => {
-    renderRecipeListWithAccessDenied()
+    await renderRecipeListWithAccessDenied()
 
     // Toasts render as a dismissible button labelled with the message inside
     // the ToastProvider's aria-live region.
@@ -238,11 +248,9 @@ describe('Admin RecipeList page', () => {
   })
 
   it('calls fetchAllRecipes (not fetchMyRecipes) to load both draft and published recipes', async () => {
-    renderRecipeList()
+    await renderRecipeList()
 
-    await waitFor(() => {
-      expect(fetchAllRecipes).toHaveBeenCalledWith('token-123')
-    })
+    expect(fetchAllRecipes).toHaveBeenCalledWith('token-123')
   })
 
   it('renders rows sorted by updatedAt descending regardless of input order', async () => {
@@ -269,11 +277,7 @@ describe('Admin RecipeList page', () => {
     }
 
     vi.mocked(fetchAllRecipes).mockResolvedValue([oldest, newest, middle])
-    renderRecipeList()
-
-    await waitFor(() => {
-      expect(screen.getByText('Newest')).toBeInTheDocument()
-    })
+    await renderRecipeList()
 
     // Row titles are the only level-2 headings on the page, so their DOM
     // order reflects the row order rendered by the list.
@@ -285,11 +289,7 @@ describe('Admin RecipeList page', () => {
   })
 
   it('renders a status label matching each row in a mixed draft/published list', async () => {
-    renderRecipeList()
-
-    await waitFor(() => {
-      expect(screen.getByText('Spaghetti Bolognese')).toBeInTheDocument()
-    })
+    await renderRecipeList()
 
     const draftRow = screen.getByText('Spaghetti Bolognese').closest('li')
     const publishedRow = screen.getByText('Thai Green Curry').closest('li')
@@ -303,34 +303,26 @@ describe('Admin RecipeList page', () => {
 
   describe('accessibility', () => {
     it('renders the loaded recipe list with no detectable axe violations', async () => {
-      const { container } = renderRecipeList()
+      const { container } = await renderRecipeList()
 
-      await waitFor(() => {
-        expect(screen.getByText('Spaghetti Bolognese')).toBeInTheDocument()
-      })
-
+      expect(screen.getByText('Spaghetti Bolognese')).toBeInTheDocument()
       expect(await axe(container)).toHaveNoViolations()
     })
 
     it('renders the empty state with no detectable axe violations', async () => {
       vi.mocked(fetchAllRecipes).mockResolvedValue([])
-      const { container } = renderRecipeList()
+      const { container } = await renderRecipeList()
 
-      await waitFor(() => {
-        expect(screen.getByText(/no recipes yet/i)).toBeInTheDocument()
-      })
-
+      expect(screen.getByText(/no recipes yet/i)).toBeInTheDocument()
       expect(await axe(container)).toHaveNoViolations()
     })
 
     it('renders the error state with no detectable axe violations', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
       vi.mocked(fetchAllRecipes).mockRejectedValue(new Error('500 Internal Server Error'))
-      const { container } = renderRecipeList()
+      const { container } = await renderRecipeList()
 
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
-      })
-
+      expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
       expect(await axe(container)).toHaveNoViolations()
     })
   })

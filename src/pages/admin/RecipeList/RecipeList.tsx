@@ -1,4 +1,4 @@
-import { handleSessionError } from '@api/auth'
+import { handleSessionError, withSessionRecovery } from '@api/auth'
 import {
   deleteRecipe,
   fetchAllRecipes,
@@ -6,6 +6,7 @@ import {
   unpublishRecipe,
 } from '@api/recipes'
 import ConfirmDialog from '@components/ConfirmDialog'
+import ErrorBoundary from '@components/ErrorBoundary'
 import {
   IconPlus,
   IconPreview,
@@ -24,9 +25,10 @@ import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import { useToast } from '@contexts/ToastContext'
 import type { Recipe } from '@models/recipe'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Suspense, use, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
+import { useSuspenseResource } from '../../../hooks/useSuspenseResource'
 import interactions from '../../../styles/interactions.module.css'
 import stateBox from '../../../styles/stateBox.module.css'
 import text from '../../../styles/text.module.css'
@@ -38,15 +40,35 @@ import styles from './RecipeList.module.css'
 // reference instead of mounting a fresh IconPreview per row per render.
 const iconPreviewAction = <IconPreview size={14} />
 
-const RecipeList = () => {
+const RecipeListError = ({ onRetry }: { onRetry: () => void }) => (
+  <StateBox
+    variant="error"
+    icon={iconWarning}
+    heading="Couldn't load recipes"
+    body="Something went wrong reaching the server. Check your connection and try again."
+    action={{ label: 'Retry', onClick: onRetry, icon: iconRetry }}
+  />
+)
+
+const RecipeListContent = ({
+  resource,
+  onRefresh,
+}: {
+  resource: Promise<Recipe[]>
+  onRefresh: () => void
+}) => {
+  const recipes = use(resource)
   const { getAccessToken, logout } = useAuth()
   const { showToast } = useToast()
   const navigate = useNavigate()
   const location = useLocation()
-  const [recipes, setRecipes] = useState<Recipe[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Recipe | null>(null)
+  const [mutationError, setMutationError] = useState<Error | null>(null)
+
+  // Surfaces a mutation failure (publish/delete, run outside render) to the
+  // nearest ErrorBoundary — errors thrown from event handlers aren't caught
+  // automatically, so this re-throws during the next render instead.
+  if (mutationError) throw mutationError
 
   const sortedRecipes = useMemo(
     () =>
@@ -66,26 +88,6 @@ const RecipeList = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const loadRecipes = useCallback(async () => {
-    setLoading(true)
-    setError(false)
-    try {
-      const token = await getAccessToken()
-      const data = await fetchAllRecipes(token)
-      setRecipes(data)
-    } catch (err) {
-      if (!handleSessionError(err, logout, navigate)) {
-        setError(true)
-      }
-    } finally {
-      setLoading(false)
-    }
-  }, [getAccessToken, logout, navigate])
-
-  useEffect(() => {
-    loadRecipes()
-  }, [loadRecipes])
-
   const handlePublish = async (recipe: Recipe) => {
     try {
       const token = await getAccessToken()
@@ -94,9 +96,11 @@ const RecipeList = () => {
       } else {
         await publishRecipe(token, recipe.id)
       }
-      await loadRecipes()
-    } catch {
-      setError(true)
+      onRefresh()
+    } catch (err) {
+      if (!handleSessionError(err, logout, navigate)) {
+        setMutationError(err instanceof Error ? err : new Error('Failed to update recipe'))
+      }
     }
   }
 
@@ -106,29 +110,15 @@ const RecipeList = () => {
       const token = await getAccessToken()
       await deleteRecipe(token, deleteTarget.id)
       setDeleteTarget(null)
-      await loadRecipes()
-    } catch {
-      setError(true)
+      onRefresh()
+    } catch (err) {
+      if (!handleSessionError(err, logout, navigate)) {
+        setMutationError(err instanceof Error ? err : new Error('Failed to delete recipe'))
+      }
     }
   }
 
   const renderBody = () => {
-    if (loading) {
-      return <StateBox variant="loading" label="Loading recipes…" />
-    }
-
-    if (error) {
-      return (
-        <StateBox
-          variant="error"
-          icon={iconWarning}
-          heading="Couldn't load recipes"
-          body="Something went wrong reaching the server. Check your connection and try again."
-          action={{ label: 'Retry', onClick: loadRecipes, icon: iconRetry }}
-        />
-      )
-    }
-
     if (sortedRecipes.length === 0) {
       return (
         <div className={`${stateBox.box} ${styles.emptyBox}`}>
@@ -246,6 +236,28 @@ const RecipeList = () => {
         &quot;?
       </ConfirmDialog>
     </div>
+  )
+}
+
+const RecipeListLoading = () => (
+  <div className={styles.page}>
+    <StateBox variant="loading" label="Loading recipes…" />
+  </div>
+)
+
+const RecipeList = () => {
+  const { getAccessToken, logout } = useAuth()
+  const navigate = useNavigate()
+  const { resource, retryKey, refresh } = useSuspenseResource(() =>
+    withSessionRecovery((token) => fetchAllRecipes(token), getAccessToken, logout, navigate)
+  )
+
+  return (
+    <ErrorBoundary key={retryKey} fallback={() => <RecipeListError onRetry={refresh} />}>
+      <Suspense fallback={<RecipeListLoading />}>
+        <RecipeListContent resource={resource} onRefresh={refresh} />
+      </Suspense>
+    </ErrorBoundary>
   )
 }
 
