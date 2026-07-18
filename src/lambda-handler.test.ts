@@ -100,7 +100,6 @@ const invokeHandler = async (rawPath?: string) => {
   return { metadata: capturedMetadata, body: chunks.join('') }
 }
 
-// eslint-disable-next-line vitest/valid-describe-callback
 describe('lambda-handler (streaming)', { timeout: 30_000 }, () => {
   describe('streamifyResponse wrapping', () => {
     it('exports a handler created via awslambda.streamifyResponse', async () => {

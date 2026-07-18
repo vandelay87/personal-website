@@ -6,8 +6,14 @@ import Home from '@pages/Home'
 import NotFound from '@pages/NotFound'
 import RecipeDetail from '@pages/RecipeDetail'
 import Recipes from '@pages/Recipes'
-import { lazy } from 'react'
 import { type RouteObject } from 'react-router-dom'
+import {
+  Login,
+  RecipeEditor,
+  RecipeList,
+  RecipePreview,
+  UserManagement,
+} from './lazyRoutes'
 import {
   AdminRootLayout,
   AdminSuspense,
@@ -15,12 +21,6 @@ import {
   RecipePreviewLayout,
   RootLayout,
 } from './routeLayouts'
-
-const Login = lazy(() => import('@pages/admin/Login'))
-const RecipeList = lazy(() => import('@pages/admin/RecipeList'))
-const RecipeEditor = lazy(() => import('@pages/admin/RecipeEditor'))
-const RecipePreview = lazy(() => import('@pages/admin/RecipePreview'))
-const UserManagement = lazy(() => import('@pages/admin/UserManagement'))
 
 export const routes: RouteObject[] = [
   {

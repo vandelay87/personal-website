@@ -122,12 +122,8 @@ describe('CodeBlock', () => {
 
     render(<CodeBlock>{mockShikiChildren}</CodeBlock>)
 
-    // Either the copy button should not render, or clicking it should not throw
-    const copyButton = screen.queryByRole('button', { name: /copy/i })
-    if (copyButton) {
-      // If it renders, clicking should not throw
-      expect(() => fireEvent.click(copyButton)).not.toThrow()
-    }
+    const copyButton = screen.getByRole('button', { name: /copy/i })
+    expect(() => fireEvent.click(copyButton)).not.toThrow()
 
     // Restore
     Object.defineProperty(navigator, 'clipboard', {

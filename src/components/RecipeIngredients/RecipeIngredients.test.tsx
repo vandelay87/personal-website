@@ -146,11 +146,8 @@ describe('RecipeIngredients checkboxes', () => {
 
     render(<RecipeIngredients ingredients={mockIngredients} slug="spaghetti-bolognese" />)
 
-    if (expectStillChecked) {
-      expect(screen.getByRole('checkbox', { name: 'flour 200 g' })).toBeChecked()
-    } else {
-      expect(screen.getByRole('checkbox', { name: 'flour 200 g' })).not.toBeChecked()
-    }
+    const checkbox = screen.getByRole('checkbox', { name: 'flour 200 g' }) as HTMLInputElement
+    expect(checkbox.checked).toBe(expectStillChecked)
 
     vi.useRealTimers()
   })
