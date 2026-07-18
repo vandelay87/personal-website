@@ -28,7 +28,7 @@
     "react-router-dom": "^7.18.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.19.0",
+    "@eslint/js": "^10.0.1",
     "@mdx-js/react": "^3.1.0",
     "@shikijs/rehype": "^4.3.1",
     "@shikijs/types": "4.3.1",

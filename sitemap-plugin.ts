@@ -126,12 +126,9 @@ const fileToRoute = (
   const segments = route.split('/').filter(Boolean)
 
   // Handle different file naming conventions
-  let processedSegments: string[] = []
+  let processedSegments: string[]
 
-  if (segments.length === 0) {
-    // Root index file
-    route = '/'
-  } else if (segments.length === 1) {
+  if (segments.length === 1) {
     // Single segment: Home.tsx -> /home
     processedSegments = [segments[0]]
   } else if (segments.length === 2 && segments[0].toLowerCase() === segments[1].toLowerCase()) {
