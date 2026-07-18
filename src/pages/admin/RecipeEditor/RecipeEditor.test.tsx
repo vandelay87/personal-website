@@ -1224,10 +1224,8 @@ describe('RecipeEditor page', () => {
       const describedBy = screen
         .getByRole('button', { name: /^publish$/i })
         .getAttribute('aria-describedby')
-      if (describedBy) {
-        const missingList = document.getElementById(describedBy)
-        expect(missingList?.textContent ?? '').not.toMatch(/cover image still processing/i)
-      }
+      const missingList = describedBy ? document.getElementById(describedBy) : null
+      expect(missingList?.textContent ?? '').not.toMatch(/cover image still processing/i)
 
       // The editor should have announced "Image ready" via the page-level
       // aria-live="polite" region.
