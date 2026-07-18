@@ -1,6 +1,6 @@
 import { handleSessionError } from '@api/auth'
 import { useAuth } from '@contexts/AuthContext'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error'
@@ -56,10 +56,14 @@ export const useAutosave = <T extends { dirty: boolean }>(
   const pendingRef = useRef(false)
   const isMountedRef = useRef(true)
 
-  stateRef.current = state
-  saveFnRef.current = saveFn
-  logoutRef.current = logout
-  navigateRef.current = navigate
+  // useLayoutEffect (not useEffect) so these are current before any
+  // synchronous event handler or timer callback can observe them.
+  useLayoutEffect(() => {
+    stateRef.current = state
+    saveFnRef.current = saveFn
+    logoutRef.current = logout
+    navigateRef.current = navigate
+  })
 
   const clearTimer = useCallback(() => {
     if (timerRef.current !== null) {

@@ -45,6 +45,11 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     if (session) {
       const decoded = decodeIdToken(session.idToken)
       if (decoded) {
+        // A lazy useState initializer can't replace this: it would read
+        // localStorage during the client's hydration render itself and
+        // mismatch the server-rendered (always logged-out) markup — this
+        // has to resolve after hydration completes, not during it.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUser(decoded)
         setIsAuthenticated(true)
       } else {

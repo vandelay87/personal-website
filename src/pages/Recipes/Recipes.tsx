@@ -1,5 +1,6 @@
 import { fetchRecipes, fetchTags } from '@api/recipes'
 import Button from '@components/Button'
+import ErrorBoundary from '@components/ErrorBoundary'
 import Grid from '@components/Grid'
 import Loading from '@components/Loading'
 import RecipeCard from '@components/RecipeCard'
@@ -8,10 +9,19 @@ import RecipeTagFilter from '@components/RecipeTagFilter'
 import Tag from '@components/Tag'
 import Typography from '@components/Typography'
 import type { RecipeIndex, Tag as TagModel } from '@models/recipe'
-import { useState, useEffect, useCallback, useMemo, type FC, type ReactNode } from 'react'
+import { Suspense, use, useState, useMemo, type FC, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { useSuspenseResource } from '../../hooks/useSuspenseResource'
 import { pluralize } from '../../utils/pluralize'
 import styles from './Recipes.module.css'
+
+interface RecipesData {
+  recipes: RecipeIndex[]
+  tags: TagModel[]
+}
+
+const fetchRecipesData = (): Promise<RecipesData> =>
+  Promise.all([fetchRecipes(), fetchTags()]).then(([recipes, tags]) => ({ recipes, tags }))
 
 const RecipesHero: FC<{ intro?: ReactNode }> = ({ intro }) => (
   <section className={styles.hero}>
@@ -29,32 +39,32 @@ const RecipesHero: FC<{ intro?: ReactNode }> = ({ intro }) => (
   </section>
 )
 
-const Recipes: FC = () => {
+const RecipesLoading: FC = () => (
+  <>
+    <RecipesHero />
+    <div className={styles.loadingWrapper}>
+      <Loading />
+    </div>
+  </>
+)
+
+const RecipesError: FC<{ onRetry: () => void }> = ({ onRetry }) => (
+  <>
+    <RecipesHero />
+    <div className={styles.empty}>
+      <Typography variant="bodyLarge">Something went wrong loading recipes.</Typography>
+      <Button variant="outline" onClick={onRetry}>
+        Retry
+      </Button>
+    </div>
+  </>
+)
+
+const RecipesContent: FC<{ resource: Promise<RecipesData> }> = ({ resource }) => {
+  const { recipes, tags } = use(resource)
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTag = searchParams.get('tag')
-
-  const [recipes, setRecipes] = useState<RecipeIndex[] | null>(null)
-  const [tags, setTags] = useState<TagModel[]>([])
-  const [error, setError] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-
-  const loadData = useCallback(async () => {
-    setError(false)
-    try {
-      const [recipesData, tagsData] = await Promise.all([
-        fetchRecipes(),
-        fetchTags(),
-      ])
-      setRecipes(recipesData)
-      setTags(tagsData)
-    } catch {
-      setError(true)
-    }
-  }, [])
-
-  useEffect(() => {
-    loadData()
-  }, [loadData])
 
   const handleTagClick = (tag: string) => {
     if (activeTag === tag) {
@@ -66,9 +76,9 @@ const Recipes: FC = () => {
 
   const handleClearTag = () => setSearchParams({})
 
-  const handleSearch = useCallback((query: string) => {
+  const handleSearch = (query: string) => {
     setSearchQuery(query)
-  }, [])
+  }
 
   const handleClearFilters = () => {
     setSearchParams({})
@@ -77,7 +87,7 @@ const Recipes: FC = () => {
 
   const filteredRecipes = useMemo(() => {
     const query = searchQuery.toLowerCase()
-    return (recipes ?? []).filter((recipe) => {
+    return recipes.filter((recipe) => {
       const matchesTag = !activeTag || recipe.tags.includes(activeTag)
       const matchesSearch =
         !searchQuery ||
@@ -87,34 +97,7 @@ const Recipes: FC = () => {
     })
   }, [recipes, activeTag, searchQuery])
 
-  if (recipes === null && !error) {
-    return (
-      <>
-        <RecipesHero />
-        <div className={styles.loadingWrapper}>
-          <Loading />
-        </div>
-      </>
-    )
-  }
-
-  if (error) {
-    return (
-      <>
-        <RecipesHero />
-        <div className={styles.empty}>
-          <Typography variant="bodyLarge">
-            Something went wrong loading recipes.
-          </Typography>
-          <Button variant="outline" onClick={loadData}>
-            Retry
-          </Button>
-        </div>
-      </>
-    )
-  }
-
-  if (recipes !== null && recipes.length === 0) {
+  if (recipes.length === 0) {
     return <RecipesHero intro="Recipes coming soon." />
   }
 
@@ -159,6 +142,18 @@ const Recipes: FC = () => {
         </Grid>
       )}
     </div>
+  )
+}
+
+const Recipes: FC = () => {
+  const { resource, retryKey, refresh } = useSuspenseResource(fetchRecipesData)
+
+  return (
+    <ErrorBoundary key={retryKey} fallback={() => <RecipesError onRetry={refresh} />}>
+      <Suspense fallback={<RecipesLoading />}>
+        <RecipesContent resource={resource} />
+      </Suspense>
+    </ErrorBoundary>
   )
 }
 

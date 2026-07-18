@@ -64,6 +64,8 @@ const createLazyPost = (content: string, hasExternalLink = false) =>
     })
   )
 
+const mockLazyPosts = vi.hoisted(() => ({}) as Record<string, unknown>)
+
 vi.mock('./posts', () => ({
   posts: mockPosts,
   getPost: (slug: string) => mockPosts.find((p: PostMeta) => p.slug === slug),
@@ -75,13 +77,15 @@ vi.mock('./posts', () => ({
       day: 'numeric',
     })
   },
-  getLazyPost: (slug: string) => {
-    const post = mockPosts.find((p: PostMeta) => p.slug === slug)
-    if (!post) return undefined
-    if (slug === 'test-post') return createLazyPost('MDX content here', true)
-    return createLazyPost(`Content for ${post.title}`)
-  },
+  lazyPosts: mockLazyPosts,
 }))
+
+for (const post of mockPosts) {
+  mockLazyPosts[post.slug] =
+    post.slug === 'test-post'
+      ? createLazyPost('MDX content here', true)
+      : createLazyPost(`Content for ${post.title}`)
+}
 
 vi.mock('@pages/NotFound', () => ({
   default: () => <div data-testid="not-found">404</div>,

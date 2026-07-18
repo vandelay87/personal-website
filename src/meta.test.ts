@@ -26,7 +26,7 @@ vi.mock('./pages/Blog/posts/index', () => ({
   posts: [mockPostData.testPost, mockPostData.testPostNoImage],
   getPost: (slug: string) =>
     [mockPostData.testPost, mockPostData.testPostNoImage].find((p) => p.slug === slug),
-  getLazyPost: () => undefined,
+  lazyPosts: {},
   loadPostContent: () => undefined,
   formatDate: (d: string) => d,
 }))

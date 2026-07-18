@@ -276,6 +276,7 @@ const RecipeEditor: FC = () => {
   // processing, so only the in-session upload signal tells us a cover exists
   // and should be polled. Reset whenever a different recipe loads.
   const [coverUploadedThisSession, setCoverUploadedThisSession] = useState(false)
+  const [lastFormIdForCoverReset, setLastFormIdForCoverReset] = useState(form.id)
 
   const recentlyCreatedIdRef = useRef<string | null>(null)
   const creatingDraftRef = useRef(false)
@@ -392,9 +393,13 @@ const RecipeEditor: FC = () => {
 
   // A freshly-loaded recipe brings its own cover-presence truth (processedAt),
   // so drop any in-session upload signal carried over from a previous recipe.
-  useEffect(() => {
-    setCoverUploadedThisSession(false)
-  }, [form.id])
+  // Adjusted here during render (React's "adjusting state when a prop
+  // changes" pattern) rather than in an effect, since it's purely derived
+  // from form.id and doesn't need to synchronize with anything external.
+  if (form.id !== lastFormIdForCoverReset) {
+    setLastFormIdForCoverReset(form.id)
+    if (coverUploadedThisSession) setCoverUploadedThisSession(false)
+  }
 
   const announce = useCallback((message: string) => {
     setAnnouncement((prev) => ({ message, toggle: !prev.toggle }))

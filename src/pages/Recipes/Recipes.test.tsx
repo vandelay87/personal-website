@@ -1,6 +1,13 @@
 import { fetchRecipes, fetchTags } from '@api/recipes'
 import type { RecipeIndex, Tag } from '@models/recipe'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import {
+  act,
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  type RenderResult,
+} from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { axe } from 'vitest-axe'
@@ -59,13 +66,24 @@ const mockTags: Tag[] = [
   { tag: 'Spicy', count: 1 },
 ]
 
-const renderRecipes = (initialRoute = '/recipes', { withLocation = false } = {}) =>
-  render(
-    <MemoryRouter initialEntries={[initialRoute]}>
-      <Recipes />
-      {withLocation && <LocationDisplay />}
-    </MemoryRouter>
-  )
+// Recipes suspends on mount (Suspense + `use()`), so the initial render must
+// be awaited inside an async act() — otherwise React defers the resolved
+// commit indefinitely instead of applying it once the fetch settles.
+const renderRecipes = async (
+  initialRoute = '/recipes',
+  { withLocation = false } = {}
+): Promise<RenderResult> => {
+  let result!: RenderResult
+  await act(async () => {
+    result = render(
+      <MemoryRouter initialEntries={[initialRoute]}>
+        <Recipes />
+        {withLocation && <LocationDisplay />}
+      </MemoryRouter>
+    )
+  })
+  return result
+}
 
 describe('Recipes page', () => {
   beforeEach(() => {
@@ -75,40 +93,34 @@ describe('Recipes page', () => {
   })
 
   it('renders recipe grid after loading', async () => {
-    renderRecipes()
+    await renderRecipes()
 
-    await waitFor(() => {
-      expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
-    })
+    expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
     expect(screen.getByText('Thai Green Curry')).toBeInTheDocument()
     expect(screen.getByText('Italian Pasta Carbonara')).toBeInTheDocument()
   })
 
-  it('shows loading indicator while fetching', () => {
+  it('shows loading indicator while fetching', async () => {
     vi.mocked(fetchRecipes).mockReturnValue(new Promise(() => {}))
     vi.mocked(fetchTags).mockReturnValue(new Promise(() => {}))
 
-    renderRecipes()
+    await renderRecipes()
 
     expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument()
   })
 
   it('filters by tag via URL search param (?tag=Italian)', async () => {
-    renderRecipes('/recipes?tag=Italian')
+    await renderRecipes('/recipes?tag=Italian')
 
-    await waitFor(() => {
-      expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
-    })
+    expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
     expect(screen.getByText('Italian Pasta Carbonara')).toBeInTheDocument()
     expect(screen.queryByText('Thai Green Curry')).not.toBeInTheDocument()
   })
 
   it('clicking a tag chip writes ?tag=<tag> to the URL', async () => {
-    renderRecipes('/recipes', { withLocation: true })
+    await renderRecipes('/recipes', { withLocation: true })
 
-    await waitFor(() => {
-      expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
-    })
+    expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /italian/i }))
 
@@ -120,11 +132,9 @@ describe('Recipes page', () => {
   })
 
   it('clicking the active tag chip again clears ?tag from the URL', async () => {
-    renderRecipes('/recipes?tag=Italian', { withLocation: true })
+    await renderRecipes('/recipes?tag=Italian', { withLocation: true })
 
-    await waitFor(() => {
-      expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
-    })
+    expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /italian/i }))
 
@@ -133,15 +143,14 @@ describe('Recipes page', () => {
   })
 
   it('searches by keyword (title match)', async () => {
-    renderRecipes()
+    await renderRecipes()
 
-    await waitFor(() => {
-      expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
-    })
+    expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
 
     const searchInput = screen.getByRole('searchbox', { name: /search recipes/i })
     fireEvent.change(searchInput, { target: { value: 'curry' } })
 
+    // RecipeSearch debounces onSearch by 300ms.
     await waitFor(() => {
       expect(screen.getByText('Thai Green Curry')).toBeInTheDocument()
       expect(screen.queryByText('Classic Margherita Pizza')).not.toBeInTheDocument()
@@ -149,16 +158,15 @@ describe('Recipes page', () => {
   })
 
   it('searches by keyword (tag match)', async () => {
-    renderRecipes()
+    await renderRecipes()
 
-    await waitFor(() => {
-      expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
-    })
+    expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
 
     // "Spicy" only appears as a tag (on Thai Green Curry), not in any title.
     const searchInput = screen.getByRole('searchbox', { name: /search recipes/i })
     fireEvent.change(searchInput, { target: { value: 'spicy' } })
 
+    // RecipeSearch debounces onSearch by 300ms.
     await waitFor(() => {
       expect(screen.getByText('Thai Green Curry')).toBeInTheDocument()
       expect(screen.queryByText('Classic Margherita Pizza')).not.toBeInTheDocument()
@@ -167,15 +175,14 @@ describe('Recipes page', () => {
   })
 
   it('applies combined tag + search filtering', async () => {
-    renderRecipes('/recipes?tag=Italian')
+    await renderRecipes('/recipes?tag=Italian')
 
-    await waitFor(() => {
-      expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
-    })
+    expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
 
     const searchInput = screen.getByRole('searchbox', { name: /search recipes/i })
     fireEvent.change(searchInput, { target: { value: 'carbonara' } })
 
+    // RecipeSearch debounces onSearch by 300ms.
     await waitFor(() => {
       expect(screen.getByText('Italian Pasta Carbonara')).toBeInTheDocument()
       expect(screen.queryByText('Classic Margherita Pizza')).not.toBeInTheDocument()
@@ -183,19 +190,17 @@ describe('Recipes page', () => {
   })
 
   it('shows the no-results message with clear button when filter has no matches', async () => {
-    renderRecipes()
+    await renderRecipes()
 
-    await waitFor(() => {
-      expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
-    })
+    expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
 
     const searchInput = screen.getByRole('searchbox', { name: /search recipes/i })
     fireEvent.change(searchInput, { target: { value: 'nonexistent dish xyz' } })
 
+    // RecipeSearch debounces onSearch by 300ms.
     await waitFor(() => {
       expect(screen.getByText(/nothing in the kitchen matches that/i)).toBeInTheDocument()
     })
-
     expect(screen.getByRole('button', { name: /clear filter/i })).toBeInTheDocument()
   })
 
@@ -203,30 +208,41 @@ describe('Recipes page', () => {
     vi.mocked(fetchRecipes).mockResolvedValue([])
     vi.mocked(fetchTags).mockResolvedValue([])
 
-    renderRecipes()
+    await renderRecipes()
 
-    await waitFor(() => {
-      expect(screen.getByText(/recipes coming soon/i)).toBeInTheDocument()
-    })
+    expect(screen.getByText(/recipes coming soon/i)).toBeInTheDocument()
   })
 
   it('shows error state with retry button when API fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
     vi.mocked(fetchRecipes).mockRejectedValue(new Error('500 Internal Server Error'))
     vi.mocked(fetchTags).mockRejectedValue(new Error('500 Internal Server Error'))
 
-    renderRecipes()
+    await renderRecipes()
 
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
+  })
+
+  it('retrying after an error re-fetches and shows the recipe grid', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.mocked(fetchRecipes).mockRejectedValueOnce(new Error('500 Internal Server Error'))
+    vi.mocked(fetchTags).mockRejectedValueOnce(new Error('500 Internal Server Error'))
+
+    await renderRecipes()
+
+    expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /retry/i }))
     })
+
+    expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
   })
 
   it('has aria-live region for recipe count', async () => {
-    renderRecipes()
+    await renderRecipes()
 
-    await waitFor(() => {
-      expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
-    })
+    expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
 
     const liveRegion = screen.getByRole('status')
     expect(liveRegion).toHaveAttribute('aria-live', 'polite')
@@ -234,29 +250,24 @@ describe('Recipes page', () => {
 
   describe('accessibility', () => {
     it('renders the default loaded recipe grid with no detectable axe violations', async () => {
-      const { container } = renderRecipes()
+      const { container } = await renderRecipes()
 
-      await waitFor(() => {
-        expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
-      })
-
+      expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
       expect(await axe(container)).toHaveNoViolations()
     })
 
     it('renders the no-results empty state with no detectable axe violations', async () => {
-      const { container } = renderRecipes()
+      const { container } = await renderRecipes()
 
-      await waitFor(() => {
-        expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
-      })
+      expect(screen.getByText('Classic Margherita Pizza')).toBeInTheDocument()
 
       const searchInput = screen.getByRole('searchbox', { name: /search recipes/i })
       fireEvent.change(searchInput, { target: { value: 'nonexistent dish xyz' } })
 
+      // RecipeSearch debounces onSearch by 300ms.
       await waitFor(() => {
         expect(screen.getByText(/nothing in the kitchen matches that/i)).toBeInTheDocument()
       })
-
       expect(await axe(container)).toHaveNoViolations()
     })
   })
