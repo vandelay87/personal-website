@@ -1220,7 +1220,8 @@ describe('RecipeEditor page', () => {
         expect(screen.getByRole('button', { name: /^publish$/i })).not.toBeDisabled()
       })
 
-      // The missing-fields list should no longer mention the cover image.
+      // The missing-fields list should no longer mention the cover image
+      // (it may be absent entirely if no fields are missing anymore).
       const describedBy = screen
         .getByRole('button', { name: /^publish$/i })
         .getAttribute('aria-describedby')
