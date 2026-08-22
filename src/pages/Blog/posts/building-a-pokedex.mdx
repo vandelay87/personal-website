@@ -10,7 +10,7 @@ image: /images/blog/pokedex-desktop.webp
 
 I built a full-stack Pokedex as a portfolio project. It runs on AWS, costs almost nothing to host, and looks like a Game Boy Color screen. The frontend is React 19 with TypeScript. The backend is API Gateway, Lambda, and DynamoDB, all defined in CDK.
 
-You can try it at [akli.dev/apps/pokedex](https://akli.dev/apps/pokedex).
+You can try it at [pokedex.akli.dev](https://pokedex.akli.dev).
 
 ## The CDK stacks
 
@@ -222,4 +222,4 @@ The result: HP fills first, then Attack, then Defense, cascading down the list. 
 
 **End-to-end CDK tests.** I unit-tested the Lambda handlers and the stack synthesis, but I didn't test the Custom Resource seeder against a real DynamoDB table. A CDK integration test using `integ-runner` would catch issues that unit tests miss.
 
-You can try the Pokedex at [akli.dev/apps/pokedex](https://akli.dev/apps/pokedex).
+You can try the Pokedex at [pokedex.akli.dev](https://pokedex.akli.dev).
