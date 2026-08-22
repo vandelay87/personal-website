@@ -4,6 +4,7 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { axe } from 'vitest-axe'
+import { APP_LINKS } from '../../constants/appLinks'
 import Home from './Home'
 
 vi.mock('@api/recipes', () => ({
@@ -69,12 +70,17 @@ describe('Home', () => {
     expect(link).toHaveAttribute('download')
   })
 
-  it('renders the Apps & experiments link section as a list of rows', () => {
+  it('renders the Apps & experiments link section as a list of rows linking to the new subdomain URLs', () => {
     renderHome()
     const heading = screen.getByRole('heading', { level: 2, name: /apps & experiments/i })
     expect(heading).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 3, name: 'Pokedex' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 3, name: 'Sand box' })).toBeInTheDocument()
+
+    const [pokedexLink, sandboxLink] = APP_LINKS
+    const pokedexHeading = screen.getByRole('heading', { level: 3, name: 'Pokedex' })
+    expect(pokedexHeading.closest('a')).toHaveAttribute('href', pokedexLink.href)
+
+    const sandboxHeading = screen.getByRole('heading', { level: 3, name: 'Sand box' })
+    expect(sandboxHeading.closest('a')).toHaveAttribute('href', sandboxLink.href)
 
     const section = heading.closest('section')!
     expect(within(section).getByRole('link', { name: 'All' })).toHaveAttribute('href', '/apps')

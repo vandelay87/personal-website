@@ -1,5 +1,6 @@
-import { utimesSync, writeFileSync } from 'fs'
-import { join } from 'path'
+import { readFileSync, utimesSync, writeFileSync } from 'fs'
+import { dirname, join } from 'path'
+import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { generateSitemap } from './sitemap-plugin'
 import { createTempTestDir } from './tests/tempTestDir'
@@ -140,5 +141,23 @@ describe('generateSitemap', () => {
     expect(sitemap).toContain('<loc>https://akli.dev/</loc>')
     expect(sitemap).toContain('<loc>https://akli.dev/apps</loc>')
     expect(sitemap).toContain('<?xml version="1.0" encoding="UTF-8"?>')
+  })
+})
+
+// This is a source-level "greppable gate" check (same style as
+// scripts/check-descendant-selectors.ts, per CLAUDE.md) rather than an
+// exercise of generateSitemap() itself: vite.config.ts builds its real
+// additionalRoutes array inline inside defineConfig(), so it isn't exported
+// as a standalone testable value. Asserting against the config's own source
+// text is the smallest way to guard that the real sitemap config (not the
+// generic fixture data used by the `generateSitemap` tests above, several of
+// which reuse '/apps/pokedex' as arbitrary sample input and are unrelated to
+// this) never reintroduces the removed /apps/pokedex route.
+describe('vite.config.ts sitemap routes', () => {
+  it('no longer references the removed /apps/pokedex route', () => {
+    const viteConfigPath = join(dirname(fileURLToPath(import.meta.url)), 'vite.config.ts')
+    const viteConfigSource = readFileSync(viteConfigPath, 'utf-8')
+
+    expect(viteConfigSource).not.toContain('/apps/pokedex')
   })
 })
