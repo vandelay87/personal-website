@@ -241,7 +241,6 @@ export default defineConfig(({ command, isSsrBuild, mode }) => {
             defaultPriority: 0.5,
             defaultChangefreq: 'monthly',
             additionalRoutes: [
-              { route: '/apps/pokedex', priority: 0.7, changefreq: 'monthly' },
               ...getBlogRoutes(),
             ],
           }),
