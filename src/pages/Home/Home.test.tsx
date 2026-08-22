@@ -80,6 +80,15 @@ describe('Home', () => {
     expect(within(section).getByRole('link', { name: 'All' })).toHaveAttribute('href', '/apps')
   })
 
+  it('renders the Apps & experiments rows linking to the new subdomain URLs', () => {
+    renderHome()
+    const pokedexHeading = screen.getByRole('heading', { level: 3, name: 'Pokedex' })
+    expect(pokedexHeading.closest('a')).toHaveAttribute('href', 'https://pokedex.akli.dev')
+
+    const sandboxHeading = screen.getByRole('heading', { level: 3, name: 'Sand box' })
+    expect(sandboxHeading.closest('a')).toHaveAttribute('href', 'https://sandbox.akli.dev')
+  })
+
   it('renders the blog link section with post rows', () => {
     renderHome()
     expect(screen.getByRole('heading', { level: 2, name: /the blog/i })).toBeInTheDocument()
