@@ -8,8 +8,11 @@ import pokedexImgSrc from '../../assets/pokedex.webp'
 import pokedexImgSrcSet from '../../assets/pokedex.webp?w=320;640;768;1024;1280;1536;1920&format=webp&as=srcset'
 import imgSrc from '../../assets/sand-box.webp'
 import imgSrcSet from '../../assets/sand-box.webp?w=320;640;768;1024;1280;1536;1920&format=webp&as=srcset'
+import { APP_LINKS } from '../../constants/appLinks'
 import { pluralize } from '../../utils/pluralize'
 import styles from './Apps.module.css'
+
+const [pokedexLink, sandboxLink] = APP_LINKS
 
 const APPS: AppCardProps[] = [
   {
@@ -21,7 +24,7 @@ const APPS: AppCardProps[] = [
       srcSet: pokedexImgSrcSet,
       alt: 'A searchable encyclopedia of Gen 1 Pokemon, styled after the classic Game Boy Color Pokedex',
     },
-    href: 'https://pokedex.akli.dev',
+    href: pokedexLink.href,
     tag: 'React · AWS',
   },
   {
@@ -33,7 +36,7 @@ const APPS: AppCardProps[] = [
       srcSet: imgSrcSet,
       alt: 'Real-time particle physics simulation of falling sand grains on a black canvas',
     },
-    href: 'https://sandbox.akli.dev',
+    href: sandboxLink.href,
     tag: 'Canvas · Physics',
   },
 ]
