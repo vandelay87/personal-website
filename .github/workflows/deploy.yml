@@ -42,7 +42,7 @@ jobs:
           aws-region: eu-west-2
 
       - name: Deploy client bundle to S3
-        run: aws s3 sync ./dist/client s3://${{ vars.AWS_S3_BUCKET_NAME }} --delete --exclude "apps/sand-box/*" --exclude "apps/pokedex/*"
+        run: aws s3 sync ./dist/client s3://${{ vars.AWS_S3_BUCKET_NAME }} --delete
 
       - name: Zip server bundle
         run: cd dist/server && zip -r ../server.zip .
