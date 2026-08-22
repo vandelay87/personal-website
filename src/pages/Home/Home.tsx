@@ -9,6 +9,7 @@ import { useEffect, useState, type FC, type ReactNode } from 'react'
 import cvFileUrl from '../../assets/Akli-Aissat-CV.pdf'
 import profileImgSrc from '../../assets/profile.webp'
 import profileImgSrcSet from '../../assets/profile.webp?w=150;200;300;400&format=webp&as=srcset'
+import { APP_LINKS } from '../../constants/appLinks'
 import { formatDate, posts } from '../Blog/posts'
 import styles from './Home.module.css'
 
@@ -20,18 +21,20 @@ interface LinkRow {
   href: string
 }
 
+const [pokedexLink, sandboxLink] = APP_LINKS
+
 const APPS_ROWS: LinkRow[] = [
   {
     title: 'Pokedex',
     description:
       'A searchable encyclopedia of Gen 1 Pokemon, styled after the classic Game Boy Color Pokedex.',
-    href: 'https://akli.dev/apps/pokedex',
+    href: pokedexLink.href,
   },
   {
     title: 'Sand box',
     description:
       'A real-time particle physics simulation of falling sand grains on a black canvas.',
-    href: 'https://akli.dev/apps/sand-box',
+    href: sandboxLink.href,
   },
 ]
 
