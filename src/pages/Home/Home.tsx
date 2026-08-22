@@ -25,13 +25,13 @@ const APPS_ROWS: LinkRow[] = [
     title: 'Pokedex',
     description:
       'A searchable encyclopedia of Gen 1 Pokemon, styled after the classic Game Boy Color Pokedex.',
-    href: 'https://akli.dev/apps/pokedex',
+    href: 'https://pokedex.akli.dev',
   },
   {
     title: 'Sand box',
     description:
       'A real-time particle physics simulation of falling sand grains on a black canvas.',
-    href: 'https://akli.dev/apps/sand-box',
+    href: 'https://sandbox.akli.dev',
   },
 ]
 

@@ -54,7 +54,7 @@ describe('Apps', () => {
   it('renders the correct card href', () => {
     renderApps()
     expect(
-      screen.getByRole('link', { name: 'https://akli.dev/apps/sand-box' })
+      screen.getByRole('link', { name: 'https://sandbox.akli.dev' })
     ).toBeInTheDocument()
   })
 
@@ -67,7 +67,7 @@ describe('Apps', () => {
       )
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('link', { name: 'https://akli.dev/apps/pokedex' })
+      screen.getByRole('link', { name: 'https://pokedex.akli.dev' })
     ).toBeInTheDocument()
   })
 

@@ -21,7 +21,7 @@ const APPS: AppCardProps[] = [
       srcSet: pokedexImgSrcSet,
       alt: 'A searchable encyclopedia of Gen 1 Pokemon, styled after the classic Game Boy Color Pokedex',
     },
-    href: 'https://akli.dev/apps/pokedex',
+    href: 'https://pokedex.akli.dev',
     tag: 'React · AWS',
   },
   {
@@ -33,7 +33,7 @@ const APPS: AppCardProps[] = [
       srcSet: imgSrcSet,
       alt: 'Real-time particle physics simulation of falling sand grains on a black canvas',
     },
-    href: 'https://akli.dev/apps/sand-box',
+    href: 'https://sandbox.akli.dev',
     tag: 'Canvas · Physics',
   },
 ]
