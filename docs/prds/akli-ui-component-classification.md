@@ -80,7 +80,3 @@ Follows the exact same pattern as the existing Pokedex/Sand-box cards (see `docs
 - [ ] No entry is added to `personal-website`'s sitemap for Storybook (it's a separate origin — see Non-Goals)
 - [ ] Apps page test updated to verify the Storybook card renders
 - [ ] All tests pass (`pnpm test`)
-
-## Open Questions
-
-- None — all resolved.
