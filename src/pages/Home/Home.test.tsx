@@ -81,6 +81,9 @@ describe('Home', () => {
     const sandboxHeading = screen.getByRole('heading', { level: 3, name: 'Sand box' })
     expect(sandboxHeading.closest('a')).toHaveAttribute('href', APP_LINKS.Sandbox)
 
+    const storybookHeading = screen.getByRole('heading', { level: 3, name: 'Storybook' })
+    expect(storybookHeading.closest('a')).toHaveAttribute('href', APP_LINKS.Storybook)
+
     const section = heading.closest('section')!
     expect(within(section).getByRole('link', { name: 'All' })).toHaveAttribute('href', '/apps')
   })
