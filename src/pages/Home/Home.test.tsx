@@ -4,7 +4,7 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { axe } from 'vitest-axe'
-import { getAppLink } from '../../constants/appLinks'
+import { APP_LINKS } from '../../constants/appLinks'
 import Home from './Home'
 
 vi.mock('@api/recipes', () => ({
@@ -75,13 +75,11 @@ describe('Home', () => {
     const heading = screen.getByRole('heading', { level: 2, name: /apps & experiments/i })
     expect(heading).toBeInTheDocument()
 
-    const pokedexLink = getAppLink('Pokedex')
-    const sandboxLink = getAppLink('Sandbox')
     const pokedexHeading = screen.getByRole('heading', { level: 3, name: 'Pokedex' })
-    expect(pokedexHeading.closest('a')).toHaveAttribute('href', pokedexLink.href)
+    expect(pokedexHeading.closest('a')).toHaveAttribute('href', APP_LINKS.Pokedex)
 
     const sandboxHeading = screen.getByRole('heading', { level: 3, name: 'Sand box' })
-    expect(sandboxHeading.closest('a')).toHaveAttribute('href', sandboxLink.href)
+    expect(sandboxHeading.closest('a')).toHaveAttribute('href', APP_LINKS.Sandbox)
 
     const section = heading.closest('section')!
     expect(within(section).getByRole('link', { name: 'All' })).toHaveAttribute('href', '/apps')
