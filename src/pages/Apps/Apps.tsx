@@ -10,13 +10,9 @@ import imgSrc from '../../assets/sand-box.webp'
 import imgSrcSet from '../../assets/sand-box.webp?w=320;640;768;1024;1280;1536;1920&format=webp&as=srcset'
 import storybookImgSrc from '../../assets/storybook.webp'
 import storybookImgSrcSet from '../../assets/storybook.webp?w=320;640;768;1024;1280;1536;1920&format=webp&as=srcset'
-import { getAppLink } from '../../constants/appLinks'
+import { APP_LINKS } from '../../constants/appLinks'
 import { pluralize } from '../../utils/pluralize'
 import styles from './Apps.module.css'
-
-const pokedexLink = getAppLink('Pokedex')
-const sandboxLink = getAppLink('Sandbox')
-const storybookLink = getAppLink('Storybook')
 
 const APPS: AppCardProps[] = [
   {
@@ -28,7 +24,7 @@ const APPS: AppCardProps[] = [
       srcSet: storybookImgSrcSet,
       alt: 'The interactive design system and component catalog for akli.dev',
     },
-    href: storybookLink.href,
+    href: APP_LINKS.Storybook,
     tag: 'Storybook · Design system',
   },
   {
@@ -40,7 +36,7 @@ const APPS: AppCardProps[] = [
       srcSet: pokedexImgSrcSet,
       alt: 'A searchable encyclopedia of Gen 1 Pokemon, styled after the classic Game Boy Color Pokedex',
     },
-    href: pokedexLink.href,
+    href: APP_LINKS.Pokedex,
     tag: 'React · AWS',
   },
   {
@@ -52,7 +48,7 @@ const APPS: AppCardProps[] = [
       srcSet: imgSrcSet,
       alt: 'Real-time particle physics simulation of falling sand grains on a black canvas',
     },
-    href: sandboxLink.href,
+    href: APP_LINKS.Sandbox,
     tag: 'Canvas · Physics',
   },
 ]
