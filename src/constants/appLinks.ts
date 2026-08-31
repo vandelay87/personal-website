@@ -11,3 +11,9 @@ export const APP_LINKS: AppLink[] = [
   { name: 'Sandbox', href: 'https://sandbox.akli.dev' },
   { name: 'Storybook', href: 'https://storybook.akli.dev' },
 ]
+
+export const getAppLink = (name: AppLinkName): AppLink => {
+  const link = APP_LINKS.find((appLink) => appLink.name === name)
+  if (!link) throw new Error(`No app link found for "${name}"`)
+  return link
+}

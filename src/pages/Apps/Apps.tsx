@@ -10,11 +10,13 @@ import imgSrc from '../../assets/sand-box.webp'
 import imgSrcSet from '../../assets/sand-box.webp?w=320;640;768;1024;1280;1536;1920&format=webp&as=srcset'
 import storybookImgSrc from '../../assets/storybook.webp'
 import storybookImgSrcSet from '../../assets/storybook.webp?w=320;640;768;1024;1280;1536;1920&format=webp&as=srcset'
-import { APP_LINKS } from '../../constants/appLinks'
+import { getAppLink } from '../../constants/appLinks'
 import { pluralize } from '../../utils/pluralize'
 import styles from './Apps.module.css'
 
-const [pokedexLink, sandboxLink, storybookLink] = APP_LINKS
+const pokedexLink = getAppLink('Pokedex')
+const sandboxLink = getAppLink('Sandbox')
+const storybookLink = getAppLink('Storybook')
 
 const APPS: AppCardProps[] = [
   {
