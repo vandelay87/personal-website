@@ -9,7 +9,7 @@ import { useEffect, useState, type FC, type ReactNode } from 'react'
 import cvFileUrl from '../../assets/Akli-Aissat-CV.pdf'
 import profileImgSrc from '../../assets/profile.webp'
 import profileImgSrcSet from '../../assets/profile.webp?w=150;200;300;400&format=webp&as=srcset'
-import { APP_LINKS } from '../../constants/appLinks'
+import { getAppLink } from '../../constants/appLinks'
 import { formatDate, posts } from '../Blog/posts'
 import styles from './Home.module.css'
 
@@ -21,7 +21,8 @@ interface LinkRow {
   href: string
 }
 
-const [pokedexLink, sandboxLink] = APP_LINKS
+const pokedexLink = getAppLink('Pokedex')
+const sandboxLink = getAppLink('Sandbox')
 
 const APPS_ROWS: LinkRow[] = [
   {
