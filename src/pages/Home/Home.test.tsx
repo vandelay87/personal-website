@@ -75,12 +75,14 @@ describe('Home', () => {
     const heading = screen.getByRole('heading', { level: 2, name: /apps & experiments/i })
     expect(heading).toBeInTheDocument()
 
-    const [pokedexLink, sandboxLink] = APP_LINKS
     const pokedexHeading = screen.getByRole('heading', { level: 3, name: 'Pokedex' })
-    expect(pokedexHeading.closest('a')).toHaveAttribute('href', pokedexLink.href)
+    expect(pokedexHeading.closest('a')).toHaveAttribute('href', APP_LINKS.Pokedex)
 
     const sandboxHeading = screen.getByRole('heading', { level: 3, name: 'Sand box' })
-    expect(sandboxHeading.closest('a')).toHaveAttribute('href', sandboxLink.href)
+    expect(sandboxHeading.closest('a')).toHaveAttribute('href', APP_LINKS.Sandbox)
+
+    const storybookHeading = screen.getByRole('heading', { level: 3, name: 'Storybook' })
+    expect(storybookHeading.closest('a')).toHaveAttribute('href', APP_LINKS.Storybook)
 
     const section = heading.closest('section')!
     expect(within(section).getByRole('link', { name: 'All' })).toHaveAttribute('href', '/apps')

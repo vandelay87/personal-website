@@ -20,6 +20,7 @@ To write a new PRD, copy `docs/prds/template.md` and fill it in.
 ## Conventions
 
 - Components live in `src/components/<Name>/<Name>.tsx` with a barrel `index.ts`
+- When classifying a new component: if it encodes UI style (spacing, color, typography, a generic interaction pattern), it belongs in `@akli-dev/ui`; if it encodes what personal-website specifically does (recipes, admin/auth flows), it stays in this repo. V1 split for reference: `Header`, `Footer`, `ThemeToggle`, `Button`, `Typography`, `Link`, `Input`, `Card`, `Callout`, `Grid`, `Image`, `Loading`, `icons` moved to `@akli-dev/ui`; `RecipeCard`, `RecipeDetailView`, `AdminLayout`, `ProtectedRoute`, etc. stay here. See `docs/prds/akli-ui-component-classification.md` and the `akli-ui` repo's `akli-ui-package-and-storybook.md` PRD for full rationale.
 - Pages live in `src/pages/<Name>/<Name>.tsx` with a barrel `index.ts`
 - Each component/page has a co-located test file `<Name>.test.tsx`
 - Use path aliases: `@api/`, `@components/`, `@contexts/`, `@hooks/`, `@pages/`, `@models/` (→ `src/types/`)
