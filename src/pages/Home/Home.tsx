@@ -23,6 +23,11 @@ interface LinkRow {
 
 const APPS_ROWS: LinkRow[] = [
   {
+    title: 'Storybook',
+    description: 'The interactive design system and component catalog for akli.dev.',
+    href: APP_LINKS.Storybook,
+  },
+  {
     title: 'Pokedex',
     description:
       'A searchable encyclopedia of Gen 1 Pokemon, styled after the classic Game Boy Color Pokedex.',
