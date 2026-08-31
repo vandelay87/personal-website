@@ -53,7 +53,7 @@ tests/
 ## Pages
 
 - `/` — Home page with hero, CV download, and apps CTA
-- `/apps` — Showcase of interactive experiments and side projects, linking out to `pokedex.akli.dev` and `sandbox.akli.dev` (each deployed and hosted separately)
+- `/apps` — Showcase of interactive experiments and side projects, linking out to `pokedex.akli.dev`, `sandbox.akli.dev`, and `storybook.akli.dev` (each deployed and hosted separately)
 - `/blog` — Technical blog with tag filtering
 - `/blog/:slug` — Individual blog posts (MDX with code blocks, callouts, file trees)
 - `/recipes` — Recipe listing with search and tag filtering
