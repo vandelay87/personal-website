@@ -8,13 +8,29 @@ import pokedexImgSrc from '../../assets/pokedex.webp'
 import pokedexImgSrcSet from '../../assets/pokedex.webp?w=320;640;768;1024;1280;1536;1920&format=webp&as=srcset'
 import imgSrc from '../../assets/sand-box.webp'
 import imgSrcSet from '../../assets/sand-box.webp?w=320;640;768;1024;1280;1536;1920&format=webp&as=srcset'
-import { APP_LINKS } from '../../constants/appLinks'
+import storybookImgSrc from '../../assets/storybook.webp'
+import storybookImgSrcSet from '../../assets/storybook.webp?w=320;640;768;1024;1280;1536;1920&format=webp&as=srcset'
+import { getAppLink } from '../../constants/appLinks'
 import { pluralize } from '../../utils/pluralize'
 import styles from './Apps.module.css'
 
-const [pokedexLink, sandboxLink] = APP_LINKS
+const pokedexLink = getAppLink('Pokedex')
+const sandboxLink = getAppLink('Sandbox')
+const storybookLink = getAppLink('Storybook')
 
 const APPS: AppCardProps[] = [
+  {
+    title: 'Storybook',
+    description:
+      'The interactive design system and component catalog for akli.dev.',
+    image: {
+      src: storybookImgSrc,
+      srcSet: storybookImgSrcSet,
+      alt: 'The interactive design system and component catalog for akli.dev',
+    },
+    href: storybookLink.href,
+    tag: 'Storybook · Design system',
+  },
   {
     title: 'Pokedex',
     description:
