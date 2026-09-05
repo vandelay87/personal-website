@@ -1,0 +1,131 @@
+# PRD: @akli-dev/ui Adoption in personal-website
+
+> Companion PRDs: `akli-ui-component-classification.md` (this repo), which named this migration as deferred follow-up work once `@akli-dev/ui` v1 shipped; and `akli-ui`'s `docs/prds/css-tree-shaking.md`, whose v2.0.0 release this migration now targets directly (confirmed live: `npm view @akli-dev/ui@2.0.0 version` → `2.0.0`). Two costs this PRD originally accepted as permanent — Card's lost route-level code-splitting and `animations.css` keyframe duplication — are resolved by that release; see Performance.
+
+## Overview
+
+`@akli-dev/ui` — now at v2.0.0 on npm, published with per-component CSS tree-shaking (`docs/prds/css-tree-shaking.md` in the `akli-ui` repo) — is the shared component package extracted from personal-website's own generic UI. This PRD covers the actual cutover: replacing personal-website's local copies of the generic components (`Header`, `Footer`, `ThemeToggle`, `Button`, `Typography`, `Link`, `Input`, `Card`, `Callout`, `Grid`, `Image`, `Loading`, `List`/`ListItem`, `icons`) with imports from the published package, eliminating the duplication the package was built to solve.
+
+`List`/`ListItem` isn't in `CLAUDE.md`'s written "V1 split" list (13 names) but is already exported by `@akli-dev/ui` today and is unambiguously generic per the classification rule — this PRD treats it as in-scope and updates `CLAUDE.md`'s convention list to match.
+
+## Problem Statement
+
+personal-website still maintains its own copies of every component that was extracted into `@akli-dev/ui` — the extraction created the package but never cut personal-website over to consume it. Any bugfix, accessibility improvement, or design tweak now has to be applied twice, or silently drifts between the two copies. The classification PRD explicitly flagged this migration as deferred, not resolved.
+
+## Goals
+
+- personal-website imports all generic components from `@akli-dev/ui` instead of local copies
+- `src/styles/tokens.css` and `src/styles/fonts.css` are replaced by `@akli-dev/ui/tokens.css` and `@akli-dev/ui/fonts.css`, with no double-loading of fonts/tokens at any point in the migration
+- Local copies (component, test, story, CSS module) are deleted once migrated — no dead code left behind
+- Zero visual or behavioral regression on any page, verified via local dev-server QA per phase (no staging environment exists; deploy is merge-to-`main` → production)
+- No performance regression versus the current implementation — bundle size, font payload, and Core Web Vitals (LCP, CLS) are at or below today's baseline once the migration completes
+- Any API gap surfaced during migration is closed in `akli-ui` first, not worked around locally
+
+## Non-Goals
+
+- Migrating domain-specific components (`RecipeCard`, `RecipeDetailView`, `AdminLayout`, `ProtectedRoute`, etc.) — these correctly stay in personal-website per the classification convention in `CLAUDE.md`
+- Any visual or design redesign — this is an implementation swap, not a restyle. `@akli-dev/ui`'s tokens already reflect personal-website's completed "paper" design system, since they were extracted from it
+- Changing the SSR theme bootstrap script's behavior in `index.html` — kept exactly as-is (see Design & UX)
+- Visual regression / Chromatic testing — already deferred as a non-goal at the `akli-ui` package level; out of scope here too
+- Introducing a staging/preview deploy pipeline — out of scope for this PRD; risk is mitigated instead by phased rollout and local QA per phase
+- Introducing automated performance-budget CI (e.g. Lighthouse CI, bundle-size gate) — personal-website has no such tooling today; performance is verified manually per phase, matching how `paper-redesign.md` and `redesign.md` verified it (manual Lighthouse pass per route, both themes)
+- Enforcing the classification convention via lint/CI — already a documented non-goal in the companion PRD
+- Proactively adding components or props to `akli-ui` beyond what this migration's actual call sites require
+
+## User Stories
+
+- As the site maintainer, I want personal-website's generic components sourced from one published package, so a fix only has to happen once.
+- As a future contributor, I want no local components silently duplicating what `@akli-dev/ui` already provides, so the classification convention holds in practice, not just on paper.
+
+## Design & UX
+
+No intended visual change on any page — `@akli-dev/ui`'s components were extracted from personal-website's current design, so tokens, typography, and spacing should render identically once swapped.
+
+`ThemeToggle`: personal-website's `index.html` has an inline pre-hydration bootstrap script that reads `localStorage`, falls back to `prefers-color-scheme`, and sets `data-theme` on `<html>` before first paint — real flash-prevention for a site that does actual server rendering (Lambda). That script is kept unchanged. Only the `ThemeToggle` component import is swapped to `@akli-dev/ui`'s version, which reads and toggles the existing `data-theme` attribute rather than re-deriving it itself. `@akli-dev/ui`'s README documents this bootstrap-script optimization as bring-your-own, so this isn't fighting the package's design — it's exactly the intended integration point.
+
+States to verify per phase: light and dark theme on key pages, plus any loading/empty/error states owned by a migrated component (`Loading`'s spinner, `Callout`'s variants, `Image`'s broken-image fallback). Concretely, per phase, the pages to eyeball on the local dev server are:
+- **Phase A** (tokens/fonts): one page from each layout family — `Home`, `Blog`/`BlogPost`, `Recipes`, `Login` — in both themes, since a token-name mismatch would show up as a color/spacing/type diff anywhere. (Cascade-layer risk starts in Phase B, once component CSS is first imported — see Technical Considerations.)
+- **Phase B**: `Home`, `Apps`, `Blog`/`BlogPost` (Typography/Link/Image/List), `Recipes` (Grid/Loading), any page rendering a `Callout`.
+- **Phase C**: `Login`, `RecipeEditor`, `UserManagement` (Button/Input forms), `Recipes`/`RecipeDetail` (Card).
+- **Phase D**: every page, both themes, plus explicit public/logged-out/admin `Header` variants — regression here is site-wide by construction.
+
+For Phase D specifically, also do a manual keyboard-only tab-through (no visual regression tooling can catch this) on at least one public page and one admin page, in both themes: confirm the tab order is skip-link → brand → nav → theme toggle → main → footer, that `ThemeToggle`'s accessible name still updates when toggled, and that focus indicators remain visible at every stop, matching pre-migration behavior.
+
+## Technical Considerations
+
+### Dependency setup
+
+- `pnpm add @akli-dev/ui@^2.0.0`. Peer dependencies (`react@^19`, `react-dom@^19`, `react-router-dom@^7`) are already satisfied by personal-website's current versions (`react@^19.2.8`, `react-dom@^19.2.8`, `react-router-dom@^7.18.2`). `vite` is now `peerDependenciesMeta.optional` as of v2 (personal-website still needs it installed regardless — `preloadFonts()` requires it — but this resolves the non-blocking suggestion recorded in Open Questions below).
+- After installing, run `pnpm why react react-dom` and confirm a single resolved version of each. `akli-ui` has a documented history of a duplicate-React bug from mishandled `rollupOptions.external`/peerDependencies (fixed on its side today, per its `CLAUDE.md`) — since personal-website consumes it as a real npm dependency, not a pnpm workspace link, nothing structurally guarantees correct deduping if that regresses upstream.
+- Correct `CLAUDE.md`'s Stack section, which currently says "Vite 7" but should say "Vite 8" (stale, unrelated to this migration but worth fixing while editing that section's component-classification bullet). Update the same bullet's "V1 split" list to add `List`/`ListItem`.
+
+### Sequencing — phased, not a single migration
+
+No staging environment exists for personal-website; every merge to `main` deploys straight to production. Each phase below ships as its own PR so a regression is small, bisectable, and easy to verify locally before merge.
+
+**Phase A — Foundation (tokens/fonts), one atomic PR**
+- Before swapping, diff the custom-property names in `src/styles/tokens.css` against `@akli-dev/ui`'s shipped `tokens.css`. As of this writing, 15 local aliases (`--text`, `--subtle`, `--muted`, `--faint`, `--surf`, `--field`, `--hover`, `--line`, `--btn-bg`, `--btn-border`, `--btn-fg`, `--green`, `--green-bg`, `--amber`, `--amber-bg`, `--danger`, `--danger-bg`) exist locally but not in `@akli-dev/ui`'s tokens.css — currently unreferenced by any compiled component/page CSS (only used in the static `docs/design/paper/*.html` mockups), so today's swap wouldn't visibly break anything, but `var(--undefined-token)` fails silently, so this must be explicitly reconciled (update the mockups or drop the aliases) rather than assumed to carry over.
+- Swap the global entry stylesheet's imports from local `src/styles/tokens.css` / `src/styles/fonts.css` to `@akli-dev/ui/fonts.css` (imported first) → `@akli-dev/ui/tokens.css`, matching the ordering `@akli-dev/ui`'s README requires (fonts before tokens, to avoid FOUC/CLS from the metric-matched fallback face). `@akli-dev/ui/index.css` is **not** imported here: as of v2.0.0 it's optional/legacy (it now contains only shared `@keyframes`, no component styles) and is handled separately in Phase D — see Performance.
+- Cascade-layer compatibility doesn't need verifying in this phase: unlike v1, no `@akli-dev/ui` component CSS is imported yet (see above), so there's no `@layer component-defaults` declaration to reconcile against `src/index.css:16`'s precedence until Phase B. When Phase B lands, verify safe, not just assumed, that each migrated component's own `.module.css` (e.g. `Typography.module.css`, `Link.module.css`) declares the same `@layer component-defaults` name, with no bare/global element selectors of its own, so the layer declarations merge correctly and `composed-overrides` still lands after `component-defaults`. This holds only as long as akli-ui doesn't introduce a new layer name; re-check this note if akli-ui's CSS architecture changes.
+- Delete local `src/styles/tokens.css` and `src/styles/fonts.css` once nothing references them. Also delete the now-orphaned local font asset files (`src/assets/fonts/*.woff2`, `*-OFL.txt` license files) and the hardcoded `<link rel="preload" href="/src/assets/fonts/geist-sans-latin-variable.woff2" ...>` tag in `index.html` — left in place, that tag would preload a font file no longer referenced by any `@font-face`, and `preloadFonts()` (below) doesn't remove pre-existing tags for you.
+- This step must be atomic: local and package token/font sources must never both be imported at once — that would double-load fonts and risk token drift.
+- No component swaps happen in this phase. Local components keep working unchanged, since they reference the same CSS custom property names `@akli-dev/ui`'s `tokens.css` defines (once the alias reconciliation above is done). Unlike v1, this phase ships **no** component CSS at all: `@akli-dev/ui` v2 tree-shakes CSS per component (`docs/prds/css-tree-shaking.md` in the `akli-ui` repo), so a component's compiled CSS only ships once that component's JS is actually imported, starting in Phase B.
+- Wire up `@akli-dev/ui/vite-plugin`'s `preloadFonts()` in `vite.config.ts`, gated behind the same `!isSsrBuild` condition `vite.config.ts` already uses for other HTML/asset-only plugins (e.g. the sitemap plugin) — `build:server` never processes `index.html`/`fonts.css`, so an unconditional `preloadFonts()` would emit a spurious "could not find the Geist Sans font asset" warning on every server build.
+- `check:descendant-selectors`' component discovery (`discoverVariantComponents`) globs `src/components/**/*.module.css` for a real `@layer component-defaults` at-rule — it has no knowledge of `@akli-dev/ui`'s shipped CSS. As each component is deleted locally in Phases B–D, it silently drops out of that gate's coverage; a stale `.ancestor .Y` descendant-selector workaround against a package-sourced component would no longer be caught. Document this as an accepted, known coverage gap (the script already documents a comparable gap for `Tag`) rather than extending the script in this PRD.
+
+**Phase B — Leaf/presentational components**
+`Typography`, `Link`, `Loading`, `Callout`, `Grid`, `Image`, `List`/`ListItem`, `icons`. Repo-wide import swap (`@components/<Name>` → `@akli-dev/ui`), then delete the local component/test/story/CSS-module files once no longer referenced anywhere. `icons` swap is a straight rename (personal-website's icon set is a full subset of `@akli-dev/ui`'s exports) — `@components/icons` → `@akli-dev/ui` across `AutosaveStatus`, `IngredientList`, `StepList`, `ReorderControls`, `ImageUpload`, and the four admin pages that import it.
+
+**Phase C — Interactive components**
+`Button`, `Input`, `Card`. Same swap-and-delete pattern. Higher usage surface (forms, admin pages, recipe pages) — check for prop/variant drift before deleting local versions (see API drift handling below). Also grep for existing `ref=` call sites on these components before deleting the local versions — e.g. `Login.tsx`'s autofocus (`firstFieldRef.current?.focus()`) depends on `Input`'s forwarded ref pointing at the real `<input>` DOM node. Both local and `@akli-dev/ui`'s `Input` type their ref the same way (`Ref<HTMLInputElement>`), so a mismatch in what the ref actually targets would compile cleanly but break autofocus silently at runtime — verify behaviorally, not just by type-checking.
+
+**Phase D — Structural components**
+`Header`, `Footer`, `ThemeToggle`. Migrated last since `PageShell` composes them directly on every page — a regression here is maximally visible. `ThemeToggle`'s swap must preserve the `index.html` bootstrap-script behavior described in Design & UX. `RecipePreview.tsx` imports `ThemeToggle` directly and its test file currently has no `vitest-axe` assertion — see Testing. Once these land, delete local `src/styles/animations.css` and its `@import` in `src/index.css` — see Performance for why this phase is the safe point to do so.
+
+### Performance
+
+- Since `@akli-dev/ui` v2 tree-shakes CSS per component, Phase A ships zero component CSS — only tokens/fonts. Each later phase's migrated components ship only their own compiled CSS (plus any genuinely shared CSS, deduplicated to one copy), not the whole library. Some temporary CSS payload duplication is still expected purely from the phased rollout itself — at any point in Phases B–D, a component migrated in an earlier phase and one not yet migrated both ship CSS simultaneously (local CSS Modules for the latter, `@akli-dev/ui`'s per-component CSS for the former) — but this resolves as each phase completes, rather than being front-loaded entirely in Phase A the way v1's single `index.css` would have done.
+- The two costs v1's packaging would have made **permanent** are resolved by `@akli-dev/ui` v2 and no longer apply:
+  - **Card's code-splitting**: `Card` is used only by the lazy-loaded `Login` route (`React.lazy` in `src/lazyRoutes.tsx`) today. Under v2's per-component CSS tree-shaking, `Card`'s compiled CSS ships bundled with `Card`'s own JS, which itself only loads inside `Login`'s async chunk — the existing route-level code-splitting is preserved once Card migrates in Phase C, not permanently lost.
+  - **`animations.css` duplication**: `src/styles/animations.css` (`@keyframes spin/shimmer/shimmerSweep`) is also consumed by `AutosaveStatus.module.css` and `interactions.module.css`, both domain-specific and staying local, so it can't simply be deleted the moment any one component is migrated. But `@akli-dev/ui`'s `package.json` marks its own barrel entry (`./dist/index.js`) side-effectful specifically so its identical `animations.css` import always survives a consumer's tree-shaking, regardless of which named components are actually used — so from Phase B onward (the first phase importing anything from `@akli-dev/ui`), those keyframes are guaranteed present globally on every page that imports at least one migrated component. Delete local `src/styles/animations.css` (and its `@import` in `src/index.css`) in Phase D specifically, once `Header`/`Footer` — rendered via `PageShell` on every page — make that guarantee unconditional site-wide rather than dependent on which components a given page happens to import. `AutosaveStatus.module.css`/`interactions.module.css` need no changes: both already reference the keyframes by plain global name (`animation: global(spin) ...` etc.), not by file path, and `@akli-dev/ui`'s copy is byte-for-byte identical to personal-website's own (confirmed by diff).
+- Before Phase A, diff `@akli-dev/ui`'s shipped font files/weights (`fonts.css`) against personal-website's currently self-hosted set — if akli-ui ships additional weights or families beyond what personal-website actually uses today, that's a net-new payload increase to flag and justify, not something to absorb silently. (Spot-checked at PRD-writing time: the two `fonts.css` files are byte-for-byte equivalent in their `@font-face` declarations — re-confirm at implementation time in case either side has drifted.)
+- Record a written baseline before Phase A ships — bundle size (JS + CSS, gzip, per Vite's own build output table), font byte count/weights, and Lighthouse LCP/CLS per key page × theme — and append it to this PRD or the tracking issue, so each later phase has a concrete number to diff against instead of relying on memory.
+- Measure client bundle size using `pnpm build:client`'s own per-chunk gzip-size output (not a bare `du -sh dist/`, which conflates JS and CSS and hides the per-chunk detail needed to catch a regression like the `Card` code-splitting loss above). Run after Phase A and after each subsequent phase; flag any increase versus the running baseline. (Note: `package.json` has no bare `pnpm build` script — use `pnpm build:client` for this measurement and `pnpm build:prod` for the full build-passes gate in Acceptance Criteria.)
+- Run a manual Lighthouse pass (performance *and* accessibility categories, both themes) on the representative page sample from Design & UX, after each phase, per the project's existing manual-verification convention (see `paper-redesign.md`). Pin CPU/network throttling (`lighthouse --throttling-method=devtools` or equivalent DevTools settings) and take the median of at least 3 runs — LCP is noisy enough run-to-run that a single reading isn't a reliable pass/fail signal, especially right after a font-loading change.
+- Moving the font source from local `src/assets` to `node_modules/@akli-dev/ui` doesn't change CDN/caching behavior — Vite content-hashes and copies both identically into `dist/client/assets/`. The only effect is a one-time cache-bust for returning visitors the day Phase A ships (new hash vs. their cached old one) — expect a possible same-day field-metric blip that isn't a real regression.
+
+### API drift handling
+
+If a migrated component's personal-website call sites need a prop or variant `@akli-dev/ui` doesn't currently export: pause that component's migration, file a companion issue/PR in the `akli-ui` repo (with a changeset), release it, bump `@akli-dev/ui` in personal-website, then resume the swap. `akli-ui` stays the single source of truth for generic UI — gaps get closed there, not worked around locally.
+
+### Testing
+
+- No new component tests are needed for `@akli-dev/ui`'s components themselves — they're already tested in that repo.
+- Every page/component test in personal-website that currently imports a local version and asserts on its rendered output must have its import updated to `@akli-dev/ui` and be re-verified (e.g., `Login.test.tsx`, `Apps.test.tsx`, and others rendering a migrated component). The component's own dedicated test file (`<Name>.test.tsx`) is deleted alongside its component; consuming tests stay and just get their import path updated.
+- `vitest-axe` a11y assertions on affected pages must continue to pass after each phase. This only holds real weight where an assertion actually exists: `RecipeEditor.test.tsx`, `UserManagement.test.tsx`, and `RecipeDetail.test.tsx` (all touched by Phase C's `Button`/`Input`) and `RecipePreview.test.tsx` (touched by Phase D's `ThemeToggle`) currently have **no** `vitest-axe` assertion, so "checks pass" would trivially pass there today without proving anything. Add a `vitest-axe` check to each of these four test files as part of the phase that touches them, before that phase's PR can close.
+- `vitest-axe`'s jsdom environment can't evaluate `color-contrast` or confirm that an accessible-name change (e.g. `ThemeToggle`'s `aria-label` flipping between "Switch to dark/light mode") is actually announced — that gap is covered by the Lighthouse accessibility-category pass in the Performance section, plus the manual keyboard-only tab-through required for Phase D in Design & UX.
+- TDD isn't applicable here — there's no new logic, only an import swap. Each phase's PR is verified instead by `pnpm test` passing plus a local dev-server visual check (light and dark theme) of every page touched by that phase.
+
+## Acceptance Criteria
+
+- [ ] `@akli-dev/ui` is a direct dependency in `package.json`; peer dependency versions confirmed compatible; `pnpm why react react-dom` shows a single resolved version of each
+- [ ] Token custom-property names in local `tokens.css` are diffed against `@akli-dev/ui`'s shipped `tokens.css` before Phase A; any local-only alias is either removed or its remaining usages (e.g. `docs/design/paper/*.html`) are updated
+- [ ] Phase A: global stylesheet imports `@akli-dev/ui/fonts.css` → `@akli-dev/ui/tokens.css` in that order (no `index.css` import — optional/legacy under v2); local `tokens.css`/`fonts.css`/font asset files (`src/assets/fonts/*.woff2`, `*-OFL.txt`) deleted; the hardcoded `<link rel="preload">` for the local font in `index.html` is removed; `preloadFonts()` vite plugin wired into `vite.config.ts`, gated behind `!isSsrBuild`; no visual diff on the Phase A page sample (Home, Blog/BlogPost, Recipes, Login) in light or dark theme
+- [ ] Phase B: `Typography`, `Link`, `Loading`, `Callout`, `Grid`, `Image`, `List`/`ListItem`, and all icon imports are sourced from `@akli-dev/ui`; local versions (component, test, story, CSS module) deleted
+- [ ] Phase C: `Button`, `Input`, `Card` sourced from `@akli-dev/ui`; local versions deleted; no prop/variant regressions on admin forms or recipe pages; existing `ref=` call sites on these components (e.g. `Login.tsx`'s autofocus on `Input`) still behave correctly, verified by running the affected flow, not just type-checking
+- [ ] Phase D: `Header`, `Footer`, `ThemeToggle` sourced from `@akli-dev/ui`; local versions deleted; local `src/styles/animations.css` and its `@import` in `src/index.css` are deleted, since `@akli-dev/ui`'s barrel now guarantees the identical keyframes load site-wide; the `index.html` SSR bootstrap script is unchanged and still prevents theme-flash on first paint; manual keyboard-only tab-through (skip-link → brand → nav → theme toggle → main → footer, focus visible at each stop) passes on one public and one admin page, both themes
+- [ ] Every consuming test file that renders a migrated component is updated to import from `@akli-dev/ui` and passes
+- [ ] `vitest-axe` a11y checks pass on all pages touched by each phase, including new assertions added to `RecipeEditor.test.tsx`, `UserManagement.test.tsx`, `RecipeDetail.test.tsx` (Phase C), and `RecipePreview.test.tsx` (Phase D), which have no `vitest-axe` coverage today
+- [ ] `pnpm test`, `pnpm lint` (including `check:descendant-selectors`, with its known coverage gap for already-migrated components documented, not silently accepted), and `pnpm build:prod` all pass after each phase
+- [ ] A written performance baseline (bundle size gzip JS+CSS from `pnpm build:client`'s output, font byte count/weights, Lighthouse LCP/CLS per key page × theme) is recorded before Phase A ships
+- [ ] Client bundle size (`pnpm build:client` gzip output, JS and CSS tracked separately) at the end of Phase D is at or below the recorded baseline — no accepted permanent exceptions remain, since `@akli-dev/ui` v2's per-component CSS tree-shaking resolves both costs v1 would have made permanent (Card's route-level code-splitting, `animations.css` duplication; see Performance)
+- [ ] `@akli-dev/ui`'s shipped font files/weights are diffed against personal-website's current self-hosted set before Phase A; any net-new font payload is explicitly called out and justified, not silently absorbed
+- [ ] Manual Lighthouse pass (performance and accessibility categories, both themes, pinned throttling, median of ≥3 runs) on the representative page sample shows no regression in LCP or CLS versus the recorded baseline, checked after each phase
+- [ ] Any API gap discovered during migration is resolved via an `akli-ui` companion issue and release, not a local workaround
+- [ ] `CLAUDE.md`'s Stack section is corrected from "Vite 7" to "Vite 8", and its "V1 split" component list is updated to include `List`/`ListItem`
+- [ ] No local component, test, story, or CSS-module files remain for any migrated component once that component's phase completes
+
+## Open Questions
+
+- None blocking. If a component's API has drifted enough to require non-trivial changes in `akli-ui` (discovered during Phase C or D), the specific gap and its resolution should be recorded here as it's found.
+- `check:descendant-selectors`' coverage gap for migrated-out components (see Phase A technical considerations) is accepted as-is for this PRD. If it becomes a real problem in practice, extending the script's discovery to also parse `@akli-dev/ui`'s shipped CSS would be a separate, focused follow-up — not bundled into this migration.
