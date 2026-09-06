@@ -386,7 +386,7 @@ describe('scanRepo — integration against the current repo state', () => {
     expect(findings).toEqual([])
   })
 
-  it('discovers Typography, Link, and Tag from real component CSS modules (not Button, which has no layer yet)', () => {
+  it('discovers Tag from real component CSS modules (not Button, which has no layer yet)', () => {
     // Regression guard for the generalized discovery against real files —
     // confirms it isn't only exercised via the synthetic fixtures above.
     const repoRoot = resolve(__dirname, '..')
@@ -399,13 +399,16 @@ describe('scanRepo — integration against the current repo state', () => {
     const discovered = discoverVariantComponentsFromSources(files)
     const tags = discovered.map((c) => c.tag).sort()
 
-    expect(tags).toContain('Typography')
-    expect(tags).toContain('Link')
     expect(tags).toContain('Tag')
     expect(tags).not.toContain('Button')
     expect(tags).not.toContain('RecipeSteps')
     expect(tags).not.toContain('TagInput')
     expect(tags).not.toContain('RecipeDetailView')
+    // Sourced from @akli-dev/ui since their migration — no longer
+    // discoverable via a local src/components/**/*.module.css glob (see
+    // issue #413, still open, for extending discovery to package CSS).
+    expect(tags).not.toContain('Typography')
+    expect(tags).not.toContain('Link')
   })
 })
 

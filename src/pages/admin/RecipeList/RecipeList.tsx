@@ -1,3 +1,16 @@
+import {
+  IconPlus,
+  IconPreview,
+  Link,
+  Typography,
+  iconDelete,
+  iconDocument,
+  iconEdit,
+  iconPublish,
+  iconRetry,
+  iconUnpublish,
+  iconWarning,
+} from '@akli-dev/ui'
 import { handleSessionError, withSessionRecovery } from '@api/auth'
 import {
   deleteRecipe,
@@ -7,21 +20,8 @@ import {
 } from '@api/recipes'
 import ConfirmDialog from '@components/ConfirmDialog'
 import ErrorBoundary from '@components/ErrorBoundary'
-import {
-  IconPlus,
-  IconPreview,
-  iconDelete,
-  iconDocument,
-  iconEdit,
-  iconPublish,
-  iconRetry,
-  iconUnpublish,
-  iconWarning,
-} from '@components/icons'
-import Link from '@components/Link'
 import StateBox from '@components/StateBox'
 import StatusBadge from '@components/StatusBadge'
-import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import { useToast } from '@contexts/ToastContext'
 import type { Recipe } from '@models/recipe'

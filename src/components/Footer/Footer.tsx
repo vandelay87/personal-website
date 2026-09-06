@@ -1,4 +1,4 @@
-import Link from '@components/Link'
+import { Link } from '@akli-dev/ui'
 import { useId, type FC } from 'react'
 import { SOCIAL_LINKS } from '../../constants/socialLinks'
 import styles from './Footer.module.css'

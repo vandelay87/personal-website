@@ -1,7 +1,6 @@
+import { IconPlus, List, ListItem } from '@akli-dev/ui'
 import Button from '@components/Button'
-import { IconPlus } from '@components/icons'
 import Input from '@components/Input'
-import List, { ListItem } from '@components/List'
 import ReorderControls from '@components/ReorderControls'
 import { useReorderableList } from '@hooks/useReorderableList'
 import type { Ingredient } from '@models/recipe'

@@ -1,13 +1,19 @@
+import {
+  IconAlertCircle,
+  Typography,
+  iconDelete,
+  iconInvite,
+  iconRetry,
+  iconWarning,
+} from '@akli-dev/ui'
 import { handleSessionError, withSessionRecovery } from '@api/auth'
 import { fetchUsers, inviteUser, removeUser, UserExistsError } from '@api/users'
 import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
 import ErrorBoundary from '@components/ErrorBoundary'
-import { IconAlertCircle, iconDelete, iconInvite, iconRetry, iconWarning } from '@components/icons'
 import Input from '@components/Input'
 import StateBox from '@components/StateBox'
 import StatusBadge from '@components/StatusBadge'
-import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import { useToast } from '@contexts/ToastContext'
 import type { AdminRole, AdminUser } from '@models/auth'
@@ -21,7 +27,8 @@ import styles from './UserManagement.module.css'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-const isValidEmail = (value: string): boolean => EMAIL_PATTERN.test(value.trim())
+const isValidEmail = (value: string): boolean =>
+  EMAIL_PATTERN.test(value.trim())
 
 const ROLE_OPTIONS: AdminRole[] = ['contributor', 'admin']
 
@@ -33,7 +40,8 @@ const ROLE_LABEL: Record<AdminRole, string> = {
 const ROLE_HINT: Record<AdminRole, string> = {
   admin:
     'Admins can manage recipes and users, including inviting and removing people.',
-  contributor: "Contributors can create and manage recipes, but can't manage users.",
+  contributor:
+    "Contributors can create and manage recipes, but can't manage users.",
 }
 
 const UserManagementError = ({ onRetry }: { onRetry: () => void }) => (
@@ -144,7 +152,11 @@ const UserManagementContent = ({
             </button>
           </div>
 
-          <form className={styles.inviteForm} onSubmit={handleInviteSubmit} noValidate>
+          <form
+            className={styles.inviteForm}
+            onSubmit={handleInviteSubmit}
+            noValidate
+          >
             <div className={styles.field}>
               <label htmlFor={emailInputId} className={styles.label}>
                 Email address
@@ -242,7 +254,9 @@ const UserManagementContent = ({
                 <div className={styles.rowIdentity}>
                   <span className={styles.rowEmail}>{userRow.email}</span>
                   {isSelf && (
-                    <span className={`${text.tagChipBase} ${styles.selfTag}`}>You</span>
+                    <span className={`${text.tagChipBase} ${styles.selfTag}`}>
+                      You
+                    </span>
                   )}
                 </div>
               </div>
@@ -254,7 +268,10 @@ const UserManagementContent = ({
                 >
                   {ROLE_LABEL[userRow.role]}
                 </StatusBadge>
-                <span className={styles.statusCell} data-status={userRow.status}>
+                <span
+                  className={styles.statusCell}
+                  data-status={userRow.status}
+                >
                   <span className={styles.statusDot} aria-hidden="true" />
                   {userRow.status === 'confirmed' ? 'Confirmed' : 'Pending'}
                 </span>
@@ -294,7 +311,9 @@ const UserManagementContent = ({
   // "person"/"people" is an irregular plural pluralize.ts can't produce
   // (it only appends "s" to the singular) — spelled out directly here.
   const subtitle =
-    users.length === 1 ? '1 person has access' : `${users.length} people have access`
+    users.length === 1
+      ? '1 person has access'
+      : `${users.length} people have access`
 
   return (
     <div className={styles.page}>
@@ -323,11 +342,19 @@ const UserManagement = () => {
   const { getAccessToken, logout } = useAuth()
   const navigate = useNavigate()
   const { resource, retryKey, refresh } = useSuspenseResource(() =>
-    withSessionRecovery((token) => fetchUsers(token), getAccessToken, logout, navigate)
+    withSessionRecovery(
+      (token) => fetchUsers(token),
+      getAccessToken,
+      logout,
+      navigate
+    )
   )
 
   return (
-    <ErrorBoundary key={retryKey} fallback={() => <UserManagementError onRetry={refresh} />}>
+    <ErrorBoundary
+      key={retryKey}
+      fallback={() => <UserManagementError onRetry={refresh} />}
+    >
       <Suspense fallback={<UserManagementLoading />}>
         <UserManagementContent resource={resource} onRefresh={refresh} />
       </Suspense>

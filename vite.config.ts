@@ -290,8 +290,13 @@ export default defineConfig(({ command, isSsrBuild, mode }) => {
     // live over HTTP, breaks when packages like React's dev runtime are
     // forced through Vite's SSR transform pipeline instead of
     // externalized/required from node_modules, on their `typeof module`
-    // CJS-interop checks.
-    noExternal: command === 'build' || process.env.VITEST ? true : undefined,
+    // CJS-interop checks. `@akli-dev/ui` is the one dep that must stay
+    // noExternal even in that mode: its barrel (`dist/index.js`) has a bare
+    // `import './index.css'` side effect (see vite-config comment above on
+    // the animations.css guarantee), and Node's own ESM loader — which is
+    // what actually resolves an externalized SSR dep in dev — can't parse a
+    // `.css` specifier the way Vite's transform pipeline can.
+    noExternal: command === 'build' || process.env.VITEST ? true : ['@akli-dev/ui'],
     external: ['node:fs', 'node:path'],
   },
   build: {

@@ -1,7 +1,7 @@
+import { Loading } from '@akli-dev/ui'
 import AdminLayout from '@components/AdminLayout'
 import Footer from '@components/Footer'
 import Header, { type HeaderLink } from '@components/Header'
-import Loading from '@components/Loading'
 import PageShell from '@components/PageShell'
 import ScrollToTop from '@components/ScrollToTop'
 import SkipLink from '@components/SkipLink'
