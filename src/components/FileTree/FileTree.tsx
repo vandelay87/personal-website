@@ -1,4 +1,4 @@
-import List, { ListItem } from '@components/List'
+import { List, ListItem } from '@akli-dev/ui'
 import type { FC, ReactNode } from 'react'
 
 import styles from './FileTree.module.css'

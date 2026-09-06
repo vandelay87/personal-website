@@ -1,3 +1,4 @@
+import { IconAlertCircle, IconPreview, Link, Loading, Typography, iconLock } from '@akli-dev/ui'
 import { isSessionError } from '@api/auth'
 import {
   createDraft,
@@ -11,15 +12,11 @@ import {
 import AutosaveStatus from '@components/AutosaveStatus'
 import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
-import { IconAlertCircle, IconPreview, iconLock } from '@components/icons'
 import ImageUpload from '@components/ImageUpload'
 import IngredientList from '@components/IngredientList'
-import Link from '@components/Link'
-import Loading from '@components/Loading'
 import StatusBadge from '@components/StatusBadge'
 import StepList from '@components/StepList'
 import TagInput from '@components/TagInput'
-import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import { useToast } from '@contexts/ToastContext'
 import { useAutosave } from '@hooks/useAutosave'

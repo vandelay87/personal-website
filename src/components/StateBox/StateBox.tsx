@@ -1,6 +1,5 @@
+import { Loading, Typography } from '@akli-dev/ui'
 import Button from '@components/Button'
-import Loading from '@components/Loading'
-import Typography from '@components/Typography'
 import type { FC, ReactNode } from 'react'
 
 import stateBox from '../../styles/stateBox.module.css'

@@ -1,4 +1,4 @@
-import { ListItem } from '@components/List'
+import { ListItem } from '@akli-dev/ui'
 import type { FC, ReactNode } from 'react'
 
 import styles from './Toast.module.css'

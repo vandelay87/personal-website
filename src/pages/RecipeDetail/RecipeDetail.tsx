@@ -1,6 +1,6 @@
+import { Loading } from '@akli-dev/ui'
 import { fetchRecipe } from '@api/recipes'
 import Button from '@components/Button'
-import Loading from '@components/Loading'
 import RecipeDetailView from '@components/RecipeDetailView'
 import { RecipeDataContext } from '@contexts/RecipeDataContext'
 import type { Recipe } from '@models/recipe'

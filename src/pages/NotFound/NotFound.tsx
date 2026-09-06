@@ -1,4 +1,4 @@
-import Typography from '@components/Typography'
+import { Typography } from '@akli-dev/ui'
 import styles from './NotFound.module.css'
 
 export default function NotFound() {

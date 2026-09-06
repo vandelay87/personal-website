@@ -1,4 +1,4 @@
-import List, { ListItem } from '@components/List'
+import { List, ListItem } from '@akli-dev/ui'
 import type { Ingredient } from '@models/recipe'
 import { useState, type FC } from 'react'
 import styles from './RecipeIngredients.module.css'
