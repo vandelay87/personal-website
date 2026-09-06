@@ -410,35 +410,6 @@ export const checkPair = (params: {
 }
 
 /**
- * Core behind `discoverVariantComponentsFromSources`: parses each local
- * `.module.css` file's `@layer component-defaults` block into a
- * `DiscoveredComponent`, deriving the JSX tag name from the basename with
- * `extension` stripped. This is plain, human-authored source with no
- * build-hashing, so `extractTopLevelClassNames`'s output is stored as-is —
- * see `discoverVariantComponentsFromPackageSources` for the separate
- * sidecar-based logic @akli-dev/ui's hashed package CSS needs instead.
- */
-const discoverFromSources = (
-  files: Array<{ path: string; source: string }>,
-  extension: string
-): DiscoveredComponent[] => {
-  const discovered: DiscoveredComponent[] = []
-
-  for (const { path, source } of files) {
-    const block = findLayerBlock(source, LAYER_NAME)
-    if (block === null) continue
-
-    discovered.push({
-      tag: basename(path, extension),
-      cssPath: path,
-      layered: extractTopLevelClassNames(block),
-    })
-  }
-
-  return discovered
-}
-
-/**
  * Discovers every component using the same `variant`-prop shape as
  * Typography/Link: a component CSS module (`src/components/**\/*.module.css`)
  * with a real `@layer component-defaults` at-rule of its own. The component's
@@ -461,7 +432,22 @@ const discoverFromSources = (
  */
 export const discoverVariantComponentsFromSources = (
   files: Array<{ path: string; source: string }>
-): DiscoveredComponent[] => discoverFromSources(files, '.module.css')
+): DiscoveredComponent[] => {
+  const discovered: DiscoveredComponent[] = []
+
+  for (const { path, source } of files) {
+    const block = findLayerBlock(source, LAYER_NAME)
+    if (block === null) continue
+
+    discovered.push({
+      tag: basename(path, '.module.css'),
+      cssPath: path,
+      layered: extractTopLevelClassNames(block),
+    })
+  }
+
+  return discovered
+}
 
 /**
  * A package component's shipped CSS paired with its sidecar `.module.js`
@@ -475,6 +461,17 @@ export interface PackageComponentSource {
   cssSource: string
   /** Text of the sibling `<Name>.module.js` sidecar. */
   moduleJsSource: string
+  /**
+   * `findLayerBlock(cssSource, LAYER_NAME)`'s result, computed once by
+   * `globAndReadPackageComponentSources` (which already needs it to decide
+   * whether this CSS file is a candidate at all, before it even reads that
+   * candidate's sidecar off disk) and reused here rather than re-running
+   * `findLayerBlock`'s comment-strip + brace-depth scan a second time in
+   * `discoverVariantComponentsFromPackageSources` — that function still
+   * checks this field for `null` itself (a component with no layer at all,
+   * e.g. Button today), it just no longer has to recompute it.
+   */
+  layerBlock: string | null
 }
 
 /**
@@ -544,8 +541,10 @@ export const parsePackageModuleMap = (moduleJsSource: string): Map<string, strin
  * that mapping instead. A semantic name counts as "layered" iff any of its
  * mapped hashed classname(s) — see that function's doc comment on why the
  * value can be more than one token — appear in
- * `extractTopLevelClassNames`'s (unmodified) output for that CSS file's
- * `@layer component-defaults` block.
+ * `extractTopLevelClassNames`'s (unmodified) output for `source.layerBlock`
+ * (that CSS file's `@layer component-defaults` block, already found once by
+ * `globAndReadPackageComponentSources` — see `PackageComponentSource`'s doc
+ * comment on why it's threaded through rather than re-derived here).
  *
  * If a component's CSS has no `@layer component-defaults` at all (Button,
  * today), it's skipped exactly as before — not a candidate, sidecar not even
@@ -560,9 +559,8 @@ export const discoverVariantComponentsFromPackageSources = (
 ): DiscoveredComponent[] => {
   const discovered: DiscoveredComponent[] = []
 
-  for (const { cssPath, cssSource, moduleJsSource } of sources) {
-    const block = findLayerBlock(cssSource, LAYER_NAME)
-    if (block === null) continue
+  for (const { cssPath, layerBlock, moduleJsSource } of sources) {
+    if (layerBlock === null) continue
 
     const semanticMap = parsePackageModuleMap(moduleJsSource)
     if (semanticMap === null) {
@@ -575,7 +573,7 @@ export const discoverVariantComponentsFromPackageSources = (
       continue
     }
 
-    const rawLayeredNames = extractTopLevelClassNames(block)
+    const rawLayeredNames = extractTopLevelClassNames(layerBlock)
     const layered = new Set<string>()
     for (const [semanticName, hashedValue] of semanticMap) {
       if (hashedValue.split(/\s+/).some((token) => rawLayeredNames.has(token))) {
@@ -595,7 +593,7 @@ const warnSkippingPackageComponent = (cssPath: string, reason: string): void => 
 }
 
 /** Globs `pattern` under `repoRoot` and reads each match into a `{path, source}` pair (path relative to `repoRoot`). */
-const globAndReadFiles = (repoRoot: string, pattern: string): Array<{ path: string; source: string }> =>
+export const globAndReadFiles = (repoRoot: string, pattern: string): Array<{ path: string; source: string }> =>
   globSync(pattern, { cwd: repoRoot, absolute: true }).map((absPath) => ({
     path: relative(repoRoot, absPath),
     source: readFileSync(absPath, 'utf8'),
@@ -612,12 +610,19 @@ const globAndReadFiles = (repoRoot: string, pattern: string): Array<{ path: stri
  * component CSS file with a layer has one), but is defended against here:
  * that one component is skipped — with a `console.warn` explaining why —
  * rather than crashing discovery for every other component.
+ *
+ * `findLayerBlock` (a full comment-strip regex pass plus a brace-depth scan)
+ * is run here once per CSS file to decide candidacy, and its result is
+ * stored on the returned `PackageComponentSource.layerBlock` so
+ * `discoverVariantComponentsFromPackageSources` doesn't have to run it again
+ * on the same `cssSource` to get the block's contents.
  */
-const globAndReadPackageComponentSources = (repoRoot: string, cssPattern: string): PackageComponentSource[] => {
+export const globAndReadPackageComponentSources = (repoRoot: string, cssPattern: string): PackageComponentSource[] => {
   const sources: PackageComponentSource[] = []
 
   for (const { path: cssPath, source: cssSource } of globAndReadFiles(repoRoot, cssPattern)) {
-    if (findLayerBlock(cssSource, LAYER_NAME) === null) continue
+    const layerBlock = findLayerBlock(cssSource, LAYER_NAME)
+    if (layerBlock === null) continue
 
     const moduleJsAbsPath = resolve(repoRoot, cssPath).replace(/\.css$/, '.module.js')
     let moduleJsSource: string
@@ -632,7 +637,7 @@ const globAndReadPackageComponentSources = (repoRoot: string, cssPattern: string
       continue
     }
 
-    sources.push({ cssPath, cssSource, moduleJsSource })
+    sources.push({ cssPath, cssSource, moduleJsSource, layerBlock })
   }
 
   return sources

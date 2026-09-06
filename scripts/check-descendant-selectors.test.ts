@@ -1,7 +1,5 @@
-import { readFileSync } from 'node:fs'
-import { dirname, relative, resolve } from 'node:path'
+import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { globSync } from 'glob'
 import { describe, expect, it, vi } from 'vitest'
 
 import {
@@ -13,6 +11,8 @@ import {
   extractTopLevelClassNames,
   findCompoundSelectorsForClass,
   findLayerBlock,
+  globAndReadFiles,
+  globAndReadPackageComponentSources,
   parsePackageModuleMap,
   parseTagUsage,
   scanComposesRepo,
@@ -20,29 +20,6 @@ import {
 } from './check-descendant-selectors'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-
-/** Test-only helper mirroring the script's own `globAndReadFiles`: globs `pattern` under `repoRoot` and reads each match into a `{path, source}` pair. */
-const readCssFiles = (repoRoot: string, pattern: string) =>
-  globSync(pattern, { cwd: repoRoot, absolute: true }).map((absPath) => ({
-    path: relative(repoRoot, absPath),
-    source: readFileSync(absPath, 'utf8'),
-  }))
-
-/**
- * Test-only helper mirroring the script's own `globAndReadPackageComponentSources`:
- * builds on `readCssFiles`, keeps only CSS with a real `@layer component-defaults`
- * (Button has none, so its sidecar is never even read here — same as production),
- * and reads each survivor's sibling `.module.js` sidecar into a
- * `PackageComponentSource`-shaped object.
- */
-const readPackageComponentSources = (repoRoot: string, cssPattern: string) =>
-  readCssFiles(repoRoot, cssPattern)
-    .filter(({ source }) => findLayerBlock(source, 'component-defaults') !== null)
-    .map(({ path, source }) => ({
-      cssPath: path,
-      cssSource: source,
-      moduleJsSource: readFileSync(resolve(repoRoot, path).replace(/\.css$/, '.module.js'), 'utf8'),
-    }))
 
 // Mirrors the real Typography.module.css shape (issue #263): a handful of
 // variant rules inside `@layer component-defaults`.
@@ -531,11 +508,13 @@ describe('discoverVariantComponentsFromPackageSources — package CSS + sidecar 
         cssPath: 'node_modules/@akli-dev/ui/dist/components/Typography/Typography.css',
         cssSource: TYPOGRAPHY_PACKAGE_CSS,
         moduleJsSource: TYPOGRAPHY_PACKAGE_MODULE_JS,
+        layerBlock: findLayerBlock(TYPOGRAPHY_PACKAGE_CSS, 'component-defaults'),
       },
       {
         cssPath: 'node_modules/@akli-dev/ui/dist/components/Link/Link.css',
         cssSource: LINK_PACKAGE_CSS,
         moduleJsSource: LINK_PACKAGE_MODULE_JS,
+        layerBlock: findLayerBlock(LINK_PACKAGE_CSS, 'component-defaults'),
       },
     ])
 
@@ -552,6 +531,7 @@ describe('discoverVariantComponentsFromPackageSources — package CSS + sidecar 
         cssPath: 'node_modules/@akli-dev/ui/dist/components/Input/Input.css',
         cssSource: INPUT_PACKAGE_CSS,
         moduleJsSource: INPUT_PACKAGE_MODULE_JS,
+        layerBlock: findLayerBlock(INPUT_PACKAGE_CSS, 'component-defaults'),
       },
     ])
 
@@ -565,6 +545,7 @@ describe('discoverVariantComponentsFromPackageSources — package CSS + sidecar 
         cssPath: 'node_modules/@akli-dev/ui/dist/components/Button/Button.css',
         cssSource: BUTTON_PACKAGE_CSS,
         moduleJsSource: BUTTON_PACKAGE_MODULE_JS,
+        layerBlock: findLayerBlock(BUTTON_PACKAGE_CSS, 'component-defaults'),
       },
     ])
 
@@ -579,12 +560,14 @@ describe('discoverVariantComponentsFromPackageSources — package CSS + sidecar 
         cssPath: 'node_modules/@akli-dev/ui/dist/components/Typography/Typography.css',
         cssSource: TYPOGRAPHY_PACKAGE_CSS,
         moduleJsSource: TYPOGRAPHY_PACKAGE_MODULE_JS,
+        layerBlock: findLayerBlock(TYPOGRAPHY_PACKAGE_CSS, 'component-defaults'),
       },
       {
         // A layer exists, so this is a candidate — but its sidecar is malformed junk.
         cssPath: 'node_modules/@akli-dev/ui/dist/components/Broken/Broken.css',
         cssSource: '@layer component-defaults{._foo_abcde_1{color:red}}',
         moduleJsSource: 'export default {};',
+        layerBlock: findLayerBlock('@layer component-defaults{._foo_abcde_1{color:red}}', 'component-defaults'),
       },
     ])
 
@@ -601,7 +584,7 @@ describe('discoverVariantComponentsFromPackageSources — integration against th
   // node_modules, so there's no need to re-glob/re-read/re-parse it per `it`.
   const repoRoot = resolve(__dirname, '..')
   const discovered = discoverVariantComponentsFromPackageSources(
-    readPackageComponentSources(repoRoot, 'node_modules/@akli-dev/ui/dist/components/**/*.css')
+    globAndReadPackageComponentSources(repoRoot, 'node_modules/@akli-dev/ui/dist/components/**/*.css')
   )
 
   it('discovers Typography and Link from the real shipped, build-hashed dist CSS resolved via the real sidecar .module.js files — restoring the coverage lost when their local .module.css files were deleted', () => {
@@ -657,7 +640,7 @@ describe('scanRepo — integration against the current repo state', () => {
     // Regression guard for the generalized discovery against real files —
     // confirms it isn't only exercised via the synthetic fixtures above.
     const repoRoot = resolve(__dirname, '..')
-    const files = readCssFiles(repoRoot, 'src/components/**/*.module.css')
+    const files = globAndReadFiles(repoRoot, 'src/components/**/*.module.css')
 
     const discovered = discoverVariantComponentsFromSources(files)
     const tags = discovered.map((c) => c.tag).sort()
