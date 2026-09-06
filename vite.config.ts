@@ -183,6 +183,9 @@ const getBlogRoutes = (): Array<{ route: string; priority: number; changefreq: '
   }
 }
 
+const clientOnlyPlugins = (isSsrBuild: boolean | undefined, plugins: Plugin[]): Plugin[] =>
+  isSsrBuild ? [] : plugins
+
 export default defineConfig(({ command, isSsrBuild, mode }) => {
   const env = loadEnv(mode, rootDir, '')
   return {
@@ -219,35 +222,33 @@ export default defineConfig(({ command, isSsrBuild, mode }) => {
       ],
     }),
     imagetools(),
-    ...(!isSsrBuild
-      ? [
-          preloadFonts(),
-          sitemapPlugin({
-            hostname: 'https://akli.dev',
-            pagesDir: 'src/pages',
-            include: ['**/*.tsx'],
-            exclude: ['**/*.test.*', '**/*.spec.*', '**/NotFound.*', '**/*test*', '**/BlogPost.*'],
-            routeMapping: {
-              '/home': '/',
-            },
-            routeConfig: {
-              '/': {
-                priority: 1.0,
-                changefreq: 'monthly',
-              },
-              '/apps': {
-                priority: 0.8,
-                changefreq: 'monthly',
-              },
-            },
-            defaultPriority: 0.5,
-            defaultChangefreq: 'monthly',
-            additionalRoutes: [
-              ...getBlogRoutes(),
-            ],
-          }),
-        ]
-      : []),
+    ...clientOnlyPlugins(isSsrBuild, [
+      preloadFonts(),
+      sitemapPlugin({
+        hostname: 'https://akli.dev',
+        pagesDir: 'src/pages',
+        include: ['**/*.tsx'],
+        exclude: ['**/*.test.*', '**/*.spec.*', '**/NotFound.*', '**/*test*', '**/BlogPost.*'],
+        routeMapping: {
+          '/home': '/',
+        },
+        routeConfig: {
+          '/': {
+            priority: 1.0,
+            changefreq: 'monthly',
+          },
+          '/apps': {
+            priority: 0.8,
+            changefreq: 'monthly',
+          },
+        },
+        defaultPriority: 0.5,
+        defaultChangefreq: 'monthly',
+        additionalRoutes: [
+          ...getBlogRoutes(),
+        ],
+      }),
+    ]),
   ],
   resolve: {
     alias: {
