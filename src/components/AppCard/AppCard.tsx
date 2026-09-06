@@ -1,5 +1,4 @@
-import { Image, Typography } from '@akli-dev/ui'
-import type { ImageProps } from '@akli-dev/ui'
+import { Image, Typography, type ImageProps } from '@akli-dev/ui'
 import Tag from '@components/Tag'
 import type { FC } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
@@ -14,7 +13,13 @@ export interface AppCardProps {
   tag?: string
 }
 
-const AppCard: FC<AppCardProps> = ({ title, description, href, image, tag }) => {
+const AppCard: FC<AppCardProps> = ({
+  title,
+  description,
+  href,
+  image,
+  tag,
+}) => {
   const content = (
     <>
       <div className={styles.imageWrapper} aria-hidden="true">
@@ -43,7 +48,9 @@ const AppCard: FC<AppCardProps> = ({ title, description, href, image, tag }) => 
           </span>
         </div>
 
-        <Typography variant="body" className={styles.description}>{description}</Typography>
+        <Typography variant="body" className={styles.description}>
+          {description}
+        </Typography>
 
         <span className={styles.openApp}>Open app</span>
       </div>

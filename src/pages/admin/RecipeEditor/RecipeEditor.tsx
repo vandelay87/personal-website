@@ -1,4 +1,11 @@
-import { IconAlertCircle, IconPreview, Link, Loading, Typography, iconLock } from '@akli-dev/ui'
+import {
+  IconAlertCircle,
+  IconPreview,
+  Link,
+  Loading,
+  Typography,
+  iconLock,
+} from '@akli-dev/ui'
 import { isSessionError } from '@api/auth'
 import {
   createDraft,
@@ -26,8 +33,21 @@ import {
 } from '@hooks/useImageProcessingPoll'
 import { applyStepReadiness, sluggify } from '@models/recipe'
 import type { Ingredient, Recipe, Step, Tag } from '@models/recipe'
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type FC } from 'react'
-import { useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  type FC,
+} from 'react'
+import {
+  useBlocker,
+  useLocation,
+  useNavigate,
+  useParams,
+} from 'react-router-dom'
 
 import interactions from '../../../styles/interactions.module.css'
 import stateBox from '../../../styles/stateBox.module.css'
@@ -62,7 +82,12 @@ interface FormState {
 
 type SettableField = Exclude<
   keyof FormState,
-  'dirty' | 'mode' | 'id' | 'coverImageProcessedAt' | 'slugManuallyEdited' | 'hasPersistedImages'
+  | 'dirty'
+  | 'mode'
+  | 'id'
+  | 'coverImageProcessedAt'
+  | 'slugManuallyEdited'
+  | 'hasPersistedImages'
 >
 
 type FormAction =
@@ -110,8 +135,14 @@ const recipeToFormState = (recipe: Recipe, freshDraft = false): FormState => {
     cookTime: recipe.cookTime,
     servings: recipe.servings,
     tags: recipe.tags ?? [],
-    ingredients: ingredients.length > 0 ? ingredients : [{ item: '', quantity: '', unit: '' }],
-    steps: steps.length > 0 ? steps : [{ stepId: crypto.randomUUID(), order: 1, text: '' }],
+    ingredients:
+      ingredients.length > 0
+        ? ingredients
+        : [{ item: '', quantity: '', unit: '' }],
+    steps:
+      steps.length > 0
+        ? steps
+        : [{ stepId: crypto.randomUUID(), order: 1, text: '' }],
     coverImageAlt: recipe.coverImage?.alt ?? '',
     coverImageProcessedAt: recipe.coverImage?.processedAt,
     hasPersistedImages:
@@ -138,26 +169,38 @@ const applyImageStatusUpdates = (
   // spread carries the existing `dirty` value unchanged.
   return {
     ...state,
-    coverImageProcessedAt: coverUpdate?.processedAt ?? state.coverImageProcessedAt,
+    coverImageProcessedAt:
+      coverUpdate?.processedAt ?? state.coverImageProcessedAt,
     steps: nextSteps,
   }
 }
 
 const withStepIds = (steps: Step[]): Step[] =>
-  steps.map((step) => (step.stepId ? step : { ...step, stepId: crypto.randomUUID() }))
+  steps.map((step) =>
+    step.stepId ? step : { ...step, stepId: crypto.randomUUID() }
+  )
 
 const formReducer = (state: FormState, action: FormAction): FormState => {
   switch (action.type) {
     case 'SET_FIELD': {
       if (action.field === 'slug') {
-        return { ...state, slug: action.value as string, slugManuallyEdited: true, dirty: true }
+        return {
+          ...state,
+          slug: action.value as string,
+          slugManuallyEdited: true,
+          dirty: true,
+        }
       }
       if (action.field === 'title' && !state.slugManuallyEdited) {
         const title = action.value as string
         return { ...state, title, slug: sluggify(title), dirty: true }
       }
       if (action.field === 'steps') {
-        return { ...state, steps: withStepIds(action.value as Step[]), dirty: true }
+        return {
+          ...state,
+          steps: withStepIds(action.value as Step[]),
+          dirty: true,
+        }
       }
       return { ...state, [action.field]: action.value, dirty: true }
     }
@@ -168,7 +211,12 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
     case 'SET_MODE':
       return { ...state, mode: action.mode }
     case 'RESET_SLUG_TO_TITLE':
-      return { ...state, slug: sluggify(state.title), slugManuallyEdited: false, dirty: true }
+      return {
+        ...state,
+        slug: sluggify(state.title),
+        slugManuallyEdited: false,
+        dirty: true,
+      }
     case 'IMAGE_STATUS_UPDATE':
       return applyImageStatusUpdates(state, action.updates)
   }
@@ -176,7 +224,8 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
 
 const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/
 
-const isValidSlug = (slug: string): boolean => slug.length <= 100 && SLUG_REGEX.test(slug)
+const isValidSlug = (slug: string): boolean =>
+  slug.length <= 100 && SLUG_REGEX.test(slug)
 
 const buildPatchPayload = (form: FormState): Partial<Recipe> => ({
   title: form.title,
@@ -214,12 +263,18 @@ const computePublishChecklist = (form: FormState): PublishChecklistItem[] => {
     { label: 'Intro', done: !!form.intro.trim() },
     { label: 'Cover image', done: form.coverImageProcessedAt !== undefined },
     { label: 'Alt text', done: !!form.coverImageAlt.trim() },
-    { label: 'At least one ingredient', done: form.ingredients.some((ing) => ing.item.trim()) },
+    {
+      label: 'At least one ingredient',
+      done: form.ingredients.some((ing) => ing.item.trim()),
+    },
     { label: 'At least one step', done: form.steps.some((s) => s.text.trim()) },
   ]
   form.steps.forEach((step, index) => {
     if (step.image && step.image.processedAt === undefined) {
-      items.push({ label: `Step ${index + 1} image still processing`, done: false })
+      items.push({
+        label: `Step ${index + 1} image still processing`,
+        done: false,
+      })
     }
     if (step.image?.processedAt !== undefined && !step.image.alt?.trim()) {
       items.push({ label: `Step ${index + 1} image alt text`, done: false })
@@ -262,18 +317,26 @@ const RecipeEditor: FC = () => {
   const [existingTags, setExistingTags] = useState<string[]>([])
   const [loading, setLoading] = useState(Boolean(routeId))
   const [submitting, setSubmitting] = useState(false)
-  const [announcement, setAnnouncement] = useState({ message: '', toggle: false })
+  const [announcement, setAnnouncement] = useState({
+    message: '',
+    toggle: false,
+  })
   const [sessionExpired, setSessionExpired] = useState(false)
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false)
   const [isCoverUploading, setIsCoverUploading] = useState(false)
-  const [uploadingStepIds, setUploadingStepIds] = useState<Set<string>>(new Set())
+  const [uploadingStepIds, setUploadingStepIds] = useState<Set<string>>(
+    new Set()
+  )
   const [slugError, setSlugError] = useState<string | null>(null)
   // True once a cover upload starts this session. A loaded recipe with no
   // processed cover is indistinguishable from one whose cover is still
   // processing, so only the in-session upload signal tells us a cover exists
   // and should be polled. Reset whenever a different recipe loads.
-  const [coverUploadedThisSession, setCoverUploadedThisSession] = useState(false)
-  const [lastFormIdForCoverReset, setLastFormIdForCoverReset] = useState(form.id)
+  const [coverUploadedThisSession, setCoverUploadedThisSession] =
+    useState(false)
+  const [lastFormIdForCoverReset, setLastFormIdForCoverReset] = useState(
+    form.id
+  )
 
   const recentlyCreatedIdRef = useRef<string | null>(null)
   const creatingDraftRef = useRef(false)
@@ -285,17 +348,20 @@ const RecipeEditor: FC = () => {
     []
   )
 
-  const handleError = useCallback((err: unknown, fallback?: string) => {
-    if (isSessionError(err)) {
-      setSessionExpired(true)
-      return
-    }
-    const message = err instanceof Error ? err.message : 'An error occurred'
-    if (err instanceof Error && /^409\b/.test(message)) {
-      setSlugError(message.replace(/^409\s*/, ''))
-    }
-    showToast(fallback ?? `Error: ${message}`, 'error')
-  }, [showToast])
+  const handleError = useCallback(
+    (err: unknown, fallback?: string) => {
+      if (isSessionError(err)) {
+        setSessionExpired(true)
+        return
+      }
+      const message = err instanceof Error ? err.message : 'An error occurred'
+      if (err instanceof Error && /^409\b/.test(message)) {
+        setSlugError(message.replace(/^409\s*/, ''))
+      }
+      showToast(fallback ?? `Error: ${message}`, 'error')
+    },
+    [showToast]
+  )
 
   const blocker = useBlocker(form.dirty)
 
@@ -332,7 +398,11 @@ const RecipeEditor: FC = () => {
         const token = await getAccessToken()
         const { id, slug } = await createDraft(token)
         recentlyCreatedIdRef.current = id
-        dispatch({ type: 'LOAD_RECIPE', recipe: draftFromCreated(id, slug), freshDraft: true })
+        dispatch({
+          type: 'LOAD_RECIPE',
+          recipe: draftFromCreated(id, slug),
+          freshDraft: true,
+        })
         navigate(`/admin/recipes/${id}/edit`, { replace: true })
       } catch (err) {
         handleError(err, 'Error creating draft')
@@ -378,7 +448,12 @@ const RecipeEditor: FC = () => {
     [getAccessToken]
   )
 
-  const { status: autosaveStatus, lastSavedAt, retry, flush } = useAutosave(form, saveFn, {
+  const {
+    status: autosaveStatus,
+    lastSavedAt,
+    retry,
+    flush,
+  } = useAutosave(form, saveFn, {
     intervalMs: 2000,
   })
 
@@ -435,7 +510,13 @@ const RecipeEditor: FC = () => {
       status: form.mode,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.id, form.coverImageAlt, form.coverImageProcessedAt, form.steps, coverUploadedThisSession])
+  }, [
+    form.id,
+    form.coverImageAlt,
+    form.coverImageProcessedAt,
+    form.steps,
+    coverUploadedThisSession,
+  ])
 
   const { timedOut } = useImageProcessingPoll(loadedRecipe, (updates) => {
     dispatch({ type: 'IMAGE_STATUS_UPDATE', updates })
@@ -519,9 +600,18 @@ const RecipeEditor: FC = () => {
     }
   }
 
-  const setIngredients = useCallback((next: Ingredient[]) => setField('ingredients', next), [setField])
-  const setSteps = useCallback((next: Step[]) => setField('steps', next), [setField])
-  const setTags = useCallback((next: string[]) => setField('tags', next), [setField])
+  const setIngredients = useCallback(
+    (next: Ingredient[]) => setField('ingredients', next),
+    [setField]
+  )
+  const setSteps = useCallback(
+    (next: Step[]) => setField('steps', next),
+    [setField]
+  )
+  const setTags = useCallback(
+    (next: string[]) => setField('tags', next),
+    [setField]
+  )
 
   const handleCoverUploadStarted = useCallback(() => {
     setIsCoverUploading(true)
@@ -556,7 +646,8 @@ const RecipeEditor: FC = () => {
   const loginHref = `/admin/login?redirect=${encodeURIComponent(location.pathname)}`
   const recipeId = form.id || routeId
   const isPublished = form.mode === 'published'
-  const slugResettable = !slugLocked && form.slugManuallyEdited && sluggify(form.title) !== form.slug
+  const slugResettable =
+    !slugLocked && form.slugManuallyEdited && sluggify(form.title) !== form.slug
 
   return (
     <div className={styles.container}>
@@ -566,7 +657,10 @@ const RecipeEditor: FC = () => {
             <span className={styles.bannerIcon} aria-hidden="true">
               <IconAlertCircle size={17} ariaHidden />
             </span>
-            <span>Your session has expired. Log in again to keep editing — your latest changes are saved.</span>
+            <span>
+              Your session has expired. Log in again to keep editing — your
+              latest changes are saved.
+            </span>
           </span>
           <Link to={loginHref} variant="ghost" className={styles.bannerAction}>
             Log in again
@@ -580,7 +674,9 @@ const RecipeEditor: FC = () => {
             className={`${interactions.spinner} ${interactions.spinnerSm} ${styles.timeoutSpinner}`}
             aria-hidden="true"
           />
-          <span>Processing is taking longer than expected — try refreshing the page.</span>
+          <span>
+            Processing is taking longer than expected — try refreshing the page.
+          </span>
         </div>
       )}
 
@@ -635,7 +731,9 @@ const RecipeEditor: FC = () => {
                 readOnly={slugLocked}
                 aria-disabled={slugLocked || undefined}
                 aria-describedby={
-                  slugError ? 'recipe-slug-preview recipe-slug-error' : 'recipe-slug-preview'
+                  slugError
+                    ? 'recipe-slug-preview recipe-slug-error'
+                    : 'recipe-slug-preview'
                 }
                 onChange={(e) => {
                   setSlugError(null)
@@ -662,11 +760,18 @@ const RecipeEditor: FC = () => {
                   <span className={styles.slugLockIcon} aria-hidden="true">
                     {iconLock}
                   </span>
-                  <span>Locked — images reference this URL. Remove all images to change it.</span>
+                  <span>
+                    Locked — images reference this URL. Remove all images to
+                    change it.
+                  </span>
                 </p>
               )}
               {slugError && (
-                <p id="recipe-slug-error" role="alert" className={styles.slugError}>
+                <p
+                  id="recipe-slug-error"
+                  role="alert"
+                  className={styles.slugError}
+                >
                   {slugError}
                 </p>
               )}
@@ -719,7 +824,9 @@ const RecipeEditor: FC = () => {
           </fieldset>
 
           <fieldset className={styles.sectionTight}>
-            <legend className={styles.sectionLabel}>Timing &amp; servings</legend>
+            <legend className={styles.sectionLabel}>
+              Timing &amp; servings
+            </legend>
             <div className={styles.metadataRow}>
               <div className={styles.field}>
                 <label htmlFor="recipe-prep-time" className={styles.fieldLabel}>
@@ -774,7 +881,9 @@ const RecipeEditor: FC = () => {
           <fieldset className={styles.sectionTight}>
             <legend className={styles.sectionLabelRow}>
               <span className={styles.sectionLabel}>Ingredients</span>
-              <span className={styles.hint}>{pluralize(form.ingredients.length, 'item')}</span>
+              <span className={styles.hint}>
+                {pluralize(form.ingredients.length, 'item')}
+              </span>
             </legend>
             <IngredientList
               ingredients={form.ingredients}
@@ -786,7 +895,9 @@ const RecipeEditor: FC = () => {
           <fieldset className={styles.sectionTight}>
             <legend className={styles.sectionLabelRow}>
               <span className={styles.sectionLabel}>Method</span>
-              <span className={styles.hint}>{pluralize(form.steps.length, 'step')}</span>
+              <span className={styles.hint}>
+                {pluralize(form.steps.length, 'step')}
+              </span>
             </legend>
             {recipeId && (
               <StepList
@@ -824,7 +935,9 @@ const RecipeEditor: FC = () => {
                     loading={submitting}
                     disabled={!canPublish}
                     fullWidth
-                    ariaDescribedBy={!canPublish ? MISSING_FIELDS_ID : undefined}
+                    ariaDescribedBy={
+                      !canPublish ? MISSING_FIELDS_ID : undefined
+                    }
                   >
                     Publish
                   </Button>
@@ -842,7 +955,10 @@ const RecipeEditor: FC = () => {
 
                 {!canPublish && (
                   <div className={styles.checklistWrap}>
-                    <p id={`${MISSING_FIELDS_ID}-label`} className={styles.checklistLabel}>
+                    <p
+                      id={`${MISSING_FIELDS_ID}-label`}
+                      className={styles.checklistLabel}
+                    >
                       Before publishing
                     </p>
                     <ul
@@ -856,7 +972,10 @@ const RecipeEditor: FC = () => {
                           className={styles.checklistItem}
                           data-done={item.done}
                         >
-                          <span className={styles.checklistIcon} aria-hidden="true">
+                          <span
+                            className={styles.checklistIcon}
+                            aria-hidden="true"
+                          >
                             {item.done ? '✓' : ''}
                           </span>
                           <span>{item.label}</span>
@@ -869,7 +988,12 @@ const RecipeEditor: FC = () => {
             ) : (
               <>
                 <div className={styles.actionsCol}>
-                  <Button onClick={handleUpdate} type="button" loading={submitting} fullWidth>
+                  <Button
+                    onClick={handleUpdate}
+                    type="button"
+                    loading={submitting}
+                    fullWidth
+                  >
                     Update
                   </Button>
                   <Button
@@ -901,7 +1025,8 @@ const RecipeEditor: FC = () => {
       </div>
 
       <div className="sr-only" role="status" aria-live="polite">
-        {announcement.message && `${announcement.message}${announcement.toggle ? '​' : ''}`}
+        {announcement.message &&
+          `${announcement.message}${announcement.toggle ? '​' : ''}`}
       </div>
 
       <ConfirmDialog
@@ -912,7 +1037,8 @@ const RecipeEditor: FC = () => {
         onConfirm={() => blocker.proceed?.()}
         onCancel={() => blocker.reset?.()}
       >
-        Your changes are still saving. If you leave now they might not be stored.
+        Your changes are still saving. If you leave now they might not be
+        stored.
       </ConfirmDialog>
 
       <ConfirmDialog
@@ -924,7 +1050,8 @@ const RecipeEditor: FC = () => {
         onConfirm={handleDiscardConfirm}
         onCancel={() => setDiscardDialogOpen(false)}
       >
-        This draft and everything in it will be permanently deleted. This can&rsquo;t be undone.
+        This draft and everything in it will be permanently deleted. This
+        can&rsquo;t be undone.
       </ConfirmDialog>
     </div>
   )
