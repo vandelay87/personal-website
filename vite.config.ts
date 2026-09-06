@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
+import { preloadFonts } from '@akli-dev/ui/vite-plugin'
 import mdx from '@mdx-js/rollup'
 import rehypeShiki from '@shikijs/rehype'
 import type { ShikiTransformer } from '@shikijs/types'
@@ -220,6 +221,7 @@ export default defineConfig(({ command, isSsrBuild, mode }) => {
     imagetools(),
     ...(!isSsrBuild
       ? [
+          preloadFonts(),
           sitemapPlugin({
             hostname: 'https://akli.dev',
             pagesDir: 'src/pages',
