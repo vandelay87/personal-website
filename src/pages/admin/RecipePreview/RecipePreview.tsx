@@ -3,6 +3,7 @@ import {
   IconPreview,
   Link,
   Loading,
+  ThemeToggle,
   Typography,
   iconEdit,
   iconNotFound,
@@ -12,7 +13,6 @@ import {
 import { isSessionError } from '@api/auth'
 import { fetchRecipeByIdAdmin, publishRecipe } from '@api/recipes'
 import RecipeDetailView from '@components/RecipeDetailView'
-import ThemeToggle from '@components/ThemeToggle'
 import { useAuth } from '@contexts/AuthContext'
 import {
   useImageProcessingPoll,

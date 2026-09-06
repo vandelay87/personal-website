@@ -1,6 +1,5 @@
 @import '@akli-dev/ui/fonts.css';
 @import '@akli-dev/ui/tokens.css';
-@import './styles/animations.css';
 
 /* Cascade layer order (higher-priority layers later): `component-defaults`
    (Typography/Link/Tag's own base styles, issue #263) is beaten by

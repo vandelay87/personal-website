@@ -1,5 +1,4 @@
-import Footer from '@components/Footer'
-import Header, { type HeaderLink } from '@components/Header'
+import { Footer, Header, type HeaderLink } from '@akli-dev/ui'
 import PageShell from '@components/PageShell'
 import { useAuth } from '@contexts/AuthContext'
 import type { FC, ReactNode } from 'react'

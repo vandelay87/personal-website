@@ -9,6 +9,7 @@ import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { axe } from 'vitest-axe'
 
 import RecipePreview from './RecipePreview'
 
@@ -154,7 +155,7 @@ describe('RecipePreview page', () => {
   // AC1 — renders the recipe using the same display components as the public
   // recipe detail page (title, ingredients, steps, intro).
   it('renders the recipe title, intro, ingredients and steps', async () => {
-    renderPreview('rec-draft')
+    const { container } = renderPreview('rec-draft')
 
     await waitFor(() => {
       expect(
@@ -171,6 +172,7 @@ describe('RecipePreview page', () => {
     expect(
       screen.getByText('Bake the shell blind for 15 minutes')
     ).toBeInTheDocument()
+    expect(await axe(container)).toHaveNoViolations()
   })
 
   // AC2 — Draft recipes show the draft banner with Edit and Publish controls.
@@ -212,7 +214,7 @@ describe('RecipePreview page', () => {
   // to the public page at /recipes/<slug>.
   it('shows the published banner with Edit and a link to the public page for a published recipe', async () => {
     vi.mocked(fetchRecipeByIdAdmin).mockResolvedValue(mockPublishedRecipe)
-    renderPreview('rec-published')
+    const { container } = renderPreview('rec-published')
 
     await waitFor(() => {
       expect(
@@ -235,6 +237,7 @@ describe('RecipePreview page', () => {
         link.getAttribute('href') === '/recipes/published-thai-green-curry'
     )
     expect(publicLink).toBeDefined()
+    expect(await axe(container)).toHaveNoViolations()
   })
 
   it('does not show a Publish button for an already-published recipe', async () => {
