@@ -54,6 +54,14 @@
  * A Tag-specific check would need bespoke logic for its `active`/
  * `removeClassName` shape, which is a different mechanism and not attempted
  * here.
+ *
+ * Same shape, discovered from @akli-dev/ui's shipped CSS (issue #413, see
+ * `discoverVariantComponentsFromPackageSources`): Input has a real shipped
+ * layer (`.field`) but no `variant` prop, so — like Tag — it's discovered as
+ * a candidate but never flagged. Button is the mirror image: it has a
+ * `variant` prop but no shipped `@layer component-defaults` yet, so it isn't
+ * discovered as a candidate at all. Both are expected given the package's
+ * current release, not bugs in this check.
  */
 
 import { readFileSync } from 'node:fs'
@@ -66,6 +74,16 @@ const REPO_ROOT = resolve(__dirname, '..')
 
 const TEXT_MODULE_CSS_PATH = 'src/styles/text.module.css'
 const LAYER_NAME = 'component-defaults'
+/**
+ * Scoped to `dist/components/**\/*.css` rather than a bare `dist/**\/*.css`:
+ * `dist/styles/interactions.css` also contains a real `@layer component-defaults`
+ * block (a shared utility file, not a per-component one) and would derive a
+ * nonsensical "tag" (`interactions`) if swept in — harmless in practice (no
+ * `<interactions>` JSX tag can ever exist to match it), but there's no reason
+ * to invite a spurious discovered candidate when this narrower glob matches
+ * the package's actual per-component file layout just as easily.
+ */
+const PACKAGE_COMPONENTS_CSS_GLOB = 'node_modules/@akli-dev/ui/dist/components/**/*.css'
 
 export interface Finding {
   tsxFile: string
@@ -392,6 +410,35 @@ export const checkPair = (params: {
 }
 
 /**
+ * Core behind `discoverVariantComponentsFromSources`: parses each local
+ * `.module.css` file's `@layer component-defaults` block into a
+ * `DiscoveredComponent`, deriving the JSX tag name from the basename with
+ * `extension` stripped. This is plain, human-authored source with no
+ * build-hashing, so `extractTopLevelClassNames`'s output is stored as-is —
+ * see `discoverVariantComponentsFromPackageSources` for the separate
+ * sidecar-based logic @akli-dev/ui's hashed package CSS needs instead.
+ */
+const discoverFromSources = (
+  files: Array<{ path: string; source: string }>,
+  extension: string
+): DiscoveredComponent[] => {
+  const discovered: DiscoveredComponent[] = []
+
+  for (const { path, source } of files) {
+    const block = findLayerBlock(source, LAYER_NAME)
+    if (block === null) continue
+
+    discovered.push({
+      tag: basename(path, extension),
+      cssPath: path,
+      layered: extractTopLevelClassNames(block),
+    })
+  }
+
+  return discovered
+}
+
+/**
  * Discovers every component using the same `variant`-prop shape as
  * Typography/Link: a component CSS module (`src/components/**\/*.module.css`)
  * with a real `@layer component-defaults` at-rule of its own. The component's
@@ -414,32 +461,196 @@ export const checkPair = (params: {
  */
 export const discoverVariantComponentsFromSources = (
   files: Array<{ path: string; source: string }>
+): DiscoveredComponent[] => discoverFromSources(files, '.module.css')
+
+/**
+ * A package component's shipped CSS paired with its sidecar `.module.js`
+ * (same basename, e.g. `Typography.css` + `Typography.module.js`) — see
+ * `parsePackageModuleMap`'s doc comment for what that sidecar contains and
+ * why it's used instead of reverse-engineering the CSS's hash shape.
+ */
+export interface PackageComponentSource {
+  /** Path to the component's shipped CSS, relative to repo root. */
+  cssPath: string
+  cssSource: string
+  /** Text of the sibling `<Name>.module.js` sidecar. */
+  moduleJsSource: string
+}
+
+/**
+ * Parses an @akli-dev/ui component's shipped `<Name>.module.js` sidecar —
+ * the bundler-emitted, authoritative semantic-name -> hashed-classname
+ * mapping (e.g. `dist/components/Typography/Typography.module.js`) — into a
+ * `semanticName -> hashedClassName` map. This is the literal mapping the
+ * build step itself produced, not a heuristic reconstruction of the CSS's
+ * hash shape (issue #413 follow-up: a regex de-hashing the CSS directly,
+ * `_heading1_q94bf_8` -> `heading1`, depended on that hash format staying
+ * stable; this doesn't).
+ *
+ * These are small, consistent esbuild/rollup-emitted files, confirmed real
+ * against Typography/Link/Input/Button, always this shape:
+ *
+ *   var e = "_heading1_q94bf_8", t = "_heading2_q94bf_15", ..., c = {
+ *     heading1: e,
+ *     heading2: t,
+ *     ...
+ *   };
+ *
+ * Step A matches every `<var> = "<hashedClassName>"` pair from the
+ * declaration list. The matched value can itself be a space-separated list
+ * of multiple hashed class names — e.g. Input's real
+ * `field: "_field_a84mr_13 _field_19wrf_36"`, a CSS Modules `composes:`
+ * result — so it's kept as one opaque string here, not assumed to be a
+ * single token. Step B matches every `<semanticName>: <var>` pair inside
+ * the object-literal block and resolves each `var` through step A's map.
+ *
+ * Returns null (rather than throwing) if either step finds nothing, e.g. a
+ * future build-tooling change emits a different shape entirely — the
+ * caller then skips that one component with a clear reason instead of
+ * crashing discovery for every other component.
+ */
+export const parsePackageModuleMap = (moduleJsSource: string): Map<string, string> | null => {
+  const varValues = new Map<string, string>()
+  for (const [, varName, hashedValue] of moduleJsSource.matchAll(/\b([A-Za-z_$][\w$]*)\s*=\s*"([^"]*)"/g)) {
+    varValues.set(varName, hashedValue)
+  }
+  if (varValues.size === 0) return null
+
+  const objectLiteralMatch = moduleJsSource.match(/=\s*\{([\s\S]*?)\}\s*;/)
+  if (!objectLiteralMatch) return null
+
+  const semanticMap = new Map<string, string>()
+  for (const [, semanticName, varName] of objectLiteralMatch[1].matchAll(/([\w$]+)\s*:\s*([A-Za-z_$][\w$]*)/g)) {
+    const hashedValue = varValues.get(varName)
+    if (hashedValue !== undefined) semanticMap.set(semanticName, hashedValue)
+  }
+
+  return semanticMap.size > 0 ? semanticMap : null
+}
+
+/**
+ * Same discovery logic as `discoverVariantComponentsFromSources`, but for
+ * @akli-dev/ui's shipped components (`dist/components/**\/*.css`, each
+ * paired with its sidecar `.module.js`) rather than this repo's local
+ * `.module.css` source — see this file's header comment and issue #413: as
+ * components migrate out to the package (Phases B-D), their local CSS
+ * module is deleted, and `discoverVariantComponentsFromSources` alone can
+ * no longer see their `@layer component-defaults` rules at all once that
+ * happens.
+ *
+ * The package's shipped CSS is compiled CSS-Modules output with build-hashed
+ * class names, so there's no way to recover the original semantic name from
+ * the CSS text alone — `parsePackageModuleMap` reads the sidecar that *is*
+ * that mapping instead. A semantic name counts as "layered" iff any of its
+ * mapped hashed classname(s) — see that function's doc comment on why the
+ * value can be more than one token — appear in
+ * `extractTopLevelClassNames`'s (unmodified) output for that CSS file's
+ * `@layer component-defaults` block.
+ *
+ * If a component's CSS has no `@layer component-defaults` at all (Button,
+ * today), it's skipped exactly as before — not a candidate, sidecar not even
+ * parsed. If a sidecar fails to parse (`parsePackageModuleMap` returns null),
+ * that one component is skipped with a `console.warn` explaining why, rather
+ * than crashing discovery for every other component. JSX tag name is still
+ * derived from the CSS file's basename (`Typography.css` -> `Typography`),
+ * the same convention as local-file discovery.
+ */
+export const discoverVariantComponentsFromPackageSources = (
+  sources: PackageComponentSource[]
 ): DiscoveredComponent[] => {
   const discovered: DiscoveredComponent[] = []
 
-  for (const { path, source } of files) {
-    const block = findLayerBlock(source, LAYER_NAME)
+  for (const { cssPath, cssSource, moduleJsSource } of sources) {
+    const block = findLayerBlock(cssSource, LAYER_NAME)
     if (block === null) continue
 
-    discovered.push({
-      tag: basename(path, '.module.css'),
-      cssPath: path,
-      layered: extractTopLevelClassNames(block),
-    })
+    const semanticMap = parsePackageModuleMap(moduleJsSource)
+    if (semanticMap === null) {
+      warnSkippingPackageComponent(
+        cssPath,
+        `its .module.js sidecar didn't match the expected esbuild/rollup CSS-Modules shape, so the ` +
+          `authoritative semantic-name mapping couldn't be parsed. Excluding this component from ` +
+          `discovery rather than guessing.`
+      )
+      continue
+    }
+
+    const rawLayeredNames = extractTopLevelClassNames(block)
+    const layered = new Set<string>()
+    for (const [semanticName, hashedValue] of semanticMap) {
+      if (hashedValue.split(/\s+/).some((token) => rawLayeredNames.has(token))) {
+        layered.add(semanticName)
+      }
+    }
+
+    discovered.push({ tag: basename(cssPath, '.css'), cssPath, layered })
   }
 
   return discovered
 }
 
-/** Impure wrapper around `discoverVariantComponentsFromSources`: globs+reads component CSS modules off disk. */
-const discoverVariantComponents = (repoRoot: string): DiscoveredComponent[] => {
-  const cssFiles = globSync('src/components/**/*.module.css', { cwd: repoRoot, absolute: true })
-  const files = cssFiles.map((absPath) => ({
+/** Logs why one @akli-dev/ui package component is being excluded from discovery, so a bad file doesn't crash the whole script. */
+const warnSkippingPackageComponent = (cssPath: string, reason: string): void => {
+  console.warn(`check-descendant-selectors: skipping ${cssPath} — ${reason}`)
+}
+
+/** Globs `pattern` under `repoRoot` and reads each match into a `{path, source}` pair (path relative to `repoRoot`). */
+const globAndReadFiles = (repoRoot: string, pattern: string): Array<{ path: string; source: string }> =>
+  globSync(pattern, { cwd: repoRoot, absolute: true }).map((absPath) => ({
     path: relative(repoRoot, absPath),
     source: readFileSync(absPath, 'utf8'),
   }))
-  return discoverVariantComponentsFromSources(files)
+
+/**
+ * Globs `cssPattern` under `repoRoot` via `globAndReadFiles`, then — for
+ * each CSS file that actually has a `@layer component-defaults` block (a
+ * candidate; Button's shipped CSS today does not, so it's filtered out here
+ * without ever touching its sidecar) — also reads its sibling
+ * `<Name>.module.js` (same basename) into a `PackageComponentSource` for
+ * `discoverVariantComponentsFromPackageSources`. A missing sidecar
+ * shouldn't happen given @akli-dev/ui's build output shape (every shipped
+ * component CSS file with a layer has one), but is defended against here:
+ * that one component is skipped — with a `console.warn` explaining why —
+ * rather than crashing discovery for every other component.
+ */
+const globAndReadPackageComponentSources = (repoRoot: string, cssPattern: string): PackageComponentSource[] => {
+  const sources: PackageComponentSource[] = []
+
+  for (const { path: cssPath, source: cssSource } of globAndReadFiles(repoRoot, cssPattern)) {
+    if (findLayerBlock(cssSource, LAYER_NAME) === null) continue
+
+    const moduleJsAbsPath = resolve(repoRoot, cssPath).replace(/\.css$/, '.module.js')
+    let moduleJsSource: string
+    try {
+      moduleJsSource = readFileSync(moduleJsAbsPath, 'utf8')
+    } catch {
+      warnSkippingPackageComponent(
+        cssPath,
+        `no sibling ${basename(moduleJsAbsPath)} sidecar found; can't confirm its @layer class names ` +
+          `without the authoritative semantic-name mapping.`
+      )
+      continue
+    }
+
+    sources.push({ cssPath, cssSource, moduleJsSource })
+  }
+
+  return sources
 }
+
+/**
+ * Impure wrapper: globs+reads local component CSS modules
+ * (`discoverVariantComponentsFromSources`) AND @akli-dev/ui's shipped
+ * component CSS + sidecars (`discoverVariantComponentsFromPackageSources`,
+ * issue #413) off disk, then merges both discovery sources into one
+ * candidate list.
+ */
+const discoverVariantComponents = (repoRoot: string): DiscoveredComponent[] => [
+  ...discoverVariantComponentsFromSources(globAndReadFiles(repoRoot, 'src/components/**/*.module.css')),
+  ...discoverVariantComponentsFromPackageSources(
+    globAndReadPackageComponentSources(repoRoot, PACKAGE_COMPONENTS_CSS_GLOB)
+  ),
+]
 
 const loadLayeredClassNames = (repoRoot: string, relativeCssPath: string): Set<string> => {
   const absolutePath = resolve(repoRoot, relativeCssPath)
