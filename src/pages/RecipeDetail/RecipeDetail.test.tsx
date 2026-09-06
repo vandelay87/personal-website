@@ -4,6 +4,7 @@ import type { Recipe } from '@models/recipe'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { axe } from 'vitest-axe'
 import RecipeDetail from './RecipeDetail'
 
 vi.mock('@api/recipes', () => ({
@@ -151,5 +152,27 @@ describe('RecipeDetail page', () => {
 
     expect(screen.getByText('Test Recipe')).toBeInTheDocument()
     expect(fetchRecipe).not.toHaveBeenCalled()
+  })
+
+  describe('accessibility', () => {
+    it('renders the loaded recipe with no detectable axe violations', async () => {
+      const { container } = renderRecipeDetail(mockRecipe)
+
+      expect(
+        screen.getByRole('heading', { level: 1, name: 'Test Recipe' })
+      ).toBeInTheDocument()
+      expect(await axe(container)).toHaveNoViolations()
+    })
+
+    it('renders the error state with no detectable axe violations', async () => {
+      vi.mocked(fetchRecipe).mockRejectedValue(new Error('500 Internal Server Error'))
+      const { container } = renderRecipeDetail(undefined)
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
+      })
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
   })
 })

@@ -1,7 +1,5 @@
-import { IconPlus, List, ListItem } from '@akli-dev/ui'
-import Button from '@components/Button'
+import { Button, IconPlus, Input, List, ListItem } from '@akli-dev/ui'
 import ImageUpload from '@components/ImageUpload'
-import Input from '@components/Input'
 import ReorderControls from '@components/ReorderControls'
 import Textarea from '@components/Textarea'
 import { useReorderableList } from '@hooks/useReorderableList'

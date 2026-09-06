@@ -1,4 +1,5 @@
 import {
+  Button,
   IconPreview,
   Link,
   Loading,
@@ -10,7 +11,6 @@ import {
 } from '@akli-dev/ui'
 import { isSessionError } from '@api/auth'
 import { fetchRecipeByIdAdmin, publishRecipe } from '@api/recipes'
-import Button from '@components/Button'
 import RecipeDetailView from '@components/RecipeDetailView'
 import ThemeToggle from '@components/ThemeToggle'
 import { useAuth } from '@contexts/AuthContext'

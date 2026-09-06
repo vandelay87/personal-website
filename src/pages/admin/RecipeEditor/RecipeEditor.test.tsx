@@ -20,6 +20,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { createMemoryRouter, Link, RouterProvider } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
+import { axe } from 'vitest-axe'
 
 import RecipeEditor from './RecipeEditor'
 
@@ -1777,6 +1778,45 @@ describe('RecipeEditor page', () => {
         .getAllByTestId('image-upload-imagetype-step')
         .map((el) => el.textContent)
       expect(stepImageTypes).toEqual([`step-${stepB}`, `step-${stepA}`])
+    })
+  })
+
+  describe('accessibility', () => {
+    it('renders the create-mode default view with no detectable axe violations', async () => {
+      const { container } = renderEditor('/admin/recipes/new')
+
+      await waitFor(() => {
+        expect(createDraft).toHaveBeenCalled()
+      })
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
+
+    it('renders the edit-mode (published) view with no detectable axe violations', async () => {
+      vi.mocked(fetchAllRecipes).mockResolvedValue([publishedRecipe])
+      vi.mocked(fetchMyRecipes).mockResolvedValue([publishedRecipe])
+
+      const { container } = renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /title/i })).toHaveValue('Spaghetti Bolognese')
+      })
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
+
+    it('renders the discard-draft confirmation dialog with no detectable axe violations', async () => {
+      const user = userEvent.setup()
+      const { container } = renderEditor('/admin/recipes/rec-001/edit')
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /discard draft/i })).toBeInTheDocument()
+      })
+
+      await user.click(screen.getByRole('button', { name: /discard draft/i }))
+      await screen.findByRole('dialog')
+
+      expect(await axe(container)).toHaveNoViolations()
     })
   })
 })

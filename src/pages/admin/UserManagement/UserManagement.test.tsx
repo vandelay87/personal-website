@@ -13,6 +13,7 @@ import {
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { axe } from 'vitest-axe'
 
 import UserManagement from './UserManagement'
 
@@ -288,6 +289,39 @@ describe('Admin UserManagement page', () => {
       // Success toast
       const toast = await screen.findByRole('button', { name: /removed/i })
       expect(toast).toBeInTheDocument()
+    })
+  })
+
+  describe('accessibility', () => {
+    it('renders the populated user list with no detectable axe violations', async () => {
+      const { container } = await renderUserManagement()
+
+      expect(screen.getByText('admin@akli.dev')).toBeInTheDocument()
+      expect(await axe(container)).toHaveNoViolations()
+    })
+
+    it('renders the invite form with no detectable axe violations', async () => {
+      const user = userEvent.setup()
+      const { container } = await renderUserManagement()
+
+      await user.click(screen.getByRole('button', { name: /invite user/i }))
+      expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
+
+    it('renders the remove-user confirmation dialog with no detectable axe violations', async () => {
+      const user = userEvent.setup()
+      const { container } = await renderUserManagement()
+
+      const contribRow = screen.getByText('contrib@akli.dev').closest('li')
+      const removeButton = within(contribRow as HTMLElement).getByRole('button', {
+        name: /remove/i,
+      })
+      await user.click(removeButton)
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+
+      expect(await axe(container)).toHaveNoViolations()
     })
   })
 })

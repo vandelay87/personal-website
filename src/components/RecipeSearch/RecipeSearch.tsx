@@ -1,4 +1,4 @@
-import Input from '@components/Input'
+import { Input } from '@akli-dev/ui'
 import { useState, useEffect, type FC } from 'react'
 import styles from './RecipeSearch.module.css'
 

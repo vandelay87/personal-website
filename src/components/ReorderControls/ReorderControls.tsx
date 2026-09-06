@@ -1,5 +1,4 @@
-import { iconChevronDown, iconChevronUp, iconRemove } from '@akli-dev/ui'
-import Button from '@components/Button'
+import { Button, iconChevronDown, iconChevronUp, iconRemove } from '@akli-dev/ui'
 import type { FC } from 'react'
 
 export interface ReorderControlsProps {
