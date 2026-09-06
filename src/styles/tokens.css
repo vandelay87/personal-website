@@ -1,7 +1,8 @@
 /* Design tokens — warm editorial "paper" system.
    Source of truth: docs/design/paper/design_system/tokens/.
-   Two layers: semantic --color-* (light on :root, dark under
-   [data-theme="dark"]) plus short working aliases.
+   Semantic --color-* names (light on :root, dark under
+   [data-theme="dark"]) match @akli-dev/ui's shipped tokens.css — no
+   local-only short aliases (issue #408).
    Fonts are self-hosted (see src/styles/fonts.css, imported before this
    file) — Geist + JetBrains Mono woff2, plus a metric-matched 'Geist
    Fallback' face that holds layout during the font-display: swap flash. */
@@ -114,27 +115,6 @@
      correction, so it just resolves to the existing token there. */
   --color-success-on-tint: #1a754d;   /* ~4.7–4.96:1 depending on consumer backdrop */
   --color-warning-on-tint: #8c5a08;   /* ~4.85–4.96:1 depending on consumer backdrop */
-
-  /* ── Short working aliases (used across pages + UI kits) ──── */
-  --bg:         var(--color-bg);
-  --surf:       var(--color-surface);
-  --field:      var(--color-field);
-  --hover:      var(--color-hover);
-  --text:       var(--color-text-strong);
-  --subtle:     var(--color-text);
-  --muted:      var(--color-text-muted);
-  --faint:      var(--color-text-faint);
-  --line:       var(--color-border);
-  --btn-border: var(--color-border-strong);
-  --accent:     var(--color-primary);
-  --btn-bg:     var(--color-btn-bg);
-  --btn-fg:     var(--color-btn-fg);
-  --green:      var(--color-success);
-  --green-bg:   var(--color-success-bg);
-  --amber:      var(--color-warning);
-  --amber-bg:   var(--color-warning-bg);
-  --danger:     var(--color-error);
-  --danger-bg:  var(--color-error-bg);
 
   /* ── Spacing scale (4px base) ─────────────────────────────── */
   --space-1:  0.25rem;  /* 4px  */
