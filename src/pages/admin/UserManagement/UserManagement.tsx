@@ -1,5 +1,7 @@
 import {
+  Button,
   IconAlertCircle,
+  Input,
   Typography,
   iconDelete,
   iconInvite,
@@ -8,10 +10,8 @@ import {
 } from '@akli-dev/ui'
 import { handleSessionError, withSessionRecovery } from '@api/auth'
 import { fetchUsers, inviteUser, removeUser, UserExistsError } from '@api/users'
-import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
 import ErrorBoundary from '@components/ErrorBoundary'
-import Input from '@components/Input'
 import StateBox from '@components/StateBox'
 import StatusBadge from '@components/StatusBadge'
 import { useAuth } from '@contexts/AuthContext'

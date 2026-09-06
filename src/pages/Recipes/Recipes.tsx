@@ -1,6 +1,5 @@
-import { Grid, Loading, Typography } from '@akli-dev/ui'
+import { Button, Grid, Loading, Typography } from '@akli-dev/ui'
 import { fetchRecipes, fetchTags } from '@api/recipes'
-import Button from '@components/Button'
 import ErrorBoundary from '@components/ErrorBoundary'
 import RecipeCard from '@components/RecipeCard'
 import RecipeSearch from '@components/RecipeSearch'

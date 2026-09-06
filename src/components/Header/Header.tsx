@@ -1,4 +1,4 @@
-import Button from '@components/Button'
+import { Button } from '@akli-dev/ui'
 import ThemeToggle from '@components/ThemeToggle'
 import { useMeasuredHeightVar } from '@hooks/useMeasuredHeightVar'
 import type { FC } from 'react'

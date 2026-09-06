@@ -1,7 +1,6 @@
 
-import { Image, iconAddImage, iconReplace, iconUploadCloud } from '@akli-dev/ui'
+import { Button, Image, iconAddImage, iconReplace, iconUploadCloud } from '@akli-dev/ui'
 import { getUploadUrl } from '@api/recipes'
-import Button from '@components/Button'
 import ProcessingPlaceholder from '@components/ProcessingPlaceholder'
 import { parseImageType, recipeImageUrl, type ImageType } from '@models/recipe'
 import { useEffect, useId, useRef, useState, type ChangeEvent, type FC } from 'react'

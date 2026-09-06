@@ -1,4 +1,5 @@
 import {
+  Button,
   IconAlertCircle,
   IconPreview,
   Link,
@@ -17,7 +18,6 @@ import {
   updateRecipe,
 } from '@api/recipes'
 import AutosaveStatus from '@components/AutosaveStatus'
-import Button from '@components/Button'
 import ConfirmDialog from '@components/ConfirmDialog'
 import ImageUpload from '@components/ImageUpload'
 import IngredientList from '@components/IngredientList'
