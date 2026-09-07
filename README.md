@@ -6,8 +6,9 @@ Personal portfolio site for [akli.dev](https://akli.dev). Built with React 19, T
 
 - React 19 + TypeScript
 - React Router v7 (SSR + client-side hydration)
-- Vite 7
+- Vite 8
 - CSS Modules with design tokens
+- `@akli-dev/ui` — shared design-system components and tokens
 - MDX blog with Shiki syntax highlighting
 - Vitest + Testing Library
 - pnpm
@@ -42,7 +43,7 @@ src/
   types/         # Shared TypeScript interfaces
   contexts/      # React contexts (RecipeDataContext for SSR, AuthContext)
   hooks/         # Custom hooks
-  styles/        # Design tokens and animations
+  styles/        # Shared CSS-module utilities (form fields, interactions, state boxes, text)
   assets/        # Images and static files
 docs/
   prds/          # Product requirement documents
