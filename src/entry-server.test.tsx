@@ -118,7 +118,7 @@ describe('entry-server render', () => {
       const html = await render('/blog/building-a-pokedex')
       // Real content from the blog post should be in the HTML
       expect(html).toContain('Pokedex')
-    }, 30000)
+    })
 
     it('contains blog-post-specific meta tags', async () => {
       const html = await render('/blog/building-a-pokedex')
