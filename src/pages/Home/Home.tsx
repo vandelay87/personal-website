@@ -38,7 +38,9 @@ const APPS_ROWS: LinkRow[] = [
   },
 ]
 
-const BLOG_ROWS: LinkRow[] = posts.slice(0, 2).map((post) => ({
+const MAX_HOME_BLOG_POSTS = 3
+
+const BLOG_ROWS: LinkRow[] = posts.slice(0, MAX_HOME_BLOG_POSTS).map((post) => ({
   title: post.title,
   description: `${formatDate(post.date)} · ${post.readingTime} min read`,
   href: `/blog/${post.slug}`,
