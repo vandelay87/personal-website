@@ -213,8 +213,9 @@
   /* 0.7s not in the duration token scale; kept literal per _helpers.css spec.
      `global(...)` is required — without it, Vite's CSS Modules transform
      scopes the `spin` identifier to a hashed local name with no matching
-     @keyframes, silently no-op'ing the animation (spin lives, unscoped, in
-     the plain src/styles/animations.css file, not a .module.css). */
+     @keyframes, silently no-op'ing the animation (`@keyframes spin` ships
+     from `@akli-dev/ui`'s CSS, loaded site-wide via its barrel's
+     sideEffects-declared import, not from any local file in this repo). */
   animation: global(spin) 0.7s linear infinite;
 }
 
@@ -226,9 +227,9 @@
 }
 
 /* ── Shimmer (processing placeholders) ────────────────────────
-   Distinct technique from the existing `shimmer` keyframe in
-   animations.css (translateX sweep of an overlay pseudo-element, used by
-   Image's blur placeholder) — this ports _helpers.css's own
+   Distinct technique from the existing `shimmer` keyframe shipped in
+   `@akli-dev/ui`'s CSS (translateX sweep of an overlay pseudo-element, used
+   by Image's blur placeholder) — this ports _helpers.css's own
    background-position sweep on a gradient background, so it gets its own
    keyframe (`shimmerSweep`) rather than overloading the existing one. */
 .shimmer {
@@ -246,11 +247,12 @@
 
 /* ── Reduced motion ────────────────────────────────────────────
    Disables the transitions/hover-transforms defined in this file (not
-   just their timing) that `animations.css` has no way to know about.
-   `.spinner`/`.shimmer` need no entry here — their `spin`/`shimmerSweep`
-   keyframes are already neutered under reduced motion at the keyframe
-   level in `animations.css`, so re-disabling `animation` here would just
-   duplicate that same outcome through a second mechanism. */
+   just their timing) that `@akli-dev/ui`'s shipped CSS has no way to know
+   about. `.spinner`/`.shimmer` need no entry here — their
+   `spin`/`shimmerSweep` keyframes are already neutered under reduced
+   motion at the keyframe level in `@akli-dev/ui`'s CSS, so re-disabling
+   `animation` here would just duplicate that same outcome through a
+   second mechanism. */
 @media (prefers-reduced-motion: reduce) {
   .linkIcon {
     transition: none;
