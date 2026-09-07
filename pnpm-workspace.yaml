@@ -2,6 +2,8 @@ allowBuilds:
   esbuild: true
   sharp: true
   unrs-resolver: true
+minimumReleaseAgeExclude:
+  - '@akli-dev/ui@2.0.0 || 2.1.0'
 supportedArchitectures:
   os:
     - current

@@ -1,4 +1,4 @@
-import Loading from '@components/Loading'
+import { Loading } from '@akli-dev/ui'
 import { useAuth } from '@contexts/AuthContext'
 import type { FC, ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'

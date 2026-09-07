@@ -1,5 +1,4 @@
-import Button from '@components/Button'
-import Typography from '@components/Typography'
+import { Button, Typography } from '@akli-dev/ui'
 import { useEffect, useRef, type FC, type MouseEvent, type ReactNode } from 'react'
 
 import styles from './ConfirmDialog.module.css'

@@ -1,12 +1,18 @@
+import {
+  Button,
+  IconPreview,
+  Link,
+  Loading,
+  ThemeToggle,
+  Typography,
+  iconEdit,
+  iconNotFound,
+  iconPublish,
+  iconViewPublic,
+} from '@akli-dev/ui'
 import { isSessionError } from '@api/auth'
 import { fetchRecipeByIdAdmin, publishRecipe } from '@api/recipes'
-import Button from '@components/Button'
-import { IconPreview, iconEdit, iconNotFound, iconPublish, iconViewPublic } from '@components/icons'
-import Link from '@components/Link'
-import Loading from '@components/Loading'
 import RecipeDetailView from '@components/RecipeDetailView'
-import ThemeToggle from '@components/ThemeToggle'
-import Typography from '@components/Typography'
 import { useAuth } from '@contexts/AuthContext'
 import {
   useImageProcessingPoll,

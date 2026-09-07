@@ -1,6 +1,5 @@
-import Image from '@components/Image'
+import { Image, Typography } from '@akli-dev/ui'
 import ProcessingPlaceholder from '@components/ProcessingPlaceholder'
-import Typography from '@components/Typography'
 import { recipeImageUrl, stepImageType, type Step } from '@models/recipe'
 import type { FC } from 'react'
 import styles from './RecipeSteps.module.css'

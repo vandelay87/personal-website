@@ -1,4 +1,4 @@
-import List from '@components/List'
+import { List } from '@akli-dev/ui'
 import Toast, { type ToastTone } from '@components/Toast'
 import {
   useCallback,

@@ -2,9 +2,13 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
 
-vi.mock('@components/Header', () => ({
-  default: () => <div data-testid="header-mock">Header</div>,
-}))
+vi.mock('@akli-dev/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@akli-dev/ui')>()
+  return {
+    ...actual,
+    Header: () => <div data-testid="header-mock">Header</div>,
+  }
+})
 
 vi.mock('@pages/Home', () => ({
   default: () => <div>Home page</div>,

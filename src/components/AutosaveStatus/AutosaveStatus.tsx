@@ -1,4 +1,4 @@
-import { IconAlertCircle } from '@components/icons'
+import { IconAlertCircle } from '@akli-dev/ui'
 import type { AutosaveStatus as AutosaveStatusValue } from '@hooks/useAutosave'
 import type { FC, ReactNode } from 'react'
 import { useEffect, useState } from 'react'

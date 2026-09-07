@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
+import { preloadFonts } from '@akli-dev/ui/vite-plugin'
 import mdx from '@mdx-js/rollup'
 import rehypeShiki from '@shikijs/rehype'
 import type { ShikiTransformer } from '@shikijs/types'
@@ -182,6 +183,9 @@ const getBlogRoutes = (): Array<{ route: string; priority: number; changefreq: '
   }
 }
 
+const clientOnlyPlugins = (isSsrBuild: boolean | undefined, plugins: Plugin[]): Plugin[] =>
+  isSsrBuild ? [] : plugins
+
 export default defineConfig(({ command, isSsrBuild, mode }) => {
   const env = loadEnv(mode, rootDir, '')
   return {
@@ -218,34 +222,33 @@ export default defineConfig(({ command, isSsrBuild, mode }) => {
       ],
     }),
     imagetools(),
-    ...(!isSsrBuild
-      ? [
-          sitemapPlugin({
-            hostname: 'https://akli.dev',
-            pagesDir: 'src/pages',
-            include: ['**/*.tsx'],
-            exclude: ['**/*.test.*', '**/*.spec.*', '**/NotFound.*', '**/*test*', '**/BlogPost.*'],
-            routeMapping: {
-              '/home': '/',
-            },
-            routeConfig: {
-              '/': {
-                priority: 1.0,
-                changefreq: 'monthly',
-              },
-              '/apps': {
-                priority: 0.8,
-                changefreq: 'monthly',
-              },
-            },
-            defaultPriority: 0.5,
-            defaultChangefreq: 'monthly',
-            additionalRoutes: [
-              ...getBlogRoutes(),
-            ],
-          }),
-        ]
-      : []),
+    ...clientOnlyPlugins(isSsrBuild, [
+      preloadFonts(),
+      sitemapPlugin({
+        hostname: 'https://akli.dev',
+        pagesDir: 'src/pages',
+        include: ['**/*.tsx'],
+        exclude: ['**/*.test.*', '**/*.spec.*', '**/NotFound.*', '**/*test*', '**/BlogPost.*'],
+        routeMapping: {
+          '/home': '/',
+        },
+        routeConfig: {
+          '/': {
+            priority: 1.0,
+            changefreq: 'monthly',
+          },
+          '/apps': {
+            priority: 0.8,
+            changefreq: 'monthly',
+          },
+        },
+        defaultPriority: 0.5,
+        defaultChangefreq: 'monthly',
+        additionalRoutes: [
+          ...getBlogRoutes(),
+        ],
+      }),
+    ]),
   ],
   resolve: {
     alias: {
@@ -287,8 +290,14 @@ export default defineConfig(({ command, isSsrBuild, mode }) => {
     // live over HTTP, breaks when packages like React's dev runtime are
     // forced through Vite's SSR transform pipeline instead of
     // externalized/required from node_modules, on their `typeof module`
-    // CJS-interop checks.
-    noExternal: command === 'build' || process.env.VITEST ? true : undefined,
+    // CJS-interop checks. `@akli-dev/ui` is the one dep that must stay
+    // noExternal even in that mode: its barrel (`dist/index.js`) has a bare
+    // `import './index.css'` side effect, declared as such via that
+    // package's own `package.json` `sideEffects` field (`["*.css",
+    // "./dist/index.js"]`), and Node's own ESM loader — which is what
+    // actually resolves an externalized SSR dep in dev — can't parse a
+    // `.css` specifier the way Vite's transform pipeline can.
+    noExternal: command === 'build' || process.env.VITEST ? true : ['@akli-dev/ui'],
     external: ['node:fs', 'node:path'],
   },
   build: {

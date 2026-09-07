@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@akli-dev/ui':
+        specifier: ^2.1.0
+        version: 2.1.0(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(vite@8.2.2(@types/node@26.3.0)(esbuild@0.27.4)(jiti@2.6.1)(yaml@2.8.3))
       '@mdx-js/rollup':
         specifier: ^3.1.0
         version: 3.1.1(rollup@4.59.0)
@@ -137,6 +140,18 @@ packages:
 
   '@adobe/css-tools@4.5.0':
     resolution: {integrity: sha512-6OzddxPio9UiWTCemp4N8cYLV2ZN1ncRnV1cVGtve7dhPOtRkleRyx32GQCYSwDYgaHU3USMm84tNsvKzRCa1Q==}
+
+  '@akli-dev/ui@2.1.0':
+    resolution: {integrity: sha512-4Qw0YrbaYgm9AuWd1BKM/MziyBFbek4oLXyAfm2Gk4Ft6rWae8SOoeDJ/V/xTmSeKYS/pUKNY9KsUn1CyLcMgA==}
+    engines: {node: '>=24', npm: '>=11.5.1'}
+    peerDependencies:
+      react: ^19
+      react-dom: ^19
+      react-router-dom: ^7
+      vite: ^8
+    peerDependenciesMeta:
+      vite:
+        optional: true
 
   '@antfu/install-pkg@1.1.0':
     resolution: {integrity: sha512-MGQsmw10ZyI+EJo45CdSER4zEb+p31LpDAFp2Z3gkSd1yqVZGi0Ebx++YTEMonJy4oChEMLsxZ64j8FH6sSqtQ==}
@@ -3723,6 +3738,14 @@ packages:
 snapshots:
 
   '@adobe/css-tools@4.5.0': {}
+
+  '@akli-dev/ui@2.1.0(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(vite@8.2.2(@types/node@26.3.0)(esbuild@0.27.4)(jiti@2.6.1)(yaml@2.8.3))':
+    dependencies:
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+      react-router-dom: 7.18.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+    optionalDependencies:
+      vite: 8.2.2(@types/node@26.3.0)(esbuild@0.27.4)(jiti@2.6.1)(yaml@2.8.3)
 
   '@antfu/install-pkg@1.1.0':
     dependencies:

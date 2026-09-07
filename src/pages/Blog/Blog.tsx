@@ -1,6 +1,5 @@
-import List, { ListItem } from '@components/List'
+import { List, ListItem, Typography } from '@akli-dev/ui'
 import Tag from '@components/Tag'
-import Typography from '@components/Typography'
 import type { FC } from 'react'
 import { useMemo } from 'react'
 import { Link as RouterLink, useSearchParams } from 'react-router-dom'
