@@ -252,6 +252,21 @@ describe('entry-server render', () => {
       expect(html).toContain('<div id="root">')
       expect(html).not.toContain('<div id="root"></div>')
     })
+
+    it('injects the recipe data script before the root div so the client can read it back before hydration', async () => {
+      const html = await render('/recipes/spaghetti-bolognese', { recipe: mockRecipe })
+
+      expect(html).toContain('window.__RECIPE_DATA__=')
+      expect(html.indexOf('window.__RECIPE_DATA__=')).toBeLessThan(
+        html.indexOf('<div id="root">')
+      )
+    })
+
+    it('does not inject a recipe data script when no data was prefetched', async () => {
+      const html = await render('/recipes/spaghetti-bolognese')
+
+      expect(html).not.toContain('__RECIPE_DATA__')
+    })
   })
 
   describe('error handling', () => {

@@ -14,6 +14,7 @@ import type { RecipeData } from './contexts/RecipeDataContext'
 import { ToastProvider } from './contexts/ToastContext'
 import { getMetaTags, escapeHtml } from './meta'
 import { routes } from './routes'
+import { injectRecipeDataScript } from './ssrData'
 
 // Read the client-built index.html (copied into dist/server/ by build:prod).
 // Has hashed CSS/JS asset links. Falls back to minimal template for tests.
@@ -87,6 +88,11 @@ const buildHeadHtml = (routePath: string, data?: RecipeData): string => {
   }
 
   lines.push(`<link rel="canonical" href="${escapeHtml(meta.canonical)}" />`)
+
+  const recipeDataScript = data ? injectRecipeDataScript(data) : ''
+  if (recipeDataScript) {
+    lines.push(recipeDataScript)
+  }
 
   return lines.join('\n    ')
 }
