@@ -11,23 +11,25 @@
 > 2. `personal-website` phase 1 (done) — frontend cutover for recipe URLs.
 > 3. `akli-infrastructure` phase 2 (sibling above) — blog origin under same subdomain.
 > 4. **THIS PRD** — `personal-website` phase 2: move blog images to `public/blog/<post-slug>/`, update MDX/test references to `images.akli.dev/blog/<post-slug>/*`.
+>
+> **Scope note (2026-09, third update):** responsive image sizing (thumb/medium/full variants, `srcSet`) already landed in [PR #445](https://github.com/vandelay87/personal-website/pull/445), deliberately kept on the *current* live `/images/blog/` path since this PRD's CDN domain isn't deployed yet. Each of the six images is now three files (`<file>-thumb.webp`, `<file>-medium.webp`, `<file>-full.webp`), not one — see "Responsive sizing already landed" in Technical Considerations. This PRD's remaining scope is narrower than originally written: move the 18 already-sized files into `public/blog/<post-slug>/` and switch the already-wired `src`/`srcSet` URLs to the `images.akli.dev` domain. No new resizing, no new MDX authoring.
 
 ## Overview
 
 Move blog image files from `public/images/blog/` to `public/blog/<post-slug>/` — nested by the owning post's slug, not flat — so they deploy to S3 key `blog/<post-slug>/<file>` (the sibling PRD's `blog/*` CloudFront behavior already matches nested paths, so no infra change is needed for this). Update every reference across the codebase from `/images/blog/<file>` → `https://images.akli.dev/blog/<post-slug>/<file>`. After this ships, `images.akli.dev` is the single canonical surface for every image on akli.dev.
 
-**Design note (2026-09):** this PRD originally specified a flat `blog/<file>` namespace. Changed to per-post nesting before implementation started — see "Image organization: nested by post slug" in Technical Considerations for why.
+**Design note (2026-09):** this PRD originally specified a flat `blog/<file>` namespace. Changed to per-post nesting before implementation started — see "Image organization: nested by post slug" in Technical Considerations for why. Separately, each logical image is now three sized files, not one — see "Responsive sizing already landed" below.
 
 ## Problem Statement
 
 Phase 1 of the images-CDN epic switched recipe images to `images.akli.dev`. Blog images still live at `akli.dev/images/blog/<file>` served from the site bucket via the existing `images/*` behavior. The unified images CDN is half-complete. Phase 2 finishes it: blog images need to move keys (in S3) and URLs (in MDX + meta) to live alongside recipes on `images.akli.dev`.
 
-The migration touches a small surface — three MDX posts reference blog images today (`building-a-pokedex.mdx`, plus `from-draft-to-published-recipe.mdx` and `akli-ui-storybook.mdx`, both shipped after this PRD was originally written — see Technical Considerations) plus two test files — so the implementation is mechanical. The bigger concern is sequencing: this PRD must ship after the akli-infrastructure phase 2 deploy, otherwise MDX references point at a route that doesn't exist yet.
+The migration touches a small surface — three MDX posts reference blog images today (`building-a-pokedex.mdx`, plus `from-draft-to-published-recipe.mdx` and `akli-ui-storybook.mdx`, both shipped after this PRD was originally written — see Technical Considerations), each already wired with `src`/`srcSet` for sized variants by PR #445, plus one test assertion — so the remaining implementation (move 18 files, switch a domain in already-existing URLs) is even more mechanical than originally scoped. The bigger concern is still sequencing: this PRD must ship after the akli-infrastructure phase 2 deploy, otherwise MDX references point at a route that doesn't exist yet.
 
 ## Goals
 
-- Every blog-image reference in the codebase points at `https://images.akli.dev/blog/<post-slug>/<file>.webp` after this ships.
-- Blog image files live at `public/blog/<post-slug>/<file>.webp` (Vite deploys them to S3 key `blog/<post-slug>/<file>.webp`).
+- Every blog-image reference in the codebase (already sized `-thumb`/`-medium`/`-full` variants, per PR #445) points at `https://images.akli.dev/blog/<post-slug>/<file>-<size>.webp` after this ships.
+- Blog image files live at `public/blog/<post-slug>/<file>-<size>.webp` (Vite deploys them to matching S3 keys).
 - OG/Twitter meta tags for blog posts emit absolute `https://images.akli.dev/blog/...` URLs (correct, not double-prefixed) — depends on phase 1's `buildMetaTags` fix.
 - After deploy, the deploy workflow's `aws s3 sync --delete` removes the old `images/blog/<file>.webp` keys from S3, completing the cutover. No orphaned files.
 - The unified images CDN is now the single canonical image-serving surface for the site.
@@ -57,27 +59,23 @@ Backend / build / deploy only. No UI changes — readers don't see anything diff
 ### URL pattern transform
 
 ```diff
-- /images/blog/pokedex-desktop.webp
-+ https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop.webp
+- /images/blog/pokedex-desktop-full.webp
++ https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-full.webp
 ```
 
-Applied wherever blog images are referenced. The `blog/` prefix is always followed by the owning post's slug — see "Image organization: nested by post slug" below.
+Applied to all three sized variants of all six images (18 URLs total). The `blog/` prefix is always followed by the owning post's slug — see "Image organization: nested by post slug" below. Filenames (including the `-thumb`/`-medium`/`-full` suffix) are unchanged from PR #445 — only the domain and directory move.
 
 ### File move
 
+18 files (six images × three sizes each — see "Responsive sizing already landed" in Technical Considerations), e.g.:
+
 ```diff
-- public/images/blog/pokedex-desktop.webp
-- public/images/blog/pokedex-mobile.webp
-- public/images/blog/recipes.webp
-- public/images/blog/recipe-editor.webp
-- public/images/blog/storybook-button-docs.webp
-- public/images/blog/storybook-header-public-variant.webp
-+ public/blog/building-a-pokedex/pokedex-desktop.webp
-+ public/blog/building-a-pokedex/pokedex-mobile.webp
-+ public/blog/from-draft-to-published-recipe/recipes.webp
-+ public/blog/from-draft-to-published-recipe/recipe-editor.webp
-+ public/blog/akli-ui-storybook/storybook-button-docs.webp
-+ public/blog/akli-ui-storybook/storybook-header-public-variant.webp
+- public/images/blog/pokedex-desktop-thumb.webp
+- public/images/blog/pokedex-desktop-medium.webp
+- public/images/blog/pokedex-desktop-full.webp
++ public/blog/building-a-pokedex/pokedex-desktop-thumb.webp
++ public/blog/building-a-pokedex/pokedex-desktop-medium.webp
++ public/blog/building-a-pokedex/pokedex-desktop-full.webp
 ```
 
 Each image moves into a subdirectory named after its post's slug — the same string used in the post's `/blog/<slug>` route. After Vite build, files end up at S3 keys `blog/<post-slug>/<file>.webp` in the site bucket. The sibling PRD's `images.akli.dev/blog/*` CloudFront behavior already matches nested paths (`*` matches everything after `blog/`, slashes included), so it serves them with no path rewrite and no infra-side change.
@@ -105,42 +103,40 @@ Same loading, error, success states as before. Same `<Image>` component, same OG
 
 No infra-side change was needed for this: the sibling akli-infrastructure PRD's `blog/*` CloudFront path pattern already matches nested paths (`*` matches everything after the prefix, slashes included), so `blog/<slug>/<file>.webp` routes correctly with the existing behavior as originally designed.
 
+### Responsive sizing already landed (PR #445) — changes the file inventory below
+
+**Landed 2026-09, before this migration.** Each of the six blog images now exists as three sized variants — `<file>-thumb.webp` (400w, q80), `<file>-medium.webp` (800w, q85), `<file>-full.webp` (1200w, q90) — matching the size/quality scheme the recipe `ImageResizer` Lambda uses, generated by `scripts/resize-blog-images.ts` (sharp-based, guards against upscaling narrower sources via `withoutEnlargement`, which the Lambda it mirrors doesn't). The original single-file-per-image (`pokedex-desktop.webp`, etc.) no longer exists — it was replaced, not kept alongside the variants.
+
+Every MDX `<Image>` already carries `src`/`srcSet` pointing at two of the three variants (`medium`+`full` for full-width images, `thumb`+`medium` for the one image explicitly capped at 400px display width) — the same pattern `RecipeDetailView` uses for its hero image. Frontmatter `image:` (used for OG/Twitter meta) points at the `-full` variant.
+
+**This was deliberately kept on the current live `/images/blog/` path**, not this PRD's `images.akli.dev` domain — switching domains before the sibling akli-infrastructure PRD deploys would have 404'd immediately. That means this PRD's actual remaining work is: move the 18 already-sized files into their post-slug subdirectories, and update the `src`/`srcSet` URLs already wired in MDX from `/images/blog/<file>-<size>.webp` to `https://images.akli.dev/blog/<post-slug>/<file>-<size>.webp`. No resizing, no new `<Image>` props, no new test coverage — those are all already done.
+
 ### Mechanical find-replace surface
 
-**Three MDX files** reference blog images today (updated 2026-09 — two of these shipped after this PRD was originally written, when only `building-a-pokedex.mdx` existed; re-verify this list at implementation time in case more posts landed since):
+**Three MDX files** reference blog images today, each already updated by PR #445 to reference sized variants with `src`/`srcSet` (re-verify this list at implementation time in case more posts landed since):
 
-- **`src/pages/Blog/posts/building-a-pokedex.mdx`** (slug `building-a-pokedex`) — 3 references:
-  - Line 6 (frontmatter): `image: /images/blog/pokedex-desktop.webp`
-  - Line 9 (inline `<Image src=...>`): `/images/blog/pokedex-desktop.webp`
-  - Line 213 (inline `<Image src=...>`): `/images/blog/pokedex-mobile.webp`
-- **`src/pages/Blog/posts/from-draft-to-published-recipe.mdx`** (slug `from-draft-to-published-recipe`) — 3 references:
-  - Line 6 (frontmatter): `image: /images/blog/recipes.webp`
-  - Line 9 (inline `<Image src=...>`): `/images/blog/recipes.webp`
-  - Line 94 (inline `<Image src=...>`): `/images/blog/recipe-editor.webp`
-- **`src/pages/Blog/posts/akli-ui-storybook.mdx`** (slug `akli-ui-storybook`) — 3 references:
-  - Line 6 (frontmatter): `image: /images/blog/storybook-button-docs.webp`
-  - Line 9 (inline `<Image src=...>`): `/images/blog/storybook-button-docs.webp`
-  - Line 27 (inline `<Image src=...>`): `/images/blog/storybook-header-public-variant.webp`
+- **`src/pages/Blog/posts/building-a-pokedex.mdx`** (slug `building-a-pokedex`) — frontmatter `image:` (→ `-full`) + two inline `<Image>` tags (cover: `medium`+`full` srcSet; mobile screenshot, capped at 400px: `thumb`+`medium` srcSet).
+- **`src/pages/Blog/posts/from-draft-to-published-recipe.mdx`** (slug `from-draft-to-published-recipe`) — frontmatter `image:` (→ `-full`) + two inline `<Image>` tags, both `medium`+`full` srcSet.
+- **`src/pages/Blog/posts/akli-ui-storybook.mdx`** (slug `akli-ui-storybook`) — frontmatter `image:` (→ `-full`) + two inline `<Image>` tags, both `medium`+`full` srcSet.
 
-Six distinct image files in total, each replaced with its post-nested absolute URL:
+Six logical images, eighteen actual files (three sized variants each), each variant replaced with its post-nested absolute URL — domain and directory change only, filenames unchanged:
 
-| File | New URL |
+| Current (`/images/blog/`) | New (`https://images.akli.dev/blog/<post-slug>/`) |
 |---|---|
-| `pokedex-desktop.webp` | `https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop.webp` |
-| `pokedex-mobile.webp` | `https://images.akli.dev/blog/building-a-pokedex/pokedex-mobile.webp` |
-| `recipes.webp` | `https://images.akli.dev/blog/from-draft-to-published-recipe/recipes.webp` |
-| `recipe-editor.webp` | `https://images.akli.dev/blog/from-draft-to-published-recipe/recipe-editor.webp` |
-| `storybook-button-docs.webp` | `https://images.akli.dev/blog/akli-ui-storybook/storybook-button-docs.webp` |
-| `storybook-header-public-variant.webp` | `https://images.akli.dev/blog/akli-ui-storybook/storybook-header-public-variant.webp` |
+| `pokedex-desktop-thumb.webp` / `-medium.webp` / `-full.webp` | `building-a-pokedex/pokedex-desktop-{thumb,medium,full}.webp` |
+| `pokedex-mobile-thumb.webp` / `-medium.webp` / `-full.webp` | `building-a-pokedex/pokedex-mobile-{thumb,medium,full}.webp` |
+| `recipes-thumb.webp` / `-medium.webp` / `-full.webp` | `from-draft-to-published-recipe/recipes-{thumb,medium,full}.webp` |
+| `recipe-editor-thumb.webp` / `-medium.webp` / `-full.webp` | `from-draft-to-published-recipe/recipe-editor-{thumb,medium,full}.webp` |
+| `storybook-button-docs-thumb.webp` / `-medium.webp` / `-full.webp` | `akli-ui-storybook/storybook-button-docs-{thumb,medium,full}.webp` |
+| `storybook-header-public-variant-thumb.webp` / `-medium.webp` / `-full.webp` | `akli-ui-storybook/storybook-header-public-variant-{thumb,medium,full}.webp` |
 
-Each frontmatter `image:` value flows into `buildMetaTags(...)` for OG/Twitter meta — works correctly because phase 1's `buildMetaTags` fix (absolute-URL passthrough) is already merged, see banner at top of this PRD.
+Each frontmatter `image:` value (pointing at the `-full` variant) flows into `buildMetaTags(...)` for OG/Twitter meta — works correctly because phase 1's `buildMetaTags` fix (absolute-URL passthrough) is already merged, see banner at top of this PRD.
 
-Two test files also need updating:
+One test file needs updating as part of THIS PRD's remaining scope:
 
-- **`src/meta.test.ts`**:
-  - Line 12 (mock frontmatter `image:` fixture) — change to `'https://images.akli.dev/blog/test-post/test-post-cover.webp'` (nested to match production shape; extension changed to `.webp` for fidelity).
-  - Lines 309 + 315 (assertions on `og.image` / `twitter.image`) — change expected to the new absolute URL (NOT `https://akli.devhttps://...` — relies on phase 1's `buildMetaTags` fix to produce a clean URL).
-- **`src/entry-server.test.tsx:120`** — assertion `expect(html).toContain('/images/blog/pokedex-desktop.webp')` updated to `expect(html).toContain('https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop.webp')`.
+- **`src/entry-server.test.tsx`** — already updated by PR #445 to assert `expect(html).toContain('/images/blog/pokedex-desktop-full.webp')`. This migration only needs to switch that to the full CDN URL: `expect(html).toContain('https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-full.webp')`.
+
+`src/meta.test.ts` uses a fictional mock fixture (`test-post-cover.jpg`/`.webp`) unrelated to the real filenames above — it was already updated by an earlier refresh of this PRD (nested, absolute form) and needs no further change here.
 
 No other surfaces are affected:
 - No `BlogCard` / `BlogPost` / blog-list component constructs blog image URLs.
@@ -176,9 +172,9 @@ Phase 1 personal-website PRD specified a fix to `buildMetaTags` that conditional
    - Verify: curl https://images.akli.dev/blog/anything.webp → 404 NoSuchKey
 
 2. personal-website phase 2 deploys (THIS PRD)
-   - public/images/blog/* → public/blog/<post-slug>/* (all 6 images, nested by owning post)
-   - building-a-pokedex.mdx, from-draft-to-published-recipe.mdx, akli-ui-storybook.mdx updated (3 refs each, 9 total)
-   - Tests updated
+   - public/images/blog/*-{thumb,medium,full}.webp → public/blog/<post-slug>/*-{thumb,medium,full}.webp (18 files, nested by owning post — already sized by PR #445, this step only moves+renames the directory)
+   - building-a-pokedex.mdx, from-draft-to-published-recipe.mdx, akli-ui-storybook.mdx: existing src/srcSet URLs switched to the images.akli.dev domain (no new refs, no new sizes — both already landed in PR #445)
+   - entry-server.test.tsx assertion switched to the new domain
    - Vite build + s3 sync --delete removes old keys, uploads new keys
 
 3. Verify: visit all three blog posts on akli.dev
@@ -208,61 +204,60 @@ ACs split into Automated (TDD-able with `pnpm test` / `pnpm lint` before deploy)
 
 ### Automated — File move
 
-- [ ] None of the six source images remain under `public/images/blog/`: `pokedex-desktop.webp`, `pokedex-mobile.webp`, `recipes.webp`, `recipe-editor.webp`, `storybook-button-docs.webp`, `storybook-header-public-variant.webp`.
-- [ ] Each of the six exists under its post-slug subdirectory in `public/blog/` — `public/blog/building-a-pokedex/pokedex-desktop.webp`, `public/blog/building-a-pokedex/pokedex-mobile.webp`, `public/blog/from-draft-to-published-recipe/recipes.webp`, `public/blog/from-draft-to-published-recipe/recipe-editor.webp`, `public/blog/akli-ui-storybook/storybook-button-docs.webp`, `public/blog/akli-ui-storybook/storybook-header-public-variant.webp` — with byte content identical to the original (verify with `diff` against a pre-move snapshot or `sha256sum`).
+- [ ] None of the 18 sized-variant images (`<file>-thumb.webp`, `<file>-medium.webp`, `<file>-full.webp` for each of the six logical images) remain under `public/images/blog/`.
+- [ ] Each of the 18 exists under its post-slug subdirectory in `public/blog/` (e.g. `public/blog/building-a-pokedex/pokedex-desktop-thumb.webp`, `-medium.webp`, `-full.webp`, and the equivalent five sets for the other two posts) — with byte content identical to the pre-move file (verify with `diff` or `sha256sum`).
 - [ ] `public/images/blog/` directory is removed.
-- [ ] `public/images/` directory is removed if it has no remaining contents after the move (re-verify at implementation time that `blog/` is still the only subdirectory; if so, `ls public/images/` after removing `blog/` should return an empty listing, in which case `rmdir public/images/`).
+- [ ] `public/images/` directory is removed if it has no remaining contents after the move.
 
 ### Automated — MDX post updates
 
-- [ ] **`building-a-pokedex.mdx`**: frontmatter `image:` and both inline `<Image src=...>` references use `https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop.webp` and `https://images.akli.dev/blog/building-a-pokedex/pokedex-mobile.webp` respectively.
-- [ ] **`from-draft-to-published-recipe.mdx`**: frontmatter `image:` and both inline `<Image src=...>` references use `https://images.akli.dev/blog/from-draft-to-published-recipe/recipes.webp` and `https://images.akli.dev/blog/from-draft-to-published-recipe/recipe-editor.webp` respectively.
-- [ ] **`akli-ui-storybook.mdx`**: frontmatter `image:` and both inline `<Image src=...>` references use `https://images.akli.dev/blog/akli-ui-storybook/storybook-button-docs.webp` and `https://images.akli.dev/blog/akli-ui-storybook/storybook-header-public-variant.webp` respectively.
+Each of the three posts already has `src`/`srcSet` pointing at sized variants (PR #445) — this migration only changes the domain/directory those URLs resolve to, not which variants are referenced or which `<Image>` props are set.
+
+- [ ] **`building-a-pokedex.mdx`**: frontmatter `image:` and both inline `<Image>` tags' `src`/`srcSet` URLs point at `https://images.akli.dev/blog/building-a-pokedex/...` (same filenames as today, domain/path changed only).
+- [ ] **`from-draft-to-published-recipe.mdx`**: same, pointing at `https://images.akli.dev/blog/from-draft-to-published-recipe/...`.
+- [ ] **`akli-ui-storybook.mdx`**: same, pointing at `https://images.akli.dev/blog/akli-ui-storybook/...`.
 - [ ] No remaining `/images/blog/` references in any of the three MDX files (`grep -rc '/images/blog/' src/pages/Blog/posts/*.mdx` returns 0 for each).
-- [ ] No MDX post other than these three references `images/blog/` (re-verify at implementation time in case a new post landed since this refresh — same check the original PRD ran, now against three known files instead of one).
-- [ ] Each post's images live under a subdirectory matching its own slug — no post's images reference another post's slug directory (catches copy-paste mistakes across the three near-identical find-replace edits).
+- [ ] No MDX post other than these three references `images/blog/` (re-verify at implementation time in case a new post landed since this refresh).
+- [ ] Each post's images live under a subdirectory matching its own slug — no post's images reference another post's slug directory.
 
 ### Automated — Test updates
 
-- [ ] `src/meta.test.ts` mock blog-post frontmatter `image:` field is changed from `/images/blog/test-post-cover.jpg` to `https://images.akli.dev/blog/test-post/test-post-cover.webp` (absolute, nested to match production shape; extension also updated to `.webp` for fidelity).
-- [ ] `src/meta.test.ts` blog-branch assertion on `meta.og.image` is updated to expect the full absolute URL `https://images.akli.dev/blog/test-post/test-post-cover.webp` (NOT `https://akli.devhttps://...` — this assertion fails without phase 1's `buildMetaTags` fix, acting as the canary).
-- [ ] `src/meta.test.ts` blog-branch assertion on `meta.twitter.image` is updated equivalently.
-- [ ] `src/entry-server.test.tsx` blog-branch assertion is updated to `expect(html).toContain('https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop.webp')`.
-- [ ] `src/entry-server.test.tsx` gains a NEW assertion for the inline mobile image: `expect(html).toContain('https://images.akli.dev/blog/building-a-pokedex/pokedex-mobile.webp')` (current tests only cover the cover; this PR is a good moment to close the inline-image coverage gap).
+- [ ] `src/entry-server.test.tsx` assertion is switched from `expect(html).toContain('/images/blog/pokedex-desktop-full.webp')` (PR #445's already-landed form) to `expect(html).toContain('https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-full.webp')`.
+- [ ] `src/meta.test.ts` needs no further change — its mock fixture is fictional and was already updated to the nested absolute form in an earlier refresh of this PRD.
 - [ ] All updated test files pass `pnpm exec vitest run`.
 
 ### Automated — Quality gates
 
-- [ ] `pnpm test` passes (all suites green).
+- [ ] `pnpm test` passes (all suites green — 790 tests as of PR #445's baseline).
 - [ ] `pnpm lint` passes.
-- [ ] `pnpm exec tsc --noEmit` produces no NEW errors. Pre-PRD baseline (recorded at PRD time): the existing errors are `mdast` module resolution in `plugins/`, `AuthContext` null-typing errors, `Recipe.status` string-vs-union mismatches in `entry-server.test.tsx` and `meta.test.ts`. The error count after this PR's changes equals the baseline count.
-- [ ] `pnpm build` succeeds.
-- [ ] **Build-output check (deploy-state proxy):** `dist/client/blog/building-a-pokedex/pokedex-desktop.webp` and `dist/client/blog/building-a-pokedex/pokedex-mobile.webp` exist after `pnpm build`. `dist/client/images/blog/` does NOT exist after `pnpm build`. (This proves Vite's `public/` copy preserved the nested directory structure and that `aws s3 sync --delete` will drop the old keys post-deploy.)
+- [ ] `pnpm exec tsc --noEmit` produces no new errors.
+- [ ] `pnpm build:client` succeeds (verify against a machine with Playwright browsers installed for `rehype-mermaid` — this fails in any environment missing them, unrelated to this PRD; see PR #445's test plan).
+- [ ] **Build-output check (deploy-state proxy):** `dist/client/blog/building-a-pokedex/pokedex-desktop-full.webp` (and the other 17 sized variants) exist after build. `dist/client/images/blog/` does NOT exist. (Proves Vite's `public/` copy preserved the nested directory structure and that `aws s3 sync --delete` will drop the old keys post-deploy.)
 
 ### PR review checklist (manual review during PR, not enforced by tests)
 
-- [ ] `grep -rn 'images/blog' src/ public/` returns zero matches (catches both `/images/blog/` and `images/blog/` patterns; `public/blog/` should be the only blog-images directory after the move).
-- [ ] No MDX post other than the three listed in Technical Considerations references `images/blog/` (re-verify in case a new post landed during the in-flight period).
-- [ ] Phase 1 `buildMetaTags` fix is confirmed present on `main` (already merged as of this PRD's refresh — `src/meta.ts:91-92` contains `image.startsWith('http') ?`; re-confirm it hasn't regressed before merging).
-- [ ] `.github/workflows/deploy.yml` `aws s3 sync` invocation does NOT have `--exclude "images/blog/*"` or `--exclude "images/*"` added between PRD time and merge (sanity check against an unrelated workflow change that would prevent old-key deletion).
+- [ ] `grep -rn 'images/blog' src/ public/` returns zero matches.
+- [ ] No MDX post other than the three listed in Technical Considerations references `images/blog/`.
+- [ ] Phase 1 `buildMetaTags` fix is confirmed present on `main` (already merged; `src/meta.ts:91-92` contains `image.startsWith('http') ?`).
+- [ ] `.github/workflows/deploy.yml`'s `aws s3 sync` invocation does NOT have `--exclude "images/blog/*"` or `--exclude "images/*"` added.
 
 ### Manual — Lockstep verification (post-deploy of sibling, before this PR ships)
 
-- [ ] Sibling akli-infrastructure phase 2 PRD has shipped: `curl -I https://images.akli.dev/blog/any-slug/anything-not-yet-uploaded.webp` returns `HTTP/2 404` with S3 NoSuchKey body (proves the route + OAC + bucket policy are functional for nested paths too, not just flat ones).
-- [ ] Existing `akli.dev/images/blog/<file>.webp` URLs still return 200 (regression baseline before the cutover).
+- [ ] Sibling akli-infrastructure phase 2 PRD has shipped: `curl -I https://images.akli.dev/blog/any-slug/anything-not-yet-uploaded.webp` returns `HTTP/2 404` with S3 NoSuchKey body.
+- [ ] Existing `akli.dev/images/blog/<file>-<size>.webp` URLs still return 200 (regression baseline before the cutover).
 
 ### Manual — End-to-end verification (post-deploy of THIS PR)
 
-- [ ] After this PR's deploy completes, each of the six images returns `HTTP/2 200`, `content-type: image/webp` at its nested URL: `curl -I https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop.webp` (and the equivalent for the other five).
-- [ ] After this PR's deploy completes, the old `https://akli.dev/images/blog/<file>` URL for each of the six returns 404 (confirms `--delete` removed the old keys; this is the agreed-upon broken-link outcome from the no-redirects decision).
-- [ ] Visit each of the three blog posts (`/blog/building-a-pokedex`, `/blog/from-draft-to-published-recipe`, `/blog/akli-ui-storybook`) in a browser — all images load correctly. DevTools network panel shows requests to `images.akli.dev/blog/...` returning 200 with `image/webp`.
+- [ ] After this PR's deploy completes, all 18 sized-variant URLs return `HTTP/2 200`, `content-type: image/webp` (e.g. `curl -I https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-full.webp`, and the equivalent for every other file).
+- [ ] After this PR's deploy completes, the old `https://akli.dev/images/blog/<file>-<size>.webp` URL for each of the 18 returns 404 (confirms `--delete` removed the old keys).
+- [ ] Visit each of the three blog posts (`/blog/building-a-pokedex`, `/blog/from-draft-to-published-recipe`, `/blog/akli-ui-storybook`) in a browser — all images load correctly. DevTools network panel shows requests to `images.akli.dev/blog/...` returning 200 with `image/webp`, and the requested variant (`-medium`/`-full`/`-thumb`) matches what the browser's `srcSet` selection would be expected to pick for the viewport/DPR in use (unchanged behavior from PR #445 — only the domain moved).
 - [ ] No requests to `akli.dev/images/blog/...` in the network tab when viewing any of the three posts (regression guard against any missed reference).
 - [ ] OG meta tag spot check on each of the three posts: `curl https://akli.dev/blog/<slug>` and grep for `og:image` — value equals the post's `https://images.akli.dev/blog/<cover-file>` (verifies the `buildMetaTags` fix produces a clean URL, not double-prefixed).
 - [ ] Social-share preview check: paste one of the three post URLs into Twitter/Slack/Discord — preview card renders the cover image (one-time spot check; cached previews from before the cutover may need to be re-scraped).
 
 ### Documentation
 
-- [ ] `CLAUDE.md` "Conventions" bullet that currently reads "Blog post images live in `public/images/blog/` — referenced by URL string in MDX, served as-is, no Vite processing. Optimise manually before adding." is updated to: "Blog post images live in `public/blog/<post-slug>/` (nested by the post's slug, matching the `recipes/<id>/` CDN convention) and are served from `https://images.akli.dev/blog/<post-slug>/<file>` — referenced by absolute URL in MDX, served as-is, no Vite processing. Optimise manually before adding."
+- [ ] `CLAUDE.md` "Conventions" bullet updated to describe the full current state: images live in `public/blog/<post-slug>/` (nested by slug, matching the `recipes/<id>/` convention), each as `-thumb`/`-medium`/`-full` sized variants generated by `scripts/resize-blog-images.ts`, referenced via `src`/`srcSet` on `<Image>`, served from `https://images.akli.dev/blog/<post-slug>/<file>-<size>.webp`.
 - [ ] No accessibility regression check needed (alt text is unchanged; image bytes are unchanged).
 
 ## Open Questions
@@ -281,3 +276,9 @@ This PRD sat unimplemented long enough that the codebase moved under it. Re-veri
 ### 2026-09 second refresh note — nested path structure
 
 Changed the S3 key / URL scheme from flat (`blog/<file>.webp`) to per-post-nested (`blog/<post-slug>/<file>.webp`) before implementation started — no PR had opened yet, so no live migration cost. Reason: flat naming was inconsistent with the already-shipped `recipes/<id>/<file>.webp` convention, forced manual collision-avoidance in filenames, and made per-post cleanup impossible without tracking which loose files belonged to which post. No infra-side change needed — the sibling akli-infrastructure PRD's `blog/*` CloudFront path pattern already matches nested paths. See "Image organization: nested by post slug" in Technical Considerations for full rationale. GitHub issues #440 and #443 (personal-website) were updated to match.
+
+### 2026-09 third refresh note — responsive sizing landed ahead of the migration
+
+[PR #445](https://github.com/vandelay87/personal-website/pull/445) (the same PR carrying this PRD's own doc updates) implemented responsive image sizing for all six blog images — `-thumb`/`-medium`/`-full` webp variants matching the recipe `ImageResizer` Lambda's scheme, generated by the new `scripts/resize-blog-images.ts`, wired into MDX via `src`/`srcSet`. This was **not** originally part of this PRD's scope (which only ever covered the path/domain migration) — it was done proactively, deliberately kept on the current live `/images/blog/` path rather than the not-yet-deployed CDN domain, so it shipped safely without depending on the sibling PRD.
+
+Effect on this PRD: every "one file per image" assumption throughout (Goals, Design & UX, Technical Considerations, Acceptance Criteria) has been updated to "three sized files per image, only the domain/directory changes." No new design work, no new resizing, no new `<Image>` props needed at migration time — that's all already done. GitHub issues #439, #440, #442, and #443 (personal-website) were updated to match; see each issue for its reduced remaining scope.
