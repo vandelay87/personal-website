@@ -4,7 +4,7 @@
 >
 > **Hard dependency on:** [`images-cdn-phase-1.md`](./images-cdn-phase-1.md). That PRD adds the `buildMetaTags` fix to handle absolute image URLs (skip the unconditional `${BASE_URL}${image}` prefix when `image` already starts with `http`).
 >
-> **Merge blocker — verified at PRD time:** `src/meta.ts:90` on `main` today reads `const fullImage = image ? \`${BASE_URL}${image}\` : undefined` — unconditional prefix. The phase 1 fix is NOT yet on `main`. If this PRD's PR is merged before phase 1's fix lands, blog OG meta tags will produce `https://akli.devhttps://images.akli.dev/blog/...` (broken). **Phase 1 must merge first; this is non-negotiable.**
+> **Dependency status (2026-09, PRD refresh): satisfied.** `src/meta.ts:91-92` already reads `image.startsWith('http') ? image : \`${BASE_URL}${image}\`` — phase 1's fix is merged on `main`. The original "merge blocker" language below described the state at PRD-writing time; it's no longer a blocker, kept for context.
 >
 > **Epic context:** PRD 4 of 4 — the final piece of the unified images CDN epic.
 > 1. `akli-infrastructure` phase 1 (done) — subdomain + recipe-images origin.
@@ -20,7 +20,7 @@ Move blog image files from `public/images/blog/` to `public/blog/` so they deplo
 
 Phase 1 of the images-CDN epic switched recipe images to `images.akli.dev`. Blog images still live at `akli.dev/images/blog/<file>` served from the site bucket via the existing `images/*` behavior. The unified images CDN is half-complete. Phase 2 finishes it: blog images need to move keys (in S3) and URLs (in MDX + meta) to live alongside recipes on `images.akli.dev`.
 
-The migration touches a small surface (only one MDX post has blog images today — `building-a-pokedex.mdx` — plus two test files), so the implementation is mechanical. The bigger concern is sequencing: this PRD must ship after the akli-infrastructure phase 2 deploy, otherwise MDX references point at a route that doesn't exist yet.
+The migration touches a small surface — three MDX posts reference blog images today (`building-a-pokedex.mdx`, plus `from-draft-to-published-recipe.mdx` and `akli-ui-storybook.mdx`, both shipped after this PRD was originally written — see Technical Considerations) plus two test files — so the implementation is mechanical. The bigger concern is sequencing: this PRD must ship after the akli-infrastructure phase 2 deploy, otherwise MDX references point at a route that doesn't exist yet.
 
 ## Goals
 
@@ -66,11 +66,19 @@ Applied wherever blog images are referenced.
 ```diff
 - public/images/blog/pokedex-desktop.webp
 - public/images/blog/pokedex-mobile.webp
+- public/images/blog/recipes.webp
+- public/images/blog/recipe-editor.webp
+- public/images/blog/storybook-button-docs.webp
+- public/images/blog/storybook-header-public-variant.webp
 + public/blog/pokedex-desktop.webp
 + public/blog/pokedex-mobile.webp
++ public/blog/recipes.webp
++ public/blog/recipe-editor.webp
++ public/blog/storybook-button-docs.webp
++ public/blog/storybook-header-public-variant.webp
 ```
 
-After Vite build, files end up at S3 keys `blog/pokedex-desktop.webp` and `blog/pokedex-mobile.webp` in the site bucket. The sibling PRD's `images.akli.dev/blog/*` behavior serves them with no path rewrite.
+After Vite build, files end up at S3 keys `blog/<file>.webp` in the site bucket, one per image above. The sibling PRD's `images.akli.dev/blog/*` behavior serves them with no path rewrite.
 
 ### Why absolute URLs in MDX
 
@@ -87,14 +95,24 @@ Same loading, error, success states as before. Same `<Image>` component, same OG
 
 ### Mechanical find-replace surface
 
-Only **one MDX file** today references blog images:
+**Three MDX files** reference blog images today (updated 2026-09 — two of these shipped after this PRD was originally written, when only `building-a-pokedex.mdx` existed; re-verify this list at implementation time in case more posts landed since):
 
 - **`src/pages/Blog/posts/building-a-pokedex.mdx`** — 3 references:
   - Line 6 (frontmatter): `image: /images/blog/pokedex-desktop.webp`
   - Line 9 (inline `<Image src=...>`): `/images/blog/pokedex-desktop.webp`
   - Line 213 (inline `<Image src=...>`): `/images/blog/pokedex-mobile.webp`
+- **`src/pages/Blog/posts/from-draft-to-published-recipe.mdx`** — 3 references:
+  - Line 6 (frontmatter): `image: /images/blog/recipes.webp`
+  - Line 9 (inline `<Image src=...>`): `/images/blog/recipes.webp`
+  - Line 94 (inline `<Image src=...>`): `/images/blog/recipe-editor.webp`
+- **`src/pages/Blog/posts/akli-ui-storybook.mdx`** — 3 references:
+  - Line 6 (frontmatter): `image: /images/blog/storybook-button-docs.webp`
+  - Line 9 (inline `<Image src=...>`): `/images/blog/storybook-button-docs.webp`
+  - Line 27 (inline `<Image src=...>`): `/images/blog/storybook-header-public-variant.webp`
 
-Replace each with the absolute `https://images.akli.dev/blog/<file>` form. The frontmatter `image:` value flows into `buildMetaTags(...)` for OG/Twitter meta — works correctly only after phase 1's `buildMetaTags` fix is in place.
+Six distinct image files in total: `pokedex-desktop.webp`, `pokedex-mobile.webp`, `recipes.webp`, `recipe-editor.webp`, `storybook-button-docs.webp`, `storybook-header-public-variant.webp`.
+
+Replace each reference with the absolute `https://images.akli.dev/blog/<file>` form. Each frontmatter `image:` value flows into `buildMetaTags(...)` for OG/Twitter meta — works correctly because phase 1's `buildMetaTags` fix (absolute-URL passthrough) is already merged, see banner at top of this PRD.
 
 Two test files also need updating:
 
@@ -111,24 +129,22 @@ No other surfaces are affected:
 
 ### Deploy workflow `--delete` behavior
 
-`.github/workflows/deploy.yml:43`:
+`.github/workflows/deploy.yml:45` (updated 2026-09 — the PRD-time command had `--exclude` flags for `apps/sand-box/*`/`apps/pokedex/*` and read the bucket name from `secrets.S3_BUCKET_NAME`; both apps moved to their own buckets/deploy roles since, via the akli-infrastructure per-app-buckets-and-OIDC migration, so the excludes are gone and the bucket name is now a non-sensitive repo variable):
 ```bash
-aws s3 sync ./dist/client s3://${{ secrets.S3_BUCKET_NAME }} --delete --exclude "apps/sand-box/*" --exclude "apps/pokedex/*"
+aws s3 sync ./dist/client s3://${{ vars.AWS_S3_BUCKET_NAME }} --delete
 ```
 
 `--delete` removes any S3 key not present in `dist/client/`. After this PRD's deploy, `dist/client/blog/*.webp` exists (from `public/blog/`), and `dist/client/images/blog/` does NOT exist (the source moved). So `--delete` will remove the old `images/blog/*.webp` keys from S3.
 
 This is **exactly what we want** per the sibling PRD's "no redirects, accept-breakage" decision. No `--exclude` clause is needed for `images/blog/*`.
 
-### Hard dependency on phase 1's `buildMetaTags` fix
+### Dependency on phase 1's `buildMetaTags` fix — already satisfied
 
-Phase 1 personal-website PRD specifies a fix to `buildMetaTags` (`src/meta.ts:90`) that conditionally skips the `BASE_URL` prefix when the image URL is already absolute. Without that fix, the OG meta-tag URL for the blog post becomes `https://akli.devhttps://images.akli.dev/blog/pokedex-desktop.webp` (broken).
+Phase 1 personal-website PRD specified a fix to `buildMetaTags` that conditionally skips the `BASE_URL` prefix when the image URL is already absolute. Without that fix, the OG meta-tag URL for a blog post would become `https://akli.devhttps://images.akli.dev/blog/pokedex-desktop.webp` (broken).
 
-Two scenarios:
-- **Phase 1 has shipped before this PRD's PR opens** (expected): `buildMetaTags` already handles absolute URLs. This PRD just changes the inputs.
-- **Phase 1 has NOT shipped**: this PRD's PR cannot merge — either phase 1 ships first, or the buildMetaTags fix is added here as a duplicated change (not recommended; better to wait for phase 1).
+**Status (2026-09, PRD refresh): confirmed merged.** `src/meta.ts:91-92` reads `image.startsWith('http') ? image : \`${BASE_URL}${image}\`` — this PRD's inputs (absolute `images.akli.dev` URLs) are already handled correctly. The scenario analysis below described the risk at PRD-writing time; it's resolved, kept for context.
 
-The PRD assumes phase 1 ships first. If sequencing changes, the implementer must add the buildMetaTags fix here, but that's a deviation from the agreed plan and should be flagged in the PR description.
+- **Phase 1 had shipped before this PRD's PR opens** — confirmed: this is the actual outcome. `buildMetaTags` already handles absolute URLs; this PRD just changes the inputs.
 
 ### Lockstep deploy ordering
 
@@ -139,17 +155,17 @@ The PRD assumes phase 1 ships first. If sequencing changes, the implementer must
    - Verify: curl https://images.akli.dev/blog/anything.webp → 404 NoSuchKey
 
 2. personal-website phase 2 deploys (THIS PRD)
-   - public/images/blog/* → public/blog/*
-   - building-a-pokedex.mdx updated (3 refs)
+   - public/images/blog/* → public/blog/* (all 6 images)
+   - building-a-pokedex.mdx, from-draft-to-published-recipe.mdx, akli-ui-storybook.mdx updated (3 refs each, 9 total)
    - Tests updated
    - Vite build + s3 sync --delete removes old keys, uploads new keys
 
-3. Verify: visit /blog/building-a-pokedex on akli.dev
+3. Verify: visit all three blog posts on akli.dev
    - Cover + inline images load from images.akli.dev/blog/...
    - DevTools network panel confirms 200 + image/webp responses
 ```
 
-If reversed (this PRD ships before infra phase 2): MDX references `images.akli.dev/blog/...` URLs but the route doesn't exist → all blog images on `building-a-pokedex` broken. Sequence carefully.
+If reversed (this PRD ships before infra phase 2): MDX references `images.akli.dev/blog/...` URLs but the route doesn't exist → all blog images across all three posts broken. Sequence carefully.
 
 ### Test maintenance (Update mode, not Write mode)
 
@@ -171,19 +187,18 @@ ACs split into Automated (TDD-able with `pnpm test` / `pnpm lint` before deploy)
 
 ### Automated — File move
 
-- [ ] `public/images/blog/pokedex-desktop.webp` no longer exists.
-- [ ] `public/images/blog/pokedex-mobile.webp` no longer exists.
-- [ ] `public/blog/pokedex-desktop.webp` exists with byte content identical to the original (verify with `diff` against pre-move snapshot or `sha256sum`).
-- [ ] `public/blog/pokedex-mobile.webp` exists with byte content identical to the original.
+- [ ] None of the six source images remain under `public/images/blog/`: `pokedex-desktop.webp`, `pokedex-mobile.webp`, `recipes.webp`, `recipe-editor.webp`, `storybook-button-docs.webp`, `storybook-header-public-variant.webp`.
+- [ ] Each of the six exists under `public/blog/` with byte content identical to the original (verify with `diff` against a pre-move snapshot or `sha256sum`).
 - [ ] `public/images/blog/` directory is removed.
-- [ ] `public/images/` directory is removed if it has no remaining contents after the move (verified today as containing only `blog/`; running `ls public/images/` after removing `blog/` should return an empty listing, in which case `rmdir public/images/`).
+- [ ] `public/images/` directory is removed if it has no remaining contents after the move (re-verify at implementation time that `blog/` is still the only subdirectory; if so, `ls public/images/` after removing `blog/` should return an empty listing, in which case `rmdir public/images/`).
 
-### Automated — `building-a-pokedex.mdx` updates
+### Automated — MDX post updates
 
-- [ ] Frontmatter `image:` field equals `https://images.akli.dev/blog/pokedex-desktop.webp` (absolute URL, no leading `/`).
-- [ ] All inline `<Image src=...>` references using the desktop image use `https://images.akli.dev/blog/pokedex-desktop.webp`.
-- [ ] All inline `<Image src=...>` references using the mobile image use `https://images.akli.dev/blog/pokedex-mobile.webp`.
-- [ ] No remaining `/images/blog/` references in the MDX file (`grep -c '/images/blog/' src/pages/Blog/posts/building-a-pokedex.mdx` returns 0).
+- [ ] **`building-a-pokedex.mdx`**: frontmatter `image:` and both inline `<Image src=...>` references (desktop, mobile) use the absolute `https://images.akli.dev/blog/<file>` form.
+- [ ] **`from-draft-to-published-recipe.mdx`**: frontmatter `image:` and both inline `<Image src=...>` references (`recipes.webp`, `recipe-editor.webp`) use the absolute `https://images.akli.dev/blog/<file>` form.
+- [ ] **`akli-ui-storybook.mdx`**: frontmatter `image:` and both inline `<Image src=...>` references (`storybook-button-docs.webp`, `storybook-header-public-variant.webp`) use the absolute `https://images.akli.dev/blog/<file>` form.
+- [ ] No remaining `/images/blog/` references in any of the three MDX files (`grep -rc '/images/blog/' src/pages/Blog/posts/*.mdx` returns 0 for each).
+- [ ] No MDX post other than these three references `images/blog/` (re-verify at implementation time in case a new post landed since this refresh — same check the original PRD ran, now against three known files instead of one).
 
 ### Automated — Test updates
 
@@ -205,8 +220,8 @@ ACs split into Automated (TDD-able with `pnpm test` / `pnpm lint` before deploy)
 ### PR review checklist (manual review during PR, not enforced by tests)
 
 - [ ] `grep -rn 'images/blog' src/ public/` returns zero matches (catches both `/images/blog/` and `images/blog/` patterns; `public/blog/` should be the only blog-images directory after the move).
-- [ ] No MDX file other than `building-a-pokedex.mdx` references `images/blog/` (re-verify in case a new post landed during the in-flight period — confirmed at PRD time as the only one).
-- [ ] Phase 1 `buildMetaTags` fix is confirmed merged on `main` BEFORE this PR merges (visual check of `src/meta.ts` `buildMetaTags` body — should contain `image.startsWith('http') ?` or equivalent).
+- [ ] No MDX post other than the three listed in Technical Considerations references `images/blog/` (re-verify in case a new post landed during the in-flight period).
+- [ ] Phase 1 `buildMetaTags` fix is confirmed present on `main` (already merged as of this PRD's refresh — `src/meta.ts:91-92` contains `image.startsWith('http') ?`; re-confirm it hasn't regressed before merging).
 - [ ] `.github/workflows/deploy.yml` `aws s3 sync` invocation does NOT have `--exclude "images/blog/*"` or `--exclude "images/*"` added between PRD time and merge (sanity check against an unrelated workflow change that would prevent old-key deletion).
 
 ### Manual — Lockstep verification (post-deploy of sibling, before this PR ships)
@@ -216,13 +231,12 @@ ACs split into Automated (TDD-able with `pnpm test` / `pnpm lint` before deploy)
 
 ### Manual — End-to-end verification (post-deploy of THIS PR)
 
-- [ ] After this PR's deploy completes, `curl -I https://images.akli.dev/blog/pokedex-desktop.webp` returns `HTTP/2 200`, `content-type: image/webp`.
-- [ ] After this PR's deploy completes, `curl -I https://images.akli.dev/blog/pokedex-mobile.webp` returns `HTTP/2 200`, `content-type: image/webp`.
-- [ ] After this PR's deploy completes, `curl -I https://akli.dev/images/blog/pokedex-desktop.webp` returns 404 (confirms `--delete` removed the old keys; this is the agreed-upon broken-link outcome from the no-redirects decision).
-- [ ] Visit `https://akli.dev/blog/building-a-pokedex` in a browser — both the cover image and the inline `pokedex-mobile` image load correctly. DevTools network panel shows requests to `images.akli.dev/blog/...` returning 200 with `image/webp`.
-- [ ] No requests to `akli.dev/images/blog/...` in the network tab when viewing the blog post (regression guard against any missed reference).
-- [ ] OG meta tag spot check: `curl https://akli.dev/blog/building-a-pokedex` and grep for `og:image` — value equals `https://images.akli.dev/blog/pokedex-desktop.webp` (verifies the `buildMetaTags` fix produces a clean URL, not double-prefixed).
-- [ ] Social-share preview check: paste `https://akli.dev/blog/building-a-pokedex` into Twitter/Slack/Discord — preview card renders the cover image (one-time spot check; cached previews from before the cutover may need to be re-scraped).
+- [ ] After this PR's deploy completes, each of the six images (`pokedex-desktop.webp`, `pokedex-mobile.webp`, `recipes.webp`, `recipe-editor.webp`, `storybook-button-docs.webp`, `storybook-header-public-variant.webp`) returns `HTTP/2 200`, `content-type: image/webp` at `curl -I https://images.akli.dev/blog/<file>`.
+- [ ] After this PR's deploy completes, the old `https://akli.dev/images/blog/<file>` URL for each of the six returns 404 (confirms `--delete` removed the old keys; this is the agreed-upon broken-link outcome from the no-redirects decision).
+- [ ] Visit each of the three blog posts (`/blog/building-a-pokedex`, `/blog/from-draft-to-published-recipe`, `/blog/akli-ui-storybook`) in a browser — all images load correctly. DevTools network panel shows requests to `images.akli.dev/blog/...` returning 200 with `image/webp`.
+- [ ] No requests to `akli.dev/images/blog/...` in the network tab when viewing any of the three posts (regression guard against any missed reference).
+- [ ] OG meta tag spot check on each of the three posts: `curl https://akli.dev/blog/<slug>` and grep for `og:image` — value equals the post's `https://images.akli.dev/blog/<cover-file>` (verifies the `buildMetaTags` fix produces a clean URL, not double-prefixed).
+- [ ] Social-share preview check: paste one of the three post URLs into Twitter/Slack/Discord — preview card renders the cover image (one-time spot check; cached previews from before the cutover may need to be re-scraped).
 
 ### Documentation
 
@@ -237,3 +251,7 @@ All resolved during PRD review:
 - **Test fixture extension** → resolved to **`.webp`** (matching production blog image format). ACs updated accordingly.
 
 No remaining open questions for phase 2.
+
+### 2026-09 refresh note
+
+This PRD sat unimplemented long enough that the codebase moved under it. Re-verified against current `main` and updated: scope expanded from 1 to 3 MDX posts / 6 images (two posts shipped after this PRD was written), phase 1's `buildMetaTags` dependency is now confirmed merged, and the quoted `deploy.yml` command was updated to match its current form. No design decisions changed — same URL scheme, same file-move approach, same no-redirects trade-off. Re-verify the MDX file list again at implementation time in case further posts have shipped since this refresh.
