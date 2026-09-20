@@ -3,10 +3,10 @@ title: From an Empty Draft to a Published Recipe
 date: 2026-06-27
 description: A walk through my recipe app by following one recipe from the moment I click "New" to the moment a visitor reads it, across React, Lambda, DynamoDB, and S3.
 tags: [react, aws, lambda, dynamodb, s3, cognito, typescript]
-image: /images/blog/recipes.webp
+image: /images/blog/recipes-full.webp
 ---
 
-<Image src="/images/blog/recipes.webp" alt="The recipes section of akli.dev showing a grid of recipe cards" caption="The recipes section, running on akli.dev" priority />
+<Image src="/images/blog/recipes-medium.webp" srcSet="/images/blog/recipes-medium.webp 800w, /images/blog/recipes-full.webp 1200w" alt="The recipes section of akli.dev showing a grid of recipe cards" caption="The recipes section, running on akli.dev" priority />
 
 I added a recipes section to akli.dev. The public side is a grid you can browse and search at [akli.dev/recipes](https://akli.dev/recipes). Behind a login there's an editor I use to write the recipes, which makes the whole thing closer to a small content management system than a static page.
 
@@ -91,7 +91,7 @@ await docClient.send(new UpdateCommand({
 
 The API turns that note into a `processedAt` field on the image. The editor reads it as "safe to show now". Until it appears, the editor shows a skeleton placeholder and quietly polls the recipe every second and a half, swapping the placeholder for the real photo the moment it's ready.
 
-<Image src="/images/blog/recipe-editor.webp" alt="The admin recipe editor with a recipe open for editing" caption="The admin editor I use to write recipes" maxWidth="600px" />
+<Image src="/images/blog/recipe-editor-medium.webp" srcSet="/images/blog/recipe-editor-medium.webp 800w, /images/blog/recipe-editor-full.webp 1200w" alt="The admin recipe editor with a recipe open for editing" caption="The admin editor I use to write recipes" maxWidth="600px" />
 
 The same `processedAt` check guards publishing, so I can't accidentally ship a recipe whose hero image is still a 404.
 

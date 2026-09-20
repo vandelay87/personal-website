@@ -3,10 +3,10 @@ title: "@akli-dev/ui and the Storybook Behind It"
 date: 2026-09-07
 description: Why I pulled akli.dev's generic components into their own package, and the font loading, CSS packaging, and accessibility problems that came with it.
 tags: [react, typescript, storybook, vite, css, accessibility]
-image: /images/blog/storybook-button-docs.webp
+image: /images/blog/storybook-button-docs-full.webp
 ---
 
-<Image src="/images/blog/storybook-button-docs.webp" alt="Storybook's sidebar listing every component, with the Button component's docs page open showing its props table and a live example" caption="The component library, browsable at storybook.akli.dev" priority />
+<Image src="/images/blog/storybook-button-docs-medium.webp" srcSet="/images/blog/storybook-button-docs-medium.webp 800w, /images/blog/storybook-button-docs-full.webp 1200w" alt="Storybook's sidebar listing every component, with the Button component's docs page open showing its props table and a live example" caption="The component library, browsable at storybook.akli.dev" priority />
 
 `@akli-dev/ui` is a small React component library: `Header`, `Footer`, `Button`, `Typography`, `Input`, `Card`, a handful more, plus the design tokens and self-hosted fonts behind them. It lives in its own repo, publishes to npm as `@akli-dev/ui`, and ships a public Storybook at [storybook.akli.dev](https://storybook.akli.dev). The main site, the one you're reading this on, now depends on it like any other package. It didn't used to. Every one of these components used to live directly inside this site's own codebase, and pulling them out turned into a longer project than I expected, mostly because of the parts that don't show up when you're just looking at the components themselves.
 
@@ -24,7 +24,7 @@ Once the components live in a package with no host app wrapped around them, you 
 
 The obvious one is development. `Header` alone has three real variants (`public`, `admin`, `logged-out`), and I want to see all three, in both light and dark theme, without spinning up the main site and logging in and out to trigger each state. Storybook gives every component its own story per variant, and a toolbar toggle flips the theme across all of them at once. The docs side of this matters too: Storybook's autodocs addon generates a props table straight from each component's TSDoc comments, so the documentation is the component's own type signature, not a hand-maintained README that quietly goes stale the first time a prop gets renamed.
 
-<Image src="/images/blog/storybook-header-public-variant.webp" alt="The Header component's public variant, rendered in Storybook" caption="Header's public variant, viewed in Storybook" />
+<Image src="/images/blog/storybook-header-public-variant-medium.webp" srcSet="/images/blog/storybook-header-public-variant-medium.webp 800w, /images/blog/storybook-header-public-variant-full.webp 1200w" alt="The Header component's public variant, rendered in Storybook" caption="Header's public variant, viewed in Storybook" />
 
 The second job is public. Storybook is deployed openly at `storybook.akli.dev`, its own S3 bucket and CloudFront distribution in `akli-infrastructure`, the same pattern as the Pokedex and sandbox subdomains. Anyone can browse it. That makes it a portfolio artefact in its own right, a design system someone can click through without needing to know anything about the main site specifically.
 

@@ -3,10 +3,10 @@ title: Building a Pokedex with React and AWS
 date: 2026-04-07
 description: How I built a full-stack Pokedex app with React 19, AWS CDK, DynamoDB, Lambda, and a Game Boy Color aesthetic.
 tags: [react, aws, cdk, dynamodb, lambda, typescript]
-image: /images/blog/pokedex-desktop.webp
+image: /images/blog/pokedex-desktop-full.webp
 ---
 
-<Image src="/images/blog/pokedex-desktop.webp" alt="Pokedex app showing the Pokemon list and detail panel" caption="The finished Pokedex, running on akli.dev" priority />
+<Image src="/images/blog/pokedex-desktop-medium.webp" srcSet="/images/blog/pokedex-desktop-medium.webp 800w, /images/blog/pokedex-desktop-full.webp 1200w" alt="Pokedex app showing the Pokemon list and detail panel" caption="The finished Pokedex, running on akli.dev" priority />
 
 I built a full-stack Pokedex as a portfolio project. It runs on AWS, costs almost nothing to host, and looks like a Game Boy Color screen. The frontend is React 19 with TypeScript. The backend is API Gateway, Lambda, and DynamoDB, all defined in CDK.
 
@@ -212,7 +212,7 @@ Stat bars animate in with a staggered delay. Each bar receives its index as a CS
 
 The result: HP fills first, then Attack, then Defense, cascading down the list. The animation also respects `prefers-reduced-motion`.
 
-<Image src="/images/blog/pokedex-mobile.webp" alt="Pokedex mobile view showing the detail overlay with stat bars" caption="The mobile detail overlay with animated stat bars" maxWidth="400px" />
+<Image src="/images/blog/pokedex-mobile-thumb.webp" srcSet="/images/blog/pokedex-mobile-thumb.webp 400w, /images/blog/pokedex-mobile-medium.webp 800w" alt="Pokedex mobile view showing the detail overlay with stat bars" caption="The mobile detail overlay with animated stat bars" maxWidth="400px" />
 
 ## What I'd do differently
 
