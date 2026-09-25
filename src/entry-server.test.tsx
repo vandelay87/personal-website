@@ -136,7 +136,7 @@ describe('entry-server render', () => {
     it('contains OG image for blog post with image', async () => {
       const html = await render('/blog/building-a-pokedex')
       expect(html).toContain('property="og:image"')
-      expect(html).toContain('/images/blog/pokedex-desktop.webp')
+      expect(html).toContain('/images/blog/pokedex-desktop-full.webp')
     })
 
     it('contains twitter large image card for blog post with image', async () => {
