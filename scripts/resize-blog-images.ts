@@ -1,5 +1,5 @@
 import { readdir, readFile, unlink, writeFile } from 'node:fs/promises'
-import { dirname, extname, join, resolve } from 'node:path'
+import { dirname, extname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 
@@ -15,17 +15,16 @@ const VARIANTS = [
 const VARIANT_SUFFIXES = VARIANTS.map((v) => v.suffix)
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const BLOG_IMAGES_DIR = resolve(__dirname, '../public/images/blog')
+const BLOG_IMAGES_DIR = resolve(__dirname, '../public/blog')
 
 const isAlreadyVariant = (basename: string): boolean =>
   VARIANT_SUFFIXES.some((suffix) => basename.endsWith(`-${suffix}`))
 
-const resizeOne = async (filename: string): Promise<void> => {
+const resizeOne = async (slugDir: string, filename: string): Promise<void> => {
   const ext = extname(filename)
   const basename = filename.slice(0, -ext.length)
-  if (isAlreadyVariant(basename)) return
 
-  const sourcePath = join(BLOG_IMAGES_DIR, filename)
+  const sourcePath = join(slugDir, filename)
   const sourceBuffer = await readFile(sourcePath)
 
   await Promise.all(
@@ -35,25 +34,36 @@ const resizeOne = async (filename: string): Promise<void> => {
         .webp({ quality: variant.quality })
         .toBuffer()
 
-      await writeFile(join(BLOG_IMAGES_DIR, `${basename}-${variant.suffix}.webp`), variantBuffer)
+      await writeFile(join(slugDir, `${basename}-${variant.suffix}.webp`), variantBuffer)
     }),
   )
 
   await unlink(sourcePath)
-  console.log(`resized ${filename} -> ${basename}-{${VARIANT_SUFFIXES.join(',')}}.webp`)
+  const slug = relative(BLOG_IMAGES_DIR, slugDir)
+  console.log(`resized ${slug}/${filename} -> ${slug}/${basename}-{${VARIANT_SUFFIXES.join(',')}}.webp`)
 }
 
 const main = async (): Promise<void> => {
-  const entries = await readdir(BLOG_IMAGES_DIR)
-  const sources = entries.filter((name) => extname(name) === '.webp')
+  const slugEntries = await readdir(BLOG_IMAGES_DIR, { withFileTypes: true })
+  const slugDirs = slugEntries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => join(BLOG_IMAGES_DIR, entry.name))
 
-  if (sources.length === 0) {
-    console.log('No unprocessed .webp files found in public/images/blog/.')
-    return
+  let processed = 0
+  for (const slugDir of slugDirs) {
+    const entries = await readdir(slugDir)
+    const sources = entries.filter(
+      (name) => extname(name) === '.webp' && !isAlreadyVariant(name.slice(0, -'.webp'.length)),
+    )
+
+    for (const filename of sources) {
+      await resizeOne(slugDir, filename)
+      processed += 1
+    }
   }
 
-  for (const filename of sources) {
-    await resizeOne(filename)
+  if (processed === 0) {
+    console.log('No unprocessed .webp files found in public/blog/<post-slug>/.')
   }
 }
 
