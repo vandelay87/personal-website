@@ -4,6 +4,8 @@ import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest'
 import { createTempTestDir } from '../tests/tempTestDir'
 import { blogPostsMeta, extractPlainText, parseFrontmatter } from './blog-posts-meta'
 
+type LoadFn = (this: { addWatchFile: (file: string) => void }, id: string) => string | undefined
+
 describe('parseFrontmatter', () => {
   it('parses flat key/value pairs', () => {
     const raw = `---
@@ -232,7 +234,7 @@ ${Array(250).fill('word').join(' ')}`
   it('ignores load calls for ids other than the resolved virtual module id', () => {
     const plugin = blogPostsMeta(postsDir)
     const addWatchFile = vi.fn()
-    const load = plugin.load as unknown as (this: { addWatchFile: typeof addWatchFile }, id: string) => string | undefined
+    const load = plugin.load as unknown as LoadFn
 
     expect(load.call({ addWatchFile }, './something-else.ts')).toBeUndefined()
     expect(addWatchFile).not.toHaveBeenCalled()
@@ -241,7 +243,7 @@ ${Array(250).fill('word').join(' ')}`
   it('reads only .mdx files, watches each one, and emits frontmatter/reading-time maps', () => {
     const plugin = blogPostsMeta(postsDir)
     const addWatchFile = vi.fn()
-    const load = plugin.load as unknown as (this: { addWatchFile: typeof addWatchFile }, id: string) => string | undefined
+    const load = plugin.load as unknown as LoadFn
 
     const source = load.call({ addWatchFile }, '\0virtual:blog-posts-meta')
 
@@ -266,8 +268,6 @@ ${Array(250).fill('word').join(' ')}`
 })
 
 describe('blogPostsMeta hero validation', () => {
-  type LoadFn = (this: { addWatchFile: () => void }, id: string) => string | undefined
-
   const validHeroLines = {
     src: '  src: https://images.akli.dev/blog/post/hero-medium.webp',
     srcSet: '  srcSet: https://images.akli.dev/blog/post/hero-medium.webp 800w',
@@ -296,38 +296,29 @@ Body.`
     }
   }
 
-  const loadErrorMessage = (heroLines: string[]): string => {
-    try {
-      loadWithHero(heroLines)
-    } catch (error) {
-      return (error as Error).message
-    }
-    throw new Error('Expected load() to throw for an invalid hero mapping')
-  }
+  const heroLinesWithout = (missingKey: keyof typeof validHeroLines): string[] =>
+    Object.entries(validHeroLines)
+      .filter(([key]) => key !== missingKey)
+      .map(([, line]) => line)
 
-  it.each(Object.keys(validHeroLines) as (keyof typeof validHeroLines)[])(
-    'refuses to build when a hero mapping is missing the required %s key, naming the file and the key',
-    (missingKey) => {
-      const heroLines = Object.entries(validHeroLines)
-        .filter(([key]) => key !== missingKey)
-        .map(([, line]) => line)
-
-      const message = loadErrorMessage(heroLines)
-      expect(message).toContain('broken-hero.mdx')
-      expect(message).toContain(missingKey)
-    }
-  )
-
-  it('refuses to build when srcSet is typo\'d as srcset, naming the file and the missing key', () => {
-    const message = loadErrorMessage([
-      validHeroLines.src,
-      '  srcset: https://images.akli.dev/blog/post/hero-medium.webp 800w',
-      validHeroLines.sizes,
-      validHeroLines.alt,
-    ])
-
-    expect(message).toContain('broken-hero.mdx')
-    expect(message).toContain('srcSet')
+  it.each([
+    ...(Object.keys(validHeroLines) as (keyof typeof validHeroLines)[]).map((missingKey) => ({
+      scenario: `is missing the required ${missingKey} key`,
+      heroLines: heroLinesWithout(missingKey),
+      missingKey,
+    })),
+    {
+      scenario: "has srcSet typo'd as srcset",
+      heroLines: [
+        validHeroLines.src,
+        '  srcset: https://images.akli.dev/blog/post/hero-medium.webp 800w',
+        validHeroLines.sizes,
+        validHeroLines.alt,
+      ],
+      missingKey: 'srcSet',
+    },
+  ])('refuses to build when a hero mapping $scenario, naming the file and the missing key', ({ heroLines, missingKey }) => {
+    expect(() => loadWithHero(heroLines)).toThrow(new RegExp(`broken-hero\\.mdx.*${missingKey}`))
   })
 
   it('accepts a hero mapping without the optional caption', () => {

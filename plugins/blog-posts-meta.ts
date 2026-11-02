@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
 import type { Plugin } from 'vite'
+import type { PostHero } from '../src/pages/Blog/posts'
 import { calculateReadingTime } from './remark-reading-time'
 
 const VIRTUAL_MODULE_ID = 'virtual:blog-posts-meta'
@@ -32,8 +33,7 @@ export const parseFrontmatter = (
   if (!match) return {}
 
   const result: Record<string, FrontmatterValue> = {}
-  let pendingKey: string | null = null
-  let currentMapping: Record<string, string> | null = null
+  let mappingKey: string | null = null
 
   for (const line of match[1].split(/\r?\n/)) {
     if (!line.trim()) continue
@@ -43,20 +43,18 @@ export const parseFrontmatter = (
     const key = line.slice(0, colonIndex).trim()
     const rawValue = line.slice(colonIndex + 1).trim()
 
-    if (/^\s/.test(line) && pendingKey !== null) {
-      if (!currentMapping) {
-        currentMapping = {}
-        result[pendingKey] = currentMapping
-      }
-      currentMapping[key] = stripQuotes(rawValue)
+    if (/^\s/.test(line) && mappingKey !== null) {
+      const existing = result[mappingKey]
+      const mapping = typeof existing === 'object' && !Array.isArray(existing) ? existing : {}
+      mapping[key] = stripQuotes(rawValue)
+      result[mappingKey] = mapping
       continue
     }
 
-    pendingKey = null
-    currentMapping = null
+    mappingKey = null
     if (rawValue === '') {
       result[key] = ''
-      pendingKey = key
+      mappingKey = key
     } else if (rawValue.startsWith('[') && rawValue.endsWith(']')) {
       result[key] = rawValue
         .slice(1, -1)
@@ -70,7 +68,7 @@ export const parseFrontmatter = (
   return result
 }
 
-const REQUIRED_HERO_KEYS = ['src', 'srcSet', 'sizes', 'alt'] as const
+const REQUIRED_HERO_KEYS = ['src', 'srcSet', 'sizes', 'alt'] as const satisfies readonly (keyof PostHero)[]
 
 const validateHero = (file: string, hero: FrontmatterValue | undefined): void => {
   if (hero === undefined) return

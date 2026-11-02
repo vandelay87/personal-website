@@ -16,6 +16,11 @@ export interface MetaTags {
     description: string
     image?: string
   }
+  preloadImage?: {
+    href: string
+    srcSet: string
+    sizes: string
+  }
 }
 
 import type { RecipeData } from './contexts/RecipeDataContext'
@@ -57,7 +62,7 @@ export const normalisePath = (path: string): string => {
   return path.endsWith('/') ? path.slice(0, -1) : path
 }
 
-export const getBlogPostForPath = (path: string): PostMeta | undefined => {
+const getBlogPostForPath = (path: string): PostMeta | undefined => {
   const blogPostMatch = normalisePath(path).match(/^\/blog\/(.+)$/)
   return blogPostMatch ? postsModule.getPost(blogPostMatch[1]) : undefined
 }
@@ -129,7 +134,7 @@ export const getMetaTags = (path: string, data?: RecipeData): MetaTags => {
 
   const post = getBlogPostForPath(normalised)
   if (post) {
-    return buildMetaTags(
+    const meta = buildMetaTags(
       `${post.title} | Akli Aissat`,
       post.description,
       canonical,
@@ -137,6 +142,9 @@ export const getMetaTags = (path: string, data?: RecipeData): MetaTags => {
       'article',
       post.image,
     )
+    if (!post.hero) return meta
+    const { src, srcSet, sizes } = post.hero
+    return { ...meta, preloadImage: { href: src, srcSet, sizes } }
   }
 
   const recipeMatch = normalised.match(/^\/recipes\/(.+)$/)
