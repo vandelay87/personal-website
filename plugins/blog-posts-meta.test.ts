@@ -13,7 +13,7 @@ title: Building a Pokedex
 date: 2026-04-07
 tags: [react, aws]
 hero:
-  stem: building-a-pokedex/pokedex-desktop
+  stem: pokedex-desktop
   alt: "Pokedex app"
 ---
 
@@ -23,7 +23,7 @@ Body text.`
       title: 'Building a Pokedex',
       date: '2026-04-07',
       tags: ['react', 'aws'],
-      hero: { stem: 'building-a-pokedex/pokedex-desktop', alt: 'Pokedex app' },
+      hero: { stem: 'pokedex-desktop', alt: 'Pokedex app' },
     })
   })
 
@@ -198,7 +198,7 @@ describe('blogPostsMeta frontmatter validation', () => {
   }
 
   const validHeroLines = {
-    stem: '  stem: post/hero',
+    stem: '  stem: hero',
     alt: '  alt: A hero image',
   }
 
@@ -256,28 +256,33 @@ describe('blogPostsMeta frontmatter validation', () => {
 
   it('accepts a hero mapping with the optional caption and emits it', () => {
     expect(emittedFrontmatter(loadWithHero([...Object.values(validHeroLines), '  caption: A caption'])).hero).toEqual({
-      stem: 'post/hero',
+      stem: 'hero',
       alt: 'A hero image',
       caption: 'A caption',
     })
   })
 
-  it('omits unknown top-level keys from the emitted frontmatter', () => {
-    const frontmatter = emittedFrontmatter(loadPost([...Object.values(validFieldLines), 'notes: draft']))
-
-    expect(frontmatter).not.toHaveProperty('notes')
-  })
-
-  it('omits empty optional keys from the emitted frontmatter', () => {
-    const frontmatter = emittedFrontmatter(loadPost([...Object.values(validFieldLines), 'hero:']))
-
-    expect(frontmatter).not.toHaveProperty('hero')
-  })
-
-  it('omits empty optional keys nested in the hero from the emitted frontmatter', () => {
-    const frontmatter = emittedFrontmatter(loadWithHero([...Object.values(validHeroLines), '  caption:']))
-
-    expect(frontmatter.hero).not.toHaveProperty('caption')
+  it.each([
+    {
+      scenario: 'unknown top-level keys',
+      source: () => loadPost([...Object.values(validFieldLines), 'notes: draft']),
+      select: (frontmatter: Record<string, unknown>) => frontmatter,
+      key: 'notes',
+    },
+    {
+      scenario: 'empty optional keys',
+      source: () => loadPost([...Object.values(validFieldLines), 'hero:']),
+      select: (frontmatter: Record<string, unknown>) => frontmatter,
+      key: 'hero',
+    },
+    {
+      scenario: 'empty optional keys nested in the hero',
+      source: () => loadWithHero([...Object.values(validHeroLines), '  caption:']),
+      select: (frontmatter: Record<string, unknown>) => frontmatter.hero,
+      key: 'caption',
+    },
+  ])('omits $scenario from the emitted frontmatter', ({ source, select, key }) => {
+    expect(select(emittedFrontmatter(source()))).not.toHaveProperty(key)
   })
 
   it.each([
@@ -288,7 +293,7 @@ describe('blogPostsMeta frontmatter validation', () => {
     })),
     {
       scenario: "has stem typo'd as src",
-      heroLines: ['  src: post/hero', validHeroLines.alt],
+      heroLines: ['  src: hero', validHeroLines.alt],
       missingKey: 'stem',
     },
   ])('refuses to build when a hero mapping $scenario, naming the file and the missing key', ({ heroLines, missingKey }) => {

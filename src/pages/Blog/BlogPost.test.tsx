@@ -6,7 +6,8 @@ import { axe } from 'vitest-axe'
 import BlogPost from './BlogPost'
 import { HERO_IMAGE_SIZES, type PostMeta } from './posts'
 
-const mockPosts = vi.hoisted(() => {
+const mockPosts = await vi.hoisted(async () => {
+  const { testPostHero } = await import('./posts/fixtures')
   const posts: PostMeta[] = [
     {
       title: 'Test Post',
@@ -15,13 +16,7 @@ const mockPosts = vi.hoisted(() => {
       tags: ['react', 'aws'],
       slug: 'test-post',
       readingTime: 3,
-      hero: {
-        src: 'https://images.akli.dev/blog/test-post/hero-medium.webp',
-        srcSet:
-          'https://images.akli.dev/blog/test-post/hero-medium.webp 800w, https://images.akli.dev/blog/test-post/hero-full.webp 1200w',
-        alt: 'Hero image for the test post',
-        caption: 'The test post hero caption',
-      },
+      hero: testPostHero,
     },
     {
       title: 'Second Post',
@@ -87,6 +82,15 @@ for (const post of mockPosts) {
       : createLazyPost(`Content for ${post.title}`)
 }
 
+mockLazyPosts['third-post'] = lazy(() =>
+  Promise.resolve({
+    default: ({ components }: { components?: Record<string, unknown> }) => {
+      const PostImageComponent = components?.PostImage as React.ComponentType<{ stem: string; alt: string }>
+      return <PostImageComponent stem="diagram" alt="A diagram" />
+    },
+  })
+)
+
 vi.mock('@pages/NotFound', () => ({
   default: () => <div data-testid="not-found">404</div>,
 }))
@@ -127,7 +131,7 @@ describe('BlogPost', () => {
 
   describe('hero image', () => {
     it('renders the frontmatter hero with its caption, requested with the shared sizes so it matches the SSR preload', () => {
-      const { hero } = mockPosts[0]
+      const hero = mockPosts[0].hero?.image
       renderWithRoute('test-post')
       const img = screen.getByRole('img', { name: hero?.alt })
       expect(img).toHaveAttribute('src', hero?.src)
@@ -140,6 +144,18 @@ describe('BlogPost', () => {
       renderWithRoute('second-post')
       await screen.findByText('Content for Second Post')
       expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('inline post images', () => {
+    it('resolves a PostImage stem against the current post slug', async () => {
+      renderWithRoute('third-post')
+      const img = await screen.findByRole('img', { name: 'A diagram' })
+      expect(img).toHaveAttribute('src', 'https://images.akli.dev/blog/third-post/diagram-medium.webp')
+      expect(img).toHaveAttribute(
+        'srcset',
+        'https://images.akli.dev/blog/third-post/diagram-medium.webp 800w, https://images.akli.dev/blog/third-post/diagram-full.webp 1200w'
+      )
     })
   })
 

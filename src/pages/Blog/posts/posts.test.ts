@@ -14,7 +14,7 @@ vi.mock('virtual:blog-posts-meta', () => ({
       date: '2026-04-06',
       description: 'A test post to verify the MDX pipeline.',
       tags: ['test'],
-      hero: { stem: 'test-post/cover', alt: 'Cover alt', caption: 'Cover caption' },
+      hero: { stem: 'cover', alt: 'Cover alt', caption: 'Cover caption' },
     },
   },
   readingTimeMap: {
@@ -59,24 +59,25 @@ describe('Post registry', () => {
 })
 
 describe('Post registry hero derivation', () => {
-  it('derives the hero src, srcSet and OG image from the frontmatter stem', () => {
+  it('derives the hero src, srcSet and OG image from the post slug and frontmatter stem', () => {
     const post = getPost('test-post')
 
     expect(post?.hero).toEqual({
-      src: 'https://images.akli.dev/blog/test-post/cover-medium.webp',
-      srcSet:
-        'https://images.akli.dev/blog/test-post/cover-medium.webp 800w, https://images.akli.dev/blog/test-post/cover-full.webp 1200w',
-      alt: 'Cover alt',
-      caption: 'Cover caption',
+      image: {
+        src: 'https://images.akli.dev/blog/test-post/cover-medium.webp',
+        srcSet:
+          'https://images.akli.dev/blog/test-post/cover-medium.webp 800w, https://images.akli.dev/blog/test-post/cover-full.webp 1200w',
+        alt: 'Cover alt',
+        caption: 'Cover caption',
+      },
+      ogImage: 'https://images.akli.dev/blog/test-post/cover-full.webp',
     })
-    expect(post?.image).toBe('https://images.akli.dev/blog/test-post/cover-full.webp')
   })
 
-  it('sets neither hero nor image when the frontmatter has no hero', () => {
+  it('sets no hero when the frontmatter has no hero', () => {
     const post = getPost('older-post')
 
     expect(post).toBeDefined()
     expect(post).not.toHaveProperty('hero')
-    expect(post).not.toHaveProperty('image')
   })
 })

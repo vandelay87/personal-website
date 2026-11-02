@@ -4,7 +4,7 @@ date: 2026-04-07
 description: How I built a full-stack Pokedex app with React 19, AWS CDK, DynamoDB, Lambda, and a Game Boy Color aesthetic.
 tags: [react, aws, cdk, dynamodb, lambda, typescript]
 hero:
-  stem: building-a-pokedex/pokedex-desktop
+  stem: pokedex-desktop
   alt: "Pokedex app showing the Pokemon list and detail panel"
   caption: "The finished Pokedex, running on akli.dev"
 ---
@@ -213,7 +213,7 @@ Stat bars animate in with a staggered delay. Each bar receives its index as a CS
 
 The result: HP fills first, then Attack, then Defense, cascading down the list. The animation also respects `prefers-reduced-motion`.
 
-<Image src="https://images.akli.dev/blog/building-a-pokedex/pokedex-mobile-thumb.webp" srcSet="https://images.akli.dev/blog/building-a-pokedex/pokedex-mobile-thumb.webp 400w, https://images.akli.dev/blog/building-a-pokedex/pokedex-mobile-medium.webp 800w" alt="Pokedex mobile view showing the detail overlay with stat bars" caption="The mobile detail overlay with animated stat bars" maxWidth="400px" />
+<PostImage stem="pokedex-mobile" variants={['thumb', 'medium']} alt="Pokedex mobile view showing the detail overlay with stat bars" caption="The mobile detail overlay with animated stat bars" maxWidth="400px" />
 
 ## What I'd do differently
 

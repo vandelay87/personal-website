@@ -2,7 +2,7 @@
 import type { Recipe } from '@models/recipe'
 import { describe, it, expect, vi } from 'vitest'
 
-const mockPostData = vi.hoisted(() => ({
+const mockPostData = await vi.hoisted(async () => ({
   testPost: {
     title: 'Test Post Title',
     date: '2025-01-15',
@@ -10,13 +10,7 @@ const mockPostData = vi.hoisted(() => ({
     tags: ['testing'],
     slug: 'test-post',
     readingTime: 3,
-    image: '/blog/test-post/test-post-cover.jpg',
-    hero: {
-      src: 'https://images.akli.dev/blog/test-post/hero-medium.webp',
-      srcSet:
-        'https://images.akli.dev/blog/test-post/hero-medium.webp 800w, https://images.akli.dev/blog/test-post/hero-full.webp 1200w',
-      alt: 'Hero image for the test post',
-    },
+    hero: (await import('./pages/Blog/posts/fixtures')).testPostHero,
   },
   testPostNoImage: {
     title: 'No Image Post',
@@ -312,14 +306,12 @@ describe('getMetaTags', () => {
 
     it('includes og:image when post has image', () => {
       const meta = getMetaTags('/blog/test-post')
-      expect(meta.og.image).toBe('https://akli.dev/blog/test-post/test-post-cover.jpg')
+      expect(meta.og.image).toBe('https://images.akli.dev/blog/test-post/hero-full.webp')
     })
 
     it('includes twitter:image when post has image', () => {
       const meta = getMetaTags('/blog/test-post')
-      expect(meta.twitter.image).toBe(
-        'https://akli.dev/blog/test-post/test-post-cover.jpg'
-      )
+      expect(meta.twitter.image).toBe('https://images.akli.dev/blog/test-post/hero-full.webp')
     })
 
     it('sets twitter:card to summary_large_image when post has image', () => {
@@ -343,7 +335,7 @@ describe('getMetaTags', () => {
     })
 
     it('preloads the hero with its src and srcSet and the shared hero sizes when the post has a hero', () => {
-      const { src, srcSet } = mockPostData.testPost.hero
+      const { src, srcSet } = mockPostData.testPost.hero.image
       expect(getMetaTags('/blog/test-post').preloadImage).toEqual({
         src,
         srcSet,

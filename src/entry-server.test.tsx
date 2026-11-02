@@ -159,7 +159,7 @@ describe('entry-server render', () => {
         // at the start of #root, in <body> — expected, and not counted here.
         const document = parseHtml(await render('/blog/building-a-pokedex'))
         const preloads = findHeadImagePreloads(document)
-        const hero = getPost('building-a-pokedex')?.hero
+        const hero = getPost('building-a-pokedex')?.hero?.image
         const heroImg = [...document.querySelectorAll('body img')].find(
           (img) => img.getAttribute('alt') === hero?.alt
         )

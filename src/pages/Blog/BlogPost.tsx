@@ -1,6 +1,7 @@
 import { Callout, Image, Link, Typography } from '@akli-dev/ui'
 import CodeBlock from '@components/CodeBlock'
 import FileTree from '@components/FileTree'
+import PostImage, { type PostImageProps } from '@components/PostImage'
 import Tag from '@components/Tag'
 import NotFound from '@pages/NotFound'
 import type { AnchorHTMLAttributes } from 'react'
@@ -14,13 +15,13 @@ const BlogLink = ({ href, children }: AnchorHTMLAttributes<HTMLAnchorElement>) =
   <Link to={href ?? '#'} tone="accent">{children}</Link>
 )
 
-const mdxComponents = {
+const createMdxComponents = (slug: string) => ({
   pre: CodeBlock,
   a: BlogLink,
   Callout,
-  Image,
   FileTree,
-}
+  PostImage: (props: Omit<PostImageProps, 'slug'>) => <PostImage slug={slug} {...props} />,
+})
 
 const getRelatedPosts = (current: PostMeta, allPosts: PostMeta[]): PostMeta[] => {
   const others = allPosts.filter((p) => p.slug !== current.slug)
@@ -47,6 +48,7 @@ const BlogPost = () => {
     () => (post ? getRelatedPosts(post, posts) : []),
     [post]
   )
+  const mdxComponents = useMemo(() => post && createMdxComponents(post.slug), [post])
 
   if (!post || !PostContent) {
     return <NotFound />
@@ -91,7 +93,7 @@ const BlogPost = () => {
       </header>
 
       <div className={styles.prose}>
-        {post.hero && <Image {...post.hero} sizes={HERO_IMAGE_SIZES} priority />}
+        {post.hero && <Image {...post.hero.image} sizes={HERO_IMAGE_SIZES} priority />}
         <Suspense fallback={<Typography variant="body">Loading...</Typography>}>
           <PostContent components={mdxComponents} />
         </Suspense>
