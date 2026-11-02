@@ -93,8 +93,7 @@ export const escapeHtml = (str: string): string => {
 export const isKnownRoute = (path: string): boolean => {
   const leaf = matchLeafRoute(path)
   if (!leaf) return false
-  if (leaf.route.path !== BLOG_POST_ROUTE) return true
-  return leaf.params.slug !== undefined && postsModule.getPost(leaf.params.slug) !== undefined
+  return leaf.route.path !== BLOG_POST_ROUTE || getBlogPostForPath(path) !== undefined
 }
 
 const buildMetaTags = (

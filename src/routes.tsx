@@ -25,7 +25,7 @@ import {
 const withCaseSensitivePaths = (routeTable: RouteObject[]): RouteObject[] =>
   routeTable.map((route) =>
     route.index
-      ? { ...route, caseSensitive: true }
+      ? route
       : { ...route, caseSensitive: true, children: route.children && withCaseSensitivePaths(route.children) }
   )
 
