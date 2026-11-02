@@ -369,12 +369,14 @@ describe('entry-server render', () => {
         routes: [{ path: '*', element: <CrashingComponent /> }],
       }))
 
-      const { render: renderWithError } = await import('./entry-server')
+      try {
+        const { render: renderWithError } = await import('./entry-server')
 
-      await expect(renderWithError('/')).rejects.toThrow()
-
-      vi.doUnmock('./routes')
-      vi.resetModules()
+        await expect(renderWithError('/')).rejects.toThrow()
+      } finally {
+        vi.doUnmock('./routes')
+        vi.resetModules()
+      }
     })
   })
 })
