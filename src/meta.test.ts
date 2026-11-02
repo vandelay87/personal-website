@@ -486,4 +486,8 @@ describe('isKnownRoute', () => {
       expect(isKnownRoute(path)).toBe(false)
     }
   )
+
+  it.each(['/Apps', '/Recipes/some-slug'])('returns false for mixed-case path %s', (path) => {
+    expect(isKnownRoute(path)).toBe(false)
+  })
 })

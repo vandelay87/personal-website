@@ -157,6 +157,12 @@ describe('lambda-handler (streaming)', { timeout: 30_000 }, () => {
         expect(metadata.headers?.['Cache-Control']).toBe('no-cache')
       }
     )
+
+    it('returns 404 with no-cache for a mixed-case path', async () => {
+      const { metadata } = await invokeHandler('/Apps')
+      expect(metadata.statusCode).toBe(404)
+      expect(metadata.headers?.['Cache-Control']).toBe('no-cache')
+    })
   })
 
   describe('recipe routes', () => {
