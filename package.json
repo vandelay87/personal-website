@@ -1,7 +1,7 @@
 {
   "name": "personal-website",
   "private": true,
-  "version": "1.14.1",
+  "version": "1.14.2",
   "type": "module",
   "packageManager": "pnpm@11.9.0",
   "engines": {
@@ -69,6 +69,7 @@
     "vite-imagetools": "^12.0.1",
     "vitest": "^4.1.11",
     "vitest-axe": "^0.1.0",
-    "yaml": "^2.8.3"
+    "yaml": "^2.8.3",
+    "zod": "^4.4.3"
   }
 }

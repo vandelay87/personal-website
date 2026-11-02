@@ -26,7 +26,7 @@ declare module '*.mdx' {
 // than the compiled .mdx module so posts/index.ts never statically
 // imports the same module contentModules dynamically imports.
 declare module 'virtual:blog-posts-meta' {
-  import type { PostFrontmatter } from '@pages/Blog/posts'
+  import type { PostFrontmatter } from '@models/blog'
 
   export const frontmatterMap: Record<string, PostFrontmatter>
   export const readingTimeMap: Record<string, number>
