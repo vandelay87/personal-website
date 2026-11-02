@@ -175,7 +175,9 @@ describe('entry-server render', () => {
         'https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-medium.webp 800w, https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-full.webp 1200w'
       const pokedexHeroAlt = 'Pokedex app showing the Pokemon list and detail panel'
 
-      it('emits a single high-priority image preload in <head> pointing at the hero image', async () => {
+      it('emits exactly one high-priority image preload within <head> (not counting body markup) pointing at the hero image', async () => {
+        // React 19's server renderer also emits its own matching image preload
+        // at the start of #root, with identical srcset/sizes — expected.
         const { head } = splitHead(await render('/blog/building-a-pokedex'))
         const preloads = findImagePreloads(head)
 
@@ -212,15 +214,17 @@ describe('entry-server render', () => {
           }
         })
 
-        const { render: renderWithoutHero } = await import('./entry-server')
-        const html = await renderWithoutHero('/blog/building-a-pokedex')
-        const { head } = splitHead(html)
+        try {
+          const { render: renderWithoutHero } = await import('./entry-server')
+          const html = await renderWithoutHero('/blog/building-a-pokedex')
+          const { head } = splitHead(html)
 
-        expect(html).toContain('<title>Building a Pokedex with React and AWS | Akli Aissat</title>')
-        expect(findImagePreloads(head)).toHaveLength(0)
-
-        vi.doUnmock('./pages/Blog/posts/index')
-        vi.resetModules()
+          expect(html).toContain('<title>Building a Pokedex with React and AWS | Akli Aissat</title>')
+          expect(findImagePreloads(head)).toHaveLength(0)
+        } finally {
+          vi.doUnmock('./pages/Blog/posts/index')
+          vi.resetModules()
+        }
       })
 
       it.each(['/', '/blog', '/apps'])('does not emit an image preload in <head> for the non-post route %s', async (route) => {

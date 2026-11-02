@@ -73,6 +73,22 @@ date: 2026-04-07
     })
   })
 
+  it('keeps a top-level key with an empty value and no indented children as an empty string, not a mapping', () => {
+    const raw = `---
+title: A Post
+image:
+date: 2026-01-01
+caption:
+---`
+
+    expect(parseFrontmatter(raw)).toEqual({
+      title: 'A Post',
+      image: '',
+      date: '2026-01-01',
+      caption: '',
+    })
+  })
+
   it('returns an empty object when there is no frontmatter block', () => {
     expect(parseFrontmatter('Just body text, no frontmatter.')).toEqual({})
   })
@@ -246,5 +262,75 @@ ${Array(250).fill('word').join(' ')}`
     expect(readingTimeMap['./post-a.mdx']).toBe(1)
     expect(readingTimeMap['./post-b.mdx']).toBe(2)
     expect(frontmatterMap['./README.md']).toBeUndefined()
+  })
+})
+
+describe('blogPostsMeta hero validation', () => {
+  type LoadFn = (this: { addWatchFile: () => void }, id: string) => string | undefined
+
+  const validHeroLines = {
+    src: '  src: https://images.akli.dev/blog/post/hero-medium.webp',
+    srcSet: '  srcSet: https://images.akli.dev/blog/post/hero-medium.webp 800w',
+    sizes: "  sizes: '(max-width: 768px) 100vw, 720px'",
+    alt: '  alt: A hero image',
+  }
+
+  const loadWithHero = (heroLines: string[]): string | undefined => {
+    const temp = createTempTestDir('blog-posts-meta-hero-test-')
+    try {
+      writeFileSync(
+        join(temp.dir, 'broken-hero.mdx'),
+        `---
+title: Broken Hero
+date: 2026-03-03
+hero:
+${heroLines.join('\n')}
+---
+
+Body.`
+      )
+      const load = blogPostsMeta(temp.dir).load as unknown as LoadFn
+      return load.call({ addWatchFile: () => {} }, '\0virtual:blog-posts-meta')
+    } finally {
+      temp.cleanup()
+    }
+  }
+
+  const loadErrorMessage = (heroLines: string[]): string => {
+    try {
+      loadWithHero(heroLines)
+    } catch (error) {
+      return (error as Error).message
+    }
+    throw new Error('Expected load() to throw for an invalid hero mapping')
+  }
+
+  it.each(Object.keys(validHeroLines) as (keyof typeof validHeroLines)[])(
+    'refuses to build when a hero mapping is missing the required %s key, naming the file and the key',
+    (missingKey) => {
+      const heroLines = Object.entries(validHeroLines)
+        .filter(([key]) => key !== missingKey)
+        .map(([, line]) => line)
+
+      const message = loadErrorMessage(heroLines)
+      expect(message).toContain('broken-hero.mdx')
+      expect(message).toContain(missingKey)
+    }
+  )
+
+  it('refuses to build when srcSet is typo\'d as srcset, naming the file and the missing key', () => {
+    const message = loadErrorMessage([
+      validHeroLines.src,
+      '  srcset: https://images.akli.dev/blog/post/hero-medium.webp 800w',
+      validHeroLines.sizes,
+      validHeroLines.alt,
+    ])
+
+    expect(message).toContain('broken-hero.mdx')
+    expect(message).toContain('srcSet')
+  })
+
+  it('accepts a hero mapping without the optional caption', () => {
+    expect(() => loadWithHero(Object.values(validHeroLines))).not.toThrow()
   })
 })
