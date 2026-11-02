@@ -7,11 +7,14 @@ import { blogPostsMeta, extractPlainText, parseFrontmatter } from './blog-posts-
 type LoadFn = (this: { addWatchFile: (file: string) => void }, id: string) => string | undefined
 
 describe('parseFrontmatter', () => {
-  it('parses flat key/value pairs', () => {
+  it('parses the frontmatter block into an object', () => {
     const raw = `---
 title: Building a Pokedex
 date: 2026-04-07
-description: How I built a Pokedex
+tags: [react, aws]
+hero:
+  src: https://images.akli.dev/blog/pokedex-medium.webp
+  alt: "Pokedex app"
 ---
 
 Body text.`
@@ -19,92 +22,13 @@ Body text.`
     expect(parseFrontmatter(raw)).toEqual({
       title: 'Building a Pokedex',
       date: '2026-04-07',
-      description: 'How I built a Pokedex',
-    })
-  })
-
-  it('parses an array field', () => {
-    const raw = `---
-tags: [react, aws, cdk]
----`
-
-    expect(parseFrontmatter(raw)).toEqual({
-      tags: ['react', 'aws', 'cdk'],
-    })
-  })
-
-  it('strips surrounding quotes from scalar and array values', () => {
-    const raw = `---
-title: "Quoted Title"
-tags: ['react', "aws"]
----`
-
-    expect(parseFrontmatter(raw)).toEqual({
-      title: 'Quoted Title',
       tags: ['react', 'aws'],
-    })
-  })
-
-  it('parses a nested hero mapping into an object, stripping quotes, alongside flat and array keys', () => {
-    const raw = `---
-title: Building a Pokedex
-tags: [react, aws]
-image: https://images.akli.dev/blog/pokedex-full.webp
-hero:
-  src: https://images.akli.dev/blog/pokedex-medium.webp
-  srcSet: "https://images.akli.dev/blog/pokedex-medium.webp 800w, https://images.akli.dev/blog/pokedex-full.webp 1200w"
-  alt: 'Pokedex app showing the Pokemon list'
-  caption: The finished Pokedex
-date: 2026-04-07
----`
-
-    expect(parseFrontmatter(raw)).toEqual({
-      title: 'Building a Pokedex',
-      tags: ['react', 'aws'],
-      image: 'https://images.akli.dev/blog/pokedex-full.webp',
-      hero: {
-        src: 'https://images.akli.dev/blog/pokedex-medium.webp',
-        srcSet:
-          'https://images.akli.dev/blog/pokedex-medium.webp 800w, https://images.akli.dev/blog/pokedex-full.webp 1200w',
-        alt: 'Pokedex app showing the Pokemon list',
-        caption: 'The finished Pokedex',
-      },
-      date: '2026-04-07',
-    })
-  })
-
-  it('keeps a top-level key with an empty value and no indented children as an empty string, not a mapping', () => {
-    const raw = `---
-title: A Post
-image:
-date: 2026-01-01
-caption:
----`
-
-    expect(parseFrontmatter(raw)).toEqual({
-      title: 'A Post',
-      image: '',
-      date: '2026-01-01',
-      caption: '',
+      hero: { src: 'https://images.akli.dev/blog/pokedex-medium.webp', alt: 'Pokedex app' },
     })
   })
 
   it('returns an empty object when there is no frontmatter block', () => {
     expect(parseFrontmatter('Just body text, no frontmatter.')).toEqual({})
-  })
-
-  it('ignores blank lines and lines without a colon', () => {
-    const raw = `---
-title: A Post
-
-not-a-key-value-line
-date: 2026-01-01
----`
-
-    expect(parseFrontmatter(raw)).toEqual({
-      title: 'A Post',
-      date: '2026-01-01',
-    })
   })
 
   it('only reads the first frontmatter block, ignoring later --- separators', () => {
@@ -265,27 +189,24 @@ ${Array(250).fill('word').join(' ')}`
   })
 })
 
-describe('blogPostsMeta hero validation', () => {
+describe('blogPostsMeta frontmatter validation', () => {
+  const validFieldLines = {
+    title: 'title: A Post',
+    date: 'date: 2026-03-03',
+    description: 'description: A post',
+    tags: 'tags: [a, b]',
+  }
+
   const validHeroLines = {
     src: '  src: https://images.akli.dev/blog/post/hero-medium.webp',
     srcSet: '  srcSet: https://images.akli.dev/blog/post/hero-medium.webp 800w',
     alt: '  alt: A hero image',
   }
 
-  const loadWithHero = (heroLines: string[]): string | undefined => {
-    const temp = createTempTestDir('blog-posts-meta-hero-test-')
+  const loadPost = (frontmatterLines: string[]): string | undefined => {
+    const temp = createTempTestDir('blog-posts-meta-validation-test-')
     try {
-      writeFileSync(
-        join(temp.dir, 'broken-hero.mdx'),
-        `---
-title: Broken Hero
-date: 2026-03-03
-hero:
-${heroLines.join('\n')}
----
-
-Body.`
-      )
+      writeFileSync(join(temp.dir, 'broken-post.mdx'), `---\n${frontmatterLines.join('\n')}\n---\n\nBody.`)
       const load = blogPostsMeta(temp.dir).load as unknown as LoadFn
       return load.call({ addWatchFile: () => {} }, '\0virtual:blog-posts-meta')
     } finally {
@@ -293,15 +214,78 @@ Body.`
     }
   }
 
-  const heroLinesWithout = (missingKey: keyof typeof validHeroLines): string[] =>
-    Object.entries(validHeroLines)
+  const loadWithHero = (heroLines: string[]): string | undefined =>
+    loadPost([...Object.values(validFieldLines), 'hero:', ...heroLines])
+
+  const emittedFrontmatter = (source: string | undefined): Record<string, unknown> =>
+    JSON.parse(source!.match(/export const frontmatterMap = (.+)/)![1])['./broken-post.mdx']
+
+  const linesWithout = <T extends Record<string, string>>(lines: T, missingKey: keyof T): string[] =>
+    Object.entries(lines)
       .filter(([key]) => key !== missingKey)
       .map(([, line]) => line)
+
+  it.each(Object.keys(validFieldLines) as (keyof typeof validFieldLines)[])(
+    'refuses to build when the required %s field is missing, naming the file and the field',
+    (missingKey) => {
+      expect(() => loadPost(linesWithout(validFieldLines, missingKey))).toThrow(
+        `broken-post.mdx: missing required field "${missingKey}"`
+      )
+    }
+  )
+
+  it.each([
+    { scenario: 'tags is not a list', key: 'tags', line: 'tags: react' },
+    { scenario: 'date is not a YYYY-MM-DD date', key: 'date', line: 'date: soon' },
+  ] as const)('refuses to build when $scenario, naming the file and the field', ({ key, line }) => {
+    expect(() => loadPost([...linesWithout(validFieldLines, key), line])).toThrow(
+      `broken-post.mdx: invalid field "${key}"`
+    )
+  })
+
+  it('refuses to build when the frontmatter is not valid YAML, naming the file', () => {
+    expect(() => loadPost([...Object.values(validFieldLines), 'notes: [unclosed'])).toThrow(/^broken-post\.mdx: /)
+  })
+
+  it('accepts a full post without the optional hero', () => {
+    expect(emittedFrontmatter(loadPost(Object.values(validFieldLines)))).not.toHaveProperty('hero')
+  })
+
+  it('accepts a hero mapping without the optional caption', () => {
+    expect(emittedFrontmatter(loadWithHero(Object.values(validHeroLines))).hero).not.toHaveProperty('caption')
+  })
+
+  it('accepts a hero mapping with the optional caption and emits it', () => {
+    expect(emittedFrontmatter(loadWithHero([...Object.values(validHeroLines), '  caption: A caption'])).hero).toEqual({
+      src: 'https://images.akli.dev/blog/post/hero-medium.webp',
+      srcSet: 'https://images.akli.dev/blog/post/hero-medium.webp 800w',
+      alt: 'A hero image',
+      caption: 'A caption',
+    })
+  })
+
+  it('omits unknown top-level keys from the emitted frontmatter', () => {
+    const frontmatter = emittedFrontmatter(loadPost([...Object.values(validFieldLines), 'notes: draft']))
+
+    expect(frontmatter).not.toHaveProperty('notes')
+  })
+
+  it('omits empty optional keys from the emitted frontmatter', () => {
+    const frontmatter = emittedFrontmatter(loadPost([...Object.values(validFieldLines), 'image:']))
+
+    expect(frontmatter).not.toHaveProperty('image')
+  })
+
+  it('omits empty optional keys nested in the hero from the emitted frontmatter', () => {
+    const frontmatter = emittedFrontmatter(loadWithHero([...Object.values(validHeroLines), '  caption:']))
+
+    expect(frontmatter.hero).not.toHaveProperty('caption')
+  })
 
   it.each([
     ...(Object.keys(validHeroLines) as (keyof typeof validHeroLines)[]).map((missingKey) => ({
       scenario: `is missing the required ${missingKey} key`,
-      heroLines: heroLinesWithout(missingKey),
+      heroLines: linesWithout(validHeroLines, missingKey),
       missingKey,
     })),
     {
@@ -314,10 +298,6 @@ Body.`
       missingKey: 'srcSet',
     },
   ])('refuses to build when a hero mapping $scenario, naming the file and the missing key', ({ heroLines, missingKey }) => {
-    expect(() => loadWithHero(heroLines)).toThrow(new RegExp(`broken-hero\\.mdx.*${missingKey}`))
-  })
-
-  it('accepts a hero mapping without the optional caption', () => {
-    expect(() => loadWithHero(Object.values(validHeroLines))).not.toThrow()
+    expect(() => loadWithHero(heroLines)).toThrow(`broken-post.mdx: missing required field "hero.${missingKey}"`)
   })
 })
