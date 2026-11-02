@@ -105,3 +105,51 @@ describe('Post registry', () => {
     expect(loadPostContent('nonexistent')).toBeUndefined()
   })
 })
+
+describe('Post registry hero derivation', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    vi.doUnmock('./index')
+    vi.doMock('virtual:blog-posts-meta', () => ({
+      frontmatterMap: {
+        './with-hero.mdx': {
+          title: 'With Hero',
+          date: '2026-04-06',
+          description: 'Has a hero.',
+          tags: ['test'],
+          hero: { stem: 'with-hero/cover', alt: 'Cover alt', caption: 'Cover caption' },
+        },
+        './no-hero.mdx': {
+          title: 'No Hero',
+          date: '2026-03-01',
+          description: 'Has no hero.',
+          tags: ['test'],
+        },
+      },
+      readingTimeMap: {},
+    }))
+  })
+
+  it('derives the hero src, srcSet and OG image from the frontmatter stem', async () => {
+    const { getPost } = await import('./index')
+    const post = getPost('with-hero')
+
+    expect(post?.hero).toEqual({
+      src: 'https://images.akli.dev/blog/with-hero/cover-medium.webp',
+      srcSet:
+        'https://images.akli.dev/blog/with-hero/cover-medium.webp 800w, https://images.akli.dev/blog/with-hero/cover-full.webp 1200w',
+      alt: 'Cover alt',
+      caption: 'Cover caption',
+    })
+    expect(post?.image).toBe('https://images.akli.dev/blog/with-hero/cover-full.webp')
+  })
+
+  it('sets neither hero nor image when the frontmatter has no hero', async () => {
+    const { getPost } = await import('./index')
+    const post = getPost('no-hero')
+
+    expect(post).toBeDefined()
+    expect(post).not.toHaveProperty('hero')
+    expect(post).not.toHaveProperty('image')
+  })
+})

@@ -1,4 +1,5 @@
 import {
+  blogImageUrl,
   IMAGE_BASE,
   recipeImageUrl,
   sluggify,
@@ -57,6 +58,16 @@ describe('recipeImageUrl', () => {
     // @ts-expect-error — 'large' is not a valid ImageVariant
     const result = recipeImageUrl('s', 'cover', 'large')
     expect(typeof result).toBe('string')
+  })
+})
+
+describe('blogImageUrl', () => {
+  it.each<[ImageVariant, string]>([
+    ['thumb', 'https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-thumb.webp'],
+    ['medium', 'https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-medium.webp'],
+    ['full', 'https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-full.webp'],
+  ])('builds a /blog URL from the stem with the %s variant suffix', (variant, expected) => {
+    expect(blogImageUrl('building-a-pokedex/pokedex-desktop', variant)).toBe(expected)
   })
 })
 
