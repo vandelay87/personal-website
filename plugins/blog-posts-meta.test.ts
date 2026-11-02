@@ -224,12 +224,16 @@ describe('blogPostsMeta frontmatter validation', () => {
       .filter(([key]) => key !== missingKey)
       .map(([, line]) => line)
 
+  const fieldError = (field: string, detail = '.+'): RegExp =>
+    new RegExp(`^broken-post\\.mdx: ✖ ${detail}\\n  → at ${field.replaceAll('.', '\\.')}$`)
+
+  const missingFieldError = (field: string): RegExp =>
+    fieldError(field, 'Invalid input: expected \\w+, received undefined')
+
   it.each(Object.keys(validFieldLines) as (keyof typeof validFieldLines)[])(
     'refuses to build when the required %s field is missing, naming the file and the field',
     (missingKey) => {
-      expect(() => loadPost(linesWithout(validFieldLines, missingKey))).toThrow(
-        `broken-post.mdx: missing required field "${missingKey}"`
-      )
+      expect(() => loadPost(linesWithout(validFieldLines, missingKey))).toThrow(missingFieldError(missingKey))
     }
   )
 
@@ -237,9 +241,7 @@ describe('blogPostsMeta frontmatter validation', () => {
     { scenario: 'tags is not a list', key: 'tags', line: 'tags: react' },
     { scenario: 'date is not a YYYY-MM-DD date', key: 'date', line: 'date: soon' },
   ] as const)('refuses to build when $scenario, naming the file and the field', ({ key, line }) => {
-    expect(() => loadPost([...linesWithout(validFieldLines, key), line])).toThrow(
-      `broken-post.mdx: invalid field "${key}"`
-    )
+    expect(() => loadPost([...linesWithout(validFieldLines, key), line])).toThrow(fieldError(key))
   })
 
   it('refuses to build when the frontmatter is not valid YAML, naming the file', () => {
@@ -297,6 +299,6 @@ describe('blogPostsMeta frontmatter validation', () => {
       missingKey: 'stem',
     },
   ])('refuses to build when a hero mapping $scenario, naming the file and the missing key', ({ heroLines, missingKey }) => {
-    expect(() => loadWithHero(heroLines)).toThrow(`broken-post.mdx: missing required field "hero.${missingKey}"`)
+    expect(() => loadWithHero(heroLines)).toThrow(missingFieldError(`hero.${missingKey}`))
   })
 })

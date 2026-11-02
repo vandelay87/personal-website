@@ -2,6 +2,7 @@ import type { ImageProps } from '@akli-dev/ui'
 import { blogImageSources, blogImageUrl } from '@models/image'
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
 import { frontmatterMap, readingTimeMap } from 'virtual:blog-posts-meta'
+import type { PostFrontmatter, PostHeroFrontmatter } from '../../../../plugins/blog-frontmatter'
 import type { MDXComponents } from '*.mdx'
 
 export type PostHeroImage = Required<Pick<ImageProps, 'src' | 'srcSet' | 'alt'>> &
@@ -14,15 +15,7 @@ export interface PostHero {
 
 export const HERO_IMAGE_SIZES = '(max-width: 728px) calc(100vw - 98px), 630px'
 
-export type PostHeroFrontmatter = Pick<PostHeroImage, 'alt' | 'caption'> & { stem: string }
-
-export type PostFrontmatter = {
-  title: string
-  date: string
-  description: string
-  tags: string[]
-  hero?: PostHeroFrontmatter
-}
+export type { PostFrontmatter, PostHeroFrontmatter }
 
 export interface PostMeta extends Omit<PostFrontmatter, 'hero'> {
   slug: string

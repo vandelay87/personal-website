@@ -2,7 +2,8 @@ import { readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
 import type { Plugin } from 'vite'
 import { parse } from 'yaml'
-import type { PostFrontmatter, PostHeroFrontmatter } from '../src/pages/Blog/posts'
+import { z } from 'zod'
+import { postFrontmatterSchema, type PostFrontmatter } from './blog-frontmatter'
 import { calculateReadingTime } from './remark-reading-time'
 
 const VIRTUAL_MODULE_ID = 'virtual:blog-posts-meta'
@@ -18,81 +19,15 @@ const FRONTMATTER_BLOCK = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/
 // pure functions for standalone/test use.
 const matchFrontmatterBlock = (raw: string): RegExpMatchArray | null => raw.match(FRONTMATTER_BLOCK)
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value)
-
 export const parseFrontmatter = (
   raw: string,
   match: RegExpMatchArray | null = matchFrontmatterBlock(raw)
-): Record<string, unknown> => {
-  if (!match) return {}
-  const parsed: unknown = parse(match[1])
-  return isRecord(parsed) ? parsed : {}
-}
+): unknown => (match ? parse(match[1]) : {})
 
-interface Field {
-  required: boolean
-  check: (value: unknown) => boolean
-  shape?: Record<string, Field>
-}
-
-type Shape<T> = { [K in keyof T]-?: Field }
-
-const isNonEmptyString = (value: unknown): boolean => typeof value === 'string' && value !== ''
-
-const isIsoDate = (value: unknown): boolean =>
-  typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value))
-
-const isStringArray = (value: unknown): boolean =>
-  Array.isArray(value) && value.every(isNonEmptyString)
-
-const required = (check: Field['check']): Field => ({ required: true, check })
-const optional = (check: Field['check']): Field => ({ required: false, check })
-
-const HERO_SHAPE: Shape<PostHeroFrontmatter> = {
-  stem: required(isNonEmptyString),
-  alt: required(isNonEmptyString),
-  caption: optional(isNonEmptyString),
-}
-
-const FRONTMATTER_SHAPE: Shape<PostFrontmatter> = {
-  title: required(isNonEmptyString),
-  date: required(isIsoDate),
-  description: required(isNonEmptyString),
-  tags: required(isStringArray),
-  hero: { ...optional(isRecord), shape: HERO_SHAPE },
-}
-
-interface Validated {
-  value: Record<string, unknown>
-  errors: string[]
-}
-
-const validate = (record: Record<string, unknown>, shape: Record<string, Field>, prefix = ''): Validated => {
-  const value: Record<string, unknown> = {}
-  const errors: string[] = []
-  for (const [key, field] of Object.entries(shape)) {
-    const name = `${prefix}${key}`
-    const fieldValue = record[key]
-    if (fieldValue === undefined || fieldValue === null) {
-      if (field.required) errors.push(`missing required field "${name}"`)
-    } else if (!field.check(fieldValue)) {
-      errors.push(`invalid field "${name}"`)
-    } else if (field.shape) {
-      const nested = validate(fieldValue as Record<string, unknown>, field.shape, `${name}.`)
-      errors.push(...nested.errors)
-      value[key] = nested.value
-    } else {
-      value[key] = fieldValue
-    }
-  }
-  return { value, errors }
-}
-
-const validateFrontmatter = (frontmatter: Record<string, unknown>): PostFrontmatter => {
-  const { value, errors } = validate(frontmatter, FRONTMATTER_SHAPE)
-  if (errors.length > 0) throw new Error(errors.join(', '))
-  return value as PostFrontmatter
+const validateFrontmatter = (frontmatter: unknown): PostFrontmatter => {
+  const result = postFrontmatterSchema.safeParse(frontmatter)
+  if (!result.success) throw new Error(z.prettifyError(result.error))
+  return result.data
 }
 
 // Approximates the "prose text nodes only" word count that
