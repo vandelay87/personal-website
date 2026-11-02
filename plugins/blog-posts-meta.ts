@@ -16,15 +16,15 @@ const FRONTMATTER_BLOCK = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/
 // pure functions for standalone/test use.
 const matchFrontmatterBlock = (raw: string): RegExpMatchArray | null => raw.match(FRONTMATTER_BLOCK)
 
+export type FrontmatterValue = string | string[] | Record<string, string>
+
+const stripQuotes = (value: string): string => value.replace(/^['"]|['"]$/g, '')
+
 // Minimal YAML subset parser scoped to this project's frontmatter shape
 // (flat `key: value` pairs, `key: [a, b, c]` arrays, and one level of
 // indented `key:` mappings of string values, e.g. `hero:`) — not a general
 // YAML parser. See docs/prds/blog.md's "MDX frontmatter" section for the
 // authoritative shape.
-export type FrontmatterValue = string | string[] | Record<string, string>
-
-const stripQuotes = (value: string): string => value.replace(/^['"]|['"]$/g, '')
-
 export const parseFrontmatter = (
   raw: string,
   match: RegExpMatchArray | null = matchFrontmatterBlock(raw)
@@ -32,6 +32,7 @@ export const parseFrontmatter = (
   if (!match) return {}
 
   const result: Record<string, FrontmatterValue> = {}
+  let pendingKey: string | null = null
   let currentMapping: Record<string, string> | null = null
 
   for (const line of match[1].split(/\r?\n/)) {
@@ -42,15 +43,20 @@ export const parseFrontmatter = (
     const key = line.slice(0, colonIndex).trim()
     const rawValue = line.slice(colonIndex + 1).trim()
 
-    if (/^\s/.test(line) && currentMapping) {
+    if (/^\s/.test(line) && pendingKey !== null) {
+      if (!currentMapping) {
+        currentMapping = {}
+        result[pendingKey] = currentMapping
+      }
       currentMapping[key] = stripQuotes(rawValue)
       continue
     }
 
+    pendingKey = null
     currentMapping = null
     if (rawValue === '') {
-      currentMapping = {}
-      result[key] = currentMapping
+      result[key] = ''
+      pendingKey = key
     } else if (rawValue.startsWith('[') && rawValue.endsWith(']')) {
       result[key] = rawValue
         .slice(1, -1)
@@ -62,6 +68,19 @@ export const parseFrontmatter = (
     }
   }
   return result
+}
+
+const REQUIRED_HERO_KEYS = ['src', 'srcSet', 'sizes', 'alt'] as const
+
+const validateHero = (file: string, hero: FrontmatterValue | undefined): void => {
+  if (hero === undefined) return
+  if (typeof hero !== 'object' || Array.isArray(hero)) {
+    throw new Error(`${file}: hero must be a mapping with ${REQUIRED_HERO_KEYS.join(', ')}`)
+  }
+  const missing = REQUIRED_HERO_KEYS.filter((key) => !hero[key])
+  if (missing.length > 0) {
+    throw new Error(`${file}: hero is missing required key(s): ${missing.join(', ')}`)
+  }
 }
 
 // Approximates the "prose text nodes only" word count that
@@ -110,7 +129,9 @@ export const blogPostsMeta = (postsDir: string): Plugin => ({
       const raw = readFileSync(filePath, 'utf-8')
       const key = `./${file}`
       const frontmatterMatch = matchFrontmatterBlock(raw)
-      frontmatterMap[key] = parseFrontmatter(raw, frontmatterMatch)
+      const frontmatter = parseFrontmatter(raw, frontmatterMatch)
+      validateHero(file, frontmatter.hero)
+      frontmatterMap[key] = frontmatter
       readingTimeMap[key] = calculateReadingTime(extractPlainText(raw, frontmatterMatch))
     }
 
