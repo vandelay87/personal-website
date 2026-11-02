@@ -3,7 +3,7 @@ import { join } from 'path'
 import type { Plugin } from 'vite'
 import { parse } from 'yaml'
 import { z } from 'zod'
-import { postFrontmatterSchema, type PostFrontmatter } from './blog-frontmatter'
+import { postFrontmatterSchema, type PostFrontmatter } from '../src/types/blog'
 import { calculateReadingTime } from './remark-reading-time'
 
 const VIRTUAL_MODULE_ID = 'virtual:blog-posts-meta'
@@ -22,7 +22,7 @@ const matchFrontmatterBlock = (raw: string): RegExpMatchArray | null => raw.matc
 export const parseFrontmatter = (
   raw: string,
   match: RegExpMatchArray | null = matchFrontmatterBlock(raw)
-): unknown => (match ? parse(match[1]) : {})
+): unknown => parse(match?.[1] ?? '', (_, value) => value ?? undefined) ?? {}
 
 const validateFrontmatter = (frontmatter: unknown): PostFrontmatter => {
   const result = postFrontmatterSchema.safeParse(frontmatter)

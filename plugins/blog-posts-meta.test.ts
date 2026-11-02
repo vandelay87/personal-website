@@ -225,7 +225,7 @@ describe('blogPostsMeta frontmatter validation', () => {
       .map(([, line]) => line)
 
   const fieldError = (field: string, detail = '.+'): RegExp =>
-    new RegExp(`^broken-post\\.mdx: ✖ ${detail}\\n  → at ${field.replaceAll('.', '\\.')}$`)
+    new RegExp(`^broken-post\\.mdx: ✖ ${detail}\\n  → at ${field.replace(/[.[\]]/g, '\\$&')}$`)
 
   const missingFieldError = (field: string): RegExp =>
     fieldError(field, 'Invalid input: expected \\w+, received undefined')
@@ -242,6 +242,21 @@ describe('blogPostsMeta frontmatter validation', () => {
     { scenario: 'date is not a YYYY-MM-DD date', key: 'date', line: 'date: soon' },
   ] as const)('refuses to build when $scenario, naming the file and the field', ({ key, line }) => {
     expect(() => loadPost([...linesWithout(validFieldLines, key), line])).toThrow(fieldError(key))
+  })
+
+  it('refuses to build when a required field is present but empty, reporting it as missing', () => {
+    expect(() => loadPost([...linesWithout(validFieldLines, 'title'), 'title:'])).toThrow(missingFieldError('title'))
+  })
+
+  it('refuses to build when tags contains an empty entry, naming the file and the entry', () => {
+    expect(() => loadPost([...linesWithout(validFieldLines, 'tags'), 'tags: [a, ~]'])).toThrow(fieldError('tags[1]'))
+  })
+
+  it('refuses to build when the frontmatter block is empty, naming each missing required field', () => {
+    const load = () => loadPost([])
+    for (const key of Object.keys(validFieldLines)) {
+      expect(load).toThrow(new RegExp(`✖ Invalid input: expected \\w+, received undefined\\n  → at ${key}$`, 'm'))
+    }
   })
 
   it('refuses to build when the frontmatter is not valid YAML, naming the file', () => {

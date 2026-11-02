@@ -2,12 +2,10 @@ import { z } from 'zod'
 
 const nonEmptyString = z.string().min(1)
 
-const optional = <T extends z.ZodType>(schema: T) => z.preprocess((value) => value ?? undefined, schema.optional())
-
 const postHeroFrontmatterSchema = z.object({
   stem: nonEmptyString,
   alt: nonEmptyString,
-  caption: optional(nonEmptyString),
+  caption: nonEmptyString.optional(),
 })
 
 export const postFrontmatterSchema = z.object({
@@ -15,7 +13,7 @@ export const postFrontmatterSchema = z.object({
   date: z.iso.date(),
   description: nonEmptyString,
   tags: z.array(nonEmptyString),
-  hero: optional(postHeroFrontmatterSchema),
+  hero: postHeroFrontmatterSchema.optional(),
 })
 
 export type PostHeroFrontmatter = z.output<typeof postHeroFrontmatterSchema>
