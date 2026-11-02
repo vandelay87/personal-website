@@ -10,7 +10,7 @@ const mockPostData = vi.hoisted(() => ({
     tags: ['testing'],
     slug: 'test-post',
     readingTime: 3,
-    image: '/images/blog/test-post-cover.jpg',
+    image: '/blog/test-post/test-post-cover.jpg',
   },
   testPostNoImage: {
     title: 'No Image Post',
@@ -307,13 +307,13 @@ describe('getMetaTags', () => {
 
     it('includes og:image when post has image', () => {
       const meta = getMetaTags('/blog/test-post')
-      expect(meta.og.image).toBe('https://akli.dev/images/blog/test-post-cover.jpg')
+      expect(meta.og.image).toBe('https://akli.dev/blog/test-post/test-post-cover.jpg')
     })
 
     it('includes twitter:image when post has image', () => {
       const meta = getMetaTags('/blog/test-post')
       expect(meta.twitter.image).toBe(
-        'https://akli.dev/images/blog/test-post-cover.jpg'
+        'https://akli.dev/blog/test-post/test-post-cover.jpg'
       )
     })
 
