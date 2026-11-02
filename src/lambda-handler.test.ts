@@ -217,6 +217,15 @@ describe('lambda-handler (streaming)', { timeout: 30_000 }, () => {
       expect(metadata.statusCode).toBe(404)
       expect(metadata.headers?.['Cache-Control']).toBe('no-cache')
     })
+
+    it.each([
+      ['/recipes/..%2Fusers', 'https://api.akli.dev/recipes/..%2Fusers'],
+      ['/recipes/foo%3Fx%3D1', 'https://api.akli.dev/recipes/foo%3Fx%3D1'],
+    ])('keeps the encoded slug from %s under /recipes/ in the API URL', async (path, expectedUrl) => {
+      fetchMock.mockResolvedValue(new Response(null, { status: 404 }))
+      await invokeHandler(path)
+      expect(fetchMock).toHaveBeenCalledWith(expectedUrl)
+    })
   })
 
   describe('error handling', () => {
