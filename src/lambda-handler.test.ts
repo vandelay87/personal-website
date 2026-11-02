@@ -158,26 +158,13 @@ describe('lambda-handler (streaming)', { timeout: 30_000 }, () => {
       }))
 
       try {
-        // Re-import with the mocked entry-server
         innerHandler = null
-        await import('./lambda-handler')
-        expect(innerHandler).not.toBeNull()
-
-        const { writable, chunks } = createMockWritable()
-
-        await new Promise<void>((resolve, reject) => {
-          writable.on('finish', resolve)
-          writable.on('error', reject)
-          innerHandler!(createEvent('/'), writable, {}).catch(reject)
-        })
-
-        expect(capturedMetadata.statusCode).toBe(500)
-        expect(chunks.join('')).toContain('Internal Server Error')
+        const { metadata, body } = await invokeHandler('/')
+        expect(metadata.statusCode).toBe(500)
+        expect(body).toContain('Internal Server Error')
       } finally {
         vi.doUnmock('./entry-server')
         vi.resetModules()
-        innerHandler = null
-        await import('./lambda-handler')
       }
     })
   })
