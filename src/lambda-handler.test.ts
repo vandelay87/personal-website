@@ -157,27 +157,28 @@ describe('lambda-handler (streaming)', { timeout: 30_000 }, () => {
         render: () => Promise.reject(new Error('boom')),
       }))
 
-      // Re-import with the mocked entry-server
-      innerHandler = null
-      await import('./lambda-handler')
-      expect(innerHandler).not.toBeNull()
+      try {
+        // Re-import with the mocked entry-server
+        innerHandler = null
+        await import('./lambda-handler')
+        expect(innerHandler).not.toBeNull()
 
-      const { writable, chunks } = createMockWritable()
+        const { writable, chunks } = createMockWritable()
 
-      await new Promise<void>((resolve, reject) => {
-        writable.on('finish', resolve)
-        writable.on('error', reject)
-        innerHandler!(createEvent('/'), writable, {}).catch(reject)
-      })
+        await new Promise<void>((resolve, reject) => {
+          writable.on('finish', resolve)
+          writable.on('error', reject)
+          innerHandler!(createEvent('/'), writable, {}).catch(reject)
+        })
 
-      expect(capturedMetadata.statusCode).toBe(500)
-      expect(chunks.join('')).toContain('Internal Server Error')
-
-      // Restore modules so subsequent tests use the real entry-server
-      vi.doUnmock('./entry-server')
-      vi.resetModules()
-      innerHandler = null
-      await import('./lambda-handler')
+        expect(capturedMetadata.statusCode).toBe(500)
+        expect(chunks.join('')).toContain('Internal Server Error')
+      } finally {
+        vi.doUnmock('./entry-server')
+        vi.resetModules()
+        innerHandler = null
+        await import('./lambda-handler')
+      }
     })
   })
 
