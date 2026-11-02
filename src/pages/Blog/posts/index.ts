@@ -1,6 +1,10 @@
+import type { ImageProps } from '@akli-dev/ui'
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
 import { frontmatterMap, readingTimeMap } from 'virtual:blog-posts-meta'
 import type { MDXComponents } from '*.mdx'
+
+export type PostHero = Required<Pick<ImageProps, 'src' | 'srcSet' | 'sizes' | 'alt'>> &
+  Pick<ImageProps, 'caption'>
 
 export interface PostMeta {
   title: string
@@ -10,6 +14,7 @@ export interface PostMeta {
   slug: string
   readingTime: number
   image?: string
+  hero?: PostHero
 }
 
 interface MDXModule {

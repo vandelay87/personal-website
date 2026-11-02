@@ -9,6 +9,29 @@ vi.mock('@api/recipes', () => ({
   fetchTags: vi.fn(),
 }))
 
+const decodeEntities = (value: string): string =>
+  value
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&#x27;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+
+const getAttr = (tag: string, name: string): string | undefined => {
+  const match = tag.match(new RegExp(`\\s${name}="([^"]*)"`, 'i'))
+  return match ? decodeEntities(match[1]) : undefined
+}
+
+const splitHead = (html: string): { head: string; body: string } => {
+  const headEnd = html.indexOf('</head>')
+  return { head: html.slice(0, headEnd), body: html.slice(headEnd) }
+}
+
+const findImagePreloads = (head: string): string[] =>
+  (head.match(/<link\b[^>]*>/gi) ?? []).filter(
+    (tag) => getAttr(tag, 'rel') === 'preload' && getAttr(tag, 'as') === 'image'
+  )
+
 describe('entry-server render', () => {
   describe('home page /', () => {
     it('returns non-empty HTML', async () => {
@@ -143,6 +166,71 @@ describe('entry-server render', () => {
       const html = await render('/blog/building-a-pokedex')
       expect(html).toContain('name="twitter:card" content="summary_large_image"')
       expect(html).toContain('name="twitter:image"')
+    })
+
+    describe('hero image preload', () => {
+      const pokedexHeroSrc =
+        'https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-medium.webp'
+      const pokedexHeroSrcSet =
+        'https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-medium.webp 800w, https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-full.webp 1200w'
+      const pokedexHeroAlt = 'Pokedex app showing the Pokemon list and detail panel'
+
+      it('emits exactly one high-priority image preload within <head> (not counting body markup) pointing at the hero image', async () => {
+        // React 19's server renderer also emits its own matching image preload
+        // at the start of #root, with identical srcset/sizes — expected.
+        const { head } = splitHead(await render('/blog/building-a-pokedex'))
+        const preloads = findImagePreloads(head)
+
+        expect(preloads).toHaveLength(1)
+        expect(getAttr(preloads[0], 'href')).toBe(pokedexHeroSrc)
+        expect(getAttr(preloads[0], 'imagesrcset')).toBe(pokedexHeroSrcSet)
+        expect(getAttr(preloads[0], 'imagesizes')).toBeTruthy()
+        expect(getAttr(preloads[0], 'fetchpriority')).toBe('high')
+      })
+
+      it('preloads exactly the srcset and sizes the rendered hero <img> requests, so the browser reuses the preloaded response', async () => {
+        const { head, body } = splitHead(await render('/blog/building-a-pokedex'))
+        const [preload] = findImagePreloads(head)
+        const heroImg = (body.match(/<img\b[^>]*>/gi) ?? []).find(
+          (tag) => getAttr(tag, 'alt') === pokedexHeroAlt
+        )
+
+        expect(preload).toBeDefined()
+        expect(heroImg).toBeDefined()
+        expect(getAttr(preload, 'href')).toBe(getAttr(heroImg!, 'src'))
+        expect(getAttr(preload, 'imagesrcset')).toBe(getAttr(heroImg!, 'srcset'))
+        expect(getAttr(preload, 'imagesizes')).toBe(getAttr(heroImg!, 'sizes'))
+      })
+
+      it('does not emit an image preload in <head> for a blog post without a hero image', async () => {
+        vi.resetModules()
+        vi.doMock('./pages/Blog/posts/index', async (importOriginal) => {
+          const actual = await importOriginal<typeof import('./pages/Blog/posts/index')>()
+          const withoutHero = actual.posts.map(({ hero: _hero, ...post }) => post)
+          return {
+            ...actual,
+            posts: withoutHero,
+            getPost: (slug: string) => withoutHero.find((post) => post.slug === slug),
+          }
+        })
+
+        try {
+          const { render: renderWithoutHero } = await import('./entry-server')
+          const html = await renderWithoutHero('/blog/building-a-pokedex')
+          const { head } = splitHead(html)
+
+          expect(html).toContain('<title>Building a Pokedex with React and AWS | Akli Aissat</title>')
+          expect(findImagePreloads(head)).toHaveLength(0)
+        } finally {
+          vi.doUnmock('./pages/Blog/posts/index')
+          vi.resetModules()
+        }
+      })
+
+      it.each(['/', '/blog', '/apps'])('does not emit an image preload in <head> for the non-post route %s', async (route) => {
+        const { head } = splitHead(await render(route))
+        expect(findImagePreloads(head)).toHaveLength(0)
+      })
     })
   })
 

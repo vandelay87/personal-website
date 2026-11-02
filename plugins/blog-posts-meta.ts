@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
 import type { Plugin } from 'vite'
+import type { PostHero } from '../src/pages/Blog/posts'
 import { calculateReadingTime } from './remark-reading-time'
 
 const VIRTUAL_MODULE_ID = 'virtual:blog-posts-meta'
@@ -16,17 +17,24 @@ const FRONTMATTER_BLOCK = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/
 // pure functions for standalone/test use.
 const matchFrontmatterBlock = (raw: string): RegExpMatchArray | null => raw.match(FRONTMATTER_BLOCK)
 
+export type FrontmatterValue = string | string[] | Record<string, string>
+
+const stripQuotes = (value: string): string => value.replace(/^['"]|['"]$/g, '')
+
 // Minimal YAML subset parser scoped to this project's frontmatter shape
-// (flat `key: value` pairs plus one `key: [a, b, c]` array field) — not a
-// general YAML parser. See docs/prds/blog.md's "MDX frontmatter" section
-// for the authoritative shape.
+// (flat `key: value` pairs, `key: [a, b, c]` arrays, and one level of
+// indented `key:` mappings of string values, e.g. `hero:`) — not a general
+// YAML parser. See docs/prds/blog.md's "MDX frontmatter" section for the
+// authoritative shape.
 export const parseFrontmatter = (
   raw: string,
   match: RegExpMatchArray | null = matchFrontmatterBlock(raw)
-): Record<string, string | string[]> => {
+): Record<string, FrontmatterValue> => {
   if (!match) return {}
 
-  const result: Record<string, string | string[]> = {}
+  const result: Record<string, FrontmatterValue> = {}
+  let mappingKey: string | null = null
+
   for (const line of match[1].split(/\r?\n/)) {
     if (!line.trim()) continue
     const colonIndex = line.indexOf(':')
@@ -35,17 +43,42 @@ export const parseFrontmatter = (
     const key = line.slice(0, colonIndex).trim()
     const rawValue = line.slice(colonIndex + 1).trim()
 
-    if (rawValue.startsWith('[') && rawValue.endsWith(']')) {
+    if (/^\s/.test(line) && mappingKey !== null) {
+      const existing = result[mappingKey]
+      const mapping = typeof existing === 'object' && !Array.isArray(existing) ? existing : {}
+      mapping[key] = stripQuotes(rawValue)
+      result[mappingKey] = mapping
+      continue
+    }
+
+    mappingKey = null
+    if (rawValue === '') {
+      result[key] = ''
+      mappingKey = key
+    } else if (rawValue.startsWith('[') && rawValue.endsWith(']')) {
       result[key] = rawValue
         .slice(1, -1)
         .split(',')
-        .map((item) => item.trim().replace(/^['"]|['"]$/g, ''))
+        .map((item) => stripQuotes(item.trim()))
         .filter(Boolean)
     } else {
-      result[key] = rawValue.replace(/^['"]|['"]$/g, '')
+      result[key] = stripQuotes(rawValue)
     }
   }
   return result
+}
+
+const REQUIRED_HERO_KEYS = ['src', 'srcSet', 'sizes', 'alt'] as const satisfies readonly (keyof PostHero)[]
+
+const validateHero = (file: string, hero: FrontmatterValue | undefined): void => {
+  if (hero === undefined) return
+  if (typeof hero !== 'object' || Array.isArray(hero)) {
+    throw new Error(`${file}: hero must be a mapping with ${REQUIRED_HERO_KEYS.join(', ')}`)
+  }
+  const missing = REQUIRED_HERO_KEYS.filter((key) => !hero[key])
+  if (missing.length > 0) {
+    throw new Error(`${file}: hero is missing required key(s): ${missing.join(', ')}`)
+  }
 }
 
 // Approximates the "prose text nodes only" word count that
@@ -84,7 +117,7 @@ export const blogPostsMeta = (postsDir: string): Plugin => ({
     if (id !== RESOLVED_VIRTUAL_MODULE_ID) return
 
     const files = readdirSync(postsDir).filter((file) => file.endsWith('.mdx'))
-    const frontmatterMap: Record<string, Record<string, string | string[]>> = {}
+    const frontmatterMap: Record<string, Record<string, FrontmatterValue>> = {}
     const readingTimeMap: Record<string, number> = {}
 
     for (const file of files) {
@@ -94,7 +127,9 @@ export const blogPostsMeta = (postsDir: string): Plugin => ({
       const raw = readFileSync(filePath, 'utf-8')
       const key = `./${file}`
       const frontmatterMatch = matchFrontmatterBlock(raw)
-      frontmatterMap[key] = parseFrontmatter(raw, frontmatterMatch)
+      const frontmatter = parseFrontmatter(raw, frontmatterMatch)
+      validateHero(file, frontmatter.hero)
+      frontmatterMap[key] = frontmatter
       readingTimeMap[key] = calculateReadingTime(extractPlainText(raw, frontmatterMatch))
     }
 

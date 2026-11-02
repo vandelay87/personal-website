@@ -91,6 +91,7 @@ const BlogPost = () => {
       </header>
 
       <div className={styles.prose}>
+        {post.hero && <Image {...post.hero} priority />}
         <Suspense fallback={<Typography variant="body">Loading...</Typography>}>
           <PostContent components={mdxComponents} />
         </Suspense>

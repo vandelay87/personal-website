@@ -4,6 +4,8 @@ import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest'
 import { createTempTestDir } from '../tests/tempTestDir'
 import { blogPostsMeta, extractPlainText, parseFrontmatter } from './blog-posts-meta'
 
+type LoadFn = (this: { addWatchFile: (file: string) => void }, id: string) => string | undefined
+
 describe('parseFrontmatter', () => {
   it('parses flat key/value pairs', () => {
     const raw = `---
@@ -40,6 +42,52 @@ tags: ['react', "aws"]
     expect(parseFrontmatter(raw)).toEqual({
       title: 'Quoted Title',
       tags: ['react', 'aws'],
+    })
+  })
+
+  it('parses a nested hero mapping into an object, stripping quotes, alongside flat and array keys', () => {
+    const raw = `---
+title: Building a Pokedex
+tags: [react, aws]
+image: https://images.akli.dev/blog/pokedex-full.webp
+hero:
+  src: https://images.akli.dev/blog/pokedex-medium.webp
+  srcSet: "https://images.akli.dev/blog/pokedex-medium.webp 800w, https://images.akli.dev/blog/pokedex-full.webp 1200w"
+  sizes: '(max-width: 768px) 100vw, 720px'
+  alt: Pokedex app showing the Pokemon list
+  caption: The finished Pokedex
+date: 2026-04-07
+---`
+
+    expect(parseFrontmatter(raw)).toEqual({
+      title: 'Building a Pokedex',
+      tags: ['react', 'aws'],
+      image: 'https://images.akli.dev/blog/pokedex-full.webp',
+      hero: {
+        src: 'https://images.akli.dev/blog/pokedex-medium.webp',
+        srcSet:
+          'https://images.akli.dev/blog/pokedex-medium.webp 800w, https://images.akli.dev/blog/pokedex-full.webp 1200w',
+        sizes: '(max-width: 768px) 100vw, 720px',
+        alt: 'Pokedex app showing the Pokemon list',
+        caption: 'The finished Pokedex',
+      },
+      date: '2026-04-07',
+    })
+  })
+
+  it('keeps a top-level key with an empty value and no indented children as an empty string, not a mapping', () => {
+    const raw = `---
+title: A Post
+image:
+date: 2026-01-01
+caption:
+---`
+
+    expect(parseFrontmatter(raw)).toEqual({
+      title: 'A Post',
+      image: '',
+      date: '2026-01-01',
+      caption: '',
     })
   })
 
@@ -186,7 +234,7 @@ ${Array(250).fill('word').join(' ')}`
   it('ignores load calls for ids other than the resolved virtual module id', () => {
     const plugin = blogPostsMeta(postsDir)
     const addWatchFile = vi.fn()
-    const load = plugin.load as unknown as (this: { addWatchFile: typeof addWatchFile }, id: string) => string | undefined
+    const load = plugin.load as unknown as LoadFn
 
     expect(load.call({ addWatchFile }, './something-else.ts')).toBeUndefined()
     expect(addWatchFile).not.toHaveBeenCalled()
@@ -195,7 +243,7 @@ ${Array(250).fill('word').join(' ')}`
   it('reads only .mdx files, watches each one, and emits frontmatter/reading-time maps', () => {
     const plugin = blogPostsMeta(postsDir)
     const addWatchFile = vi.fn()
-    const load = plugin.load as unknown as (this: { addWatchFile: typeof addWatchFile }, id: string) => string | undefined
+    const load = plugin.load as unknown as LoadFn
 
     const source = load.call({ addWatchFile }, '\0virtual:blog-posts-meta')
 
@@ -216,5 +264,64 @@ ${Array(250).fill('word').join(' ')}`
     expect(readingTimeMap['./post-a.mdx']).toBe(1)
     expect(readingTimeMap['./post-b.mdx']).toBe(2)
     expect(frontmatterMap['./README.md']).toBeUndefined()
+  })
+})
+
+describe('blogPostsMeta hero validation', () => {
+  const validHeroLines = {
+    src: '  src: https://images.akli.dev/blog/post/hero-medium.webp',
+    srcSet: '  srcSet: https://images.akli.dev/blog/post/hero-medium.webp 800w',
+    sizes: "  sizes: '(max-width: 768px) 100vw, 720px'",
+    alt: '  alt: A hero image',
+  }
+
+  const loadWithHero = (heroLines: string[]): string | undefined => {
+    const temp = createTempTestDir('blog-posts-meta-hero-test-')
+    try {
+      writeFileSync(
+        join(temp.dir, 'broken-hero.mdx'),
+        `---
+title: Broken Hero
+date: 2026-03-03
+hero:
+${heroLines.join('\n')}
+---
+
+Body.`
+      )
+      const load = blogPostsMeta(temp.dir).load as unknown as LoadFn
+      return load.call({ addWatchFile: () => {} }, '\0virtual:blog-posts-meta')
+    } finally {
+      temp.cleanup()
+    }
+  }
+
+  const heroLinesWithout = (missingKey: keyof typeof validHeroLines): string[] =>
+    Object.entries(validHeroLines)
+      .filter(([key]) => key !== missingKey)
+      .map(([, line]) => line)
+
+  it.each([
+    ...(Object.keys(validHeroLines) as (keyof typeof validHeroLines)[]).map((missingKey) => ({
+      scenario: `is missing the required ${missingKey} key`,
+      heroLines: heroLinesWithout(missingKey),
+      missingKey,
+    })),
+    {
+      scenario: "has srcSet typo'd as srcset",
+      heroLines: [
+        validHeroLines.src,
+        '  srcset: https://images.akli.dev/blog/post/hero-medium.webp 800w',
+        validHeroLines.sizes,
+        validHeroLines.alt,
+      ],
+      missingKey: 'srcSet',
+    },
+  ])('refuses to build when a hero mapping $scenario, naming the file and the missing key', ({ heroLines, missingKey }) => {
+    expect(() => loadWithHero(heroLines)).toThrow(new RegExp(`broken-hero\\.mdx.*${missingKey}`))
+  })
+
+  it('accepts a hero mapping without the optional caption', () => {
+    expect(() => loadWithHero(Object.values(validHeroLines))).not.toThrow()
   })
 })

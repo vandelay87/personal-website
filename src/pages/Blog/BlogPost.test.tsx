@@ -15,6 +15,14 @@ const mockPosts = vi.hoisted(() => {
       tags: ['react', 'aws'],
       slug: 'test-post',
       readingTime: 3,
+      hero: {
+        src: 'https://images.akli.dev/blog/test-post/hero-medium.webp',
+        srcSet:
+          'https://images.akli.dev/blog/test-post/hero-medium.webp 800w, https://images.akli.dev/blog/test-post/hero-full.webp 1200w',
+        sizes: '(max-width: 768px) 100vw, 720px',
+        alt: 'Hero image for the test post',
+        caption: 'The test post hero caption',
+      },
     },
     {
       title: 'Second Post',
@@ -123,6 +131,33 @@ describe('BlogPost', () => {
   it('renders NotFound for invalid slug', () => {
     renderWithRoute('nonexistent')
     expect(screen.getByTestId('not-found')).toBeInTheDocument()
+  })
+
+  describe('hero image', () => {
+    it('renders the hero image from frontmatter with its caption', () => {
+      renderWithRoute('test-post')
+      expect(
+        screen.getByRole('img', { name: 'Hero image for the test post' })
+      ).toBeInTheDocument()
+      expect(screen.getByText('The test post hero caption')).toBeInTheDocument()
+    })
+
+    it('requests the hero with the frontmatter src, srcSet and sizes so it matches the SSR preload', () => {
+      renderWithRoute('test-post')
+      const hero = screen.getByRole('img', { name: 'Hero image for the test post' })
+      expect(hero).toHaveAttribute('src', 'https://images.akli.dev/blog/test-post/hero-medium.webp')
+      expect(hero).toHaveAttribute(
+        'srcset',
+        'https://images.akli.dev/blog/test-post/hero-medium.webp 800w, https://images.akli.dev/blog/test-post/hero-full.webp 1200w'
+      )
+      expect(hero).toHaveAttribute('sizes', '(max-width: 768px) 100vw, 720px')
+    })
+
+    it('renders no hero image for a post without a hero', async () => {
+      renderWithRoute('second-post')
+      await screen.findByText('Content for Second Post')
+      expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    })
   })
 
   describe('back link', () => {
