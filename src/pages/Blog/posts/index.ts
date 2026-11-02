@@ -1,4 +1,5 @@
 import type { ImageProps } from '@akli-dev/ui'
+import { blogImageUrl } from '@models/recipe'
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
 import { frontmatterMap, readingTimeMap } from 'virtual:blog-posts-meta'
 import type { MDXComponents } from '*.mdx'
@@ -19,7 +20,11 @@ export interface PostMeta {
   hero?: PostHero
 }
 
-export type PostFrontmatter = Omit<PostMeta, 'slug' | 'readingTime'>
+export type PostHeroFrontmatter = Pick<PostHero, 'alt' | 'caption'> & { stem: string }
+
+export type PostFrontmatter = Omit<PostMeta, 'slug' | 'readingTime' | 'image' | 'hero'> & {
+  hero?: PostHeroFrontmatter
+}
 
 interface MDXModule {
   default: ComponentType<{ components?: MDXComponents }>
@@ -43,9 +48,16 @@ export const formatDate = (dateString: string): string => {
   })
 }
 
+const resolveHero = ({ stem, ...rest }: PostHeroFrontmatter): PostHero => ({
+  src: blogImageUrl(stem, 'medium'),
+  srcSet: `${blogImageUrl(stem, 'medium')} 800w, ${blogImageUrl(stem, 'full')} 1200w`,
+  ...rest,
+})
+
 export const posts: PostMeta[] = Object.entries(frontmatterMap)
-  .map(([path, frontmatter]) => ({
+  .map(([path, { hero, ...frontmatter }]) => ({
     ...frontmatter,
+    ...(hero && { image: blogImageUrl(hero.stem, 'full'), hero: resolveHero(hero) }),
     slug: extractSlug(path),
     readingTime: readingTimeMap[path] ?? 1,
   }))

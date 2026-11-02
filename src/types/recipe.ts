@@ -1,14 +1,17 @@
-export const RECIPE_IMAGE_BASE = 'https://images.akli.dev'
+export const IMAGE_BASE = 'https://images.akli.dev'
 
-export type RecipeImageVariant = 'thumb' | 'medium' | 'full'
+export type ImageVariant = 'thumb' | 'medium' | 'full'
 
 export type ImageType = 'cover' | `step-${string}`
 
 export const recipeImageUrl = (
   slug: string,
   imageType: ImageType,
-  variant: RecipeImageVariant,
-): string => `${RECIPE_IMAGE_BASE}/recipes/${slug}/${imageType}-${variant}.webp`
+  variant: ImageVariant,
+): string => `${IMAGE_BASE}/recipes/${slug}/${imageType}-${variant}.webp`
+
+export const blogImageUrl = (stem: string, variant: ImageVariant): string =>
+  `${IMAGE_BASE}/blog/${stem}-${variant}.webp`
 
 export const stepImageType = (stepId: string): ImageType => `step-${stepId}`
 

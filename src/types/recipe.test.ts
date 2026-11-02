@@ -1,14 +1,14 @@
 import {
-  RECIPE_IMAGE_BASE,
+  IMAGE_BASE,
   recipeImageUrl,
   sluggify,
-  type RecipeImageVariant,
+  type ImageVariant,
 } from '@models/recipe'
 import { describe, it, expect } from 'vitest'
 
-describe('RECIPE_IMAGE_BASE', () => {
+describe('IMAGE_BASE', () => {
   it('points at the images.akli.dev CDN host', () => {
-    expect(RECIPE_IMAGE_BASE).toBe('https://images.akli.dev')
+    expect(IMAGE_BASE).toBe('https://images.akli.dev')
   })
 })
 
@@ -27,7 +27,7 @@ describe('recipeImageUrl', () => {
     )
   })
 
-  it.each<[RecipeImageVariant, string]>([
+  it.each<[ImageVariant, string]>([
     ['thumb', 'https://images.akli.dev/recipes/spaghetti-bolognese/cover-thumb.webp'],
     ['medium', 'https://images.akli.dev/recipes/spaghetti-bolognese/cover-medium.webp'],
     ['full', 'https://images.akli.dev/recipes/spaghetti-bolognese/cover-full.webp'],
@@ -53,8 +53,8 @@ describe('recipeImageUrl', () => {
     expect(typeof result).toBe('string')
   })
 
-  it('rejects variants outside the RecipeImageVariant union at compile time', () => {
-    // @ts-expect-error — 'large' is not a valid RecipeImageVariant
+  it('rejects variants outside the ImageVariant union at compile time', () => {
+    // @ts-expect-error — 'large' is not a valid ImageVariant
     const result = recipeImageUrl('s', 'cover', 'large')
     expect(typeof result).toBe('string')
   })
