@@ -19,6 +19,8 @@ export interface PostMeta {
   hero?: PostHero
 }
 
+export type PostFrontmatter = Omit<PostMeta, 'slug' | 'readingTime'>
+
 interface MDXModule {
   default: ComponentType<{ components?: MDXComponents }>
 }

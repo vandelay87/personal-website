@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
 import type { Plugin } from 'vite'
 import { parse } from 'yaml'
-import type { PostHero, PostMeta } from '../src/pages/Blog/posts'
+import type { PostFrontmatter, PostHero } from '../src/pages/Blog/posts'
 import { calculateReadingTime } from './remark-reading-time'
 
 const VIRTUAL_MODULE_ID = 'virtual:blog-posts-meta'
@@ -17,8 +17,6 @@ const FRONTMATTER_BLOCK = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/
 // still default to matching it themselves so they stay simple one-arg
 // pure functions for standalone/test use.
 const matchFrontmatterBlock = (raw: string): RegExpMatchArray | null => raw.match(FRONTMATTER_BLOCK)
-
-type Frontmatter = Omit<PostMeta, 'slug' | 'readingTime'>
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -58,7 +56,7 @@ const HERO_SHAPE: Shape<PostHero> = {
   caption: optional(isNonEmptyString),
 }
 
-const FRONTMATTER_SHAPE: Shape<Frontmatter> = {
+const FRONTMATTER_SHAPE: Shape<PostFrontmatter> = {
   title: required(isNonEmptyString),
   date: required(isIsoDate),
   description: required(isNonEmptyString),
@@ -67,28 +65,36 @@ const FRONTMATTER_SHAPE: Shape<Frontmatter> = {
   hero: { ...optional(isRecord), shape: HERO_SHAPE },
 }
 
-const collectErrors = (record: Record<string, unknown>, shape: Record<string, Field>, prefix = ''): string[] =>
-  Object.entries(shape).flatMap(([key, field]) => {
+interface Validated {
+  value: Record<string, unknown>
+  errors: string[]
+}
+
+const validate = (record: Record<string, unknown>, shape: Record<string, Field>, prefix = ''): Validated => {
+  const value: Record<string, unknown> = {}
+  const errors: string[] = []
+  for (const [key, field] of Object.entries(shape)) {
     const name = `${prefix}${key}`
-    const value = record[key]
-    if (value === undefined || value === null) {
-      return field.required ? [`missing required field "${name}"`] : []
+    const fieldValue = record[key]
+    if (fieldValue === undefined || fieldValue === null) {
+      if (field.required) errors.push(`missing required field "${name}"`)
+    } else if (!field.check(fieldValue)) {
+      errors.push(`invalid field "${name}"`)
+    } else if (field.shape) {
+      const nested = validate(fieldValue as Record<string, unknown>, field.shape, `${name}.`)
+      errors.push(...nested.errors)
+      value[key] = nested.value
+    } else {
+      value[key] = fieldValue
     }
-    if (!field.check(value)) return [`invalid field "${name}"`]
-    return field.shape ? collectErrors(value as Record<string, unknown>, field.shape, `${name}.`) : []
-  })
+  }
+  return { value, errors }
+}
 
-const withoutNulls = (record: Record<string, unknown>): Record<string, unknown> =>
-  Object.fromEntries(
-    Object.entries(record)
-      .filter(([, value]) => value !== null)
-      .map(([key, value]) => [key, isRecord(value) ? withoutNulls(value) : value])
-  )
-
-const validateFrontmatter = (file: string, frontmatter: Record<string, unknown>): Frontmatter => {
-  const errors = collectErrors(frontmatter, FRONTMATTER_SHAPE)
-  if (errors.length > 0) throw new Error(`${file}: ${errors.join(', ')}`)
-  return withoutNulls(frontmatter) as Frontmatter
+const validateFrontmatter = (frontmatter: Record<string, unknown>): PostFrontmatter => {
+  const { value, errors } = validate(frontmatter, FRONTMATTER_SHAPE)
+  if (errors.length > 0) throw new Error(errors.join(', '))
+  return value as PostFrontmatter
 }
 
 // Approximates the "prose text nodes only" word count that
@@ -127,7 +133,7 @@ export const blogPostsMeta = (postsDir: string): Plugin => ({
     if (id !== RESOLVED_VIRTUAL_MODULE_ID) return
 
     const files = readdirSync(postsDir).filter((file) => file.endsWith('.mdx'))
-    const frontmatterMap: Record<string, Frontmatter> = {}
+    const frontmatterMap: Record<string, PostFrontmatter> = {}
     const readingTimeMap: Record<string, number> = {}
 
     for (const file of files) {
@@ -137,13 +143,11 @@ export const blogPostsMeta = (postsDir: string): Plugin => ({
       const raw = readFileSync(filePath, 'utf-8')
       const key = `./${file}`
       const frontmatterMatch = matchFrontmatterBlock(raw)
-      let frontmatter: Record<string, unknown>
       try {
-        frontmatter = parseFrontmatter(raw, frontmatterMatch)
+        frontmatterMap[key] = validateFrontmatter(parseFrontmatter(raw, frontmatterMatch))
       } catch (error) {
         throw new Error(`${file}: ${(error as Error).message}`, { cause: error })
       }
-      frontmatterMap[key] = validateFrontmatter(file, frontmatter)
       readingTimeMap[key] = calculateReadingTime(extractPlainText(raw, frontmatterMatch))
     }
 

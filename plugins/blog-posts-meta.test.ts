@@ -217,6 +217,9 @@ describe('blogPostsMeta frontmatter validation', () => {
   const loadWithHero = (heroLines: string[]): string | undefined =>
     loadPost([...Object.values(validFieldLines), 'hero:', ...heroLines])
 
+  const emittedFrontmatter = (source: string | undefined): Record<string, unknown> =>
+    JSON.parse(source!.match(/export const frontmatterMap = (.+)/)![1])['./broken-post.mdx']
+
   const linesWithout = <T extends Record<string, string>>(lines: T, missingKey: keyof T): string[] =>
     Object.entries(lines)
       .filter(([key]) => key !== missingKey)
@@ -231,23 +234,17 @@ describe('blogPostsMeta frontmatter validation', () => {
     }
   )
 
-  it('refuses to build when a field has the wrong type, naming the file and the field', () => {
-    const lines = [...linesWithout(validFieldLines, 'tags'), 'tags: react']
-
-    expect(() => loadPost(lines)).toThrow('broken-post.mdx: invalid field "tags"')
+  it.each([
+    { scenario: 'tags is not a list', key: 'tags', line: 'tags: react' },
+    { scenario: 'date is not a YYYY-MM-DD date', key: 'date', line: 'date: soon' },
+  ] as const)('refuses to build when $scenario, naming the file and the field', ({ key, line }) => {
+    expect(() => loadPost([...linesWithout(validFieldLines, key), line])).toThrow(
+      `broken-post.mdx: invalid field "${key}"`
+    )
   })
 
   it('refuses to build when the frontmatter is not valid YAML, naming the file', () => {
     expect(() => loadPost([...Object.values(validFieldLines), 'notes: [unclosed'])).toThrow(/^broken-post\.mdx: /)
-  })
-
-  const emittedFrontmatter = (source: string | undefined): Record<string, unknown> =>
-    JSON.parse(source!.match(/export const frontmatterMap = (.+)/)![1])['./broken-post.mdx']
-
-  it('refuses to build when the date is not a YYYY-MM-DD date, naming the file and the field', () => {
-    const lines = [...linesWithout(validFieldLines, 'date'), 'date: soon']
-
-    expect(() => loadPost(lines)).toThrow('broken-post.mdx: invalid field "date"')
   })
 
   it('accepts a full post without the optional hero', () => {
@@ -265,6 +262,12 @@ describe('blogPostsMeta frontmatter validation', () => {
       alt: 'A hero image',
       caption: 'A caption',
     })
+  })
+
+  it('omits unknown top-level keys from the emitted frontmatter', () => {
+    const frontmatter = emittedFrontmatter(loadPost([...Object.values(validFieldLines), 'notes: draft']))
+
+    expect(frontmatter).not.toHaveProperty('notes')
   })
 
   it('omits empty optional keys from the emitted frontmatter', () => {
