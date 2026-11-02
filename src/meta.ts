@@ -63,8 +63,8 @@ const getBlogPostForPath = (path: string): PostMeta | undefined => {
   return blogPostMatch ? postsModule.getPost(blogPostMatch[1]) : undefined
 }
 
-const getRecipeSlugForPath = (path: string): string | undefined =>
-  path.match(/^\/recipes\/(.+)$/)?.[1]
+export const getRecipeSlugForPath = (path: string): string | undefined =>
+  path.match(/^\/recipes\/([^/]+)$/)?.[1]
 
 export const escapeHtml = (str: string): string => {
   return str
