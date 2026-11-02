@@ -34,6 +34,7 @@ export const parseFrontmatter = (
 
   const result: Record<string, FrontmatterValue> = {}
   let mappingKey: string | null = null
+  let mapping: Record<string, string> = {}
 
   for (const line of match[1].split(/\r?\n/)) {
     if (!line.trim()) continue
@@ -44,8 +45,6 @@ export const parseFrontmatter = (
     const rawValue = line.slice(colonIndex + 1).trim()
 
     if (/^\s/.test(line) && mappingKey !== null) {
-      const existing = result[mappingKey]
-      const mapping = typeof existing === 'object' && !Array.isArray(existing) ? existing : {}
       mapping[key] = stripQuotes(rawValue)
       result[mappingKey] = mapping
       continue
@@ -55,6 +54,7 @@ export const parseFrontmatter = (
     if (rawValue === '') {
       result[key] = ''
       mappingKey = key
+      mapping = {}
     } else if (rawValue.startsWith('[') && rawValue.endsWith(']')) {
       result[key] = rawValue
         .slice(1, -1)
@@ -68,7 +68,7 @@ export const parseFrontmatter = (
   return result
 }
 
-const REQUIRED_HERO_KEYS = ['src', 'srcSet', 'sizes', 'alt'] as const satisfies readonly (keyof PostHero)[]
+const REQUIRED_HERO_KEYS = ['src', 'srcSet', 'alt'] as const satisfies readonly (keyof PostHero)[]
 
 const validateHero = (file: string, hero: FrontmatterValue | undefined): void => {
   if (hero === undefined) return

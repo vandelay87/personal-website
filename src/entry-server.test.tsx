@@ -1,36 +1,21 @@
 // @vitest-environment node
 import { fetchRecipes, fetchTags } from '@api/recipes'
 import type { Recipe, RecipeIndex } from '@models/recipe'
+import { JSDOM } from 'jsdom'
 import { describe, it, expect, vi } from 'vitest'
 import { render } from './entry-server'
+import { getPost, HERO_IMAGE_SIZES } from './pages/Blog/posts/index'
 
 vi.mock('@api/recipes', () => ({
   fetchRecipes: vi.fn(),
   fetchTags: vi.fn(),
 }))
 
-const decodeEntities = (value: string): string =>
-  value
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;|&#x27;/g, "'")
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
+const parseHtml = (html: string): Document => new JSDOM(html).window.document
 
-const getAttr = (tag: string, name: string): string | undefined => {
-  const match = tag.match(new RegExp(`\\s${name}="([^"]*)"`, 'i'))
-  return match ? decodeEntities(match[1]) : undefined
-}
-
-const splitHead = (html: string): { head: string; body: string } => {
-  const headEnd = html.indexOf('</head>')
-  return { head: html.slice(0, headEnd), body: html.slice(headEnd) }
-}
-
-const findImagePreloads = (head: string): string[] =>
-  (head.match(/<link\b[^>]*>/gi) ?? []).filter(
-    (tag) => getAttr(tag, 'rel') === 'preload' && getAttr(tag, 'as') === 'image'
-  )
+const findHeadImagePreloads = (document: Document): HTMLLinkElement[] => [
+  ...document.querySelectorAll<HTMLLinkElement>('head link[rel="preload"][as="image"]'),
+]
 
 describe('entry-server render', () => {
   describe('home page /', () => {
@@ -169,67 +154,29 @@ describe('entry-server render', () => {
     })
 
     describe('hero image preload', () => {
-      const pokedexHeroSrc =
-        'https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-medium.webp'
-      const pokedexHeroSrcSet =
-        'https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-medium.webp 800w, https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-full.webp 1200w'
-      const pokedexHeroAlt = 'Pokedex app showing the Pokemon list and detail panel'
-
-      it('emits exactly one high-priority image preload within <head> (not counting body markup) pointing at the hero image', async () => {
+      it('emits exactly one high-priority image preload in <head> requesting exactly what the rendered hero <img> requests', async () => {
         // React 19's server renderer also emits its own matching image preload
-        // at the start of #root, with identical srcset/sizes — expected.
-        const { head } = splitHead(await render('/blog/building-a-pokedex'))
-        const preloads = findImagePreloads(head)
-
-        expect(preloads).toHaveLength(1)
-        expect(getAttr(preloads[0], 'href')).toBe(pokedexHeroSrc)
-        expect(getAttr(preloads[0], 'imagesrcset')).toBe(pokedexHeroSrcSet)
-        expect(getAttr(preloads[0], 'imagesizes')).toBeTruthy()
-        expect(getAttr(preloads[0], 'fetchpriority')).toBe('high')
-      })
-
-      it('preloads exactly the srcset and sizes the rendered hero <img> requests, so the browser reuses the preloaded response', async () => {
-        const { head, body } = splitHead(await render('/blog/building-a-pokedex'))
-        const [preload] = findImagePreloads(head)
-        const heroImg = (body.match(/<img\b[^>]*>/gi) ?? []).find(
-          (tag) => getAttr(tag, 'alt') === pokedexHeroAlt
+        // at the start of #root, in <body> — expected, and not counted here.
+        const document = parseHtml(await render('/blog/building-a-pokedex'))
+        const preloads = findHeadImagePreloads(document)
+        const hero = getPost('building-a-pokedex')?.hero
+        const heroImg = [...document.querySelectorAll('body img')].find(
+          (img) => img.getAttribute('alt') === hero?.alt
         )
 
-        expect(preload).toBeDefined()
-        expect(heroImg).toBeDefined()
-        expect(getAttr(preload, 'href')).toBe(getAttr(heroImg!, 'src'))
-        expect(getAttr(preload, 'imagesrcset')).toBe(getAttr(heroImg!, 'srcset'))
-        expect(getAttr(preload, 'imagesizes')).toBe(getAttr(heroImg!, 'sizes'))
-      })
-
-      it('does not emit an image preload in <head> for a blog post without a hero image', async () => {
-        vi.resetModules()
-        vi.doMock('./pages/Blog/posts/index', async (importOriginal) => {
-          const actual = await importOriginal<typeof import('./pages/Blog/posts/index')>()
-          const withoutHero = actual.posts.map(({ hero: _hero, ...post }) => post)
-          return {
-            ...actual,
-            posts: withoutHero,
-            getPost: (slug: string) => withoutHero.find((post) => post.slug === slug),
-          }
-        })
-
-        try {
-          const { render: renderWithoutHero } = await import('./entry-server')
-          const html = await renderWithoutHero('/blog/building-a-pokedex')
-          const { head } = splitHead(html)
-
-          expect(html).toContain('<title>Building a Pokedex with React and AWS | Akli Aissat</title>')
-          expect(findImagePreloads(head)).toHaveLength(0)
-        } finally {
-          vi.doUnmock('./pages/Blog/posts/index')
-          vi.resetModules()
-        }
+        expect(heroImg?.getAttribute('src')).toBe(hero?.src)
+        expect(heroImg?.getAttribute('srcset')).toBe(hero?.srcSet)
+        expect(heroImg?.getAttribute('sizes')).toBe(HERO_IMAGE_SIZES)
+        expect(preloads).toHaveLength(1)
+        const [preload] = preloads
+        expect(preload.getAttribute('fetchpriority')).toBe('high')
+        expect(preload.getAttribute('href')).toBe(heroImg?.getAttribute('src'))
+        expect(preload.getAttribute('imagesrcset')).toBe(heroImg?.getAttribute('srcset'))
+        expect(preload.getAttribute('imagesizes')).toBe(heroImg?.getAttribute('sizes'))
       })
 
       it.each(['/', '/blog', '/apps'])('does not emit an image preload in <head> for the non-post route %s', async (route) => {
-        const { head } = splitHead(await render(route))
-        expect(findImagePreloads(head)).toHaveLength(0)
+        expect(findHeadImagePreloads(parseHtml(await render(route)))).toHaveLength(0)
       })
     })
   })

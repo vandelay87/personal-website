@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
 import { axe } from 'vitest-axe'
 import BlogPost from './BlogPost'
-import type { PostMeta } from './posts'
+import { HERO_IMAGE_SIZES, type PostMeta } from './posts'
 
 const mockPosts = vi.hoisted(() => {
   const posts: PostMeta[] = [
@@ -19,7 +19,6 @@ const mockPosts = vi.hoisted(() => {
         src: 'https://images.akli.dev/blog/test-post/hero-medium.webp',
         srcSet:
           'https://images.akli.dev/blog/test-post/hero-medium.webp 800w, https://images.akli.dev/blog/test-post/hero-full.webp 1200w',
-        sizes: '(max-width: 768px) 100vw, 720px',
         alt: 'Hero image for the test post',
         caption: 'The test post hero caption',
       },
@@ -74,17 +73,10 @@ const createLazyPost = (content: string, hasExternalLink = false) =>
 
 const mockLazyPosts = vi.hoisted(() => ({}) as Record<string, unknown>)
 
-vi.mock('./posts', () => ({
+vi.mock('./posts', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./posts')>()),
   posts: mockPosts,
   getPost: (slug: string) => mockPosts.find((p: PostMeta) => p.slug === slug),
-  formatDate: (dateString: string): string => {
-    const date = new Date(dateString + 'T00:00:00')
-    return date.toLocaleDateString('en-GB', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  },
   lazyPosts: mockLazyPosts,
 }))
 
@@ -134,23 +126,14 @@ describe('BlogPost', () => {
   })
 
   describe('hero image', () => {
-    it('renders the hero image from frontmatter with its caption', () => {
+    it('renders the frontmatter hero with its caption, requested with the shared sizes so it matches the SSR preload', () => {
+      const { hero } = mockPosts[0]
       renderWithRoute('test-post')
-      expect(
-        screen.getByRole('img', { name: 'Hero image for the test post' })
-      ).toBeInTheDocument()
-      expect(screen.getByText('The test post hero caption')).toBeInTheDocument()
-    })
-
-    it('requests the hero with the frontmatter src, srcSet and sizes so it matches the SSR preload', () => {
-      renderWithRoute('test-post')
-      const hero = screen.getByRole('img', { name: 'Hero image for the test post' })
-      expect(hero).toHaveAttribute('src', 'https://images.akli.dev/blog/test-post/hero-medium.webp')
-      expect(hero).toHaveAttribute(
-        'srcset',
-        'https://images.akli.dev/blog/test-post/hero-medium.webp 800w, https://images.akli.dev/blog/test-post/hero-full.webp 1200w'
-      )
-      expect(hero).toHaveAttribute('sizes', '(max-width: 768px) 100vw, 720px')
+      const img = screen.getByRole('img', { name: hero?.alt })
+      expect(img).toHaveAttribute('src', hero?.src)
+      expect(img).toHaveAttribute('srcset', hero?.srcSet)
+      expect(img).toHaveAttribute('sizes', HERO_IMAGE_SIZES)
+      expect(screen.getByText(hero?.caption ?? '')).toBeInTheDocument()
     })
 
     it('renders no hero image for a post without a hero', async () => {

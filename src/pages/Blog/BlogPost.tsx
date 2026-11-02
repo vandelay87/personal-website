@@ -7,7 +7,7 @@ import type { AnchorHTMLAttributes } from 'react'
 import { Suspense, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import styles from './BlogPost.module.css'
-import { formatDate, getPost, lazyPosts, posts } from './posts'
+import { formatDate, getPost, HERO_IMAGE_SIZES, lazyPosts, posts } from './posts'
 import type { PostMeta } from './posts'
 
 const BlogLink = ({ href, children }: AnchorHTMLAttributes<HTMLAnchorElement>) => (
@@ -91,7 +91,7 @@ const BlogPost = () => {
       </header>
 
       <div className={styles.prose}>
-        {post.hero && <Image {...post.hero} priority />}
+        {post.hero && <Image {...post.hero} sizes={HERO_IMAGE_SIZES} priority />}
         <Suspense fallback={<Typography variant="body">Loading...</Typography>}>
           <PostContent components={mdxComponents} />
         </Suspense>

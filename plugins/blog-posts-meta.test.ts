@@ -271,7 +271,6 @@ describe('blogPostsMeta hero validation', () => {
   const validHeroLines = {
     src: '  src: https://images.akli.dev/blog/post/hero-medium.webp',
     srcSet: '  srcSet: https://images.akli.dev/blog/post/hero-medium.webp 800w',
-    sizes: "  sizes: '(max-width: 768px) 100vw, 720px'",
     alt: '  alt: A hero image',
   }
 
@@ -312,7 +311,6 @@ Body.`
       heroLines: [
         validHeroLines.src,
         '  srcset: https://images.akli.dev/blog/post/hero-medium.webp 800w',
-        validHeroLines.sizes,
         validHeroLines.alt,
       ],
       missingKey: 'srcSet',

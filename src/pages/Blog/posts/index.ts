@@ -3,8 +3,10 @@ import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
 import { frontmatterMap, readingTimeMap } from 'virtual:blog-posts-meta'
 import type { MDXComponents } from '*.mdx'
 
-export type PostHero = Required<Pick<ImageProps, 'src' | 'srcSet' | 'sizes' | 'alt'>> &
+export type PostHero = Required<Pick<ImageProps, 'src' | 'srcSet' | 'alt'>> &
   Pick<ImageProps, 'caption'>
+
+export const HERO_IMAGE_SIZES = '(max-width: 728px) calc(100vw - 98px), 630px'
 
 export interface PostMeta {
   title: string
