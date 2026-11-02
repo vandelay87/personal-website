@@ -31,7 +31,7 @@ To write a new PRD, copy `docs/prds/template.md` and fill it in.
 - After modifying TSX files, run `pnpm exec eslint --fix` on changed files to auto-fix import order
 - Before creating new UI elements, check `src/components/` for existing reusable components (Image, Typography, Button, Card, Link, Loading, etc.). Always prefer existing components over raw HTML tags.
 - Site images (cards, hero) live in `src/assets/` — imported via Vite, get hashed filenames and responsive srcSet
-- Blog post images live in `public/blog/<post-slug>/` (nested by slug, matching recipes' `recipes/<id>/`) — no Vite processing; served from `https://images.akli.dev/blog/<post-slug>/<file>-<size>.webp`. Add a source `.webp` there and run `node scripts/resize-blog-images.ts`, which replaces it with `-thumb`/`-medium`/`-full` (400/800/1200w) variants. MDX references them by absolute URL via `src`/`srcSet` on `<Image>`; a post's `hero` frontmatter takes the `stem` (`<post-slug>/<file>`) instead.
+- Blog post images live in `public/blog/<post-slug>/` — no Vite processing, served from `https://images.akli.dev/blog/<post-slug>/<file>-<size>.webp` and referenced via `src`/`srcSet` on `<Image>` in MDX. Add a source `.webp` and run `node scripts/resize-blog-images.ts` to replace it with `-thumb`/`-medium`/`-full` variants.
 
 ## Greppable gates
 
