@@ -10,7 +10,13 @@ const mockPostData = vi.hoisted(() => ({
     tags: ['testing'],
     slug: 'test-post',
     readingTime: 3,
-    image: '/images/blog/test-post-cover.jpg',
+    image: '/blog/test-post/test-post-cover.jpg',
+    hero: {
+      src: 'https://images.akli.dev/blog/test-post/hero-medium.webp',
+      srcSet:
+        'https://images.akli.dev/blog/test-post/hero-medium.webp 800w, https://images.akli.dev/blog/test-post/hero-full.webp 1200w',
+      alt: 'Hero image for the test post',
+    },
   },
   testPostNoImage: {
     title: 'No Image Post',
@@ -22,16 +28,15 @@ const mockPostData = vi.hoisted(() => ({
   },
 }))
 
-vi.mock('./pages/Blog/posts/index', () => ({
+vi.mock('./pages/Blog/posts/index', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./pages/Blog/posts/index')>()),
   posts: [mockPostData.testPost, mockPostData.testPostNoImage],
   getPost: (slug: string) =>
     [mockPostData.testPost, mockPostData.testPostNoImage].find((p) => p.slug === slug),
-  lazyPosts: {},
-  loadPostContent: () => undefined,
-  formatDate: (d: string) => d,
 }))
 
 import { getMetaTags, normalisePath, escapeHtml, isKnownRoute } from './meta'
+import { HERO_IMAGE_SIZES } from './pages/Blog/posts/index'
 
 describe('normalisePath', () => {
   it('strips trailing slash from /apps/', () => {
@@ -307,13 +312,13 @@ describe('getMetaTags', () => {
 
     it('includes og:image when post has image', () => {
       const meta = getMetaTags('/blog/test-post')
-      expect(meta.og.image).toBe('https://akli.dev/images/blog/test-post-cover.jpg')
+      expect(meta.og.image).toBe('https://akli.dev/blog/test-post/test-post-cover.jpg')
     })
 
     it('includes twitter:image when post has image', () => {
       const meta = getMetaTags('/blog/test-post')
       expect(meta.twitter.image).toBe(
-        'https://akli.dev/images/blog/test-post-cover.jpg'
+        'https://akli.dev/blog/test-post/test-post-cover.jpg'
       )
     })
 
@@ -335,6 +340,19 @@ describe('getMetaTags', () => {
     it('does not include twitter:image when post has no image', () => {
       const meta = getMetaTags('/blog/no-image-post')
       expect(meta.twitter.image).toBeUndefined()
+    })
+
+    it('preloads the hero with its src and srcSet and the shared hero sizes when the post has a hero', () => {
+      const { src, srcSet } = mockPostData.testPost.hero
+      expect(getMetaTags('/blog/test-post').preloadImage).toEqual({
+        src,
+        srcSet,
+        sizes: HERO_IMAGE_SIZES,
+      })
+    })
+
+    it('does not preload an image when the post has no hero', () => {
+      expect(getMetaTags('/blog/no-image-post').preloadImage).toBeUndefined()
     })
   })
 

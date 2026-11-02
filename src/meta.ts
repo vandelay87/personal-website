@@ -16,16 +16,12 @@ export interface MetaTags {
     description: string
     image?: string
   }
-  preloadImage?: {
-    href: string
-    srcSet: string
-    sizes: string
-  }
+  preloadImage?: Pick<PostHero, 'src' | 'srcSet'> & { sizes: string }
 }
 
 import type { RecipeData } from './contexts/RecipeDataContext'
 import * as postsModule from './pages/Blog/posts/index'
-import type { PostMeta } from './pages/Blog/posts/index'
+import { HERO_IMAGE_SIZES, type PostHero, type PostMeta } from './pages/Blog/posts/index'
 import { recipeImageUrl } from './types/recipe'
 
 const BASE_URL = 'https://akli.dev'
@@ -63,7 +59,7 @@ export const normalisePath = (path: string): string => {
 }
 
 const getBlogPostForPath = (path: string): PostMeta | undefined => {
-  const blogPostMatch = normalisePath(path).match(/^\/blog\/(.+)$/)
+  const blogPostMatch = path.match(/^\/blog\/(.+)$/)
   return blogPostMatch ? postsModule.getPost(blogPostMatch[1]) : undefined
 }
 
@@ -81,11 +77,7 @@ export const KNOWN_ROUTES = new Set(Object.keys(routeMeta))
 export const isKnownRoute = (path: string): boolean => {
   if (KNOWN_ROUTES.has(path)) return true
   if (path.startsWith('/admin')) return true
-  const blogPostMatch = path.match(/^\/blog\/(.+)$/)
-  if (blogPostMatch) {
-    const post = postsModule.getPost(blogPostMatch[1])
-    return !!post
-  }
+  if (getBlogPostForPath(path)) return true
   const recipeMatch = path.match(/^\/recipes\/(.+)$/)
   if (recipeMatch) return true
   return false
@@ -134,17 +126,19 @@ export const getMetaTags = (path: string, data?: RecipeData): MetaTags => {
 
   const post = getBlogPostForPath(normalised)
   if (post) {
-    const meta = buildMetaTags(
-      `${post.title} | Akli Aissat`,
-      post.description,
-      canonical,
-      undefined,
-      'article',
-      post.image,
-    )
-    if (!post.hero) return meta
-    const { src, srcSet, sizes } = post.hero
-    return { ...meta, preloadImage: { href: src, srcSet, sizes } }
+    return {
+      ...buildMetaTags(
+        `${post.title} | Akli Aissat`,
+        post.description,
+        canonical,
+        undefined,
+        'article',
+        post.image,
+      ),
+      ...(post.hero && {
+        preloadImage: { src: post.hero.src, srcSet: post.hero.srcSet, sizes: HERO_IMAGE_SIZES },
+      }),
+    }
   }
 
   const recipeMatch = normalised.match(/^\/recipes\/(.+)$/)
