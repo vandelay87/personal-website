@@ -1,7 +1,7 @@
 import type { Writable } from 'node:stream'
 import type { RecipeData } from './contexts/RecipeDataContext'
 import { render } from './entry-server'
-import { isKnownRoute, normalisePath } from './meta'
+import { getRecipeSlugForPath, isKnownRoute, normalisePath } from './meta'
 
 export const handler = awslambda.streamifyResponse(
   async (
@@ -15,12 +15,12 @@ export const handler = awslambda.streamifyResponse(
     const path = normalisePath(rawPath)
     let statusCode = isKnownRoute(path) ? 200 : 404
 
-    const recipeMatch = path.match(/^\/recipes\/([^/]+)$/)
+    const recipeSlug = getRecipeSlugForPath(path)
     let recipeData: RecipeData | undefined
 
-    if (recipeMatch) {
+    if (recipeSlug) {
       try {
-        const response = await fetch(`https://api.akli.dev/recipes/${recipeMatch[1]}`)
+        const response = await fetch(`https://api.akli.dev/recipes/${recipeSlug}`)
         if (response.ok) {
           recipeData = { recipe: await response.json() }
         } else if (response.status === 404) {

@@ -452,6 +452,10 @@ describe('isKnownRoute', () => {
     expect(isKnownRoute('/recipes/some-slug')).toBe(true)
   })
 
+  it('returns false for a nested path under /recipes/:slug', () => {
+    expect(isKnownRoute('/recipes/some-slug/extra')).toBe(false)
+  })
+
   it('returns true for /admin/login', () => {
     expect(isKnownRoute('/admin/login')).toBe(true)
   })
