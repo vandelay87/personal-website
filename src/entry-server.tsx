@@ -12,7 +12,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { RecipeDataContext } from './contexts/RecipeDataContext'
 import type { RecipeData } from './contexts/RecipeDataContext'
 import { ToastProvider } from './contexts/ToastContext'
-import { getMetaTags, escapeHtml } from './meta'
+import { getBlogPostForPath, getMetaTags, escapeHtml } from './meta'
 import { routes } from './routes'
 import { injectRecipeDataScript } from './ssrData'
 
@@ -88,6 +88,13 @@ const buildHeadHtml = (routePath: string, data?: RecipeData): string => {
   }
 
   lines.push(`<link rel="canonical" href="${escapeHtml(meta.canonical)}" />`)
+
+  const hero = getBlogPostForPath(routePath)?.hero
+  if (hero) {
+    lines.push(
+      `<link rel="preload" as="image" href="${escapeHtml(hero.src)}" imagesrcset="${escapeHtml(hero.srcSet)}" imagesizes="${escapeHtml(hero.sizes)}" fetchpriority="high" />`
+    )
+  }
 
   const recipeDataScript = data ? injectRecipeDataScript(data) : ''
   if (recipeDataScript) {

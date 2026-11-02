@@ -167,8 +167,18 @@ title: Building a Pokedex with React and AWS
 date: 2026-04-06
 description: How I built a searchable Pokemon encyclopedia with React 19, AWS CDK, DynamoDB, and Lambda.
 tags: [react, aws, cdk, dynamodb]
+hero:
+  src: https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-medium.webp
+  srcSet: "https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-medium.webp 800w, https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-full.webp 1200w"
+  sizes: "(max-width: 728px) calc(100vw - 98px), 630px"
+  alt: Pokedex app showing the Pokemon list and detail panel
+  caption: The finished Pokedex, running on akli.dev
 ---
 ```
+
+`hero` is optional. When present, it is the single source of truth for the post's hero image: `BlogPost` renders it as a priority `<Image>` at the top of the article body, and the SSR entry (`buildHeadHtml`) emits a matching `<link rel="preload" as="image">` in `<head>` with `href`, `imagesrcset` and `imagesizes` taken from the same fields, so the browser reuses the preloaded response rather than fetching twice. `src`, `srcSet`, `sizes` and `alt` are required; `caption` is optional. `sizes` reflects the hero's rendered width in the article column (680px max-width minus 24px inline padding each side, minus the 1px image border each side, with the page shell's own 24px inline padding below 728px). The OG `image` field is separate and unaffected.
+
+The frontmatter metadata used for the post index, head tags and preload is read at build time by `plugins/blog-posts-meta.ts`, whose minimal parser supports flat `key: value` pairs, `key: [a, b]` arrays, and one level of indented `key:` mappings of string values (as used by `hero`).
 
 ### Frontmatter parsing
 

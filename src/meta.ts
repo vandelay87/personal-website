@@ -20,6 +20,7 @@ export interface MetaTags {
 
 import type { RecipeData } from './contexts/RecipeDataContext'
 import * as postsModule from './pages/Blog/posts/index'
+import type { PostMeta } from './pages/Blog/posts/index'
 import { recipeImageUrl } from './types/recipe'
 
 const BASE_URL = 'https://akli.dev'
@@ -54,6 +55,11 @@ const notFoundMeta = {
 export const normalisePath = (path: string): string => {
   if (path === '/') return '/'
   return path.endsWith('/') ? path.slice(0, -1) : path
+}
+
+export const getBlogPostForPath = (path: string): PostMeta | undefined => {
+  const blogPostMatch = normalisePath(path).match(/^\/blog\/(.+)$/)
+  return blogPostMatch ? postsModule.getPost(blogPostMatch[1]) : undefined
 }
 
 export const escapeHtml = (str: string): string => {
@@ -121,20 +127,16 @@ export const getMetaTags = (path: string, data?: RecipeData): MetaTags => {
     return buildMetaTags(route.title, route.description, canonical)
   }
 
-  const blogPostMatch = normalised.match(/^\/blog\/(.+)$/)
-  if (blogPostMatch) {
-    const slug = blogPostMatch[1]
-    const post = postsModule.getPost(slug)
-    if (post) {
-      return buildMetaTags(
-        `${post.title} | Akli Aissat`,
-        post.description,
-        canonical,
-        undefined,
-        'article',
-        post.image,
-      )
-    }
+  const post = getBlogPostForPath(normalised)
+  if (post) {
+    return buildMetaTags(
+      `${post.title} | Akli Aissat`,
+      post.description,
+      canonical,
+      undefined,
+      'article',
+      post.image,
+    )
   }
 
   const recipeMatch = normalised.match(/^\/recipes\/(.+)$/)

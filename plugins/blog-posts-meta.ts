@@ -17,16 +17,23 @@ const FRONTMATTER_BLOCK = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/
 const matchFrontmatterBlock = (raw: string): RegExpMatchArray | null => raw.match(FRONTMATTER_BLOCK)
 
 // Minimal YAML subset parser scoped to this project's frontmatter shape
-// (flat `key: value` pairs plus one `key: [a, b, c]` array field) — not a
-// general YAML parser. See docs/prds/blog.md's "MDX frontmatter" section
-// for the authoritative shape.
+// (flat `key: value` pairs, `key: [a, b, c]` arrays, and one level of
+// indented `key:` mappings of string values, e.g. `hero:`) — not a general
+// YAML parser. See docs/prds/blog.md's "MDX frontmatter" section for the
+// authoritative shape.
+export type FrontmatterValue = string | string[] | Record<string, string>
+
+const stripQuotes = (value: string): string => value.replace(/^['"]|['"]$/g, '')
+
 export const parseFrontmatter = (
   raw: string,
   match: RegExpMatchArray | null = matchFrontmatterBlock(raw)
-): Record<string, string | string[]> => {
+): Record<string, FrontmatterValue> => {
   if (!match) return {}
 
-  const result: Record<string, string | string[]> = {}
+  const result: Record<string, FrontmatterValue> = {}
+  let currentMapping: Record<string, string> | null = null
+
   for (const line of match[1].split(/\r?\n/)) {
     if (!line.trim()) continue
     const colonIndex = line.indexOf(':')
@@ -35,14 +42,23 @@ export const parseFrontmatter = (
     const key = line.slice(0, colonIndex).trim()
     const rawValue = line.slice(colonIndex + 1).trim()
 
-    if (rawValue.startsWith('[') && rawValue.endsWith(']')) {
+    if (/^\s/.test(line) && currentMapping) {
+      currentMapping[key] = stripQuotes(rawValue)
+      continue
+    }
+
+    currentMapping = null
+    if (rawValue === '') {
+      currentMapping = {}
+      result[key] = currentMapping
+    } else if (rawValue.startsWith('[') && rawValue.endsWith(']')) {
       result[key] = rawValue
         .slice(1, -1)
         .split(',')
-        .map((item) => item.trim().replace(/^['"]|['"]$/g, ''))
+        .map((item) => stripQuotes(item.trim()))
         .filter(Boolean)
     } else {
-      result[key] = rawValue.replace(/^['"]|['"]$/g, '')
+      result[key] = stripQuotes(rawValue)
     }
   }
   return result
@@ -84,7 +100,7 @@ export const blogPostsMeta = (postsDir: string): Plugin => ({
     if (id !== RESOLVED_VIRTUAL_MODULE_ID) return
 
     const files = readdirSync(postsDir).filter((file) => file.endsWith('.mdx'))
-    const frontmatterMap: Record<string, Record<string, string | string[]>> = {}
+    const frontmatterMap: Record<string, Record<string, FrontmatterValue>> = {}
     const readingTimeMap: Record<string, number> = {}
 
     for (const file of files) {
