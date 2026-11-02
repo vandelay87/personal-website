@@ -241,16 +241,42 @@ describe('blogPostsMeta frontmatter validation', () => {
     expect(() => loadPost([...Object.values(validFieldLines), 'notes: [unclosed'])).toThrow(/^broken-post\.mdx: /)
   })
 
+  const emittedFrontmatter = (source: string | undefined): Record<string, unknown> =>
+    JSON.parse(source!.match(/export const frontmatterMap = (.+)/)![1])['./broken-post.mdx']
+
+  it('refuses to build when the date is not a YYYY-MM-DD date, naming the file and the field', () => {
+    const lines = [...linesWithout(validFieldLines, 'date'), 'date: soon']
+
+    expect(() => loadPost(lines)).toThrow('broken-post.mdx: invalid field "date"')
+  })
+
   it('accepts a full post without the optional hero', () => {
-    expect(() => loadPost(Object.values(validFieldLines))).not.toThrow()
+    expect(emittedFrontmatter(loadPost(Object.values(validFieldLines)))).not.toHaveProperty('hero')
   })
 
   it('accepts a hero mapping without the optional caption', () => {
-    expect(() => loadWithHero(Object.values(validHeroLines))).not.toThrow()
+    expect(emittedFrontmatter(loadWithHero(Object.values(validHeroLines))).hero).not.toHaveProperty('caption')
   })
 
-  it('accepts a hero mapping with the optional caption', () => {
-    expect(() => loadWithHero([...Object.values(validHeroLines), '  caption: A caption'])).not.toThrow()
+  it('accepts a hero mapping with the optional caption and emits it', () => {
+    expect(emittedFrontmatter(loadWithHero([...Object.values(validHeroLines), '  caption: A caption'])).hero).toEqual({
+      src: 'https://images.akli.dev/blog/post/hero-medium.webp',
+      srcSet: 'https://images.akli.dev/blog/post/hero-medium.webp 800w',
+      alt: 'A hero image',
+      caption: 'A caption',
+    })
+  })
+
+  it('omits empty optional keys from the emitted frontmatter', () => {
+    const frontmatter = emittedFrontmatter(loadPost([...Object.values(validFieldLines), 'image:']))
+
+    expect(frontmatter).not.toHaveProperty('image')
+  })
+
+  it('omits empty optional keys nested in the hero from the emitted frontmatter', () => {
+    const frontmatter = emittedFrontmatter(loadWithHero([...Object.values(validHeroLines), '  caption:']))
+
+    expect(frontmatter.hero).not.toHaveProperty('caption')
   })
 
   it.each([

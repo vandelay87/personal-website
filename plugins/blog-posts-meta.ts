@@ -35,12 +35,15 @@ export const parseFrontmatter = (
 interface Field {
   required: boolean
   check: (value: unknown) => boolean
-  shape?: Shape<object>
+  shape?: Record<string, Field>
 }
 
 type Shape<T> = { [K in keyof T]-?: Field }
 
 const isNonEmptyString = (value: unknown): boolean => typeof value === 'string' && value !== ''
+
+const isIsoDate = (value: unknown): boolean =>
+  typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value))
 
 const isStringArray = (value: unknown): boolean =>
   Array.isArray(value) && value.every(isNonEmptyString)
@@ -57,15 +60,15 @@ const HERO_SHAPE: Shape<PostHero> = {
 
 const FRONTMATTER_SHAPE: Shape<Frontmatter> = {
   title: required(isNonEmptyString),
-  date: required(isNonEmptyString),
+  date: required(isIsoDate),
   description: required(isNonEmptyString),
   tags: required(isStringArray),
   image: optional(isNonEmptyString),
   hero: { ...optional(isRecord), shape: HERO_SHAPE },
 }
 
-const collectErrors = (record: Record<string, unknown>, shape: Shape<object>, prefix = ''): string[] =>
-  Object.entries(shape).flatMap(([key, field]: [string, Field]) => {
+const collectErrors = (record: Record<string, unknown>, shape: Record<string, Field>, prefix = ''): string[] =>
+  Object.entries(shape).flatMap(([key, field]) => {
     const name = `${prefix}${key}`
     const value = record[key]
     if (value === undefined || value === null) {
@@ -75,10 +78,17 @@ const collectErrors = (record: Record<string, unknown>, shape: Shape<object>, pr
     return field.shape ? collectErrors(value as Record<string, unknown>, field.shape, `${name}.`) : []
   })
 
-export const validateFrontmatter = (file: string, frontmatter: Record<string, unknown>): Frontmatter => {
+const withoutNulls = (record: Record<string, unknown>): Record<string, unknown> =>
+  Object.fromEntries(
+    Object.entries(record)
+      .filter(([, value]) => value !== null)
+      .map(([key, value]) => [key, isRecord(value) ? withoutNulls(value) : value])
+  )
+
+const validateFrontmatter = (file: string, frontmatter: Record<string, unknown>): Frontmatter => {
   const errors = collectErrors(frontmatter, FRONTMATTER_SHAPE)
   if (errors.length > 0) throw new Error(`${file}: ${errors.join(', ')}`)
-  return frontmatter as Frontmatter
+  return withoutNulls(frontmatter) as Frontmatter
 }
 
 // Approximates the "prose text nodes only" word count that
