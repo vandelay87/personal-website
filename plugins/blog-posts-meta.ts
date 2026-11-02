@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
 import type { Plugin } from 'vite'
 import { parse } from 'yaml'
-import type { PostFrontmatter, PostHero } from '../src/pages/Blog/posts'
+import type { PostFrontmatter, PostHeroFrontmatter } from '../src/pages/Blog/posts'
 import { calculateReadingTime } from './remark-reading-time'
 
 const VIRTUAL_MODULE_ID = 'virtual:blog-posts-meta'
@@ -49,9 +49,8 @@ const isStringArray = (value: unknown): boolean =>
 const required = (check: Field['check']): Field => ({ required: true, check })
 const optional = (check: Field['check']): Field => ({ required: false, check })
 
-const HERO_SHAPE: Shape<PostHero> = {
-  src: required(isNonEmptyString),
-  srcSet: required(isNonEmptyString),
+const HERO_SHAPE: Shape<PostHeroFrontmatter> = {
+  stem: required(isNonEmptyString),
   alt: required(isNonEmptyString),
   caption: optional(isNonEmptyString),
 }
@@ -61,7 +60,6 @@ const FRONTMATTER_SHAPE: Shape<PostFrontmatter> = {
   date: required(isIsoDate),
   description: required(isNonEmptyString),
   tags: required(isStringArray),
-  image: optional(isNonEmptyString),
   hero: { ...optional(isRecord), shape: HERO_SHAPE },
 }
 

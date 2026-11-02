@@ -2,6 +2,7 @@ import { Image, Link, Typography } from '@akli-dev/ui'
 import ProcessingPlaceholder from '@components/ProcessingPlaceholder'
 import RecipeIngredients from '@components/RecipeIngredients'
 import RecipeSteps from '@components/RecipeSteps'
+import { imageSrcSet } from '@models/image'
 import { recipeImageUrl, type Recipe } from '@models/recipe'
 import type { FC } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
@@ -31,7 +32,10 @@ const RecipeDetailView: FC<RecipeDetailViewProps> = ({ recipe }) => (
       {recipe.coverImage.processedAt ? (
         <Image
           src={recipeImageUrl(recipe.slug, 'cover', 'medium')}
-          srcSet={`${recipeImageUrl(recipe.slug, 'cover', 'medium')} 800w, ${recipeImageUrl(recipe.slug, 'cover', 'full')} 1200w`}
+          srcSet={imageSrcSet((variant) => recipeImageUrl(recipe.slug, 'cover', variant), [
+            'medium',
+            'full',
+          ])}
           alt={recipe.coverImage.alt}
           priority
           aspectRatio="16/10"

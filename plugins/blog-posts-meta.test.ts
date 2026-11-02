@@ -13,7 +13,7 @@ title: Building a Pokedex
 date: 2026-04-07
 tags: [react, aws]
 hero:
-  src: https://images.akli.dev/blog/pokedex-medium.webp
+  stem: building-a-pokedex/pokedex-desktop
   alt: "Pokedex app"
 ---
 
@@ -23,7 +23,7 @@ Body text.`
       title: 'Building a Pokedex',
       date: '2026-04-07',
       tags: ['react', 'aws'],
-      hero: { src: 'https://images.akli.dev/blog/pokedex-medium.webp', alt: 'Pokedex app' },
+      hero: { stem: 'building-a-pokedex/pokedex-desktop', alt: 'Pokedex app' },
     })
   })
 
@@ -198,8 +198,7 @@ describe('blogPostsMeta frontmatter validation', () => {
   }
 
   const validHeroLines = {
-    src: '  src: https://images.akli.dev/blog/post/hero-medium.webp',
-    srcSet: '  srcSet: https://images.akli.dev/blog/post/hero-medium.webp 800w',
+    stem: '  stem: post/hero',
     alt: '  alt: A hero image',
   }
 
@@ -257,8 +256,7 @@ describe('blogPostsMeta frontmatter validation', () => {
 
   it('accepts a hero mapping with the optional caption and emits it', () => {
     expect(emittedFrontmatter(loadWithHero([...Object.values(validHeroLines), '  caption: A caption'])).hero).toEqual({
-      src: 'https://images.akli.dev/blog/post/hero-medium.webp',
-      srcSet: 'https://images.akli.dev/blog/post/hero-medium.webp 800w',
+      stem: 'post/hero',
       alt: 'A hero image',
       caption: 'A caption',
     })
@@ -271,9 +269,9 @@ describe('blogPostsMeta frontmatter validation', () => {
   })
 
   it('omits empty optional keys from the emitted frontmatter', () => {
-    const frontmatter = emittedFrontmatter(loadPost([...Object.values(validFieldLines), 'image:']))
+    const frontmatter = emittedFrontmatter(loadPost([...Object.values(validFieldLines), 'hero:']))
 
-    expect(frontmatter).not.toHaveProperty('image')
+    expect(frontmatter).not.toHaveProperty('hero')
   })
 
   it('omits empty optional keys nested in the hero from the emitted frontmatter', () => {
@@ -289,13 +287,9 @@ describe('blogPostsMeta frontmatter validation', () => {
       missingKey,
     })),
     {
-      scenario: "has srcSet typo'd as srcset",
-      heroLines: [
-        validHeroLines.src,
-        '  srcset: https://images.akli.dev/blog/post/hero-medium.webp 800w',
-        validHeroLines.alt,
-      ],
-      missingKey: 'srcSet',
+      scenario: "has stem typo'd as src",
+      heroLines: ['  src: post/hero', validHeroLines.alt],
+      missingKey: 'stem',
     },
   ])('refuses to build when a hero mapping $scenario, naming the file and the missing key', ({ heroLines, missingKey }) => {
     expect(() => loadWithHero(heroLines)).toThrow(`broken-post.mdx: missing required field "hero.${missingKey}"`)
