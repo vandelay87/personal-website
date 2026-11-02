@@ -3,14 +3,15 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { globSync } from 'glob'
 import sharp from 'sharp'
+import { IMAGE_VARIANT_WIDTHS } from '../src/types/image.ts'
 
 // Mirrors the size/quality scheme akli-infrastructure's recipe ImageResizer
 // Lambda uses (lambda/image-resizer.ts VARIANT_SIZING), so blog and recipe
 // images share one mental model: thumb/medium/full, webp, same widths.
 const VARIANTS = [
-  { suffix: 'thumb', width: 400, quality: 80 },
-  { suffix: 'medium', width: 800, quality: 85 },
-  { suffix: 'full', width: 1200, quality: 90 },
+  { suffix: 'thumb', width: IMAGE_VARIANT_WIDTHS.thumb, quality: 80 },
+  { suffix: 'medium', width: IMAGE_VARIANT_WIDTHS.medium, quality: 85 },
+  { suffix: 'full', width: IMAGE_VARIANT_WIDTHS.full, quality: 90 },
 ] as const
 
 const VARIANT_SUFFIXES = VARIANTS.map((v) => v.suffix)

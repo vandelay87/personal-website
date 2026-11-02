@@ -1,6 +1,4 @@
-export const IMAGE_BASE = 'https://images.akli.dev'
-
-export type ImageVariant = 'thumb' | 'medium' | 'full'
+import { IMAGE_BASE, type ImageVariant } from './image'
 
 export type ImageType = 'cover' | `step-${string}`
 
@@ -9,9 +7,6 @@ export const recipeImageUrl = (
   imageType: ImageType,
   variant: ImageVariant,
 ): string => `${IMAGE_BASE}/recipes/${slug}/${imageType}-${variant}.webp`
-
-export const blogImageUrl = (stem: string, variant: ImageVariant): string =>
-  `${IMAGE_BASE}/blog/${stem}-${variant}.webp`
 
 export const stepImageType = (stepId: string): ImageType => `step-${stepId}`
 

@@ -1,17 +1,6 @@
-import {
-  blogImageUrl,
-  IMAGE_BASE,
-  recipeImageUrl,
-  sluggify,
-  type ImageVariant,
-} from '@models/recipe'
+import type { ImageVariant } from '@models/image'
+import { recipeImageUrl, sluggify } from '@models/recipe'
 import { describe, it, expect } from 'vitest'
-
-describe('IMAGE_BASE', () => {
-  it('points at the images.akli.dev CDN host', () => {
-    expect(IMAGE_BASE).toBe('https://images.akli.dev')
-  })
-})
 
 describe('recipeImageUrl', () => {
   it('builds a cover image URL from slug, imageType and variant', () => {
@@ -58,16 +47,6 @@ describe('recipeImageUrl', () => {
     // @ts-expect-error — 'large' is not a valid ImageVariant
     const result = recipeImageUrl('s', 'cover', 'large')
     expect(typeof result).toBe('string')
-  })
-})
-
-describe('blogImageUrl', () => {
-  it.each<[ImageVariant, string]>([
-    ['thumb', 'https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-thumb.webp'],
-    ['medium', 'https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-medium.webp'],
-    ['full', 'https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-full.webp'],
-  ])('builds a /blog URL from the stem with the %s variant suffix', (variant, expected) => {
-    expect(blogImageUrl('building-a-pokedex/pokedex-desktop', variant)).toBe(expected)
   })
 })
 

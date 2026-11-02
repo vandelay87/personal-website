@@ -1,5 +1,5 @@
 import type { ImageProps } from '@akli-dev/ui'
-import { blogImageUrl } from '@models/recipe'
+import { blogImageUrl, imageSrcSet } from '@models/image'
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
 import { frontmatterMap, readingTimeMap } from 'virtual:blog-posts-meta'
 import type { MDXComponents } from '*.mdx'
@@ -9,21 +9,21 @@ export type PostHero = Required<Pick<ImageProps, 'src' | 'srcSet' | 'alt'>> &
 
 export const HERO_IMAGE_SIZES = '(max-width: 728px) calc(100vw - 98px), 630px'
 
-export interface PostMeta {
+export type PostHeroFrontmatter = Pick<PostHero, 'alt' | 'caption'> & { stem: string }
+
+export type PostFrontmatter = {
   title: string
   date: string
   description: string
   tags: string[]
+  hero?: PostHeroFrontmatter
+}
+
+export interface PostMeta extends Omit<PostFrontmatter, 'hero'> {
   slug: string
   readingTime: number
   image?: string
   hero?: PostHero
-}
-
-export type PostHeroFrontmatter = Pick<PostHero, 'alt' | 'caption'> & { stem: string }
-
-export type PostFrontmatter = Omit<PostMeta, 'slug' | 'readingTime' | 'image' | 'hero'> & {
-  hero?: PostHeroFrontmatter
 }
 
 interface MDXModule {
@@ -50,7 +50,7 @@ export const formatDate = (dateString: string): string => {
 
 const resolveHero = ({ stem, ...rest }: PostHeroFrontmatter): PostHero => ({
   src: blogImageUrl(stem, 'medium'),
-  srcSet: `${blogImageUrl(stem, 'medium')} 800w, ${blogImageUrl(stem, 'full')} 1200w`,
+  srcSet: imageSrcSet((variant) => blogImageUrl(stem, variant), ['medium', 'full']),
   ...rest,
 })
 
