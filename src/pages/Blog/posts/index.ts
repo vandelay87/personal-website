@@ -2,6 +2,14 @@ import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
 import { frontmatterMap, readingTimeMap } from 'virtual:blog-posts-meta'
 import type { MDXComponents } from '*.mdx'
 
+export interface PostHero {
+  src: string
+  srcSet: string
+  sizes: string
+  alt: string
+  caption?: string
+}
+
 export interface PostMeta {
   title: string
   date: string
@@ -10,6 +18,7 @@ export interface PostMeta {
   slug: string
   readingTime: number
   image?: string
+  hero?: PostHero
 }
 
 interface MDXModule {

@@ -43,6 +43,36 @@ tags: ['react', "aws"]
     })
   })
 
+  it('parses a nested hero mapping into an object, stripping quotes, alongside flat and array keys', () => {
+    const raw = `---
+title: Building a Pokedex
+tags: [react, aws]
+image: https://images.akli.dev/blog/pokedex-full.webp
+hero:
+  src: https://images.akli.dev/blog/pokedex-medium.webp
+  srcSet: "https://images.akli.dev/blog/pokedex-medium.webp 800w, https://images.akli.dev/blog/pokedex-full.webp 1200w"
+  sizes: '(max-width: 768px) 100vw, 720px'
+  alt: Pokedex app showing the Pokemon list
+  caption: The finished Pokedex
+date: 2026-04-07
+---`
+
+    expect(parseFrontmatter(raw)).toEqual({
+      title: 'Building a Pokedex',
+      tags: ['react', 'aws'],
+      image: 'https://images.akli.dev/blog/pokedex-full.webp',
+      hero: {
+        src: 'https://images.akli.dev/blog/pokedex-medium.webp',
+        srcSet:
+          'https://images.akli.dev/blog/pokedex-medium.webp 800w, https://images.akli.dev/blog/pokedex-full.webp 1200w',
+        sizes: '(max-width: 768px) 100vw, 720px',
+        alt: 'Pokedex app showing the Pokemon list',
+        caption: 'The finished Pokedex',
+      },
+      date: '2026-04-07',
+    })
+  })
+
   it('returns an empty object when there is no frontmatter block', () => {
     expect(parseFrontmatter('Just body text, no frontmatter.')).toEqual({})
   })
