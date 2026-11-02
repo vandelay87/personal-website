@@ -53,8 +53,7 @@ image: https://images.akli.dev/blog/pokedex-full.webp
 hero:
   src: https://images.akli.dev/blog/pokedex-medium.webp
   srcSet: "https://images.akli.dev/blog/pokedex-medium.webp 800w, https://images.akli.dev/blog/pokedex-full.webp 1200w"
-  sizes: '(max-width: 768px) 100vw, 720px'
-  alt: Pokedex app showing the Pokemon list
+  alt: 'Pokedex app showing the Pokemon list'
   caption: The finished Pokedex
 date: 2026-04-07
 ---`
@@ -67,7 +66,6 @@ date: 2026-04-07
         src: 'https://images.akli.dev/blog/pokedex-medium.webp',
         srcSet:
           'https://images.akli.dev/blog/pokedex-medium.webp 800w, https://images.akli.dev/blog/pokedex-full.webp 1200w',
-        sizes: '(max-width: 768px) 100vw, 720px',
         alt: 'Pokedex app showing the Pokemon list',
         caption: 'The finished Pokedex',
       },

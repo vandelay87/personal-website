@@ -1,10 +1,10 @@
 // @vitest-environment node
 import { fetchRecipes, fetchTags } from '@api/recipes'
 import type { Recipe, RecipeIndex } from '@models/recipe'
+import { getPost, HERO_IMAGE_SIZES } from '@pages/Blog/posts'
 import { JSDOM } from 'jsdom'
 import { describe, it, expect, vi } from 'vitest'
 import { render } from './entry-server'
-import { getPost, HERO_IMAGE_SIZES } from './pages/Blog/posts/index'
 
 vi.mock('@api/recipes', () => ({
   fetchRecipes: vi.fn(),
