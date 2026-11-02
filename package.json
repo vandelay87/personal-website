@@ -15,6 +15,7 @@
     "build:dev": "cp public/robots.dev.txt public/robots.txt && vite build",
     "lint": "eslint .",
     "check:descendant-selectors": "node scripts/check-descendant-selectors.ts",
+    "resize:blog-images": "node scripts/resize-blog-images.ts",
     "preview": "vite preview",
     "format": "prettier --write . && eslint --fix .",
     "test": "vitest run",
