@@ -148,6 +148,15 @@ describe('lambda-handler (streaming)', { timeout: 30_000 }, () => {
       const { body } = await invokeHandler('/nonexistent')
       expect(body).toContain('<meta name="robots" content="noindex"')
     })
+
+    it.each(['/admin/foo', '/admin/recipes/some-id/unknown'])(
+      'returns 404 with no-cache for undefined admin path %s',
+      async (path) => {
+        const { metadata } = await invokeHandler(path)
+        expect(metadata.statusCode).toBe(404)
+        expect(metadata.headers?.['Cache-Control']).toBe('no-cache')
+      }
+    )
   })
 
   describe('recipe routes', () => {
