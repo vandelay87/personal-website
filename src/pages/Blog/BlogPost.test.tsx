@@ -4,9 +4,10 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
 import { axe } from 'vitest-axe'
 import BlogPost from './BlogPost'
-import type { PostMeta } from './posts'
+import { HERO_IMAGE_SIZES, type PostMeta } from './posts'
 
-const mockPosts = vi.hoisted(() => {
+const mockPosts = await vi.hoisted(async () => {
+  const { testPostHero } = await import('./posts/fixtures')
   const posts: PostMeta[] = [
     {
       title: 'Test Post',
@@ -15,6 +16,7 @@ const mockPosts = vi.hoisted(() => {
       tags: ['react', 'aws'],
       slug: 'test-post',
       readingTime: 3,
+      hero: testPostHero,
     },
     {
       title: 'Second Post',
@@ -66,17 +68,10 @@ const createLazyPost = (content: string, hasExternalLink = false) =>
 
 const mockLazyPosts = vi.hoisted(() => ({}) as Record<string, unknown>)
 
-vi.mock('./posts', () => ({
+vi.mock('./posts', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./posts')>()),
   posts: mockPosts,
   getPost: (slug: string) => mockPosts.find((p: PostMeta) => p.slug === slug),
-  formatDate: (dateString: string): string => {
-    const date = new Date(dateString + 'T00:00:00')
-    return date.toLocaleDateString('en-GB', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  },
   lazyPosts: mockLazyPosts,
 }))
 
@@ -86,6 +81,15 @@ for (const post of mockPosts) {
       ? createLazyPost('MDX content here', true)
       : createLazyPost(`Content for ${post.title}`)
 }
+
+mockLazyPosts['third-post'] = lazy(() =>
+  Promise.resolve({
+    default: ({ components }: { components?: Record<string, unknown> }) => {
+      const PostImageComponent = components?.PostImage as React.ComponentType<{ stem: string; alt: string }>
+      return <PostImageComponent stem="diagram" alt="A diagram" />
+    },
+  })
+)
 
 vi.mock('@pages/NotFound', () => ({
   default: () => <div data-testid="not-found">404</div>,
@@ -123,6 +127,36 @@ describe('BlogPost', () => {
   it('renders NotFound for invalid slug', () => {
     renderWithRoute('nonexistent')
     expect(screen.getByTestId('not-found')).toBeInTheDocument()
+  })
+
+  describe('hero image', () => {
+    it('renders the frontmatter hero with its caption, requested with the shared sizes so it matches the SSR preload', () => {
+      const hero = mockPosts[0].hero?.image
+      renderWithRoute('test-post')
+      const img = screen.getByRole('img', { name: hero?.alt })
+      expect(img).toHaveAttribute('src', hero?.src)
+      expect(img).toHaveAttribute('srcset', hero?.srcSet)
+      expect(img).toHaveAttribute('sizes', HERO_IMAGE_SIZES)
+      expect(screen.getByText(hero?.caption ?? '')).toBeInTheDocument()
+    })
+
+    it('renders no hero image for a post without a hero', async () => {
+      renderWithRoute('second-post')
+      await screen.findByText('Content for Second Post')
+      expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('inline post images', () => {
+    it('resolves a PostImage stem against the current post slug', async () => {
+      renderWithRoute('third-post')
+      const img = await screen.findByRole('img', { name: 'A diagram' })
+      expect(img).toHaveAttribute('src', 'https://images.akli.dev/blog/third-post/diagram-medium.webp')
+      expect(img).toHaveAttribute(
+        'srcset',
+        'https://images.akli.dev/blog/third-post/diagram-medium.webp 800w, https://images.akli.dev/blog/third-post/diagram-full.webp 1200w'
+      )
+    })
   })
 
   describe('back link', () => {

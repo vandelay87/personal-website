@@ -89,6 +89,13 @@ const buildHeadHtml = (routePath: string, data?: RecipeData): string => {
 
   lines.push(`<link rel="canonical" href="${escapeHtml(meta.canonical)}" />`)
 
+  if (meta.preloadImage) {
+    const { src, srcSet, sizes } = meta.preloadImage
+    lines.push(
+      `<link rel="preload" as="image" href="${escapeHtml(src)}" imagesrcset="${escapeHtml(srcSet)}" imagesizes="${escapeHtml(sizes)}" fetchpriority="high" />`
+    )
+  }
+
   const recipeDataScript = data ? injectRecipeDataScript(data) : ''
   if (recipeDataScript) {
     lines.push(recipeDataScript)

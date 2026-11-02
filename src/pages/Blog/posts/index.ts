@@ -1,15 +1,33 @@
+import type { ImageProps } from '@akli-dev/ui'
+import { blogImageSources, blogImageUrl } from '@models/image'
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
 import { frontmatterMap, readingTimeMap } from 'virtual:blog-posts-meta'
 import type { MDXComponents } from '*.mdx'
 
-export interface PostMeta {
+export type PostHeroImage = Required<Pick<ImageProps, 'src' | 'srcSet' | 'alt'>> &
+  Pick<ImageProps, 'caption'>
+
+export interface PostHero {
+  image: PostHeroImage
+  ogImage: string
+}
+
+export const HERO_IMAGE_SIZES = '(max-width: 728px) calc(100vw - 98px), 630px'
+
+export type PostHeroFrontmatter = Pick<PostHeroImage, 'alt' | 'caption'> & { stem: string }
+
+export type PostFrontmatter = {
   title: string
   date: string
   description: string
   tags: string[]
+  hero?: PostHeroFrontmatter
+}
+
+export interface PostMeta extends Omit<PostFrontmatter, 'hero'> {
   slug: string
   readingTime: number
-  image?: string
+  hero?: PostHero
 }
 
 interface MDXModule {
@@ -34,12 +52,21 @@ export const formatDate = (dateString: string): string => {
   })
 }
 
+const resolveHero = (slug: string, { stem, ...rest }: PostHeroFrontmatter): PostHero => ({
+  image: { ...blogImageSources(slug, stem), ...rest },
+  ogImage: blogImageUrl(slug, stem, 'full'),
+})
+
 export const posts: PostMeta[] = Object.entries(frontmatterMap)
-  .map(([path, frontmatter]) => ({
-    ...frontmatter,
-    slug: extractSlug(path),
-    readingTime: readingTimeMap[path] ?? 1,
-  }))
+  .map(([path, { hero, ...frontmatter }]) => {
+    const slug = extractSlug(path)
+    return {
+      ...frontmatter,
+      ...(hero && { hero: resolveHero(slug, hero) }),
+      slug,
+      readingTime: readingTimeMap[path] ?? 1,
+    }
+  })
   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
 export const getPost = (slug: string): PostMeta | undefined => {

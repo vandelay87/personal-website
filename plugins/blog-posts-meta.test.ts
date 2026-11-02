@@ -4,12 +4,17 @@ import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest'
 import { createTempTestDir } from '../tests/tempTestDir'
 import { blogPostsMeta, extractPlainText, parseFrontmatter } from './blog-posts-meta'
 
+type LoadFn = (this: { addWatchFile: (file: string) => void }, id: string) => string | undefined
+
 describe('parseFrontmatter', () => {
-  it('parses flat key/value pairs', () => {
+  it('parses the frontmatter block into an object', () => {
     const raw = `---
 title: Building a Pokedex
 date: 2026-04-07
-description: How I built a Pokedex
+tags: [react, aws]
+hero:
+  stem: pokedex-desktop
+  alt: "Pokedex app"
 ---
 
 Body text.`
@@ -17,48 +22,13 @@ Body text.`
     expect(parseFrontmatter(raw)).toEqual({
       title: 'Building a Pokedex',
       date: '2026-04-07',
-      description: 'How I built a Pokedex',
-    })
-  })
-
-  it('parses an array field', () => {
-    const raw = `---
-tags: [react, aws, cdk]
----`
-
-    expect(parseFrontmatter(raw)).toEqual({
-      tags: ['react', 'aws', 'cdk'],
-    })
-  })
-
-  it('strips surrounding quotes from scalar and array values', () => {
-    const raw = `---
-title: "Quoted Title"
-tags: ['react', "aws"]
----`
-
-    expect(parseFrontmatter(raw)).toEqual({
-      title: 'Quoted Title',
       tags: ['react', 'aws'],
+      hero: { stem: 'pokedex-desktop', alt: 'Pokedex app' },
     })
   })
 
   it('returns an empty object when there is no frontmatter block', () => {
     expect(parseFrontmatter('Just body text, no frontmatter.')).toEqual({})
-  })
-
-  it('ignores blank lines and lines without a colon', () => {
-    const raw = `---
-title: A Post
-
-not-a-key-value-line
-date: 2026-01-01
----`
-
-    expect(parseFrontmatter(raw)).toEqual({
-      title: 'A Post',
-      date: '2026-01-01',
-    })
   })
 
   it('only reads the first frontmatter block, ignoring later --- separators', () => {
@@ -186,7 +156,7 @@ ${Array(250).fill('word').join(' ')}`
   it('ignores load calls for ids other than the resolved virtual module id', () => {
     const plugin = blogPostsMeta(postsDir)
     const addWatchFile = vi.fn()
-    const load = plugin.load as unknown as (this: { addWatchFile: typeof addWatchFile }, id: string) => string | undefined
+    const load = plugin.load as unknown as LoadFn
 
     expect(load.call({ addWatchFile }, './something-else.ts')).toBeUndefined()
     expect(addWatchFile).not.toHaveBeenCalled()
@@ -195,7 +165,7 @@ ${Array(250).fill('word').join(' ')}`
   it('reads only .mdx files, watches each one, and emits frontmatter/reading-time maps', () => {
     const plugin = blogPostsMeta(postsDir)
     const addWatchFile = vi.fn()
-    const load = plugin.load as unknown as (this: { addWatchFile: typeof addWatchFile }, id: string) => string | undefined
+    const load = plugin.load as unknown as LoadFn
 
     const source = load.call({ addWatchFile }, '\0virtual:blog-posts-meta')
 
@@ -216,5 +186,117 @@ ${Array(250).fill('word').join(' ')}`
     expect(readingTimeMap['./post-a.mdx']).toBe(1)
     expect(readingTimeMap['./post-b.mdx']).toBe(2)
     expect(frontmatterMap['./README.md']).toBeUndefined()
+  })
+})
+
+describe('blogPostsMeta frontmatter validation', () => {
+  const validFieldLines = {
+    title: 'title: A Post',
+    date: 'date: 2026-03-03',
+    description: 'description: A post',
+    tags: 'tags: [a, b]',
+  }
+
+  const validHeroLines = {
+    stem: '  stem: hero',
+    alt: '  alt: A hero image',
+  }
+
+  const loadPost = (frontmatterLines: string[]): string | undefined => {
+    const temp = createTempTestDir('blog-posts-meta-validation-test-')
+    try {
+      writeFileSync(join(temp.dir, 'broken-post.mdx'), `---\n${frontmatterLines.join('\n')}\n---\n\nBody.`)
+      const load = blogPostsMeta(temp.dir).load as unknown as LoadFn
+      return load.call({ addWatchFile: () => {} }, '\0virtual:blog-posts-meta')
+    } finally {
+      temp.cleanup()
+    }
+  }
+
+  const loadWithHero = (heroLines: string[]): string | undefined =>
+    loadPost([...Object.values(validFieldLines), 'hero:', ...heroLines])
+
+  const emittedFrontmatter = (source: string | undefined): Record<string, unknown> =>
+    JSON.parse(source!.match(/export const frontmatterMap = (.+)/)![1])['./broken-post.mdx']
+
+  const linesWithout = <T extends Record<string, string>>(lines: T, missingKey: keyof T): string[] =>
+    Object.entries(lines)
+      .filter(([key]) => key !== missingKey)
+      .map(([, line]) => line)
+
+  it.each(Object.keys(validFieldLines) as (keyof typeof validFieldLines)[])(
+    'refuses to build when the required %s field is missing, naming the file and the field',
+    (missingKey) => {
+      expect(() => loadPost(linesWithout(validFieldLines, missingKey))).toThrow(
+        `broken-post.mdx: missing required field "${missingKey}"`
+      )
+    }
+  )
+
+  it.each([
+    { scenario: 'tags is not a list', key: 'tags', line: 'tags: react' },
+    { scenario: 'date is not a YYYY-MM-DD date', key: 'date', line: 'date: soon' },
+  ] as const)('refuses to build when $scenario, naming the file and the field', ({ key, line }) => {
+    expect(() => loadPost([...linesWithout(validFieldLines, key), line])).toThrow(
+      `broken-post.mdx: invalid field "${key}"`
+    )
+  })
+
+  it('refuses to build when the frontmatter is not valid YAML, naming the file', () => {
+    expect(() => loadPost([...Object.values(validFieldLines), 'notes: [unclosed'])).toThrow(/^broken-post\.mdx: /)
+  })
+
+  it('accepts a full post without the optional hero', () => {
+    expect(emittedFrontmatter(loadPost(Object.values(validFieldLines)))).not.toHaveProperty('hero')
+  })
+
+  it('accepts a hero mapping without the optional caption', () => {
+    expect(emittedFrontmatter(loadWithHero(Object.values(validHeroLines))).hero).not.toHaveProperty('caption')
+  })
+
+  it('accepts a hero mapping with the optional caption and emits it', () => {
+    expect(emittedFrontmatter(loadWithHero([...Object.values(validHeroLines), '  caption: A caption'])).hero).toEqual({
+      stem: 'hero',
+      alt: 'A hero image',
+      caption: 'A caption',
+    })
+  })
+
+  it.each([
+    {
+      scenario: 'unknown top-level keys',
+      source: () => loadPost([...Object.values(validFieldLines), 'notes: draft']),
+      select: (frontmatter: Record<string, unknown>) => frontmatter,
+      key: 'notes',
+    },
+    {
+      scenario: 'empty optional keys',
+      source: () => loadPost([...Object.values(validFieldLines), 'hero:']),
+      select: (frontmatter: Record<string, unknown>) => frontmatter,
+      key: 'hero',
+    },
+    {
+      scenario: 'empty optional keys nested in the hero',
+      source: () => loadWithHero([...Object.values(validHeroLines), '  caption:']),
+      select: (frontmatter: Record<string, unknown>) => frontmatter.hero,
+      key: 'caption',
+    },
+  ])('omits $scenario from the emitted frontmatter', ({ source, select, key }) => {
+    expect(select(emittedFrontmatter(source()))).not.toHaveProperty(key)
+  })
+
+  it.each([
+    ...(Object.keys(validHeroLines) as (keyof typeof validHeroLines)[]).map((missingKey) => ({
+      scenario: `is missing the required ${missingKey} key`,
+      heroLines: linesWithout(validHeroLines, missingKey),
+      missingKey,
+    })),
+    {
+      scenario: "has stem typo'd as src",
+      heroLines: ['  src: hero', validHeroLines.alt],
+      missingKey: 'stem',
+    },
+  ])('refuses to build when a hero mapping $scenario, naming the file and the missing key', ({ heroLines, missingKey }) => {
+    expect(() => loadWithHero(heroLines)).toThrow(`broken-post.mdx: missing required field "hero.${missingKey}"`)
   })
 })

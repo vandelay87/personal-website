@@ -1,6 +1,8 @@
 // @vitest-environment node
 import { fetchRecipes, fetchTags } from '@api/recipes'
 import type { Recipe, RecipeIndex } from '@models/recipe'
+import { getPost, HERO_IMAGE_SIZES } from '@pages/Blog/posts'
+import { JSDOM } from 'jsdom'
 import { describe, it, expect, vi } from 'vitest'
 import { render } from './entry-server'
 
@@ -8,6 +10,12 @@ vi.mock('@api/recipes', () => ({
   fetchRecipes: vi.fn(),
   fetchTags: vi.fn(),
 }))
+
+const parseHtml = (html: string): Document => new JSDOM(html).window.document
+
+const findHeadImagePreloads = (document: Document): HTMLLinkElement[] => [
+  ...document.querySelectorAll<HTMLLinkElement>('head link[rel="preload"][as="image"]'),
+]
 
 describe('entry-server render', () => {
   describe('home page /', () => {
@@ -136,13 +144,40 @@ describe('entry-server render', () => {
     it('contains OG image for blog post with image', async () => {
       const html = await render('/blog/building-a-pokedex')
       expect(html).toContain('property="og:image"')
-      expect(html).toContain('/images/blog/pokedex-desktop-full.webp')
+      expect(html).toContain('https://images.akli.dev/blog/building-a-pokedex/pokedex-desktop-full.webp')
     })
 
     it('contains twitter large image card for blog post with image', async () => {
       const html = await render('/blog/building-a-pokedex')
       expect(html).toContain('name="twitter:card" content="summary_large_image"')
       expect(html).toContain('name="twitter:image"')
+    })
+
+    describe('hero image preload', () => {
+      it('emits exactly one high-priority image preload in <head> requesting exactly what the rendered hero <img> requests', async () => {
+        // React 19's server renderer also emits its own matching image preload
+        // at the start of #root, in <body> — expected, and not counted here.
+        const document = parseHtml(await render('/blog/building-a-pokedex'))
+        const preloads = findHeadImagePreloads(document)
+        const hero = getPost('building-a-pokedex')?.hero?.image
+        const heroImg = [...document.querySelectorAll('body img')].find(
+          (img) => img.getAttribute('alt') === hero?.alt
+        )
+
+        expect(heroImg?.getAttribute('src')).toBe(hero?.src)
+        expect(heroImg?.getAttribute('srcset')).toBe(hero?.srcSet)
+        expect(heroImg?.getAttribute('sizes')).toBe(HERO_IMAGE_SIZES)
+        expect(preloads).toHaveLength(1)
+        const [preload] = preloads
+        expect(preload.getAttribute('fetchpriority')).toBe('high')
+        expect(preload.getAttribute('href')).toBe(heroImg?.getAttribute('src'))
+        expect(preload.getAttribute('imagesrcset')).toBe(heroImg?.getAttribute('srcset'))
+        expect(preload.getAttribute('imagesizes')).toBe(heroImg?.getAttribute('sizes'))
+      })
+
+      it.each(['/', '/blog', '/apps'])('does not emit an image preload in <head> for the non-post route %s', async (route) => {
+        expect(findHeadImagePreloads(parseHtml(await render(route)))).toHaveLength(0)
+      })
     })
   })
 
@@ -281,12 +316,14 @@ describe('entry-server render', () => {
         routes: [{ path: '*', element: <CrashingComponent /> }],
       }))
 
-      const { render: renderWithError } = await import('./entry-server')
+      try {
+        const { render: renderWithError } = await import('./entry-server')
 
-      await expect(renderWithError('/')).rejects.toThrow()
-
-      vi.doUnmock('./routes')
-      vi.resetModules()
+        await expect(renderWithError('/')).rejects.toThrow()
+      } finally {
+        vi.doUnmock('./routes')
+        vi.resetModules()
+      }
     })
   })
 })

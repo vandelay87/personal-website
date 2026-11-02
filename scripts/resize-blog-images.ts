@@ -1,59 +1,66 @@
-import { readdir, readFile, unlink, writeFile } from 'node:fs/promises'
-import { dirname, extname, join, resolve } from 'node:path'
+import { readFile, unlink, writeFile } from 'node:fs/promises'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { globSync } from 'glob'
 import sharp from 'sharp'
+import { IMAGE_VARIANT_WIDTHS, type ImageVariant } from '../src/types/image.ts'
 
 // Mirrors the size/quality scheme akli-infrastructure's recipe ImageResizer
 // Lambda uses (lambda/image-resizer.ts VARIANT_SIZING), so blog and recipe
 // images share one mental model: thumb/medium/full, webp, same widths.
-const VARIANTS = [
-  { suffix: 'thumb', width: 400, quality: 80 },
-  { suffix: 'medium', width: 800, quality: 85 },
-  { suffix: 'full', width: 1200, quality: 90 },
-] as const
+const VARIANT_QUALITIES: Record<ImageVariant, number> = {
+  thumb: 80,
+  medium: 85,
+  full: 90,
+}
 
-const VARIANT_SUFFIXES = VARIANTS.map((v) => v.suffix)
+const VARIANTS = Object.keys(VARIANT_QUALITIES) as ImageVariant[]
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const BLOG_IMAGES_DIR = resolve(__dirname, '../public/images/blog')
+const BLOG_DIR = resolve(__dirname, '../public/blog')
 
-const isAlreadyVariant = (basename: string): boolean =>
-  VARIANT_SUFFIXES.some((suffix) => basename.endsWith(`-${suffix}`))
+const isAlreadyVariant = (path: string): boolean =>
+  VARIANTS.some((variant) => path.endsWith(`-${variant}.webp`))
 
-const resizeOne = async (filename: string): Promise<void> => {
-  const ext = extname(filename)
-  const basename = filename.slice(0, -ext.length)
-  if (isAlreadyVariant(basename)) return
-
-  const sourcePath = join(BLOG_IMAGES_DIR, filename)
-  const sourceBuffer = await readFile(sourcePath)
+const resizeOne = async (sourcePath: string): Promise<void> => {
+  const stem = sourcePath.slice(0, -'.webp'.length)
+  const absoluteSourcePath = join(BLOG_DIR, sourcePath)
+  const sourceBuffer = await readFile(absoluteSourcePath)
 
   await Promise.all(
     VARIANTS.map(async (variant) => {
       const variantBuffer = await sharp(sourceBuffer)
-        .resize(variant.width, undefined, { withoutEnlargement: true })
-        .webp({ quality: variant.quality })
+        .resize(IMAGE_VARIANT_WIDTHS[variant], undefined, {
+          withoutEnlargement: true,
+        })
+        .webp({ quality: VARIANT_QUALITIES[variant] })
         .toBuffer()
 
-      await writeFile(join(BLOG_IMAGES_DIR, `${basename}-${variant.suffix}.webp`), variantBuffer)
-    }),
+      await writeFile(
+        join(BLOG_DIR, `${stem}-${variant}.webp`),
+        variantBuffer
+      )
+    })
   )
 
-  await unlink(sourcePath)
-  console.log(`resized ${filename} -> ${basename}-{${VARIANT_SUFFIXES.join(',')}}.webp`)
+  await unlink(absoluteSourcePath)
+  console.log(
+    `resized ${sourcePath} -> ${stem}-{${VARIANTS.join(',')}}.webp`
+  )
 }
 
 const main = async (): Promise<void> => {
-  const entries = await readdir(BLOG_IMAGES_DIR)
-  const sources = entries.filter((name) => extname(name) === '.webp')
+  const sources = globSync('*/*.webp', { cwd: BLOG_DIR })
+    .filter((path) => !isAlreadyVariant(path))
+    .sort()
 
   if (sources.length === 0) {
-    console.log('No unprocessed .webp files found in public/images/blog/.')
+    console.log('No unprocessed .webp files found in public/blog/<post-slug>/.')
     return
   }
 
-  for (const filename of sources) {
-    await resizeOne(filename)
+  for (const sourcePath of sources) {
+    await resizeOne(sourcePath)
   }
 }
 

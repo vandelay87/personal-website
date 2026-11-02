@@ -2,7 +2,7 @@
 import type { Recipe } from '@models/recipe'
 import { describe, it, expect, vi } from 'vitest'
 
-const mockPostData = vi.hoisted(() => ({
+const mockPostData = await vi.hoisted(async () => ({
   testPost: {
     title: 'Test Post Title',
     date: '2025-01-15',
@@ -10,7 +10,7 @@ const mockPostData = vi.hoisted(() => ({
     tags: ['testing'],
     slug: 'test-post',
     readingTime: 3,
-    image: '/images/blog/test-post-cover.jpg',
+    hero: (await import('./pages/Blog/posts/fixtures')).testPostHero,
   },
   testPostNoImage: {
     title: 'No Image Post',
@@ -22,16 +22,15 @@ const mockPostData = vi.hoisted(() => ({
   },
 }))
 
-vi.mock('./pages/Blog/posts/index', () => ({
+vi.mock('./pages/Blog/posts/index', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./pages/Blog/posts/index')>()),
   posts: [mockPostData.testPost, mockPostData.testPostNoImage],
   getPost: (slug: string) =>
     [mockPostData.testPost, mockPostData.testPostNoImage].find((p) => p.slug === slug),
-  lazyPosts: {},
-  loadPostContent: () => undefined,
-  formatDate: (d: string) => d,
 }))
 
 import { getMetaTags, normalisePath, escapeHtml, isKnownRoute } from './meta'
+import { HERO_IMAGE_SIZES } from './pages/Blog/posts/index'
 
 describe('normalisePath', () => {
   it('strips trailing slash from /apps/', () => {
@@ -307,14 +306,12 @@ describe('getMetaTags', () => {
 
     it('includes og:image when post has image', () => {
       const meta = getMetaTags('/blog/test-post')
-      expect(meta.og.image).toBe('https://akli.dev/images/blog/test-post-cover.jpg')
+      expect(meta.og.image).toBe('https://images.akli.dev/blog/test-post/hero-full.webp')
     })
 
     it('includes twitter:image when post has image', () => {
       const meta = getMetaTags('/blog/test-post')
-      expect(meta.twitter.image).toBe(
-        'https://akli.dev/images/blog/test-post-cover.jpg'
-      )
+      expect(meta.twitter.image).toBe('https://images.akli.dev/blog/test-post/hero-full.webp')
     })
 
     it('sets twitter:card to summary_large_image when post has image', () => {
@@ -335,6 +332,19 @@ describe('getMetaTags', () => {
     it('does not include twitter:image when post has no image', () => {
       const meta = getMetaTags('/blog/no-image-post')
       expect(meta.twitter.image).toBeUndefined()
+    })
+
+    it('preloads the hero with its src and srcSet and the shared hero sizes when the post has a hero', () => {
+      const { src, srcSet } = mockPostData.testPost.hero.image
+      expect(getMetaTags('/blog/test-post').preloadImage).toEqual({
+        src,
+        srcSet,
+        sizes: HERO_IMAGE_SIZES,
+      })
+    })
+
+    it('does not preload an image when the post has no hero', () => {
+      expect(getMetaTags('/blog/no-image-post').preloadImage).toBeUndefined()
     })
   })
 

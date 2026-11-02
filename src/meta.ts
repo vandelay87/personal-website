@@ -16,10 +16,12 @@ export interface MetaTags {
     description: string
     image?: string
   }
+  preloadImage?: Pick<PostHeroImage, 'src' | 'srcSet'> & { sizes: string }
 }
 
 import type { RecipeData } from './contexts/RecipeDataContext'
 import * as postsModule from './pages/Blog/posts/index'
+import { HERO_IMAGE_SIZES, type PostHeroImage, type PostMeta } from './pages/Blog/posts/index'
 import { recipeImageUrl } from './types/recipe'
 
 const BASE_URL = 'https://akli.dev'
@@ -56,6 +58,14 @@ export const normalisePath = (path: string): string => {
   return path.endsWith('/') ? path.slice(0, -1) : path
 }
 
+const getBlogPostForPath = (path: string): PostMeta | undefined => {
+  const blogPostMatch = path.match(/^\/blog\/(.+)$/)
+  return blogPostMatch ? postsModule.getPost(blogPostMatch[1]) : undefined
+}
+
+const getRecipeSlugForPath = (path: string): string | undefined =>
+  path.match(/^\/recipes\/(.+)$/)?.[1]
+
 export const escapeHtml = (str: string): string => {
   return str
     .replace(/&/g, '&amp;')
@@ -70,14 +80,8 @@ export const KNOWN_ROUTES = new Set(Object.keys(routeMeta))
 export const isKnownRoute = (path: string): boolean => {
   if (KNOWN_ROUTES.has(path)) return true
   if (path.startsWith('/admin')) return true
-  const blogPostMatch = path.match(/^\/blog\/(.+)$/)
-  if (blogPostMatch) {
-    const post = postsModule.getPost(blogPostMatch[1])
-    return !!post
-  }
-  const recipeMatch = path.match(/^\/recipes\/(.+)$/)
-  if (recipeMatch) return true
-  return false
+  if (getBlogPostForPath(path)) return true
+  return getRecipeSlugForPath(path) !== undefined
 }
 
 const buildMetaTags = (
@@ -88,9 +92,6 @@ const buildMetaTags = (
   ogType: string = 'website',
   image?: string,
 ): MetaTags => {
-  const fullImage = image
-    ? (image.startsWith('http') ? image : `${BASE_URL}${image}`)
-    : undefined
   return {
     title,
     description,
@@ -101,13 +102,13 @@ const buildMetaTags = (
       url: canonical,
       title,
       description,
-      ...(fullImage && { image: fullImage }),
+      ...(image && { image }),
     },
     twitter: {
-      card: fullImage ? 'summary_large_image' : 'summary',
+      card: image ? 'summary_large_image' : 'summary',
       title,
       description,
-      ...(fullImage && { image: fullImage }),
+      ...(image && { image }),
     },
   }
 }
@@ -121,24 +122,24 @@ export const getMetaTags = (path: string, data?: RecipeData): MetaTags => {
     return buildMetaTags(route.title, route.description, canonical)
   }
 
-  const blogPostMatch = normalised.match(/^\/blog\/(.+)$/)
-  if (blogPostMatch) {
-    const slug = blogPostMatch[1]
-    const post = postsModule.getPost(slug)
-    if (post) {
-      return buildMetaTags(
+  const post = getBlogPostForPath(normalised)
+  if (post) {
+    return {
+      ...buildMetaTags(
         `${post.title} | Akli Aissat`,
         post.description,
         canonical,
         undefined,
         'article',
-        post.image,
-      )
+        post.hero?.ogImage,
+      ),
+      ...(post.hero && {
+        preloadImage: { src: post.hero.image.src, srcSet: post.hero.image.srcSet, sizes: HERO_IMAGE_SIZES },
+      }),
     }
   }
 
-  const recipeMatch = normalised.match(/^\/recipes\/(.+)$/)
-  if (recipeMatch && data?.recipe) {
+  if (getRecipeSlugForPath(normalised) && data?.recipe) {
     const recipe = data.recipe
     const description = recipe.intro.length > 160
       ? recipe.intro.slice(0, 157) + '...'
