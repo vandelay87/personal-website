@@ -32,6 +32,7 @@ pnpm dev
 | `pnpm test:coverage` | Run tests with coverage |
 | `pnpm lint` | Lint with ESLint |
 | `pnpm format` | Format with Prettier + ESLint fix |
+| `pnpm resize:blog-images` | Replace source blog `.webp` images with `-thumb`/`-medium`/`-full` variants |
 
 ## Project structure
 
@@ -75,7 +76,7 @@ Design tokens (colors, spacing, typography, shadows, radii) are defined in `src/
 
 ## Deployment
 
-Hosted on AWS via Lambda Function URL + CloudFront. The SSR Lambda uses `renderToPipeableStream` with `awslambda.streamifyResponse` for streaming HTML responses. Suspense boundaries (blog post content via `React.lazy`) resolve on the server so crawlers see full content. S3 serves static assets with CloudFront failover on 5xx.
+Hosted on AWS via Lambda Function URL + CloudFront. The SSR Lambda uses `renderToPipeableStream` with `awslambda.streamifyResponse` for streaming HTML responses. Suspense boundaries (blog post content via `React.lazy`) resolve on the server so crawlers see full content. S3 serves static assets with CloudFront failover on 5xx. Blog images in `public/blog/<post-slug>/` deploy with the other static assets and are served from `https://images.akli.dev/blog/<post-slug>/` via the `ImagesStack` CDN.
 
 CI/CD runs via GitHub Actions on push to `main`, which builds the client and server bundles, syncs static assets to S3, deploys the server bundle to Lambda, and invalidates the CloudFront cache. Infrastructure is managed separately in the [akli-infrastructure](https://github.com/vandelay87/akli-infrastructure) repo.
 
