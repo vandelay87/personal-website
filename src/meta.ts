@@ -23,32 +23,10 @@ import { matchRoutes, type RouteMatch } from 'react-router-dom'
 import type { RecipeData } from './contexts/RecipeDataContext'
 import * as postsModule from './pages/Blog/posts/index'
 import { HERO_IMAGE_SIZES, type PostHeroImage, type PostMeta } from './pages/Blog/posts/index'
-import { routes } from './routes'
+import { routes, type RouteMeta } from './routes'
 import { recipeImageUrl } from './types/recipe'
 
 const BASE_URL = 'https://akli.dev'
-
-const routeMeta: Record<string, { title: string; description: string }> = {
-  '/': {
-    title: 'Akli Aissat — Full-Stack Engineer',
-    description:
-      'Full-stack engineer building responsive web applications with React, TypeScript, and modern web technologies. Explore my projects and experiments.',
-  },
-  '/apps': {
-    title: 'Apps & Experiments | Akli Aissat',
-    description:
-      'Interactive side projects and experiments built to explore ideas and learn how things work.',
-  },
-  '/blog': {
-    title: 'Blog | Akli Aissat',
-    description:
-      'Articles on web development, engineering, and lessons learned building software.',
-  },
-  '/recipes': {
-    title: 'Recipes | Akli Aissat',
-    description: 'Browse recipes for delicious home-cooked meals.',
-  },
-}
 
 const notFoundMeta = {
   title: 'Page Not Found | Akli Aissat',
@@ -66,6 +44,19 @@ const RECIPE_ROUTE = '/recipes/:slug'
 const matchLeafRoute = (path: string): RouteMatch | undefined => {
   const leaf = matchRoutes(routes, path)?.at(-1)
   return leaf?.route.path === '*' ? undefined : leaf
+}
+
+const isRouteMeta = (handle: unknown): handle is RouteMeta =>
+  typeof handle === 'object' &&
+  handle !== null &&
+  'title' in handle &&
+  typeof handle.title === 'string' &&
+  'description' in handle &&
+  typeof handle.description === 'string'
+
+const getStaticMetaForPath = (path: string): RouteMeta | undefined => {
+  const handle: unknown = matchLeafRoute(path)?.route.handle
+  return isRouteMeta(handle) ? handle : undefined
 }
 
 const getSlugForRoute = (path: string, routePath: string): string | undefined => {
@@ -127,11 +118,11 @@ const buildMetaTags = (
 
 export const getMetaTags = (path: string, data?: RecipeData): MetaTags => {
   const normalised = normalisePath(path)
-  const route = routeMeta[normalised]
+  const staticMeta = getStaticMetaForPath(normalised)
   const canonical = `${BASE_URL}${normalised}`
 
-  if (route) {
-    return buildMetaTags(route.title, route.description, canonical)
+  if (staticMeta) {
+    return buildMetaTags(staticMeta.title, staticMeta.description, canonical)
   }
 
   const post = getBlogPostForPath(normalised)

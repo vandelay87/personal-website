@@ -22,6 +22,11 @@ import {
   RootLayout,
 } from './routeLayouts'
 
+export interface RouteMeta {
+  title: string
+  description: string
+}
+
 const withCaseSensitivePaths = (routeTable: RouteObject[]): RouteObject[] =>
   routeTable.map((route) =>
     route.index
@@ -33,11 +38,42 @@ export const routes: RouteObject[] = withCaseSensitivePaths([
   {
     element: <RootLayout />,
     children: [
-      { path: '/', element: <Home /> },
-      { path: '/apps', element: <Apps /> },
-      { path: '/blog', element: <Blog /> },
+      {
+        path: '/',
+        element: <Home />,
+        handle: {
+          title: 'Akli Aissat — Full-Stack Engineer',
+          description:
+            'Full-stack engineer building responsive web applications with React, TypeScript, and modern web technologies. Explore my projects and experiments.',
+        } satisfies RouteMeta,
+      },
+      {
+        path: '/apps',
+        element: <Apps />,
+        handle: {
+          title: 'Apps & Experiments | Akli Aissat',
+          description:
+            'Interactive side projects and experiments built to explore ideas and learn how things work.',
+        } satisfies RouteMeta,
+      },
+      {
+        path: '/blog',
+        element: <Blog />,
+        handle: {
+          title: 'Blog | Akli Aissat',
+          description:
+            'Articles on web development, engineering, and lessons learned building software.',
+        } satisfies RouteMeta,
+      },
       { path: '/blog/:slug', element: <BlogPost /> },
-      { path: '/recipes', element: <Recipes /> },
+      {
+        path: '/recipes',
+        element: <Recipes />,
+        handle: {
+          title: 'Recipes | Akli Aissat',
+          description: 'Browse recipes for delicious home-cooked meals.',
+        } satisfies RouteMeta,
+      },
       { path: '/recipes/:slug', element: <RecipeDetail /> },
       { path: '*', element: <NotFound /> },
     ],

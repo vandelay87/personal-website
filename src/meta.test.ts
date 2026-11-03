@@ -228,6 +228,27 @@ describe('getMetaTags', () => {
       expect(meta.title).toBe('Page Not Found | Akli Aissat')
       expect(meta.robots).toBe('noindex')
     })
+
+    it.each(['/admin/login', '/admin/recipes', '/admin/recipes/123/edit'])(
+      'returns 404 meta for admin route without meta %s',
+      (path) => {
+        const meta = getMetaTags(path)
+        expect(meta.title).toBe('Page Not Found | Akli Aissat')
+        expect(meta.robots).toBe('noindex')
+      }
+    )
+  })
+
+  describe('recipes index route /recipes', () => {
+    it('returns correct description', () => {
+      const meta = getMetaTags('/recipes')
+      expect(meta.description).toBe('Browse recipes for delicious home-cooked meals.')
+    })
+
+    it('returns correct canonical URL', () => {
+      const meta = getMetaTags('/recipes')
+      expect(meta.canonical).toBe('https://akli.dev/recipes')
+    })
   })
 
   describe('trailing slash normalisation', () => {
