@@ -118,11 +118,11 @@ const buildMetaTags = (
 
 export const getMetaTags = (path: string, data?: RecipeData): MetaTags => {
   const normalised = normalisePath(path)
-  const route = getStaticMetaForPath(normalised)
+  const staticMeta = getStaticMetaForPath(normalised)
   const canonical = `${BASE_URL}${normalised}`
 
-  if (route) {
-    return buildMetaTags(route.title, route.description, canonical)
+  if (staticMeta) {
+    return buildMetaTags(staticMeta.title, staticMeta.description, canonical)
   }
 
   const post = getBlogPostForPath(normalised)
