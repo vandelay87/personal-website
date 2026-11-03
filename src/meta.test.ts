@@ -479,4 +479,15 @@ describe('isKnownRoute', () => {
   it('returns true for /admin/users', () => {
     expect(isKnownRoute('/admin/users')).toBe(true)
   })
+
+  it.each(['/admin', '/admin/foo', '/admin/recipes/some-id/unknown'])(
+    'returns false for undefined admin path %s',
+    (path) => {
+      expect(isKnownRoute(path)).toBe(false)
+    }
+  )
+
+  it.each(['/Apps', '/Recipes/some-slug'])('returns false for mixed-case path %s', (path) => {
+    expect(isKnownRoute(path)).toBe(false)
+  })
 })

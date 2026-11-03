@@ -148,6 +148,21 @@ describe('lambda-handler (streaming)', { timeout: 30_000 }, () => {
       const { body } = await invokeHandler('/nonexistent')
       expect(body).toContain('<meta name="robots" content="noindex"')
     })
+
+    it.each(['/admin/foo', '/admin/recipes/some-id/unknown'])(
+      'returns 404 with no-cache for undefined admin path %s',
+      async (path) => {
+        const { metadata } = await invokeHandler(path)
+        expect(metadata.statusCode).toBe(404)
+        expect(metadata.headers?.['Cache-Control']).toBe('no-cache')
+      }
+    )
+
+    it('returns 404 with no-cache for a mixed-case path', async () => {
+      const { metadata } = await invokeHandler('/Apps')
+      expect(metadata.statusCode).toBe(404)
+      expect(metadata.headers?.['Cache-Control']).toBe('no-cache')
+    })
   })
 
   describe('recipe routes', () => {
@@ -201,6 +216,15 @@ describe('lambda-handler (streaming)', { timeout: 30_000 }, () => {
       expect(fetchMock).not.toHaveBeenCalled()
       expect(metadata.statusCode).toBe(404)
       expect(metadata.headers?.['Cache-Control']).toBe('no-cache')
+    })
+
+    it.each([
+      ['/recipes/..%2Fusers', 'https://api.akli.dev/recipes/..%2Fusers'],
+      ['/recipes/foo%3Fx%3D1', 'https://api.akli.dev/recipes/foo%3Fx%3D1'],
+    ])('keeps the encoded slug from %s under /recipes/ in the API URL', async (path, expectedUrl) => {
+      fetchMock.mockResolvedValue(new Response(null, { status: 404 }))
+      await invokeHandler(path)
+      expect(fetchMock).toHaveBeenCalledWith(expectedUrl)
     })
   })
 

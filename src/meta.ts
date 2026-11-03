@@ -19,9 +19,11 @@ export interface MetaTags {
   preloadImage?: Pick<PostHeroImage, 'src' | 'srcSet'> & { sizes: string }
 }
 
+import { matchRoutes, type RouteMatch } from 'react-router-dom'
 import type { RecipeData } from './contexts/RecipeDataContext'
 import * as postsModule from './pages/Blog/posts/index'
 import { HERO_IMAGE_SIZES, type PostHeroImage, type PostMeta } from './pages/Blog/posts/index'
+import { routes } from './routes'
 import { recipeImageUrl } from './types/recipe'
 
 const BASE_URL = 'https://akli.dev'
@@ -58,13 +60,26 @@ export const normalisePath = (path: string): string => {
   return path.endsWith('/') ? path.slice(0, -1) : path
 }
 
+const BLOG_POST_ROUTE = '/blog/:slug'
+const RECIPE_ROUTE = '/recipes/:slug'
+
+const matchLeafRoute = (path: string): RouteMatch | undefined => {
+  const leaf = matchRoutes(routes, path)?.at(-1)
+  return leaf?.route.path === '*' ? undefined : leaf
+}
+
+const getSlugForRoute = (path: string, routePath: string): string | undefined => {
+  const leaf = matchLeafRoute(path)
+  return leaf?.route.path === routePath ? leaf.params.slug : undefined
+}
+
 const getBlogPostForPath = (path: string): PostMeta | undefined => {
-  const blogPostMatch = path.match(/^\/blog\/(.+)$/)
-  return blogPostMatch ? postsModule.getPost(blogPostMatch[1]) : undefined
+  const slug = getSlugForRoute(path, BLOG_POST_ROUTE)
+  return slug ? postsModule.getPost(slug) : undefined
 }
 
 export const getRecipeSlugForPath = (path: string): string | undefined =>
-  path.match(/^\/recipes\/([^/]+)$/)?.[1]
+  getSlugForRoute(path, RECIPE_ROUTE)
 
 export const escapeHtml = (str: string): string => {
   return str
@@ -75,13 +90,10 @@ export const escapeHtml = (str: string): string => {
     .replace(/'/g, '&#39;')
 }
 
-export const KNOWN_ROUTES = new Set(Object.keys(routeMeta))
-
 export const isKnownRoute = (path: string): boolean => {
-  if (KNOWN_ROUTES.has(path)) return true
-  if (path.startsWith('/admin')) return true
-  if (getBlogPostForPath(path)) return true
-  return getRecipeSlugForPath(path) !== undefined
+  const leaf = matchLeafRoute(path)
+  if (!leaf) return false
+  return leaf.route.path !== BLOG_POST_ROUTE || getBlogPostForPath(path) !== undefined
 }
 
 const buildMetaTags = (

@@ -119,4 +119,9 @@ describe('App routing', () => {
     renderApp('/admin/users')
     expect(await screen.findByText('User management')).toBeInTheDocument()
   })
+
+  it('renders NotFound for a mixed-case path', () => {
+    renderApp('/Apps')
+    expect(screen.getByText('Not found page')).toBeInTheDocument()
+  })
 })

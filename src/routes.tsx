@@ -22,7 +22,14 @@ import {
   RootLayout,
 } from './routeLayouts'
 
-export const routes: RouteObject[] = [
+const withCaseSensitivePaths = (routeTable: RouteObject[]): RouteObject[] =>
+  routeTable.map((route) =>
+    route.index
+      ? route
+      : { ...route, caseSensitive: true, children: route.children && withCaseSensitivePaths(route.children) }
+  )
+
+export const routes: RouteObject[] = withCaseSensitivePaths([
   {
     element: <RootLayout />,
     children: [
@@ -109,4 +116,4 @@ export const routes: RouteObject[] = [
       },
     ],
   },
-]
+])

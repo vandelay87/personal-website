@@ -20,7 +20,7 @@ export const handler = awslambda.streamifyResponse(
 
     if (recipeSlug) {
       try {
-        const response = await fetch(`https://api.akli.dev/recipes/${recipeSlug}`)
+        const response = await fetch(`https://api.akli.dev/recipes/${encodeURIComponent(recipeSlug)}`)
         if (response.ok) {
           recipeData = { recipe: await response.json() }
         } else if (response.status === 404) {
