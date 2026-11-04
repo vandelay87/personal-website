@@ -85,12 +85,16 @@ describe('Home', () => {
     expect(storybookHeading.closest('a')).toHaveAttribute('href', APP_LINKS.Storybook)
 
     const section = heading.closest('section')!
-    expect(within(section).getByRole('link', { name: 'All' })).toHaveAttribute('href', '/apps')
+    expect(within(section).getByRole('link', { name: 'All apps' })).toHaveAttribute('href', '/apps')
   })
 
   it('renders the blog link section with post rows', () => {
     renderHome()
-    expect(screen.getByRole('heading', { level: 2, name: /the blog/i })).toBeInTheDocument()
+    const heading = screen.getByRole('heading', { level: 2, name: /the blog/i })
+    expect(heading).toBeInTheDocument()
+
+    const section = heading.closest('section')!
+    expect(within(section).getByRole('link', { name: 'All posts' })).toHaveAttribute('href', '/blog')
   })
 
   it('renders the From the Kitchen recipe rail once recipes load', async () => {

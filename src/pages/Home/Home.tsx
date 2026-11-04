@@ -50,10 +50,11 @@ interface LinkSectionProps {
   headingId: string
   eyebrow: string
   allHref: string
+  allLabel: string
   rows: LinkRow[]
 }
 
-const LinkSection: FC<LinkSectionProps> = ({ headingId, eyebrow, allHref, rows }) => (
+const LinkSection: FC<LinkSectionProps> = ({ headingId, eyebrow, allHref, allLabel, rows }) => (
   <section className={styles.linkSection} aria-labelledby={headingId}>
     <div className={styles.sectionHeader}>
       <Typography
@@ -65,7 +66,7 @@ const LinkSection: FC<LinkSectionProps> = ({ headingId, eyebrow, allHref, rows }
         {eyebrow}
       </Typography>
       <Link to={allHref} icon="↗" nudge="right" rotateIcon className={styles.sectionAll}>
-        All
+        {allLabel}
       </Link>
     </div>
     <ul className={styles.rowList}>
@@ -149,6 +150,7 @@ const Home: FC = () => {
         headingId="apps-section-heading"
         eyebrow="Apps & experiments"
         allHref="/apps"
+        allLabel="All apps"
         rows={APPS_ROWS}
       />
 
@@ -201,6 +203,7 @@ const Home: FC = () => {
         headingId="blog-section-heading"
         eyebrow="The blog"
         allHref="/blog"
+        allLabel="All posts"
         rows={BLOG_ROWS}
       />
     </>
