@@ -2,11 +2,23 @@
 
 Personal portfolio site for akli.dev. Built with React 19, TypeScript, Vite, and CSS Modules.
 
-## PRDs
+## Agent skills
 
-Before implementing any new feature, check `docs/prds/` for a relevant PRD. If one exists, read it fully and follow the spec. Do not add features beyond what the PRD describes.
+### Issue tracker
 
-To write a new PRD, copy `docs/prds/template.md` and fill it in.
+Issues and specs are tracked in this repo's GitHub Issues via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default triage vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
+### Legacy PRDs
+
+`docs/prds/` holds specs written before the move to issue-based specs. They're no longer updated, but still record the rationale behind past features (SSR, the images CDN, the paper redesign, the `@akli-dev/ui` split, the admin and recipe flows). Read the relevant one before changing those areas.
 
 ## Stack
 
