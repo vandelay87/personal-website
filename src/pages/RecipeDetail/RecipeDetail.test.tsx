@@ -2,7 +2,8 @@ import { fetchRecipe } from '@api/recipes'
 import { RecipeDataContext } from '@contexts/RecipeDataContext'
 import type { Recipe } from '@models/recipe'
 import { render, screen, waitFor } from '@testing-library/react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import userEvent from '@testing-library/user-event'
+import { Link, MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { axe } from 'vitest-axe'
 import RecipeDetail from './RecipeDetail'
@@ -152,6 +153,46 @@ describe('RecipeDetail page', () => {
 
     expect(screen.getByText('Test Recipe')).toBeInTheDocument()
     expect(fetchRecipe).not.toHaveBeenCalled()
+  })
+
+  it('fetches the new recipe when navigating client-side away from the SSR recipe', async () => {
+    const otherRecipe: Recipe = {
+      ...mockRecipe,
+      id: 'recipe-2',
+      title: 'Other Recipe',
+      slug: 'other-recipe',
+    }
+    vi.mocked(fetchRecipe).mockResolvedValue(otherRecipe)
+
+    render(
+      <RecipeDataContext.Provider value={{ recipe: mockRecipe }}>
+        <MemoryRouter initialEntries={['/recipes/test-recipe']}>
+          <Link to="/recipes/other-recipe">Go to other recipe</Link>
+          <Link to="/recipes/test-recipe">Back to test recipe</Link>
+          <Routes>
+            <Route path="/recipes/:slug" element={<RecipeDetail />} />
+          </Routes>
+        </MemoryRouter>
+      </RecipeDataContext.Provider>
+    )
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Test Recipe' })
+    ).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('link', { name: 'Go to other recipe' }))
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Other Recipe' })
+    ).toBeInTheDocument()
+    expect(fetchRecipe).toHaveBeenCalledWith('other-recipe')
+
+    await userEvent.click(screen.getByRole('link', { name: 'Back to test recipe' }))
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Test Recipe' })
+    ).toBeInTheDocument()
+    expect(fetchRecipe).toHaveBeenCalledTimes(1)
   })
 
   describe('accessibility', () => {

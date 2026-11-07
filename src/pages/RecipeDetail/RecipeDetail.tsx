@@ -9,9 +9,24 @@ import { useParams } from 'react-router-dom'
 
 import styles from './RecipeDetail.module.css'
 
+// SSR data is read once on hydration and stays in context for the whole
+// session, so it only describes the recipe whose slug it carries. After a
+// client-side navigation to another slug it must be ignored.
 const RecipeDetail: FC = () => {
   const { slug } = useParams<{ slug: string }>()
-  const { recipe: ssrRecipe } = useContext(RecipeDataContext)
+  const { recipe: ssrData } = useContext(RecipeDataContext)
+  const ssrRecipe = ssrData && ssrData.slug === slug ? ssrData : undefined
+
+  // Keyed by slug so loading/error state never leaks between recipes.
+  return <RecipeDetailContent key={slug} slug={slug} ssrRecipe={ssrRecipe} />
+}
+
+interface RecipeDetailContentProps {
+  slug: string | undefined
+  ssrRecipe: Recipe | undefined
+}
+
+const RecipeDetailContent: FC<RecipeDetailContentProps> = ({ slug, ssrRecipe }) => {
 
   const [recipe, setRecipe] = useState<Recipe | undefined>(ssrRecipe)
   const [loading, setLoading] = useState(!ssrRecipe)
