@@ -23,7 +23,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@akli-dev/ui": "^2.1.2",
+    "@akli-dev/ui": "^2.2.0",
     "@mdx-js/rollup": "^3.1.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

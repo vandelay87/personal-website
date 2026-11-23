@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@akli-dev/ui':
-        specifier: ^2.1.2
-        version: 2.1.2(react-dom@19.3.1(react@19.3.1))(react-router-dom@7.18.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1)(vite@8.3.6(@types/node@26.6.6)(esbuild@0.27.4)(jiti@2.6.1)(yaml@2.9.1))
+        specifier: ^2.2.0
+        version: 2.2.0(react-dom@19.3.1(react@19.3.1))(react-router-dom@7.18.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1)(vite@8.3.6(@types/node@26.6.6)(esbuild@0.27.4)(jiti@2.6.1)(yaml@2.9.1))
       '@mdx-js/rollup':
         specifier: ^3.1.0
         version: 3.1.1(rollup@4.59.0)
@@ -153,8 +153,8 @@ packages:
   '@adobe/css-tools@4.5.0':
     resolution: {integrity: sha512-6OzddxPio9UiWTCemp4N8cYLV2ZN1ncRnV1cVGtve7dhPOtRkleRyx32GQCYSwDYgaHU3USMm84tNsvKzRCa1Q==}
 
-  '@akli-dev/ui@2.1.2':
-    resolution: {integrity: sha512-SROlll2irhNC/0j3UnSaHth+LT9f9ttLliudfwHl+hN79R/PHrtFN+CvIDpRGaJAww8bI/xRoTeo4bAu7+H+dQ==}
+  '@akli-dev/ui@2.2.0':
+    resolution: {integrity: sha512-ihVUrVKYjoV4OmZreAP/XxKlkBKdVEAg7Fv4U+j4kR9vuS8eScAbDdFHPhGgTUbzZivErPXXG2kK+x5KsUpj3A==}
     engines: {node: '>=24', npm: '>=11.5.1'}
     peerDependencies:
       react: ^19
@@ -3765,7 +3765,7 @@ snapshots:
 
   '@adobe/css-tools@4.5.0': {}
 
-  '@akli-dev/ui@2.1.2(react-dom@19.3.1(react@19.3.1))(react-router-dom@7.18.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1)(vite@8.3.6(@types/node@26.6.6)(esbuild@0.27.4)(jiti@2.6.1)(yaml@2.9.1))':
+  '@akli-dev/ui@2.2.0(react-dom@19.3.1(react@19.3.1))(react-router-dom@7.18.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1)(vite@8.3.6(@types/node@26.6.6)(esbuild@0.27.4)(jiti@2.6.1)(yaml@2.9.1))':
     dependencies:
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
