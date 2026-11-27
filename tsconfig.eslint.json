@@ -14,7 +14,6 @@
     "tests/**/*.tsx",
     "sitemap-plugin.ts",
     "sitemap-plugin.test.ts",
-    "index.html.test.ts",
     "plugins/**/*.ts",
     "scripts/**/*.ts"
   ],
